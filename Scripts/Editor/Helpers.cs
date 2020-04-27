@@ -65,28 +65,31 @@ namespace VRCWorldToolkit
 #if UNITY_POST_PROCESSING_STACK_V2
         public static void Setup(VRC_SceneDescriptor descriptor)
         {
-            if (Camera.main == null)
+            if (EditorUtility.DisplayDialog("Setup Post Processing?", "This will setup your scenes Reference Camera and make a new global volume using the included example Post Processing Profile", "OK", "Cancel"))
             {
-                GameObject camera = new GameObject("Main Camera");
-                camera.AddComponent<Camera>();
-                camera.AddComponent<AudioListener>();
-                camera.tag = "MainCamera";
+                if (Camera.main == null)
+                {
+                    GameObject camera = new GameObject("Main Camera");
+                    camera.AddComponent<Camera>();
+                    camera.AddComponent<AudioListener>();
+                    camera.tag = "MainCamera";
+                }
+                descriptor.ReferenceCamera = Camera.main.gameObject;
+                if (!Camera.main.gameObject.GetComponent<PostProcessLayer>())
+                    Camera.main.gameObject.AddComponent(typeof(PostProcessLayer));
+                PostProcessLayer postprocess_layer = Camera.main.gameObject.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
+                postprocess_layer.volumeLayer = LayerMask.GetMask("Water");
+                PostProcessVolume volume = GameObject.Instantiate(PostProcessManager.instance.QuickVolume(16, 100f));
+                if (!Directory.Exists("Assets/Post Processing"))
+                    AssetDatabase.CreateFolder("Assets", "Post Processing");
+                if (AssetDatabase.LoadAssetAtPath("Assets/Post Processing/SilentProfile.asset", typeof(PostProcessProfile)) == null)
+                {
+                    AssetDatabase.CopyAsset("Assets/VRWorldToolkit/Resources/PostProcessing/SilentProfile.asset", "Assets/Post Processing/SilentProfile.asset");
+                }
+                volume.sharedProfile = (PostProcessProfile)AssetDatabase.LoadAssetAtPath("Assets/Post Processing/SilentProfile.asset", typeof(PostProcessProfile));
+                volume.gameObject.name = "Post Processing Volume";
+                volume.gameObject.layer = LayerMask.NameToLayer("Water");
             }
-            descriptor.ReferenceCamera = Camera.main.gameObject;
-            if (!Camera.main.gameObject.GetComponent<PostProcessLayer>())
-                Camera.main.gameObject.AddComponent(typeof(PostProcessLayer));
-            PostProcessLayer postprocess_layer = Camera.main.gameObject.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
-            postprocess_layer.volumeLayer = LayerMask.GetMask("Water");
-            PostProcessVolume volume = GameObject.Instantiate(PostProcessManager.instance.QuickVolume(16, 100f));
-            if (!Directory.Exists("Assets/Post Processing"))
-                AssetDatabase.CreateFolder("Assets", "Post Processing");
-            if (AssetDatabase.LoadAssetAtPath("Assets/Post Processing/SilentProfile.asset", typeof(PostProcessProfile)) == null)
-            {
-                AssetDatabase.CopyAsset("Assets/VRWorldToolkit/Resources/PostProcessing/SilentProfile.asset", "Assets/Post Processing/SilentProfile.asset");
-            }
-            volume.sharedProfile = (PostProcessProfile)AssetDatabase.LoadAssetAtPath("Assets/Post Processing/SilentProfile.asset", typeof(PostProcessProfile));
-            volume.gameObject.name = "Post Processing Volume";
-            volume.gameObject.layer = LayerMask.NameToLayer("Water");
         }
 #endif
 
