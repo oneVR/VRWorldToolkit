@@ -2,6 +2,8 @@
 
 VRWorld Toolkit is an Unity Editor extension made to make making worlds for VRChat easier and overall lower the entry-level to make a good performing world. Considering supporting all Unity based VR platforms in the future for now the extension requires the VRCSDK to be present.
 
+Contact me on discord to report problems: 1.#0001
+
 ### Current features
 
 1. World Debugger
