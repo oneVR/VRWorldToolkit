@@ -787,7 +787,7 @@ namespace VRCWorldToolkit
                     }
                     else
                     {
-                        if ((bakedProbes - (0.99 * probeCounter)) < 0)
+                        if ((bakedProbes - (0.9 * probeCounter)) < 0)
                         {
                             lightingMessages.AddMessage(new DebuggerMessage(lightProbeCountNotBaked, MessageType.Error).setVariable(probeCounter.ToString("n0")).setVariable2((probeCounter - bakedProbes).ToString("n0")));
                         }
