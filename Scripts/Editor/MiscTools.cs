@@ -194,5 +194,19 @@ namespace VRCWorldToolkit
                 EditorGUILayout.EndHorizontal();
             }
         }
+
+        [MenuItem("VRWorld Toolkit/Useful Links/VRCPrefabs Database")]
+        private static void VRCPrefabsLink()
+        {
+            Application.OpenURL("https://vrcprefabs.com/browse");
+        }
+
+#if UDON
+        [MenuItem("VRWorld Toolkit/Useful Links/UdonSharp")]
+        private static void UdonSharpLink()
+        {
+            Application.OpenURL("https://github.com/Merlin-san/UdonSharp/releases");
+        }
+#endif
     }
 }
