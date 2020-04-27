@@ -10,15 +10,11 @@ Contact me on discord to report problems: 1.#0001
 
 Goes over trough your scene and checks for common issues and makes suggestions what to improve.
 
-2. Texture Cruncher
-
-Helps you mass crunch uncrunched textures in your world.
-
-3. Disable On Build
+2. Disable On Build
 
 Adds a Tag you can assign to GameObjects you want to disable when the world is uploaded. Biggest use case is using this for trigger based occlusion.
 
-4. Post Processing setup
+3. Post Processing setup
 
 Automatically import and setup Post Processing
 
