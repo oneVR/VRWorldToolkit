@@ -294,6 +294,18 @@ namespace VRCWorldToolkit
             };
         }
 
+        System.Action SetGenerateLightmapUVCombined(List<ModelImporter> models)
+        {
+            return () =>
+            {
+                foreach (var model in models)
+                {
+                    model.generateSecondaryUV = true;
+                    model.SaveAndReimport();
+                }
+            };
+        }
+
         System.Action SetObjectLayer(string layer, GameObject obj)
         {
             return () =>
@@ -423,6 +435,7 @@ namespace VRCWorldToolkit
         private readonly string darkEnviromentLighting = "Using dark colours for Environment Lighting can cause avatars to look weird. Only use dark Environment Lighting if your world has dark lighting.";
         private readonly string customEnviromentReflectionsNull = "Your Enviroment Reflections have been set to custom, but you haven't defined a custom cubemap!";
         private readonly string noUV2Model = "You have a model (%variable%) set to be lightmapped that doesn't have Lightmap UVs. This causes issues when baking lighting. You can enable generating Lightmap UV's in the import settings of the model.";
+        private readonly string noUV2ModelCombined = "You have %variable% models set to be lightmapped that don't have Lightmap UVs. This causes issues when baking lighting. You can enable generating Lightmap UV's in the import settings of the models.";
         private readonly string lightsNotBaked = "Your world's lighting is currently not baked. Consider baking your lights for improved performance.";
         private readonly string considerLargerLightmaps = "Consider increasing your Lightmap Size from %variable% to 4096. This allows for more stuff to fit on a single lightmap, leaving less textures that need to be sampled.";
         private readonly string nonBakedBakedLights = "Your world contains baked/mixed lights that haven't been baked! Baked lights that haven't been baked yet function as realtime lights ingame.";
@@ -737,6 +750,8 @@ namespace VRCWorldToolkit
             {
                 //Check whether if models in scene have UV2 for lightmapping 
                 MeshFilter[] filters = FindObjectsOfType<MeshFilter>();
+                List<ModelImporter> importers = new List<ModelImporter>();
+                List<string> meshName = new List<string>();
                 foreach (var filter in filters)
                 {
                     if (GameObjectUtility.AreStaticEditorFlagsSet(filter.gameObject, StaticEditorFlags.LightmapStatic))
@@ -744,11 +759,30 @@ namespace VRCWorldToolkit
                         if (AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(filter.sharedMesh)) != null)
                         {
                             ModelImporter modelImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(filter.sharedMesh)) as ModelImporter;
-                            if (!modelImporter.generateSecondaryUV && filter.sharedMesh.uv2.Length == 0)
+                            if (!importers.Contains(modelImporter))
                             {
-                                lightingMessages.AddMessage(new DebuggerMessage(noUV2Model, MessageType.Warning).setVariable(filter.sharedMesh.name).setAutoFix(SetGenerateLightmapUV(modelImporter)).setAssetLocation(modelImporter.assetPath));
+                                if (!modelImporter.generateSecondaryUV && filter.sharedMesh.uv2.Length == 0)
+                                {
+                                    importers.Add(modelImporter);
+                                    meshName.Add(filter.sharedMesh.name);
+                                }
                             }
                         }
+                    }
+                }
+
+                var modelsCount = importers.ToArray().Length;
+                if (modelsCount > 10)
+                {
+                    lightingMessages.AddMessage(new DebuggerMessage(noUV2ModelCombined, MessageType.Warning).setVariable(modelsCount.ToString()).setAutoFix(SetGenerateLightmapUVCombined(importers)));
+                }
+                else if (modelsCount > 0)
+                {
+                    for (int i = 0; i < modelsCount; i++)
+                    {
+                        string modelName = meshName[i];
+                        ModelImporter modelImporter = importers[i];
+                        lightingMessages.AddMessage(new DebuggerMessage(noUV2Model, MessageType.Warning).setVariable(modelName).setAutoFix(SetGenerateLightmapUV(modelImporter)).setAssetLocation(modelImporter.assetPath));
                     }
                 }
 
