@@ -467,6 +467,7 @@ namespace VRCWorldToolkit
         private readonly string questBakedLightingWarning = "You should bake lights for content build for Quest.";
         private readonly string ambientModeSetToCustom = "Your Environment Lighting setting is broken. This will override all light probes in the scene with black ambient light. Please change it to something else.";
         private readonly string bakeryLightNotSetEditorOnly = "Your Bakery light named %variable% is not set to be EditorOnly this can cause errors loading into a world in VRChat because external scripts get removed in the upload process.";
+        private readonly string bakeryLightUnityLight = "Your Bakery light named %variable% has a Unity Light component on it these will not get baked with Bakery and will keep acting as real time even if set to baked.";
 
         public void CheckScene()
         {
@@ -697,25 +698,34 @@ namespace VRCWorldToolkit
             BakerySkyLight[] bakerySkyLights = FindObjectsOfType(typeof(BakerySkyLight)) as BakerySkyLight[];
             foreach (var item in bakeryDirectLights)
             {
-                CheckBakeryLightLayer(item.gameObject);
+                CheckBakeryLight(item.gameObject);
                 bakedLighting = true;
             }
             foreach (var item in bakeryPointLights)
             {
-                CheckBakeryLightLayer(item.gameObject);
+                CheckBakeryLight(item.gameObject);
                 bakedLighting = true;
             }
             foreach (var item in bakerySkyLights)
             {
-                CheckBakeryLightLayer(item.gameObject);
+                CheckBakeryLight(item.gameObject);
                 bakedLighting = true;
             }
 
-            void CheckBakeryLightLayer(GameObject obj)
+            void CheckBakeryLight(GameObject obj)
             {
                 if (obj.tag != "EditorOnly")
                 {
                     lightingMessages.AddMessage(new DebuggerMessage(bakeryLightNotSetEditorOnly, MessageType.Warning).setVariable(obj.name).setAutoFix(SetGameObjectTag(obj, "EditorOnly")));
+                }
+
+                if (obj.GetComponent<Light>())
+                {
+                    Light light = obj.GetComponent<Light>();
+                    if (!light.bakingOutput.isBaked)
+                    {
+                        lightingMessages.AddMessage(new DebuggerMessage(bakeryLightUnityLight, MessageType.Warning).setVariable(light.name).setSelectObject(light.gameObject));
+                    }
                 }
             }
 #endif
