@@ -306,6 +306,14 @@ namespace VRCWorldToolkit
             };
         }
 
+        System.Action DisableComponent(Behaviour behaviour)
+        {
+            return () =>
+            {
+                behaviour.enabled = false;
+            };
+        }
+
         System.Action SetObjectLayer(string layer, GameObject obj)
         {
             return () =>
@@ -722,9 +730,9 @@ namespace VRCWorldToolkit
                 if (obj.GetComponent<Light>())
                 {
                     Light light = obj.GetComponent<Light>();
-                    if (!light.bakingOutput.isBaked)
+                    if (!light.bakingOutput.isBaked && light.enabled)
                     {
-                        lightingMessages.AddMessage(new DebuggerMessage(bakeryLightUnityLight, MessageType.Warning).setVariable(light.name).setSelectObject(light.gameObject));
+                        lightingMessages.AddMessage(new DebuggerMessage(bakeryLightUnityLight, MessageType.Warning).setVariable(light.name).setAutoFix(DisableComponent(light)).setSelectObject(light.gameObject));
                     }
                 }
             }
