@@ -918,7 +918,25 @@ namespace VRCWorldToolkit
 
 #if UNITY_POST_PROCESSING_STACK_V2
             PostProcessVolume[] PostProcessVolumes = FindObjectsOfType(typeof(PostProcessVolume)) as PostProcessVolume[];
-            if (!sceneDescriptor.ReferenceCamera && PostProcessVolumes.Length == 0 && !Camera.main.gameObject.GetComponent(typeof(PostProcessLayer)))
+            bool postProcessLayerExists = false;
+            if (Camera.main == null)
+            {
+                if (sceneDescriptor.ReferenceCamera)
+                {
+                    if (sceneDescriptor.ReferenceCamera.gameObject.GetComponent(typeof(PostProcessLayer)))
+                    {
+                        postProcessLayerExists = true;
+                    }
+                }
+            }
+            else
+            {
+                if (Camera.main.gameObject.GetComponent(typeof(PostProcessLayer)))
+                {
+                    postProcessLayerExists = true;
+                }
+            }
+            if (!sceneDescriptor.ReferenceCamera && PostProcessVolumes.Length == 0 && !postProcessLayerExists)
             {
                 postprocessingMessages.AddMessage(new DebuggerMessage(postProcessingImportedButNotSetup, MessageType.Info));
             }
