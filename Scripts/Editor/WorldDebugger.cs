@@ -716,7 +716,7 @@ namespace VRCWorldToolkit
             {
                 if (obj.tag != "EditorOnly")
                 {
-                    lightingMessages.AddMessage(new DebuggerMessage(bakeryLightNotSetEditorOnly, MessageType.Warning).setVariable(obj.name).setAutoFix(SetGameObjectTag(obj, "EditorOnly")));
+                    lightingMessages.AddMessage(new DebuggerMessage(bakeryLightNotSetEditorOnly, MessageType.Warning).setVariable(obj.name).setAutoFix(SetGameObjectTag(obj, "EditorOnly")).setSelectObject(obj));
                 }
 
                 if (obj.GetComponent<Light>())
