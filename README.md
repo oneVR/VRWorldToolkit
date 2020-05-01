@@ -8,7 +8,7 @@ Contact me on discord to report problems: 1.#0001
 
 1. World Debugger
 
-Goes over trough your scene and checks for common issues and makes suggestions what to improve.
+Goes over trough your scene and checks for common issues and makes suggestions what to improve. Includes over 50 different tips, warning, errors and messages currently!
 
 2. Disable On Build
 
