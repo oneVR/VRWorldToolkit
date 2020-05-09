@@ -24,6 +24,8 @@ namespace VRCWorldToolkit
 
         static bool recheck = true;
 
+        static bool combineMessages = true;
+
         int tabNumber = 0;
         string[] tabLabel = { "All", "General", "Optimization", "Lighting", "Post Processing" };
 
@@ -315,6 +317,17 @@ namespace VRCWorldToolkit
             };
         }
 
+        System.Action DisableComponent(Behaviour[] behaviours)
+        {
+            return () =>
+            {
+                foreach (var behaviour in behaviours)
+                {
+                    behaviour.enabled = false;
+                }
+            };
+        }
+
         System.Action SetObjectLayer(string layer, GameObject obj)
         {
             return () =>
@@ -352,6 +365,17 @@ namespace VRCWorldToolkit
             return () =>
             {
                 obj.tag = tag;
+            };
+        }
+
+        System.Action SetGameObjectTag(GameObject[] objs, string tag)
+        {
+            return () =>
+            {
+                foreach (var obj in objs)
+                {
+                    obj.tag = tag;
+                }
             };
         }
 
@@ -448,9 +472,11 @@ namespace VRCWorldToolkit
         private readonly string triggerTriggerNoCollider = "You have an OnEnterTrigger or OnExitTrigger Trigger (%variable%) that doesn't have a trigger collider on it.";
         private readonly string triggerTriggerWrongLayer = "You have an OnEnterTrigger or OnExitTrigger Trigger (%variable%) that is not on the MirrorReflection layer. This can stop raycasts from working properly.";
         private readonly string mirrorOnByDefault = "Your mirror %variable% is on by default. This is a very bad practice and you should disable any mirrors in your world by default.";
+        private readonly string combinedMirrorsOnByDefault = "You have %variable% mirrors on by default. This is a very bad practice and you should disable any mirrors in your world by default.";
         private readonly string bakedOcclusionCulling = "You currently have baked Occlusion Culling.";
         private readonly string noOcclusionCulling = "You haven't baked Occlusion Culling yet. Occlusion culling gives you a lot more performance in your world, especially in larger worlds that have multiple rooms/areas.";
-        private readonly string activeCamerasOutputtingToRenderTextures = "Your scene has active cameras outputting to render textures, which will render constantly ingame. This will affect performance negatively. A good practice is to have them be disabled by default, and only enabled when needed.";
+        private readonly string activeCameraOutputtingToRenderTexture = "Your scene has an active camera (%variable%) outputting to a render texture. This will affect performance negatively by causing more drawcalls to happen. Ideally you would only have it enabled when needed.";
+        private readonly string combinedActiveCamerasOutputtingToRenderTextures = "Your scene has active %variable% cameras outputting to render textures. This will affect performance negatively by causing more drawcalls to happen. Ideally you would only have them enabled when needed.";
         private readonly string noToonShaders = "You shouldn't use toon shaders for world building, as they're missing crucial things for making worlds. For world building the most recommended shader is Standard.";
         private readonly string nonCrunchedTextures = "%variable%% of the textures used in your scene haven't been crunch compressed. Crunch compression can greatly reduce the size of your world's textures, allowing players to load in faster.";
         private readonly string switchToProgressive = "Your world is currently using Enlighten as your lightmapper, which is deprecated in newer versions of Unity. You should consider switching to Progressive.";
@@ -489,8 +515,10 @@ namespace VRCWorldToolkit
         private readonly string noPostProcessingImported = "You haven't imported Post Processing to your project yet.";
         private readonly string questBakedLightingWarning = "You should bake lights for content build for Quest.";
         private readonly string ambientModeSetToCustom = "Your Environment Lighting setting is broken. This will override all light probes in the scene with black ambient light. Please change it to something else.";
-        private readonly string bakeryLightNotSetEditorOnly = "Your Bakery light named %variable% is not set to be EditorOnly this can cause errors loading into a world in VRChat because external scripts get removed in the upload process.";
-        private readonly string bakeryLightUnityLight = "Your Bakery light named %variable% has a Unity Light component on it these will not get baked with Bakery and will keep acting as real time even if set to baked.";
+        private readonly string bakeryLightNotSetEditorOnly = "Your Bakery light named %variable% is not set to be EditorOnly this causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
+        private readonly string combinedBakeryLightNotSetEditorOnly = "You have %variable% Bakery lights are not set to be EditorOnly this causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
+        private readonly string bakeryLightUnityLight = "Your Bakery light named %variable% has a Unity Light component on it this won't get baked with Bakery and will keep acting as real time even if set to baked.";
+        private readonly string combinedBakeryLightUnityLight = "You have %variable% Bakery lights that have a Unity Light component on it these will not get baked with Bakery and will keep acting as real time lights even if set to baked.";
 
         public void CheckScene()
         {
@@ -517,7 +545,6 @@ namespace VRCWorldToolkit
                     generalMessages.AddMessage(new DebuggerMessage(tooManySceneDescriptors, MessageType.Info).setSelectObjects(FindObjectsOfType(typeof(VRC_SceneDescriptor)) as GameObject[]));
                     return;
                 }
-
 
                 //Check how far the descriptor is from zero point for floating point errors
                 float descriptorRemoteness = Vector3.Distance(sceneDescriptor.transform.position, new Vector3(0.0f, 0.0f, 0.0f));
@@ -635,9 +662,21 @@ namespace VRCWorldToolkit
             VRC_MirrorReflection[] mirrors = FindObjectsOfType(typeof(VRC_MirrorReflection)) as VRC_MirrorReflection[];
             if (mirrors.Length > 0)
             {
-                foreach (var mirror in mirrors)
+                if (combineMessages)
                 {
-                    optimizationMessages.AddMessage(new DebuggerMessage(mirrorOnByDefault, MessageType.BadFPS).setVariable(mirror.name).setSelectObject(mirror.gameObject));
+                    List<GameObject> activeMirrors = new List<GameObject>();
+                    foreach (var mirror in mirrors)
+                    {
+                        activeMirrors.Add(mirror.gameObject);
+                    }
+                    optimizationMessages.AddMessage(new DebuggerMessage(combinedMirrorsOnByDefault, MessageType.BadFPS).setVariable(mirrors.Length.ToString()).setSelectObjects(activeMirrors.ToArray()));
+                }
+                else
+                {
+                    foreach (var mirror in mirrors)
+                    {
+                        optimizationMessages.AddMessage(new DebuggerMessage(mirrorOnByDefault, MessageType.BadFPS).setVariable(mirror.name).setSelectObject(mirror.gameObject));
+                    }
                 }
             }
 
@@ -655,6 +694,7 @@ namespace VRCWorldToolkit
             List<GameObject> activeCameras = new List<GameObject>();
             int cameraCount = 0;
             Camera[] cameras = GameObject.FindObjectsOfType<Camera>();
+
             foreach (Camera camera in cameras)
             {
                 if (camera.targetTexture)
@@ -663,9 +703,17 @@ namespace VRCWorldToolkit
                     activeCameras.Add(camera.gameObject);
                 }
             }
-            if (cameraCount > 0)
+
+            if (combineMessages && cameraCount != 1)
             {
-                optimizationMessages.AddMessage(new DebuggerMessage(activeCamerasOutputtingToRenderTextures, MessageType.Tips).setSelectObjects(activeCameras.ToArray()));
+                optimizationMessages.AddMessage(new DebuggerMessage(combinedActiveCamerasOutputtingToRenderTextures, MessageType.Tips).setVariable(cameraCount.ToString()).setSelectObjects(activeCameras.ToArray()));
+            }
+            else
+            {
+                foreach (var camera in activeCameras)
+                {
+                    optimizationMessages.AddMessage(new DebuggerMessage(activeCameraOutputtingToRenderTexture, MessageType.Tips).setVariable(camera.name).setSelectObject(camera.gameObject));
+                }
             }
 
             List<Texture> unCrunchedTextures = new List<Texture>();
@@ -710,8 +758,8 @@ namespace VRCWorldToolkit
 
             //Suggest to crunch textures if there are any uncrunched textures found
             if (textureCount > 0)
-                if ((unCrunchedTextures.ToArray().Length / textureCount * 100) > 20)
-                    optimizationMessages.AddMessage(new DebuggerMessage(nonCrunchedTextures, MessageType.Tips).setVariable((unCrunchedTextures.ToArray().Length / textureCount * 100).ToString()));
+                if ((unCrunchedTextures.Count / textureCount * 100) > 20)
+                    optimizationMessages.AddMessage(new DebuggerMessage(nonCrunchedTextures, MessageType.Tips).setVariable((unCrunchedTextures.Count / textureCount * 100).ToString()));
 
             //Lighting Checks
 
@@ -738,38 +786,56 @@ namespace VRCWorldToolkit
             bool bakedLighting = false;
 
 #if BAKERY_INCLUDED
-            BakeryDirectLight[] bakeryDirectLights = FindObjectsOfType(typeof(BakeryDirectLight)) as BakeryDirectLight[];
-            BakeryPointLight[] bakeryPointLights = FindObjectsOfType(typeof(BakeryPointLight)) as BakeryPointLight[];
-            BakerySkyLight[] bakerySkyLights = FindObjectsOfType(typeof(BakerySkyLight)) as BakerySkyLight[];
-            foreach (var item in bakeryDirectLights)
-            {
-                CheckBakeryLight(item.gameObject);
-                bakedLighting = true;
-            }
-            foreach (var item in bakeryPointLights)
-            {
-                CheckBakeryLight(item.gameObject);
-                bakedLighting = true;
-            }
-            foreach (var item in bakerySkyLights)
-            {
-                CheckBakeryLight(item.gameObject);
-                bakedLighting = true;
-            }
+            List<GameObject> bakeryLights = new List<GameObject>();
+            bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryDirectLight)) as BakeryDirectLight[], s => s.gameObject));
+            bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryPointLight)) as BakeryPointLight[], s => s.gameObject));
+            bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakerySkyLight)) as BakerySkyLight[], s => s.gameObject));
 
-            void CheckBakeryLight(GameObject obj)
+            if (bakeryLights.Count > 0)
             {
-                if (obj.tag != "EditorOnly")
+                List<GameObject> notEditorOnly = new List<GameObject>();
+                List<GameObject> unityLightOnBakeryLight = new List<GameObject>();
+
+                bakedLighting = true;
+
+                foreach (var obj in bakeryLights)
                 {
-                    lightingMessages.AddMessage(new DebuggerMessage(bakeryLightNotSetEditorOnly, MessageType.Warning).setVariable(obj.name).setAutoFix(SetGameObjectTag(obj, "EditorOnly")).setSelectObject(obj));
+                    if (obj.tag != "EditorOnly")
+                    {
+                        notEditorOnly.Add(obj);
+                    }
+
+                    if (obj.GetComponent<Light>())
+                    {
+                        Light light = obj.GetComponent<Light>();
+                        if (!light.bakingOutput.isBaked && light.enabled)
+                        {
+                            unityLightOnBakeryLight.Add(obj);
+                        }
+                    }
                 }
 
-                if (obj.GetComponent<Light>())
+                if (combineMessages && notEditorOnly.Count > 0 && notEditorOnly.Count != 1)
                 {
-                    Light light = obj.GetComponent<Light>();
-                    if (!light.bakingOutput.isBaked && light.enabled)
+                    lightingMessages.AddMessage(new DebuggerMessage(combinedBakeryLightNotSetEditorOnly, MessageType.Warning).setVariable(notEditorOnly.Count.ToString()).setAutoFix(SetGameObjectTag(notEditorOnly.ToArray(), "EditorOnly")).setSelectObjects(notEditorOnly.ToArray()));
+                }
+                else
+                {
+                    foreach (var obj in notEditorOnly)
                     {
-                        lightingMessages.AddMessage(new DebuggerMessage(bakeryLightUnityLight, MessageType.Warning).setVariable(light.name).setAutoFix(DisableComponent(light)).setSelectObject(light.gameObject));
+                        lightingMessages.AddMessage(new DebuggerMessage(bakeryLightNotSetEditorOnly, MessageType.Warning).setVariable(obj.name).setAutoFix(SetGameObjectTag(obj, "EditorOnly")).setSelectObject(obj));
+                    }
+                }
+
+                if (combineMessages && unityLightOnBakeryLight.Count > 0 && unityLightOnBakeryLight.Count != 1)
+                {
+                    lightingMessages.AddMessage(new DebuggerMessage(bakeryLightUnityLight, MessageType.Warning).setVariable(unityLightOnBakeryLight[0].name).setAutoFix(DisableComponent(Array.ConvertAll(unityLightOnBakeryLight.ToArray(), s => s.GetComponent<Light>()))).setSelectObjects(unityLightOnBakeryLight.ToArray()));
+                }
+                else
+                {
+                    foreach (var obj in unityLightOnBakeryLight)
+                    {
+                        lightingMessages.AddMessage(new DebuggerMessage(bakeryLightUnityLight, MessageType.Warning).setVariable(obj.name).setAutoFix(DisableComponent(obj.GetComponent<Light>())).setSelectObject(obj.gameObject));
                     }
                 }
             }
@@ -826,12 +892,12 @@ namespace VRCWorldToolkit
                     }
                 }
 
-                var modelsCount = importers.ToArray().Length;
-                if (modelsCount > 10)
+                var modelsCount = importers.Count;
+                if (combineMessages && modelsCount > 0)
                 {
                     lightingMessages.AddMessage(new DebuggerMessage(noUV2ModelCombined, MessageType.Warning).setVariable(modelsCount.ToString()).setAutoFix(SetGenerateLightmapUVCombined(importers)));
                 }
-                else if (modelsCount > 0)
+                else
                 {
                     for (int i = 0; i < modelsCount; i++)
                     {
@@ -890,7 +956,6 @@ namespace VRCWorldToolkit
                 //Since the scene has baked lights complain if there's no lightprobes
                 if (probes == null && probeCounter == 0)
                 {
-                    Debug.Log(probeCounter);
                     lightingMessages.AddMessage(new DebuggerMessage(noLightProbes, MessageType.Info));
                 }
 
@@ -1063,7 +1128,7 @@ namespace VRCWorldToolkit
                     }
                 }
             }
-            if (postprocessingMessages.messagesList.ToArray().Length == 0)
+            if (postprocessingMessages.messagesList.Count == 0)
                 postprocessingMessages.AddMessage(new DebuggerMessage(noProblemsInPostProcessing, MessageType.Info));
 #else
             postprocessingMessages.AddMessage(new DebuggerMessage(noPostProcessingImported, MessageType.Info));
@@ -1136,6 +1201,13 @@ namespace VRCWorldToolkit
             }
 
             GUILayout.EndVertical();
+
+            bool combineChanged = combineMessages;
+            combineMessages = EditorGUILayout.Toggle("Combine messages", combineMessages);
+            if (combineMessages != combineChanged)
+            {
+                recheck = true;
+            }
 
             tabNumber = GUILayout.Toolbar(tabNumber, tabLabel);
 
