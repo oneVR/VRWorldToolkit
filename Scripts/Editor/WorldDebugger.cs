@@ -336,6 +336,17 @@ namespace VRCWorldToolkit
             };
         }
 
+        System.Action SetObjectLayer(string layer, GameObject[] objs)
+        {
+            return () =>
+            {
+                foreach (var obj in objs)
+                {
+                    obj.layer = LayerMask.NameToLayer(layer);
+                }
+            };
+        }
+
         System.Action SetLightmapSize(int newSize)
         {
             return () =>
@@ -469,8 +480,10 @@ namespace VRCWorldToolkit
         private readonly string noPlayerMods = "Your world currently has no player mods. Player mods are used for adding jumping and changing walking speed.";
         private readonly string triggerTriggerNotTrigger = "You have an OnEnterTrigger or OnExitTrigger Trigger (%variable%), but it's collider has not been set to be a trigger. These Triggers need to have a collider set to be a trigger to work.";
         private readonly string colliderTriggerIsTrigger = "You have an OnEnterCollider or OnExitCollider Trigger (%variable%) that has a collider set to be a trigger. These only react if the collider on the object has not been set to be a trigger.";
-        private readonly string triggerTriggerNoCollider = "You have an OnEnterTrigger or OnExitTrigger Trigger (%variable%) that doesn't have a trigger collider on it.";
+        private readonly string triggerTriggerNoCollider = "You have an OnEnterTrigger or OnExitTrigger Trigger (%variable%) that doesn't have a collider on it.";
+        private readonly string colliderTriggerNoCollider = "You have an OnEnterCollider or OnExitCollider Trigger (%variable%) that doesn't have a collider on it.";
         private readonly string triggerTriggerWrongLayer = "You have an OnEnterTrigger or OnExitTrigger Trigger (%variable%) that is not on the MirrorReflection layer. This can stop raycasts from working properly.";
+        private readonly string combinedTriggerTriggerWrongLayer = "You have %variable% OnEnterTrigger or OnExitTrigger Triggers that are not on the MirrorReflection layer. This can stop raycasts from working properly.";
         private readonly string mirrorOnByDefault = "Your mirror %variable% is on by default. This is a very bad practice and you should disable any mirrors in your world by default.";
         private readonly string combinedMirrorsOnByDefault = "You have %variable% mirrors on by default. This is a very bad practice and you should disable any mirrors in your world by default.";
         private readonly string bakedOcclusionCulling = "You currently have baked Occlusion Culling.";
@@ -624,12 +637,15 @@ namespace VRCWorldToolkit
             //Get triggers in the world
             VRC_Trigger[] trigger_scripts = (VRC_Trigger[])VRC_Trigger.FindObjectsOfType(typeof(VRC_Trigger));
 
+            List<GameObject> triggerWrongLayer = new List<GameObject>();
+
             //Check for OnEnterTriggers to make sure they are on mirrorreflection layer
             foreach (var trigger_script in trigger_scripts)
             {
                 foreach (var trigger in trigger_script.Triggers)
                 {
-                    if (trigger.TriggerType.ToString() == "OnEnterTrigger" || trigger.TriggerType.ToString() == "OnExitTrigger" || trigger.TriggerType.ToString() == "OnEnterCollider" || trigger.TriggerType.ToString() == "OnExitCollider")
+
+                    if (trigger.TriggerType == VRC_Trigger.TriggerType.OnEnterTrigger || trigger.TriggerType == VRC_Trigger.TriggerType.OnExitTrigger || trigger.TriggerType == VRC_Trigger.TriggerType.OnEnterCollider || trigger.TriggerType == VRC_Trigger.TriggerType.OnExitCollider)
                     {
                         if (trigger_script.gameObject.GetComponent<Collider>())
                         {
@@ -645,15 +661,35 @@ namespace VRCWorldToolkit
                         }
                         else
                         {
-                            generalMessages.AddMessage(new DebuggerMessage(triggerTriggerNoCollider, MessageType.Error).setSelectObject(trigger_script.gameObject).setVariable(trigger_script.name));
+                            if (trigger.TriggerType == VRC_Trigger.TriggerType.OnEnterTrigger || trigger.TriggerType == VRC_Trigger.TriggerType.OnExitTrigger)
+                            {
+                                generalMessages.AddMessage(new DebuggerMessage(triggerTriggerNoCollider, MessageType.Error).setSelectObject(trigger_script.gameObject).setVariable(trigger_script.name));
+                            }
+                            else if (trigger.TriggerType == VRC_Trigger.TriggerType.OnEnterCollider || trigger.TriggerType == VRC_Trigger.TriggerType.OnExitCollider)
+                            {
+                                generalMessages.AddMessage(new DebuggerMessage(colliderTriggerNoCollider, MessageType.Error).setSelectObject(trigger_script.gameObject).setVariable(trigger_script.name));
+                            }
                         }
                         if ((trigger.TriggerType.ToString() == "OnEnterTrigger" || trigger.TriggerType.ToString() == "OnExitTrigger") && trigger_script.gameObject.layer != LayerMask.NameToLayer("MirrorReflection"))
                         {
-                            generalMessages.AddMessage(new DebuggerMessage(triggerTriggerWrongLayer, MessageType.Warning).setVariable(trigger_script.name).setSelectObject(trigger_script.gameObject).setAutoFix(SetObjectLayer("MirrorReflection", trigger_script.gameObject)));
+                            triggerWrongLayer.Add(trigger_script.gameObject);
                         }
                     }
                 }
             }
+
+            if (combineMessages && triggerWrongLayer.Count > 0 && triggerWrongLayer.Count != 1)
+            {
+                generalMessages.AddMessage(new DebuggerMessage(combinedTriggerTriggerWrongLayer, MessageType.Warning).setVariable(triggerWrongLayer.Count.ToString()).setSelectObjects(triggerWrongLayer.ToArray()).setAutoFix(SetObjectLayer("MirrorReflection", triggerWrongLayer.ToArray())));
+            }
+            else
+            {
+                foreach (var item in triggerWrongLayer)
+                {
+                    generalMessages.AddMessage(new DebuggerMessage(triggerTriggerWrongLayer, MessageType.Warning).setVariable(item.name).setSelectObject(item.gameObject).setAutoFix(SetObjectLayer("MirrorReflection", item.gameObject)));
+                }
+            }
+
 #endif
 
             //Optimization Checks
