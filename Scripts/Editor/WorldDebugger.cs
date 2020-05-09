@@ -451,7 +451,7 @@ namespace VRCWorldToolkit
         private readonly string noLightProbes = "Your world currently has no light probes, which means your baked lights won't affect dynamic objects.";
         private readonly string lightProbeCountNotBaked = "Your world currently contains %variable% light probes, but %variable2% of them haven't been baked yet.";
         private readonly string lightProbesRemovedNotReBaked = "You've removed some lightprobes after the last bake, bake them again to update your scenes lighting data. Currently the lighting data contains %variable% baked lightprobes and the scene has %variable2% lightprobes.";
-        private readonly string lightProbeCount = "Your world currently contains %variable% light probes.";
+        private readonly string lightProbeCount = "Your world currently contains %variable% baked light probes.";
         private readonly string noReflectionProbes = "Your world has no active reflection probes. Reflection probes are needed to have proper reflections on reflective materials.";
         private readonly string reflectionProbesSomeUnbaked = "Your world has %variable% reflection probes. But some of them (%variable2%) are unbaked.";
         private readonly string reflectionProbeCountText = "Your world has %variable% reflection probes.";
