@@ -127,7 +127,13 @@ namespace VRCWorldToolkit
         {
 #if UNITY_POST_PROCESSING_STACK_V2
             VRC_SceneDescriptor[] descriptors = FindObjectsOfType(typeof(VRC_SceneDescriptor)) as VRC_SceneDescriptor[];
-            WTPostProcessing.Setup(descriptors[0]);
+            if (descriptors.Length == 0)
+            {
+                EditorUtility.DisplayDialog("Scene descriptor missing", "You haven't added a scene descriptor yet, you can add one by dragging in the VRCWorld prefab.", "OK");
+            } else
+            {
+                WTPostProcessing.Setup(descriptors[0]);
+            }
 #endif
         }
 
