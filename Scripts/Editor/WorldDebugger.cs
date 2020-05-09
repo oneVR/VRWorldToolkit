@@ -6,6 +6,7 @@ using UnityEditor.Build.Reporting;
 using UnityEngine;
 using UnityEngine.Rendering;
 using VRC.SDKBase;
+using System.Linq;
 #if UNITY_POST_PROCESSING_STACK_V2
 using UnityEngine.Rendering.PostProcessing;
 #endif
@@ -354,6 +355,18 @@ namespace VRCWorldToolkit
             };
         }
 
+        System.Action FixSpawns(VRC_SceneDescriptor descriptor)
+        {
+            return () =>
+            {
+                descriptor.spawns = descriptor.spawns.Where(c => c != null).ToArray();
+                if (descriptor.spawns.Length == 0)
+                {
+                    descriptor.spawns = new Transform[] { descriptor.gameObject.transform };
+                }
+            };
+        }
+
 #if UNITY_POST_PROCESSING_STACK_V2
         System.Action SetReferenceCamera(VRC_SceneDescriptor descriptor)
         {
@@ -425,6 +438,8 @@ namespace VRCWorldToolkit
         private readonly string worldDescriptorFar = "Your scene descriptor is %variable% units far from the the zero point in Unity. Having your world center out this far will cause some noticable jittering on models. You should move your world closer to the zero point of your scene.";
         private readonly string worldDescriptorOff = "Your scene descriptor is %variable% units far from the the zero point in Unity. It's usually good practice to try to keep it as close as possible to the absolute zero point to avoid floating point errors.";
         private readonly string clippingPlane = "Consider lowering your cameras near clipping plane to accomodate people with smaller avatars. The value get's clamped between 0.01 to 0.05.";
+        private readonly string noSpawnPointSet = "You currently don't have any spawn points set in your scene descriptor. Spawning into a world with no spawn point will cause you to get thrown back to your home world.";
+        private readonly string nullSpawnPoint = "You currently have a null spawn point set in your scene descriptor. Spawning into a null spawn point will cause you to get thrown back to your home world.";
         private readonly string colliderUnderSpawnIsTrigger = "The only collider (%variable%) under your spawn point %variable2% has been set as a trigger! Players spawning into this world will fall forever.";
         private readonly string noColliderUnderSpawn = "Your spawn point %variable% doesn't have anything underneath it. Players spawning into this world will fall forever.";
         private readonly string noPlayerMods = "Your world currently has no player mods. Player mods are used for adding jumping and changing walking speed.";
@@ -526,26 +541,48 @@ namespace VRCWorldToolkit
                 }
             }
 
-
-
-            //Get spawn points to check whether there's a collider under them or not
+            //Get spawn points for any possible problems
             GameObject[] spawns = new GameObject[sceneDescriptor.spawns.Length];
 
-            foreach (var item in sceneDescriptor.spawns)
+            bool emptySpawns = false;
+            int spawnsLength = spawns.Length;
+            Transform[] fixedSpawns = sceneDescriptor.spawns.Where(c => c != null).ToArray();
+
+            if (spawnsLength != fixedSpawns.Length)
             {
-                RaycastHit hit;
-                if (!Physics.Raycast(item.position + new Vector3(0, 0.01f, 0), Vector3.down, out hit, Mathf.Infinity, 0, QueryTriggerInteraction.Ignore))
+                emptySpawns = true;
+            }
+
+            if (spawns.Length == 0)
+            {
+                generalMessages.AddMessage(new DebuggerMessage(noSpawnPointSet, MessageType.Error).setSelectObject(sceneDescriptor.gameObject).setAutoFix(FixSpawns(sceneDescriptor)));
+            }
+            else
+            {
+                if (emptySpawns)
                 {
-                    if (Physics.Raycast(item.position + new Vector3(0, 0.01f, 0), Vector3.down, out hit, Mathf.Infinity))
+                    generalMessages.AddMessage(new DebuggerMessage(nullSpawnPoint, MessageType.Error).setSelectObject(sceneDescriptor.gameObject).setAutoFix(FixSpawns(sceneDescriptor)));
+                }
+
+                foreach (var item in sceneDescriptor.spawns)
+                {
+                    if (item == null)
                     {
-                        if (hit.collider.isTrigger)
-                        {
-                            generalMessages.AddMessage(new DebuggerMessage(colliderUnderSpawnIsTrigger, MessageType.Error).setSelectObject(item.gameObject).setVariable(hit.collider.name).setVariable2(item.gameObject.name));
-                        }
+                        continue;
                     }
-                    else
-                        generalMessages.AddMessage(new DebuggerMessage(noColliderUnderSpawn, MessageType.Error).setSelectObject(item.gameObject).setVariable(item.gameObject.name));
-                    continue;
+                    RaycastHit hit;
+                    if (!Physics.Raycast(item.position + new Vector3(0, 0.01f, 0), Vector3.down, out hit, Mathf.Infinity, 0, QueryTriggerInteraction.Ignore))
+                    {
+                        if (Physics.Raycast(item.position + new Vector3(0, 0.01f, 0), Vector3.down, out hit, Mathf.Infinity))
+                        {
+                            if (hit.collider.isTrigger)
+                            {
+                                generalMessages.AddMessage(new DebuggerMessage(colliderUnderSpawnIsTrigger, MessageType.Error).setSelectObject(item.gameObject).setVariable(hit.collider.name).setVariable2(item.gameObject.name));
+                            }
+                        }
+                        else
+                            generalMessages.AddMessage(new DebuggerMessage(noColliderUnderSpawn, MessageType.Error).setSelectObject(item.gameObject).setVariable(item.gameObject.name));
+                    }
                 }
             }
 
