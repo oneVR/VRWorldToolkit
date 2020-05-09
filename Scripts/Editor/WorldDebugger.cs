@@ -698,7 +698,7 @@ namespace VRCWorldToolkit
             VRC_MirrorReflection[] mirrors = FindObjectsOfType(typeof(VRC_MirrorReflection)) as VRC_MirrorReflection[];
             if (mirrors.Length > 0)
             {
-                if (combineMessages)
+                if (combineMessages && mirrors.Length > 0 && mirrors.Length != 1)
                 {
                     List<GameObject> activeMirrors = new List<GameObject>();
                     foreach (var mirror in mirrors)
@@ -740,7 +740,7 @@ namespace VRCWorldToolkit
                 }
             }
 
-            if (combineMessages && cameraCount != 1)
+            if (combineMessages && cameraCount > 0 && cameraCount != 1)
             {
                 optimizationMessages.AddMessage(new DebuggerMessage(combinedActiveCamerasOutputtingToRenderTextures, MessageType.Tips).setVariable(cameraCount.ToString()).setSelectObjects(activeCameras.ToArray()));
             }
