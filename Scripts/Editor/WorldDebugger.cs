@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using VRC.SDKBase;
 using System.Linq;
+using VRC.Core;
 #if UNITY_POST_PROCESSING_STACK_V2
 using UnityEngine.Rendering.PostProcessing;
 #endif
@@ -470,6 +471,7 @@ namespace VRCWorldToolkit
 
         private readonly string noSceneDescriptor = "Your world currently has no scene descriptor. Please add one yourself, or drag the VRCWorld prefab to your scene.";
         private readonly string tooManySceneDescriptors = "You have multiple scene descriptors in your world. You can only have one scene descriptor in a world.";
+        private readonly string tooManyPipelineManagers = "Your world has multiple Pipeline Managers in it this will stop you from uploading the world.";
         private readonly string worldDescriptorFar = "Your scene descriptor is %variable% units far from the the zero point in Unity. Having your world center out this far will cause some noticable jittering on models. You should move your world closer to the zero point of your scene.";
         private readonly string worldDescriptorOff = "Your scene descriptor is %variable% units far from the the zero point in Unity. It's usually good practice to try to keep it as close as possible to the absolute zero point to avoid floating point errors.";
         private readonly string clippingPlane = "Consider lowering your cameras near clipping plane to accomodate people with smaller avatars. The value get's clamped between 0.01 to 0.05.";
@@ -541,6 +543,7 @@ namespace VRCWorldToolkit
             VRC_SceneDescriptor[] descriptors = FindObjectsOfType(typeof(VRC_SceneDescriptor)) as VRC_SceneDescriptor[];
             long descriptorCount = descriptors.Length;
             VRC_SceneDescriptor sceneDescriptor;
+            PipelineManager[] pipelines = FindObjectsOfType(typeof(PipelineManager)) as PipelineManager[];
 
             //Check if a descriptor exists
             if (descriptorCount == 0)
@@ -551,6 +554,11 @@ namespace VRCWorldToolkit
             else
             {
                 sceneDescriptor = descriptors[0];
+
+                if (pipelines.Length > 1)
+                {
+                    generalMessages.AddMessage(new DebuggerMessage(tooManyPipelineManagers, MessageType.Error).setSelectObjects(Array.ConvertAll(pipelines.ToArray(), s => s.gameObject)));
+                }
 
                 //Make sure only one descriptor exists
                 if (descriptorCount != 1)
