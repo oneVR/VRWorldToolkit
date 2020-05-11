@@ -395,7 +395,7 @@ namespace VRCWorldToolkit
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Change shader?", "Are you sure you want to change the shader of the material " + material.name + " to Standard", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Change shader?", "Are you sure you want to change the shader of the material " + material.name + " to Standard?", "Yes", "Cancel"))
                 {
                     Shader standard = Shader.Find(shader);
                     material.shader = standard;
@@ -407,7 +407,7 @@ namespace VRCWorldToolkit
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Change shader?", "Are you sure you want to change the shader of " + materials.Length + " materials to Standard", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Change shader?", "Are you sure you want to change the shader of " + materials.Length + " materials to Standard?", "Yes", "Cancel"))
                 {
                     Shader standard = Shader.Find(shader);
                     foreach (var material in materials)
