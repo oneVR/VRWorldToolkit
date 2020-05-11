@@ -391,6 +391,33 @@ namespace VRCWorldToolkit
             };
         }
 
+        System.Action ChangeShader(Material material, String shader)
+        {
+            return () =>
+            {
+                if (EditorUtility.DisplayDialog("Change shader?", "Are you sure you want to change the shader of the material " + material.name + " to Standard", "Yes", "Cancel"))
+                {
+                    Shader standard = Shader.Find(shader);
+                    material.shader = standard;
+                }
+            };
+        }
+
+        System.Action ChangeShader(Material[] materials, String shader)
+        {
+            return () =>
+            {
+                if (EditorUtility.DisplayDialog("Change shader?", "Are you sure you want to change the shader of " + materials.Length + " materials to Standard", "Yes", "Cancel"))
+                {
+                    Shader standard = Shader.Find(shader);
+                    foreach (var material in materials)
+                    {
+                        material.shader = standard;
+                    }
+                }
+            };
+        }
+
         System.Action FixSpawns(VRC_SceneDescriptor descriptor)
         {
             return () =>
@@ -534,6 +561,7 @@ namespace VRCWorldToolkit
         private readonly string combinedBakeryLightNotSetEditorOnly = "You have %variable% Bakery lights are not set to be EditorOnly this causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
         private readonly string bakeryLightUnityLight = "Your Bakery light named %variable% has a Unity Light component on it this won't get baked with Bakery and will keep acting as real time even if set to baked.";
         private readonly string combinedBakeryLightUnityLight = "You have %variable% Bakery lights that have a Unity Light component on it these will not get baked with Bakery and will keep acting as real time lights even if set to baked.";
+        private readonly string missingShaderWarning = "The material %variable% in your scene has a missing shader.";
 
         public void CheckScene()
         {
@@ -702,28 +730,6 @@ namespace VRCWorldToolkit
 
             //Optimization Checks
 
-            //Get active mirrors in the world and complain about them
-            VRC_MirrorReflection[] mirrors = FindObjectsOfType(typeof(VRC_MirrorReflection)) as VRC_MirrorReflection[];
-            if (mirrors.Length > 0)
-            {
-                if (combineMessages && mirrors.Length > 0 && mirrors.Length != 1)
-                {
-                    List<GameObject> activeMirrors = new List<GameObject>();
-                    foreach (var mirror in mirrors)
-                    {
-                        activeMirrors.Add(mirror.gameObject);
-                    }
-                    optimizationMessages.AddMessage(new DebuggerMessage(combinedMirrorsOnByDefault, MessageType.BadFPS).setVariable(mirrors.Length.ToString()).setSelectObjects(activeMirrors.ToArray()));
-                }
-                else
-                {
-                    foreach (var mirror in mirrors)
-                    {
-                        optimizationMessages.AddMessage(new DebuggerMessage(mirrorOnByDefault, MessageType.BadFPS).setVariable(mirror.name).setSelectObject(mirror.gameObject));
-                    }
-                }
-            }
-
             //Check for occlusion culling
             if (StaticOcclusionCulling.umbraDataSize > 0)
             {
@@ -760,50 +766,27 @@ namespace VRCWorldToolkit
                 }
             }
 
-            List<Texture> unCrunchedTextures = new List<Texture>();
-            int badShaders = 0;
-            int textureCount = 0;
-            foreach (var item in sceneDescriptor.DynamicMaterials)
+            //Get active mirrors in the world and complain about them
+            VRC_MirrorReflection[] mirrors = FindObjectsOfType(typeof(VRC_MirrorReflection)) as VRC_MirrorReflection[];
+            if (mirrors.Length > 0)
             {
-                Shader shader = item.shader;
-
-                //Check for toon shaders used in the world
-                if (shader.name.StartsWith(".poiyomi") || shader.name.StartsWith("poiyomi") || shader.name.StartsWith("arktoon") || shader.name.StartsWith("Cubedparadox") || shader.name.StartsWith("Silent's Cel Shading") || shader.name.StartsWith("Xiexe"))
-                    badShaders++;
-
-                for (int i = 0; i < ShaderUtil.GetPropertyCount(shader); i++)
+                if (combineMessages && mirrors.Length > 0 && mirrors.Length != 1)
                 {
-                    if (ShaderUtil.GetPropertyType(shader, i) == ShaderUtil.ShaderPropertyType.TexEnv)
+                    List<GameObject> activeMirrors = new List<GameObject>();
+                    foreach (var mirror in mirrors)
                     {
-                        Texture texture = item.GetTexture(ShaderUtil.GetPropertyName(shader, i));
-                        if (AssetDatabase.GetAssetPath(texture) != "")
-                        {
-                            TextureImporter textureImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(texture)) as TextureImporter;
-                            if (textureImporter != null)
-                            {
-                                if (!unCrunchedTextures.Contains(texture))
-                                {
-                                    textureCount++;
-                                }
-                                if (!textureImporter.crunchedCompression && !unCrunchedTextures.Contains(texture) && !textureImporter.textureCompression.Equals(TextureImporterCompression.Uncompressed) && EditorTextureUtil.GetStorageMemorySize(texture) > 500000)
-                                {
-                                    unCrunchedTextures.Add(texture);
-                                }
-                            }
-                        }
+                        activeMirrors.Add(mirror.gameObject);
+                    }
+                    optimizationMessages.AddMessage(new DebuggerMessage(combinedMirrorsOnByDefault, MessageType.BadFPS).setVariable(mirrors.Length.ToString()).setSelectObjects(activeMirrors.ToArray()));
+                }
+                else
+                {
+                    foreach (var mirror in mirrors)
+                    {
+                        optimizationMessages.AddMessage(new DebuggerMessage(mirrorOnByDefault, MessageType.BadFPS).setVariable(mirror.name).setSelectObject(mirror.gameObject));
                     }
                 }
             }
-
-            //If more than 10% of shaders used in scene are toon shaders to leave room for people using them for avatar displays
-            if (sceneDescriptor.DynamicMaterials.Count > 0)
-                if ((badShaders / sceneDescriptor.DynamicMaterials.Count * 100) > 10)
-                    optimizationMessages.AddMessage(new DebuggerMessage(noToonShaders, MessageType.Warning));
-
-            //Suggest to crunch textures if there are any uncrunched textures found
-            if (textureCount > 0)
-                if ((unCrunchedTextures.Count / textureCount * 100) > 20)
-                    optimizationMessages.AddMessage(new DebuggerMessage(nonCrunchedTextures, MessageType.Tips).setVariable((unCrunchedTextures.Count / textureCount * 100).ToString()));
 
             //Lighting Checks
 
@@ -913,43 +896,6 @@ namespace VRCWorldToolkit
             //If the scene has baked lights complain about stuff important to baked lighting missing
             if (bakedLighting)
             {
-                //Check whether if models in scene have UV2 for lightmapping 
-                MeshFilter[] filters = FindObjectsOfType<MeshFilter>();
-                List<ModelImporter> importers = new List<ModelImporter>();
-                List<string> meshName = new List<string>();
-                foreach (var filter in filters)
-                {
-                    if (GameObjectUtility.AreStaticEditorFlagsSet(filter.gameObject, StaticEditorFlags.LightmapStatic))
-                    {
-                        if (AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(filter.sharedMesh)) != null)
-                        {
-                            ModelImporter modelImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(filter.sharedMesh)) as ModelImporter;
-                            if (!importers.Contains(modelImporter))
-                            {
-                                if (!modelImporter.generateSecondaryUV && filter.sharedMesh.uv2.Length == 0)
-                                {
-                                    importers.Add(modelImporter);
-                                    meshName.Add(filter.sharedMesh.name);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                var modelsCount = importers.Count;
-                if (combineMessages && modelsCount > 0)
-                {
-                    lightingMessages.AddMessage(new DebuggerMessage(noUV2ModelCombined, MessageType.Warning).setVariable(modelsCount.ToString()).setAutoFix(SetGenerateLightmapUVCombined(importers)));
-                }
-                else
-                {
-                    for (int i = 0; i < modelsCount; i++)
-                    {
-                        string modelName = meshName[i];
-                        ModelImporter modelImporter = importers[i];
-                        lightingMessages.AddMessage(new DebuggerMessage(noUV2Model, MessageType.Warning).setVariable(modelName).setAutoFix(SetGenerateLightmapUV(modelImporter)).setAssetLocation(modelImporter.assetPath));
-                    }
-                }
 
                 //Count lightmaps and suggest to use bigger lightmaps if needed
                 int lightMapSize = 0;
@@ -1177,6 +1123,118 @@ namespace VRCWorldToolkit
 #else
             postprocessingMessages.AddMessage(new DebuggerMessage(noPostProcessingImported, MessageType.Info));
 #endif
+
+            //Gameobject checks
+
+            List<ModelImporter> importers = new List<ModelImporter>();
+            List<string> meshName = new List<string>();
+            
+            List<Texture> unCrunchedTextures = new List<Texture>();
+            int badShaders = 0;
+            int textureCount = 0;
+
+            List<Material> missingShaders = new List<Material>();
+
+            foreach (GameObject gameObject in Resources.FindObjectsOfTypeAll(typeof(GameObject)))
+            {
+                if (gameObject.GetComponent<Renderer>())
+                {
+                    // If baked lighting in the scene check for lightmap uvs
+                    if (bakedLighting)
+                    {
+                        if (GameObjectUtility.AreStaticEditorFlagsSet(gameObject, StaticEditorFlags.LightmapStatic) && gameObject.GetComponent<MeshRenderer>())
+                        {
+                            MeshFilter meshFilter = gameObject.GetComponent<MeshFilter>();
+                            Mesh _sharedMesh = meshFilter.sharedMesh;
+                            if (AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(_sharedMesh)) != null)
+                            {
+                                ModelImporter modelImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(_sharedMesh)) as ModelImporter;
+                                if (!importers.Contains(modelImporter))
+                                {
+                                    if (!modelImporter.generateSecondaryUV && _sharedMesh.uv2.Length == 0)
+                                    {
+                                        importers.Add(modelImporter);
+                                        meshName.Add(_sharedMesh.name);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Check materials for problems
+                    Renderer meshRenderer = gameObject.GetComponent<Renderer>();
+                    foreach (var material in meshRenderer.sharedMaterials)
+                    {
+                        Shader shader = material.shader;
+                        if (shader.name == "Hidden/InternalErrorShader" && !missingShaders.Contains(material))
+                            missingShaders.Add(material);
+
+                        if (shader.name.StartsWith(".poiyomi") || shader.name.StartsWith("poiyomi") || shader.name.StartsWith("arktoon") || shader.name.StartsWith("Cubedparadox") || shader.name.StartsWith("Silent's Cel Shading") || shader.name.StartsWith("Xiexe"))
+                            badShaders++;
+
+                        for (int i = 0; i < ShaderUtil.GetPropertyCount(shader); i++)
+                        {
+                            if (ShaderUtil.GetPropertyType(shader, i) == ShaderUtil.ShaderPropertyType.TexEnv)
+                            {
+                                Texture texture = material.GetTexture(ShaderUtil.GetPropertyName(shader, i));
+                                if (AssetDatabase.GetAssetPath(texture) != "")
+                                {
+                                    TextureImporter textureImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(texture)) as TextureImporter;
+                                    if (textureImporter != null)
+                                    {
+                                        if (!unCrunchedTextures.Contains(texture))
+                                        {
+                                            textureCount++;
+                                        }
+                                        if (!textureImporter.crunchedCompression && !unCrunchedTextures.Contains(texture) && !textureImporter.textureCompression.Equals(TextureImporterCompression.Uncompressed) && EditorTextureUtil.GetStorageMemorySize(texture) > 500000)
+                                        {
+                                            unCrunchedTextures.Add(texture);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            //If more than 10% of shaders used in scene are toon shaders to leave room for people using them for avatar displays
+            if (sceneDescriptor.DynamicMaterials.Count > 0)
+                if ((badShaders / sceneDescriptor.DynamicMaterials.Count * 100) > 10)
+                    optimizationMessages.AddMessage(new DebuggerMessage(noToonShaders, MessageType.Warning));
+
+            //Suggest to crunch textures if there are any uncrunched textures found
+            if (textureCount > 0)
+                if ((unCrunchedTextures.Count / textureCount * 100) > 20)
+                    optimizationMessages.AddMessage(new DebuggerMessage(nonCrunchedTextures, MessageType.Tips).setVariable((unCrunchedTextures.Count / textureCount * 100).ToString()));
+
+            var modelsCount = importers.Count;
+            if (combineMessages && modelsCount > 0)
+            {
+                lightingMessages.AddMessage(new DebuggerMessage(noUV2ModelCombined, MessageType.Warning).setVariable(modelsCount.ToString()).setAutoFix(SetGenerateLightmapUVCombined(importers)));
+            }
+            else
+            {
+                for (int i = 0; i < modelsCount; i++)
+                {
+                    string modelName = meshName[i];
+                    ModelImporter modelImporter = importers[i];
+                    lightingMessages.AddMessage(new DebuggerMessage(noUV2Model, MessageType.Warning).setVariable(modelName).setAutoFix(SetGenerateLightmapUV(modelImporter)).setAssetLocation(modelImporter.assetPath));
+                }
+            }
+
+            var missingShadersCount = missingShaders.Count;
+            if (combineMessages && missingShadersCount > 0)
+            {
+                generalMessages.AddMessage(new DebuggerMessage(missingShaderWarning, MessageType.Error).setVariable(missingShadersCount.ToString()).setAutoFix(ChangeShader(missingShaders.ToArray(), "Standard")));
+            }
+            else
+            {
+                foreach (var material in missingShaders)
+                {
+                    generalMessages.AddMessage(new DebuggerMessage(missingShaderWarning, MessageType.Error).setVariable(material.name).setAssetLocation(AssetDatabase.GetAssetPath(material)).setAutoFix(ChangeShader(material, "Standard")));
+                }
+            }
         }
 
         string FormatTime(System.TimeSpan t)
