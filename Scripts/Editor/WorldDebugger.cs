@@ -271,16 +271,6 @@ namespace VRCWorldToolkit
             window.Show();
         }
 
-        //System.Action AddPlayerMods(GameObject obj)
-        //{
-        //    return () =>
-        //    {
-        //        obj.AddComponent(typeof(VRC_PlayerMods));
-        //        VRCPlayerModFactory.PlayerModType type = VRCPlayerModFactory.PlayerModType.Jump;
-        //        VRCPlayerMod mod = VRCPlayerModFactory.Create(type);
-        //    };
-        //}
-
         System.Action SelectAsset(GameObject obj)
         {
             return () =>
