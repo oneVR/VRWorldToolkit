@@ -333,7 +333,10 @@ namespace VRCWorldToolkit
         {
             return () =>
             {
-                obj.layer = LayerMask.NameToLayer(layer);
+                if (EditorUtility.DisplayDialog("Change tag?", "This operation will change " + obj.name + " layer to " + layer + ". Do you want to continue?", "Yes", "Cancel"))
+                {
+                    obj.layer = LayerMask.NameToLayer(layer);
+                }
             };
         }
 
@@ -341,9 +344,12 @@ namespace VRCWorldToolkit
         {
             return () =>
             {
-                foreach (var obj in objs)
+                if (EditorUtility.DisplayDialog("Change layer?", "This operation will change " + objs.Length + " GameObjects layer to " + layer + ". Do you want to continue?", "Yes", "Cancel"))
                 {
-                    obj.layer = LayerMask.NameToLayer(layer);
+                    foreach (var obj in objs)
+                    {
+                        obj.layer = LayerMask.NameToLayer(layer);
+                    }
                 }
             };
         }
@@ -1134,7 +1140,7 @@ namespace VRCWorldToolkit
 
             List<ModelImporter> importers = new List<ModelImporter>();
             List<string> meshName = new List<string>();
-            
+
             List<Texture> unCrunchedTextures = new List<Texture>();
             int badShaders = 0;
             int textureCount = 0;
