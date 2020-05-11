@@ -376,7 +376,10 @@ namespace VRCWorldToolkit
         {
             return () =>
             {
-                obj.tag = tag;
+                if (EditorUtility.DisplayDialog("Change tag?", "This will change " + obj.name + " tag to " + tag + ". Do you want to continue?", "Yes", "Cancel"))
+                {
+                    obj.tag = tag;
+                }
             };
         }
 
@@ -384,9 +387,12 @@ namespace VRCWorldToolkit
         {
             return () =>
             {
-                foreach (var obj in objs)
+                if (EditorUtility.DisplayDialog("Change tag?", "This operation will change " + objs.Length + " GameObjects tag to " + tag + ". Do you want to continue?", "Yes", "Cancel"))
+                {
+                    foreach (var obj in objs)
                 {
                     obj.tag = tag;
+                    }
                 }
             };
         }
