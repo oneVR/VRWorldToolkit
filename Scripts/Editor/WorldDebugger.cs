@@ -298,7 +298,7 @@ namespace VRCWorldToolkit
             };
         }
 
-        System.Action SetGenerateLightmapUVCombined(List<ModelImporter> models)
+        System.Action SetGenerateLightmapUV(List<ModelImporter> models)
         {
             return () =>
             {
@@ -1211,7 +1211,7 @@ namespace VRCWorldToolkit
             var modelsCount = importers.Count;
             if (combineMessages && modelsCount > 0)
             {
-                lightingMessages.AddMessage(new DebuggerMessage(noUV2ModelCombined, MessageType.Warning).setVariable(modelsCount.ToString()).setAutoFix(SetGenerateLightmapUVCombined(importers)));
+                lightingMessages.AddMessage(new DebuggerMessage(noUV2ModelCombined, MessageType.Warning).setVariable(modelsCount.ToString()).setAutoFix(SetGenerateLightmapUV(importers)));
             }
             else
             {
