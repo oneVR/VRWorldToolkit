@@ -7,6 +7,9 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using System.Linq;
 using VRC.Core;
+#if VRC_SDK_VRCSDK3
+using VRC.SDKBase;
+#endif
 #if VRC_SDK_VRCSDK2
 using VRCSDK2;
 #endif
