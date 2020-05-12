@@ -5,9 +5,11 @@ using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
 using UnityEngine.Rendering;
-using VRC.SDKBase;
 using System.Linq;
 using VRC.Core;
+#if VRC_SDK_VRCSDK2
+using VRCSDK2;
+#endif
 #if UNITY_POST_PROCESSING_STACK_V2
 using UnityEngine.Rendering.PostProcessing;
 #endif
@@ -1167,30 +1169,33 @@ namespace VRCWorldToolkit
                     Renderer meshRenderer = gameObject.GetComponent<Renderer>();
                     foreach (var material in meshRenderer.sharedMaterials)
                     {
-                        Shader shader = material.shader;
-                        if (shader.name == "Hidden/InternalErrorShader" && !missingShaders.Contains(material))
-                            missingShaders.Add(material);
-
-                        if (shader.name.StartsWith(".poiyomi") || shader.name.StartsWith("poiyomi") || shader.name.StartsWith("arktoon") || shader.name.StartsWith("Cubedparadox") || shader.name.StartsWith("Silent's Cel Shading") || shader.name.StartsWith("Xiexe"))
-                            badShaders++;
-
-                        for (int i = 0; i < ShaderUtil.GetPropertyCount(shader); i++)
+                        if (material != null)
                         {
-                            if (ShaderUtil.GetPropertyType(shader, i) == ShaderUtil.ShaderPropertyType.TexEnv)
+                            Shader shader = material.shader;
+                            if (shader.name == "Hidden/InternalErrorShader" && !missingShaders.Contains(material))
+                                missingShaders.Add(material);
+
+                            if (shader.name.StartsWith(".poiyomi") || shader.name.StartsWith("poiyomi") || shader.name.StartsWith("arktoon") || shader.name.StartsWith("Cubedparadox") || shader.name.StartsWith("Silent's Cel Shading") || shader.name.StartsWith("Xiexe"))
+                                badShaders++;
+
+                            for (int i = 0; i < ShaderUtil.GetPropertyCount(shader); i++)
                             {
-                                Texture texture = material.GetTexture(ShaderUtil.GetPropertyName(shader, i));
-                                if (AssetDatabase.GetAssetPath(texture) != "")
+                                if (ShaderUtil.GetPropertyType(shader, i) == ShaderUtil.ShaderPropertyType.TexEnv)
                                 {
-                                    TextureImporter textureImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(texture)) as TextureImporter;
-                                    if (textureImporter != null)
+                                    Texture texture = material.GetTexture(ShaderUtil.GetPropertyName(shader, i));
+                                    if (AssetDatabase.GetAssetPath(texture) != "")
                                     {
-                                        if (!unCrunchedTextures.Contains(texture))
+                                        TextureImporter textureImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(texture)) as TextureImporter;
+                                        if (textureImporter != null)
                                         {
-                                            textureCount++;
-                                        }
-                                        if (!textureImporter.crunchedCompression && !unCrunchedTextures.Contains(texture) && !textureImporter.textureCompression.Equals(TextureImporterCompression.Uncompressed) && EditorTextureUtil.GetStorageMemorySize(texture) > 500000)
-                                        {
-                                            unCrunchedTextures.Add(texture);
+                                            if (!unCrunchedTextures.Contains(texture))
+                                            {
+                                                textureCount++;
+                                            }
+                                            if (!textureImporter.crunchedCompression && !unCrunchedTextures.Contains(texture) && !textureImporter.textureCompression.Equals(TextureImporterCompression.Uncompressed) && EditorTextureUtil.GetStorageMemorySize(texture) > 500000)
+                                            {
+                                                unCrunchedTextures.Add(texture);
+                                            }
                                         }
                                     }
                                 }
