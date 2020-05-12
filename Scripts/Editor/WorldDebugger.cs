@@ -569,6 +569,7 @@ namespace VRCWorldToolkit
         private readonly string bakeryLightUnityLight = "Your Bakery light named %variable% has a Unity Light component on it this won't get baked with Bakery and will keep acting as real time even if set to baked.";
         private readonly string combinedBakeryLightUnityLight = "You have %variable% Bakery lights that have a Unity Light component on it these will not get baked with Bakery and will keep acting as real time lights even if set to baked.";
         private readonly string missingShaderWarning = "The material %variable% in your scene has a missing shader.";
+        private readonly string combinedMissingShaderWarning = "There are %variable% materials in your scene with a missing shader.";
 
         public void CheckScene()
         {
@@ -1236,7 +1237,7 @@ namespace VRCWorldToolkit
             var missingShadersCount = missingShaders.Count;
             if (combineMessages && missingShadersCount > 0)
             {
-                generalMessages.AddMessage(new DebuggerMessage(missingShaderWarning, MessageType.Error).setVariable(missingShadersCount.ToString()).setAutoFix(ChangeShader(missingShaders.ToArray(), "Standard")));
+                generalMessages.AddMessage(new DebuggerMessage(combinedMissingShaderWarning, MessageType.Error).setVariable(missingShadersCount.ToString()).setAutoFix(ChangeShader(missingShaders.ToArray(), "Standard")));
             }
             else
             {
