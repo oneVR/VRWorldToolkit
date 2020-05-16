@@ -839,30 +839,6 @@ namespace VRCWorldToolkit.WorldDebugger
             MessageCategory lighting = masterList.AddMessageGroup("Lighting");
             MessageCategory postProcessing = masterList.AddMessageGroup("Post Processing");
 
-            //Test messages
-
-            //general.addMessageGroup(new MessageGroup("this is a message without buttons", MessageType.GoodFPS));
-
-            //MessageGroup testGroup = new MessageGroup("This is a changeable variable message with no buttons: %variable%", MessageType.Error);
-
-            //testGroup.addSingleMessage(new InvidualMessage("Variable1"));
-            //testGroup.addSingleMessage(new InvidualMessage("Variable2"));
-            //testGroup.addSingleMessage(new InvidualMessage("Variable3"));
-            //testGroup.addSingleMessage(new InvidualMessage("Variable4"));
-
-            //general.addMessageGroup(testGroup);
-
-            //MeshRenderer[] testObjects = FindObjectsOfType(typeof(MeshRenderer)) as MeshRenderer[];
-
-            //MessageGroup testGroup2 = new MessageGroup("This is a changeable variable message with no buttons that combines: %variable%", "This is %count% messages combined into one", MessageType.Info);
-
-            //foreach (var item in testObjects)
-            //{
-            //    testGroup2.addSingleMessage(new InvidualMessage(item.name).setSelectObjects(item.gameObject));
-            //}
-
-            //optimization.addMessageGroup(testGroup2);
-
             //General Checks
 
             //Get Descriptors
