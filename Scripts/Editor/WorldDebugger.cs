@@ -1426,7 +1426,7 @@ namespace VRCWorldToolkit.WorldDebugger
                 postProcessing.addMessageGroup(new MessageGroup(noProblemsInPostProcessing, MessageType.Info));
             }
 #else
-            postProcessing.addMessageGroup(new DebuggerMessage(noPostProcessingImported, MessageType.Info));
+            postProcessing.addMessageGroup(new MessageGroup(noPostProcessingImported, MessageType.Info));
 #endif
 
             //Gameobject checks
