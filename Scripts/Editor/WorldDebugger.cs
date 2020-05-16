@@ -9,6 +9,7 @@ using System.Linq;
 using VRC.Core;
 #if VRC_SDK_VRCSDK3
 using VRC.SDKBase;
+using System.Reflection;
 #endif
 #if VRC_SDK_VRCSDK2
 using VRCSDK2;
@@ -670,6 +671,14 @@ namespace VRCWorldToolkit.WorldDebugger
             };
         }
 
+        System.Action SetErrorPause(bool enabled)
+        {
+            return () =>
+            {
+                ConsoleFlagUtil.SetConsoleErrorPause(enabled);
+            };
+        }
+
 #if UNITY_POST_PROCESSING_STACK_V2
         System.Action SetReferenceCamera(VRC_SceneDescriptor descriptor)
         {
@@ -891,6 +900,12 @@ namespace VRCWorldToolkit.WorldDebugger
                 {
                     general.addMessageGroup(new MessageGroup(worldDescriptorOff, MessageType.Error).addSingleMessage(new InvidualMessage(descriptorRemoteness.ToString()).setSelectObject(Array.ConvertAll(descriptors, s => s.gameObject))));
                 }
+            }
+
+            //Check if console has error pause on
+            if(ConsoleFlagUtil.GetConsoleErrorPause())
+            {
+                general.addMessageGroup(new MessageGroup("You have Error Pause enabled in your console this can cause your world upload to fail.", MessageType.Error).addSingleMessage(new InvidualMessage(SetErrorPause(false))));
             }
 
             //Get spawn points for any possible problems
@@ -1449,6 +1464,8 @@ namespace VRCWorldToolkit.WorldDebugger
                             }
                         }
                     }
+
+
 
                     // Check materials for problems
                     Renderer meshRenderer = gameObject.GetComponent<Renderer>();
