@@ -1493,7 +1493,16 @@ namespace VRCWorldToolkit.WorldDebugger
 
                         //TODO: Investigate whether other shaders also turn pink ingame
                         if (shader.name == "Legacy Shaders/Diffuse")
-                            brokenShadersGroup.addSingleMessage(new InvidualMessage(material.name, shader.name).setAssetPath(AssetDatabase.GetAssetPath(material)).setAutoFix(ChangeShader(material, "Standard")));
+                        {
+                            if (Application.platform == RuntimePlatform.WindowsEditor)
+                            {
+                                brokenShadersGroup.addSingleMessage(new InvidualMessage(material.name, shader.name).setAssetPath(AssetDatabase.GetAssetPath(material)).setAutoFix(ChangeShader(material, "Standard")));
+                            }
+                            else
+                            {
+                                brokenShadersGroup.addSingleMessage(new InvidualMessage(material.name, shader.name).setAssetPath(AssetDatabase.GetAssetPath(material))));
+                            }
+                        }
 
                         for (int i = 0; i < ShaderUtil.GetPropertyCount(shader); i++)
                         {
