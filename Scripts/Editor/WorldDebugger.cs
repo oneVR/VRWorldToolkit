@@ -1476,7 +1476,7 @@ namespace VRCWorldToolkit.WorldDebugger
                     MessageGroup brokenShadersGroup = new MessageGroup(brokenShader, combinedBrokenShader, MessageType.Error);
 
                     List<Material> checkedMaterials = new List<Material>();
-                    
+
                     foreach (var material in meshRenderer.sharedMaterials)
                     {
                         if (material == null || checkedMaterials.Contains(material))
