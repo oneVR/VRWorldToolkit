@@ -1428,6 +1428,10 @@ namespace VRCWorldToolkit.WorldDebugger
                         if (GameObjectUtility.AreStaticEditorFlagsSet(gameObject, StaticEditorFlags.LightmapStatic) && gameObject.GetComponent<MeshRenderer>())
                         {
                             MeshFilter meshFilter = gameObject.GetComponent<MeshFilter>();
+                            if (meshFilter == null)
+                            {
+                                continue;
+                            }
                             Mesh _sharedMesh = meshFilter.sharedMesh;
                             if (AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(_sharedMesh)) != null)
                             {
