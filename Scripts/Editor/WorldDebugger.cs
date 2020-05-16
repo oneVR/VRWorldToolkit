@@ -1454,6 +1454,9 @@ namespace VRCWorldToolkit.WorldDebugger
                     Renderer meshRenderer = gameObject.GetComponent<Renderer>();
                     foreach (var material in meshRenderer.sharedMaterials)
                     {
+                        if (material == null)
+                            continue;
+
                         Shader shader = material.shader;
                         if (shader.name == "Hidden/InternalErrorShader" && !missingShaders.Contains(material))
                             missingShaders.Add(material);
