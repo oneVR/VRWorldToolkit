@@ -1321,7 +1321,7 @@ namespace VRCWorldToolkit.WorldDebugger
                 //Start by checking if reference camera has been set in the Scene Descriptor
                 if (!sceneDescriptor.ReferenceCamera)
                 {
-                    postProcessing.addMessageGroup(new MessageGroup(noReferenceCameraSet, MessageType.Info).addSingleMessage(new InvidualMessage(SetReferenceCamera(sceneDescriptor))));
+                    postProcessing.addMessageGroup(new MessageGroup(noReferenceCameraSet, MessageType.Info).addSingleMessage(new InvidualMessage(SetReferenceCamera(sceneDescriptor)).setSelectObject(sceneDescriptor.gameObject)));
                 }
                 else
                 {
@@ -1335,7 +1335,7 @@ namespace VRCWorldToolkit.WorldDebugger
                         PostProcessLayer postprocess_layer = sceneDescriptor.ReferenceCamera.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
                         if (postprocess_layer == null)
                         {
-                            postProcessing.addMessageGroup(new MessageGroup(referenceCameraNoPostProcessingLayer, MessageType.Error));
+                            postProcessing.addMessageGroup(new MessageGroup(referenceCameraNoPostProcessingLayer, MessageType.Error).addSingleMessage(new InvidualMessage(postprocess_layer.gameObject)));
                         }
 
                         LayerMask volume_layer = postprocess_layer.volumeLayer;
@@ -1375,7 +1375,7 @@ namespace VRCWorldToolkit.WorldDebugger
                                 {
                                     if (postprocess_profile.GetSetting<ColorGrading>().tonemapper.value.ToString() == "None")
                                     {
-                                        postProcessing.addMessageGroup(new MessageGroup(dontUseNoneForTonemapping, MessageType.Error));
+                                        postProcessing.addMessageGroup(new MessageGroup(dontUseNoneForTonemapping, MessageType.Error).addSingleMessage(new InvidualMessage(postprocess_layer.gameObject)));
                                     }
                                 }
 
@@ -1383,37 +1383,37 @@ namespace VRCWorldToolkit.WorldDebugger
                                 {
                                     if (postprocess_profile.GetSetting<Bloom>().intensity.value > 0.3f)
                                     {
-                                        postProcessing.addMessageGroup(new MessageGroup(tooHighBloomIntensity, MessageType.Warning));
+                                        postProcessing.addMessageGroup(new MessageGroup(tooHighBloomIntensity, MessageType.Warning).addSingleMessage(new InvidualMessage(postprocess_layer.gameObject)));
                                     }
 
                                     if (postprocess_profile.GetSetting<Bloom>().threshold.value > 1f)
                                     {
-                                        postProcessing.addMessageGroup(new MessageGroup(tooHighBloomThreshold, MessageType.Warning));
+                                        postProcessing.addMessageGroup(new MessageGroup(tooHighBloomThreshold, MessageType.Warning).addSingleMessage(new InvidualMessage(postprocess_layer.gameObject)));
                                     }
 
                                     if (postprocess_profile.GetSetting<Bloom>().dirtTexture.value || postprocess_profile.GetSetting<Bloom>().dirtIntensity.value != 0)
                                     {
-                                        postProcessing.addMessageGroup(new MessageGroup(noBloomDirtInVR, MessageType.Error).addSingleMessage(new InvidualMessage(RemovePostProcessSetting(postprocess_profile, RemovePSEffect.BloomDirt))));
+                                        postProcessing.addMessageGroup(new MessageGroup(noBloomDirtInVR, MessageType.Error).addSingleMessage(new InvidualMessage(RemovePostProcessSetting(postprocess_profile, RemovePSEffect.BloomDirt)).setSelectObject(postprocess_layer.gameObject)));
                                     }
                                 }
                                 if (postprocess_profile.GetSetting<AmbientOcclusion>())
                                 {
-                                    postProcessing.addMessageGroup(new MessageGroup(noAmbientOcclusion, MessageType.Error).addSingleMessage(new InvidualMessage(RemovePostProcessSetting(postprocess_profile, RemovePSEffect.AmbientOcclusion))));
+                                    postProcessing.addMessageGroup(new MessageGroup(noAmbientOcclusion, MessageType.Error).addSingleMessage(new InvidualMessage(RemovePostProcessSetting(postprocess_profile, RemovePSEffect.AmbientOcclusion)).setSelectObject(postprocess_layer.gameObject)));
                                 }
 
                                 if (postprocess_profile.GetSetting<DepthOfField>() && postprocess_volume.isGlobal)
                                 {
-                                    postProcessing.addMessageGroup(new MessageGroup(depthOfFieldWarning, MessageType.Warning));
+                                    postProcessing.addMessageGroup(new MessageGroup(depthOfFieldWarning, MessageType.Warning).addSingleMessage(new InvidualMessage(postprocess_layer.gameObject)));
                                 }
 
                                 if (postprocess_profile.GetSetting<ScreenSpaceReflections>())
                                 {
-                                    postProcessing.addMessageGroup(new MessageGroup(screenSpaceReflectionsWarning, MessageType.Warning).addSingleMessage(new InvidualMessage(RemovePostProcessSetting(postprocess_profile, RemovePSEffect.ScreenSpaceReflections))));
+                                    postProcessing.addMessageGroup(new MessageGroup(screenSpaceReflectionsWarning, MessageType.Warning).addSingleMessage(new InvidualMessage(RemovePostProcessSetting(postprocess_profile, RemovePSEffect.ScreenSpaceReflections)).setSelectObject(postprocess_layer.gameObject)));
                                 }
 
                                 if (postprocess_profile.GetSetting<Vignette>())
                                 {
-                                    postProcessing.addMessageGroup(new MessageGroup(vignetteWarning, MessageType.Warning));
+                                    postProcessing.addMessageGroup(new MessageGroup(vignetteWarning, MessageType.Warning).addSingleMessage(new InvidualMessage(postprocess_layer.gameObject)));
                                 }
                             }
                         }
