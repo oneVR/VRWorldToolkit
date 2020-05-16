@@ -769,10 +769,10 @@ namespace VRCWorldToolkit.WorldDebugger
         private readonly string colliderUnderSpawnIsTrigger = "The only collider (%variable%) under your spawn point %variable2% has been set as a trigger! Players spawning into this world will fall forever.";
         private readonly string noColliderUnderSpawn = "Your spawn point %variable% doesn't have anything underneath it. Players spawning into this world will fall forever.";
         private readonly string noPlayerMods = "Your world currently has no player mods. Player mods are used for adding jumping and changing walking speed.";
-        private readonly string triggerTriggerNotTrigger = "You have an OnEnterTrigger or OnExitTrigger Trigger (%variable%), but it's collider has not been set to be a trigger. These Triggers need to have a collider set to be a trigger to work.";
-        private readonly string colliderTriggerIsTrigger = "You have an OnEnterCollider or OnExitCollider Trigger (%variable%) that has a collider set to be a trigger. These only react if the collider on the object has not been set to be a trigger.";
-        private readonly string triggerTriggerNoCollider = "You have an OnEnterTrigger or OnExitTrigger Trigger (%variable%) that doesn't have a collider on it.";
-        private readonly string colliderTriggerNoCollider = "You have an OnEnterCollider or OnExitCollider Trigger (%variable%) that doesn't have a collider on it.";
+        private readonly string triggerTriggerNotTrigger = "You have an OnEnterTrigger or OnExitTrigger Trigger \"%variable%\", but it's collider has not been set to be a trigger. These Triggers need to have a collider set to be a trigger to work.";
+        private readonly string colliderTriggerIsTrigger = "You have an OnEnterCollider or OnExitCollider Trigger \"%variable%\" that has a collider set to be a trigger. These only react if the collider on the object has not been set to be a trigger.";
+        private readonly string triggerTriggerNoCollider = "You have an OnEnterTrigger or OnExitTrigger Trigger \"%variable%\" that doesn't have a collider on it.";
+        private readonly string colliderTriggerNoCollider = "You have an OnEnterCollider or OnExitCollider Trigger \"%variable%\" that doesn't have a collider on it.";
         private readonly string triggerTriggerWrongLayer = "You have an OnEnterTrigger or OnExitTrigger Trigger (%variable%) that is not on the MirrorReflection layer. This can stop raycasts from working properly.";
         private readonly string combinedTriggerTriggerWrongLayer = "You have %variable% OnEnterTrigger or OnExitTrigger Triggers that are not on the MirrorReflection layer. This can stop raycasts from working properly.";
         private readonly string mirrorOnByDefault = "Your mirror %variable% is on by default. This is a very bad practice and you should disable any mirrors in your world by default.";
@@ -789,7 +789,7 @@ namespace VRCWorldToolkit.WorldDebugger
         private readonly string singleColorEnviromentLighting = "Consider changing your Enviroment Lighting to Gradient from Flat.";
         private readonly string darkEnviromentLighting = "Using dark colours for Environment Lighting can cause avatars to look weird. Only use dark Environment Lighting if your world has dark lighting.";
         private readonly string customEnviromentReflectionsNull = "Your Enviroment Reflections have been set to custom, but you haven't defined a custom cubemap!";
-        private readonly string noUV2Model = "You have a model (%variable%) set to be lightmapped that doesn't have Lightmap UVs. This causes issues when baking lighting. You can enable generating Lightmap UV's in the import settings of the model.";
+        private readonly string noUV2Model = "You have a model \"%variable%\" set to be lightmapped that doesn't have Lightmap UVs. This causes issues when baking lighting. You can enable generating Lightmap UV's in the import settings of the model.";
         private readonly string combinedNoUV2Model = "You have %count% models set to be lightmapped that don't have Lightmap UVs. This causes issues when baking lighting. You can enable generating Lightmap UV's in the import settings of the models.";
         private readonly string lightsNotBaked = "Your world's lighting is currently not baked. Consider baking your lights for improved performance.";
         private readonly string considerLargerLightmaps = "Consider increasing your Lightmap Size from %variable% to 4096. This allows for more stuff to fit on a single lightmap, leaving less textures that need to be sampled.";
@@ -801,7 +801,7 @@ namespace VRCWorldToolkit.WorldDebugger
         private readonly string lightProbesRemovedNotReBaked = "You've removed some lightprobes after the last bake, bake them again to update your scenes lighting data. Currently the lighting data contains %variable% baked lightprobes and the scene has %variable2% lightprobes.";
         private readonly string lightProbeCount = "Your world currently contains %variable% baked light probes.";
         private readonly string noReflectionProbes = "Your world has no active reflection probes. Reflection probes are needed to have proper reflections on reflective materials.";
-        private readonly string reflectionProbesSomeUnbaked = "The reflection probe %variable% is unbaked.";
+        private readonly string reflectionProbesSomeUnbaked = "The reflection probe named \"%variable%\" is unbaked.";
         private readonly string combinedReflectionProbesSomeUnbaked = "Your world has %count% unbaked reflection probes.";
         private readonly string reflectionProbeCountText = "Your world has %variable% reflection probes.";
         private readonly string postProcessingImportedButNotSetup = "Your project has Post Processing imported, but you haven't set it up yet.";
