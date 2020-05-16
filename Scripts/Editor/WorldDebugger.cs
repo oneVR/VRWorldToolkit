@@ -827,6 +827,7 @@ namespace VRCWorldToolkit.WorldDebugger
         private readonly string combinedBakeryLightUnityLight = "You have %count% Bakery lights that have a Unity Light component on it these will not get baked with Bakery and will keep acting as real time lights even if set to baked.";
         private readonly string missingShaderWarning = "The material %variable% in your scene has a missing shader.";
         private readonly string combinedMissingShaderWarning = "You have %count% materials in your scene that have missing shaders.";
+        private readonly string errorPauseWarning = "You have Error Pause enabled in your console this can cause your world upload to fail.";
 
         public void CheckScene()
         {
@@ -905,7 +906,7 @@ namespace VRCWorldToolkit.WorldDebugger
             //Check if console has error pause on
             if(ConsoleFlagUtil.GetConsoleErrorPause())
             {
-                general.addMessageGroup(new MessageGroup("You have Error Pause enabled in your console this can cause your world upload to fail.", MessageType.Error).addSingleMessage(new InvidualMessage(SetErrorPause(false))));
+                general.addMessageGroup(new MessageGroup(errorPauseWarning, MessageType.Error).addSingleMessage(new InvidualMessage(SetErrorPause(false))));
             }
 
             //Get spawn points for any possible problems
