@@ -906,7 +906,7 @@ namespace VRCWorldToolkit.WorldDebugger
             }
 
             //Check if console has error pause on
-            if(ConsoleFlagUtil.GetConsoleErrorPause())
+            if (ConsoleFlagUtil.GetConsoleErrorPause())
             {
                 general.addMessageGroup(new MessageGroup(errorPauseWarning, MessageType.Error).addSingleMessage(new InvidualMessage(SetErrorPause(false))));
             }
