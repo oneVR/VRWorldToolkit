@@ -1476,7 +1476,7 @@ namespace VRCWorldToolkit.WorldDebugger
                             }
                             else
                             {
-                                brokenShadersGroup.addSingleMessage(new InvidualMessage(material.name, shader.name).setAssetPath(AssetDatabase.GetAssetPath(material))));
+                                brokenShadersGroup.addSingleMessage(new InvidualMessage(material.name, shader.name).setAssetPath(AssetDatabase.GetAssetPath(material)));
                             }
                         }
 
