@@ -347,7 +347,7 @@ namespace VRCWorldToolkit.WorldDebugger
                             {
                                 bool hasButtons = messageGroup.buttons();
 
-                                if (combineMessages && messageGroup.combinedMessage != null)
+                                if (combineMessages && messageGroup.combinedMessage != null && messageGroup.messageList.Count != 1)
                                 {
                                     EditorGUILayout.BeginHorizontal();
 
@@ -390,7 +390,7 @@ namespace VRCWorldToolkit.WorldDebugger
 
                                     EditorGUILayout.EndHorizontal();
                                 }
-                                else if (!combineMessages || messageGroup.combinedMessage == null)
+                                else if (!combineMessages || messageGroup.messageList.Count == 1)
                                 {
                                     foreach (var message in messageGroup.messageList)
                                     {
