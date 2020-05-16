@@ -782,6 +782,8 @@ namespace VRCWorldToolkit.WorldDebugger
         private readonly string activeCameraOutputtingToRenderTexture = "Your scene has an active camera (%variable%) outputting to a render texture. This will affect performance negatively by causing more drawcalls to happen. Ideally you would only have it enabled when needed.";
         private readonly string combinedActiveCamerasOutputtingToRenderTextures = "Your scene has %count% active cameras outputting to render textures. This will affect performance negatively by causing more drawcalls to happen. Ideally you would only have them enabled when needed.";
         private readonly string noToonShaders = "You shouldn't use toon shaders for world building, as they're missing crucial things for making worlds. For world building the most recommended shader is Standard.";
+        private readonly string brokenShader = "The material %variable% is using a broken shader %variable2% which will just appear pink ingame.";
+        private readonly string combinedBrokenShader = "You have %count% materials using broken shaders, these will just appear pink ingame.";
         private readonly string nonCrunchedTextures = "%variable%% of the textures used in your scene haven't been crunch compressed. Crunch compression can greatly reduce the size of your world's textures, allowing players to load in faster.";
         private readonly string switchToProgressive = "Your world is currently using Enlighten as your lightmapper, which is deprecated in newer versions of Unity. You should consider switching to Progressive.";
         private readonly string singleColorEnviromentLighting = "Consider changing your Enviroment Lighting to Gradient from Flat.";
@@ -1470,6 +1472,9 @@ namespace VRCWorldToolkit.WorldDebugger
 
                     // Check materials for problems
                     Renderer meshRenderer = gameObject.GetComponent<Renderer>();
+
+                    MessageGroup brokenShadersGroup = new MessageGroup(brokenShader, combinedBrokenShader, MessageType.Error);
+                    
                     foreach (var material in meshRenderer.sharedMaterials)
                     {
                         if (material == null)
@@ -1481,6 +1486,10 @@ namespace VRCWorldToolkit.WorldDebugger
 
                         if (shader.name.StartsWith(".poiyomi") || shader.name.StartsWith("poiyomi") || shader.name.StartsWith("arktoon") || shader.name.StartsWith("Cubedparadox") || shader.name.StartsWith("Silent's Cel Shading") || shader.name.StartsWith("Xiexe"))
                             badShaders++;
+
+                        //TODO: Investigate whether other shaders also turn pink ingame
+                        if (shader.name == "Legacy Shaders/Diffuse")
+                            brokenShadersGroup.addSingleMessage(new InvidualMessage(material.name, shader.name).setAssetPath(AssetDatabase.GetAssetPath(material)).setAutoFix(ChangeShader(material, "Standard")));
 
                         for (int i = 0; i < ShaderUtil.GetPropertyCount(shader); i++)
                         {
@@ -1504,6 +1513,11 @@ namespace VRCWorldToolkit.WorldDebugger
                                 }
                             }
                         }
+                    }
+
+                    if (brokenShadersGroup.messageList.Count > 0)
+                    {
+                        general.addMessageGroup(brokenShadersGroup);
                     }
                 }
             }
