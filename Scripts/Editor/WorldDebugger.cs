@@ -808,7 +808,7 @@ namespace VRCWorldToolkit.WorldDebugger
         private readonly string noReflectionProbes = "Your world has no active reflection probes. Reflection probes are needed to have proper reflections on reflective materials.";
         private readonly string reflectionProbesSomeUnbaked = "The reflection probe named \"%variable%\" is unbaked.";
         private readonly string combinedReflectionProbesSomeUnbaked = "Your world has %count% unbaked reflection probes.";
-        private readonly string reflectionProbeCountText = "Your world has %variable% reflection probes.";
+        private readonly string reflectionProbeCountText = "Your world has %variable% baked reflection probes.";
         private readonly string postProcessingImportedButNotSetup = "Your project has Post Processing imported, but you haven't set it up yet.";
         private readonly string noReferenceCameraSet = "Your Scene Descriptor has no Reference Camera set. Without a Reference Camera set, you won't be able to see Post Processing ingame.";
         private readonly string noPostProcessingVolumes = "You don't have any Post Processing Volumes in your scene. A Post Processing Volume is needed to apply effects to the camera's Post Processing Layer.";
