@@ -207,6 +207,12 @@ namespace VRCWorldToolkit
             Application.OpenURL("https://vrcprefabs.com/browse");
         }
 
+        [MenuItem("VRWorld Toolkit/Useful Links/Unofficial Wiki")]
+        private static void UnofficialWiki()
+        {
+            Application.OpenURL("http://vrchat.wikidot.com/");
+        }
+
 #if UDON
         [MenuItem("VRWorld Toolkit/Useful Links/UdonSharp")]
         private static void UdonSharpLink()
