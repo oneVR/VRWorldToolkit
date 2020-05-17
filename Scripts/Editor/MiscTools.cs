@@ -216,7 +216,7 @@ namespace VRCWorldToolkit
         [MenuItem("VRWorld Toolkit/Useful Links/VRChat 技術メモ帳 (JP)")]
         private static void UnofficialWikiJP()
         {
-            Application.OpenURL("http://vrchat.wikidot.com/");
+            Application.OpenURL("https://vrcworld.wiki.fc2.com/");
         }
 
 #if UDON
