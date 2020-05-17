@@ -824,7 +824,6 @@ namespace VRCWorldToolkit.WorldDebugger
         private readonly string depthOfFieldWarning = "Depth of field has a high performance cost, and is very disorientating in VR. If you really want to use depth of field, have it be disabled by default.";
         private readonly string screenSpaceReflectionsWarning = "Screen Space Reflections only works when using deferred rendering. VRchat isn't using deferred rendering, so this will have no effect on the main camera.";
         private readonly string vignetteWarning = "Only use vignette in very small amounts. A powerful vignette can cause sickness in VR.";
-        private readonly string noProblemsInPostProcessing = "No problems detected in your post processing setup.";
         private readonly string noPostProcessingImported = "You haven't imported Post Processing to your project yet.";
         private readonly string questBakedLightingWarning = "You should bake lights for content build for Quest.";
         private readonly string ambientModeSetToCustom = "Your Environment Lighting setting is broken. This will override all light probes in the scene with black ambient light. Please change it to something else.";
@@ -1403,10 +1402,6 @@ namespace VRCWorldToolkit.WorldDebugger
                         }
                     }
                 }
-            }
-            if (postProcessing.messageGroups.Count == 0)
-            {
-                postProcessing.addMessageGroup(new MessageGroup(noProblemsInPostProcessing, MessageType.Info));
             }
 #else
             postProcessing.addMessageGroup(new MessageGroup(noPostProcessingImported, MessageType.Info));
