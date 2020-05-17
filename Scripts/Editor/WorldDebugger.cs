@@ -833,7 +833,7 @@ namespace VRCWorldToolkit.WorldDebugger
         private readonly string combinedBakeryLightUnityLight = "You have %count% Bakery lights that have a Unity Light component on it these will not get baked with Bakery and will keep acting as real time lights even if set to baked.";
         private readonly string missingShaderWarning = "The material %variable% in your scene has a missing shader.";
         private readonly string combinedMissingShaderWarning = "You have %count% materials in your scene that have missing shaders.";
-        private readonly string errorPauseWarning = "You have Error Pause enabled in your console this can cause your world upload to fail.";
+        private readonly string errorPauseWarning = "You have Error Pause enabled in your console this can cause your world upload to fail by interrupting the build process.";
 
         public void CheckScene()
         {
