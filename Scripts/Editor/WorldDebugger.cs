@@ -1136,7 +1136,7 @@ namespace VRCWorldToolkit.WorldDebugger
                 if (light.lightmapBakeType == LightmapBakeType.Baked || light.lightmapBakeType == LightmapBakeType.Mixed)
                 {
                     bakedLighting = true;
-                    if (!light.bakingOutput.isBaked)
+                    if (!light.bakingOutput.isBaked && light.GetComponent<Light>().enabled)
                     {
                         nonBakedLights.Add(light.gameObject);
                     }
