@@ -207,8 +207,14 @@ namespace VRCWorldToolkit
             Application.OpenURL("https://vrcprefabs.com/browse");
         }
 
-        [MenuItem("VRWorld Toolkit/Useful Links/Unofficial Wiki")]
-        private static void UnofficialWiki()
+        [MenuItem("VRWorld Toolkit/Useful Links/Unofficial VRChat Wiki (EN)")]
+        private static void UnofficialWikiEN()
+        {
+            Application.OpenURL("http://vrchat.wikidot.com/");
+        }
+
+        [MenuItem("VRWorld Toolkit/Useful Links/VRChat 技術メモ帳 (JP)")]
+        private static void UnofficialWikiJP()
         {
             Application.OpenURL("http://vrchat.wikidot.com/");
         }
@@ -218,6 +224,14 @@ namespace VRCWorldToolkit
         private static void UdonSharpLink()
         {
             Application.OpenURL("https://github.com/Merlin-san/UdonSharp/releases");
+        }
+#endif
+
+#if BAKERY_INCLUDED
+        [MenuItem("VRWorld Toolkit/Useful Links/Bakery Documentation")]
+        private static void BakeryDocumentationLink()
+        {
+            Application.OpenURL("https://geom.io/bakery/");
         }
 #endif
     }
