@@ -1448,8 +1448,6 @@ namespace VRCWorldToolkit.WorldDebugger
                         }
                     }
 
-
-
                     // Check materials for problems
                     Renderer meshRenderer = gameObject.GetComponent<Renderer>();
 
