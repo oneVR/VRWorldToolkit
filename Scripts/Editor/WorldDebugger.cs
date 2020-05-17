@@ -341,6 +341,11 @@ namespace VRCWorldToolkit.WorldDebugger
                         var buttonWidth = 80;
                         var buttonHeight = 20;
 
+                        if (group.messageGroups.Count == 0)
+                        {
+                            DrawMessage("No messages found for " + group.listName + ".", MessageType.Info);
+                        }
+
                         foreach (var messageGroup in group.messageGroups)
                         {
                             if (messageGroup.messageList.Count > 0)
