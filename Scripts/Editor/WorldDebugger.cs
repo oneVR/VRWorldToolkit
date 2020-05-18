@@ -798,6 +798,7 @@ namespace VRCWorldToolkit.WorldDebugger
         private readonly string combinedNoUV2Model = "You have %count% models set to be lightmapped that don't have Lightmap UVs. This causes issues when baking lighting. You can enable generating Lightmap UV's in the import settings of the models.";
         private readonly string lightsNotBaked = "Your world's lighting is currently not baked. Consider baking your lights for improved performance.";
         private readonly string considerLargerLightmaps = "Consider increasing your Lightmap Size from %variable% to 4096. This allows for more stuff to fit on a single lightmap, leaving less textures that need to be sampled.";
+        private readonly string considerSmallerLightmaps = "Baking lightmaps at 4096 with Progressive GPU will silently fall back to CPU Progressive because it needs more than 12GB GPU Memory to be able to bake with GPU Progressive.";
         private readonly string nonBakedBakedLights = "The light %variable% is set to be baked/mixed but it hasn't been baked yet! Baked lights that haven't been baked yet function as realtime lights ingame.";
         private readonly string combinedNonBakedBakedLights = "Your world contains %count% baked/mixed lights that haven't been baked! Baked lights that haven't been baked yet function as realtime lights ingame.";
         private readonly string lightingDataAssetInfo = "Your lighting data asset takes up %variable% MB of your world's size. This contains your world's light probe data and realtime GI data.";
@@ -1156,7 +1157,7 @@ namespace VRCWorldToolkit.WorldDebugger
                 //Count lightmaps and suggest to use bigger lightmaps if needed
                 int lightMapSize = 0;
                 lightMapSize = LightmapEditorSettings.maxAtlasSize;
-                if (lightMapSize != 4096 && LightmapSettings.lightmaps.Length > 1)
+                if (lightMapSize != 4096 && LightmapSettings.lightmaps.Length > 1 && !LightmapEditorSettings.lightmapper.Equals(LightmapEditorSettings.Lightmapper.ProgressiveGPU))
                 {
                     if (LightmapSettings.lightmaps[0] != null)
                     {
@@ -1165,6 +1166,11 @@ namespace VRCWorldToolkit.WorldDebugger
                             lighting.addMessageGroup(new MessageGroup(considerLargerLightmaps, MessageType.Tips).addSingleMessage(new InvidualMessage(lightMapSize.ToString()).setAutoFix(SetLightmapSize(4096))));
                         }
                     }
+                }
+
+                if (LightmapEditorSettings.lightmapper.Equals(LightmapEditorSettings.Lightmapper.ProgressiveGPU) && lightMapSize == 4096 && SystemInfo.graphicsMemorySize < 12000)
+                {
+                    lighting.addMessageGroup(new MessageGroup(considerSmallerLightmaps, MessageType.Warning).addSingleMessage(new InvidualMessage(lightMapSize.ToString()).setAutoFix(SetLightmapSize(2048))));
                 }
 
                 //Count how many light probes the scene has
