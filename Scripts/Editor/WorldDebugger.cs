@@ -799,7 +799,7 @@ namespace VRCWorldToolkit.WorldDebugger
         private readonly string lightsNotBaked = "Your world's lighting is currently not baked. Consider baking your lights for improved performance.";
         private readonly string considerLargerLightmaps = "Consider increasing your Lightmap Size from %variable% to 4096. This allows for more stuff to fit on a single lightmap, leaving less textures that need to be sampled.";
         private readonly string considerSmallerLightmaps = "Baking lightmaps at 4096 with Progressive GPU will silently fall back to CPU Progressive because it needs more than 12GB GPU Memory to be able to bake with GPU Progressive.";
-        private readonly string nonBakedBakedLights = "The light %variable% is set to be baked/mixed but it hasn't been baked yet! Baked lights that haven't been baked yet function as realtime lights ingame.";
+        private readonly string nonBakedBakedLights = "The light \"%variable%\" is set to be baked/mixed but it hasn't been baked yet! Baked lights that haven't been baked yet function as realtime lights ingame.";
         private readonly string combinedNonBakedBakedLights = "Your world contains %count% baked/mixed lights that haven't been baked! Baked lights that haven't been baked yet function as realtime lights ingame.";
         private readonly string lightingDataAssetInfo = "Your lighting data asset takes up %variable% MB of your world's size. This contains your world's light probe data and realtime GI data.";
         private readonly string noLightProbes = "Your world currently has no light probes, which means your baked lights won't affect dynamic objects such as players and pickups.";
@@ -1474,19 +1474,6 @@ namespace VRCWorldToolkit.WorldDebugger
 
                         if (shader.name.StartsWith(".poiyomi") || shader.name.StartsWith("poiyomi") || shader.name.StartsWith("arktoon") || shader.name.StartsWith("Cubedparadox") || shader.name.StartsWith("Silent's Cel Shading") || shader.name.StartsWith("Xiexe"))
                             badShaders++;
-
-                        //TODO: Investigate whether other shaders also turn pink ingame
-                        //if (shader.name == "Legacy Shaders/Diffuse")
-                        //{
-                        //    if (Application.platform == RuntimePlatform.WindowsEditor)
-                        //    {
-                        //        brokenShadersGroup.addSingleMessage(new InvidualMessage(material.name, shader.name).setAssetPath(AssetDatabase.GetAssetPath(material)).setAutoFix(ChangeShader(material, "Standard")));
-                        //    }
-                        //    else
-                        //    {
-                        //        brokenShadersGroup.addSingleMessage(new InvidualMessage(material.name, shader.name).setAssetPath(AssetDatabase.GetAssetPath(material)));
-                        //    }
-                        //}
 
                         for (int i = 0; i < ShaderUtil.GetPropertyCount(shader); i++)
                         {
