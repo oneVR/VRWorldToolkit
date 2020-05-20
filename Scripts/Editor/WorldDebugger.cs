@@ -1444,10 +1444,13 @@ namespace VRCWorldToolkit.WorldDebugger
                                 ModelImporter modelImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(_sharedMesh)) as ModelImporter;
                                 if (!importers.Contains(modelImporter))
                                 {
-                                    if (!modelImporter.generateSecondaryUV && _sharedMesh.uv2.Length == 0)
+                                    if (modelImporter != null)
                                     {
-                                        importers.Add(modelImporter);
-                                        meshName.Add(_sharedMesh.name);
+                                        if (!modelImporter.generateSecondaryUV && _sharedMesh.uv2.Length == 0)
+                                        {
+                                            importers.Add(modelImporter);
+                                            meshName.Add(_sharedMesh.name);
+                                        }
                                     }
                                 }
                             }
