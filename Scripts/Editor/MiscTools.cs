@@ -120,54 +120,6 @@ namespace VRCWorldToolkit
             return (DestroyCube != null);
         }
 
-        [MenuItem("VRWorld Toolkit/Post Processing/Setup Post Processing")]
-        private static void PostProcessingSetup()
-        {
-#if UNITY_POST_PROCESSING_STACK_V2
-            VRC_SceneDescriptor[] descriptors = FindObjectsOfType(typeof(VRC_SceneDescriptor)) as VRC_SceneDescriptor[];
-            if (descriptors.Length == 0)
-            {
-                EditorUtility.DisplayDialog("Scene descriptor missing", "You haven't added a scene descriptor yet, you can add one by dragging in the VRCWorld prefab.", "OK");
-            } else
-            {
-                WTPostProcessing.Setup(descriptors[0]);
-            }
-#endif
-        }
-
-        [MenuItem("VRWorld Toolkit/Post Processing/Setup Post Processing", true)]
-        private static bool PostProcessingSetupValidation()
-        {
-#if UNITY_POST_PROCESSING_STACK_V2
-            return true;
-#else
-            return false;
-#endif
-        }
-
-        [MenuItem("VRWorld Toolkit/Post Processing/Import Post Processing")]
-        private static void PostProcessingInstall()
-        {
-            VRC_SceneDescriptor[] descriptors = FindObjectsOfType(typeof(VRC_SceneDescriptor)) as VRC_SceneDescriptor[];
-            WTPostProcessing.Install();
-        }
-
-        [MenuItem("VRWorld Toolkit/Post Processing/Import Post Processing", true)]
-        private static bool PostProcessingInstallValidation()
-        {
-#if UNITY_POST_PROCESSING_STACK_V2
-            return false;
-#else
-            return true;
-#endif
-        }
-
-        [MenuItem("VRWorld Toolkit/Post Processing/Post Processing Guide")]
-        private static void PostProcessingGuide()
-        {
-            Application.OpenURL("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Post-Processing");
-        }
-
         //Custom editor for VRCMirror for quickly setting layers correctly
         [CustomEditor(typeof(VRC_MirrorReflection), true, isFallback = false)]
         [CanEditMultipleObjects]
