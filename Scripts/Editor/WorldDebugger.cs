@@ -1256,7 +1256,7 @@ namespace VRCWorldToolkit.WorldDebugger
                 //Since the scene has baked lights complain if there's no lightprobes
                 else if (probes == null && probeCounter == 0)
                 {
-                    lighting.addMessageGroup(new MessageGroup(noLightProbes, MessageType.Info));
+                    lighting.addMessageGroup(new MessageGroup(noLightProbes, MessageType.Info).setDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/LightProbes.html"));
                 }
 
                 //Check lighting data asset size if it exists
@@ -1312,7 +1312,7 @@ namespace VRCWorldToolkit.WorldDebugger
 
             if (reflectionProbeCount == 0)
             {
-                lighting.addMessageGroup(new MessageGroup(noReflectionProbes, MessageType.Tips));
+                lighting.addMessageGroup(new MessageGroup(noReflectionProbes, MessageType.Tips).setDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/class-ReflectionProbe.html"));
             }
             else if (reflectionProbesUnbaked > 0)
             {
