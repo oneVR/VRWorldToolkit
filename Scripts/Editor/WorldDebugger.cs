@@ -77,11 +77,11 @@ namespace VRCWorldToolkit.WorldDebugger
 
         class InvidualMessage
         {
-            public string variable = null;
-            public string variable2 = null;
-            public GameObject[] selectObjects = null;
-            public System.Action autoFix = null;
-            public string assetPath = null;
+            public string variable;
+            public string variable2;
+            public GameObject[] selectObjects;
+            public System.Action autoFix;
+            public string assetPath;
 
             public InvidualMessage(string variable)
             {
@@ -140,6 +140,8 @@ namespace VRCWorldToolkit.WorldDebugger
             public string combinedMessage;
             public MessageType messageType;
 
+            public string documentation;
+
             public System.Action groupAutoFix;
 
             public List<InvidualMessage> messageList = new List<InvidualMessage>();
@@ -160,6 +162,12 @@ namespace VRCWorldToolkit.WorldDebugger
             public MessageGroup setGroupAutoFix(System.Action groupAutoFix)
             {
                 this.groupAutoFix = groupAutoFix;
+                return this;
+            }
+
+            public MessageGroup setDocumentation(string documentation)
+            {
+                this.documentation = documentation;
                 return this;
             }
 
@@ -229,7 +237,7 @@ namespace VRCWorldToolkit.WorldDebugger
             public bool buttons()
             {
                 bool buttons = false;
-                if (getSelectObjects().Any() || groupAutoFix != null || getActions().Any() || groupAutoFix != null)
+                if (getSelectObjects().Any() || groupAutoFix != null || getActions().Any() || groupAutoFix != null || documentation != null)
                 {
                     buttons = true;
                 }
@@ -348,10 +356,10 @@ namespace VRCWorldToolkit.WorldDebugger
 
                         foreach (var messageGroup in group.messageGroups)
                         {
-                            if (messageGroup.messageList.Count > 0)
-                            {
-                                bool hasButtons = messageGroup.buttons();
+                            bool hasButtons = messageGroup.buttons();
 
+                            if (messageGroup.messageList.Count > 0 && messageGroup.documentation == null)
+                            {
                                 if (combineMessages && messageGroup.combinedMessage != null && messageGroup.messageList.Count != 1)
                                 {
                                     EditorGUILayout.BeginHorizontal();
@@ -456,7 +464,48 @@ namespace VRCWorldToolkit.WorldDebugger
                             }
                             else
                             {
-                                DrawMessage(messageGroup.message, messageGroup.messageType);
+                                if (hasButtons)
+                                {
+                                    EditorGUILayout.BeginHorizontal();
+
+                                    GUIContent Box = new GUIContent(messageGroup.message, GetDebuggerIcon(messageGroup.messageType));
+                                    GUILayout.Box(Box, boxStyle, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
+
+                                    EditorGUILayout.BeginVertical();
+
+                                    EditorGUI.BeginDisabledGroup(messageGroup.documentation == null);
+
+                                    if (GUILayout.Button("Info", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
+                                    {
+                                        if (messageGroup.documentation != null)
+                                        {
+                                            Application.OpenURL(messageGroup.documentation);
+                                        }
+                                    }
+
+                                    EditorGUI.EndDisabledGroup();
+
+                                    EditorGUI.BeginDisabledGroup(messageGroup.groupAutoFix == null);
+
+                                    if (GUILayout.Button("Auto Fix", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
+                                    {
+                                        if (messageGroup.groupAutoFix != null)
+                                        {
+                                            messageGroup.groupAutoFix();
+                                            recheck = true;
+                                        }
+                                    }
+
+                                    EditorGUI.EndDisabledGroup();
+
+                                    EditorGUILayout.EndVertical();
+
+                                    EditorGUILayout.EndHorizontal();
+                                }
+                                else
+                                {
+                                    DrawMessage(messageGroup.message, messageGroup.messageType);
+                                }
                             }
                         }
                     }
@@ -957,7 +1006,6 @@ namespace VRCWorldToolkit.WorldDebugger
             {
                 foreach (var trigger in trigger_script.Triggers)
                 {
-
                     if (trigger.TriggerType == VRC_Trigger.TriggerType.OnEnterTrigger || trigger.TriggerType == VRC_Trigger.TriggerType.OnExitTrigger || trigger.TriggerType == VRC_Trigger.TriggerType.OnEnterCollider || trigger.TriggerType == VRC_Trigger.TriggerType.OnExitCollider)
                     {
                         if (trigger_script.gameObject.GetComponent<Collider>())
