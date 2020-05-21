@@ -988,7 +988,7 @@ namespace VRCWorldToolkit.WorldDebugger
                 }
             }
 
-#if !UDON
+#if VRC_SDK_VRCSDK2
             //Check if the world has playermods defined
             VRC_PlayerMods[] playermods = FindObjectsOfType(typeof(VRC_PlayerMods)) as VRC_PlayerMods[];
             if (playermods.Length == 0)
