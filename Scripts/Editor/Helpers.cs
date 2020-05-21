@@ -1,14 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
-using VRC.SDKBase;
-using UnityEditor.PackageManager;
-using UnityEditor.PackageManager.Requests;
 using UnityEngine;
-#if UNITY_POST_PROCESSING_STACK_V2
-using UnityEngine.Rendering.PostProcessing;
-using System.IO;
-#endif
 
 namespace VRCWorldToolkit
 {
