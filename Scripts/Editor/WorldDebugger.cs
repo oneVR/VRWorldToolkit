@@ -1557,10 +1557,6 @@ namespace VRCWorldToolkit.WorldDebugger
             }
         }
 
-
-
-
-
         MessageGroupsList masterList;
 
         void Awake()
