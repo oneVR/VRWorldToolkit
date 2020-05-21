@@ -48,5 +48,19 @@ namespace VRCWorldToolkit
             }
             return text;
         }
+
+        public static string GetAllLayersFromMask(LayerMask layerMask)
+        {
+            List<string> layers = new List<string>();
+            for (int i = 0; i < 32; i++)
+            {
+                if (layerMask == (layerMask | (1 << i)))
+                {
+                    layers.Add(LayerMask.LayerToName(i));
+                }
+            }
+            return String.Join(", ", layers.ToArray());
+        }
+
     }
 }
