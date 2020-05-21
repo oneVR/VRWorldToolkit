@@ -817,6 +817,7 @@ namespace VRCWorldToolkit.WorldDebugger
         private readonly string volumeBlendingLayerNotSet = "You don't have a Volume Blending Layer set in your Post Process Layer, so post processing won't work. Using the Water layer is recommended.";
         private readonly string postProcessingVolumeNotGlobalNoCollider = "The Post Processing Volume \"%variable%\" isn't marked as Global and doesn't have a collider. It won't affect the camera without one of these set on it.";
         private readonly string noProfileSet = "You don't have a profile set in the Post Processing Volume %variable%";
+        private readonly string volumeOnWrongLayer = "Your Post Processing Volume \"%variable%\" is not on one of the layers set in your cameras Post Processing Layer setting. (Currently: %variable2%)";
         private readonly string dontUseNoneForTonemapping = "Use either Neutral or ACES for Color Grading tonemapping, using None is the same as not using Color Grading.";
         private readonly string tooHighBloomIntensity = "Don't raise the Bloom intensity too high! You should use a low Bloom intensity, between 0.01 to 0.3.";
         private readonly string tooHighBloomThreshold = "You should avoid having your Bloom threshold set high. It might cause unexpected problems with avatars. Ideally you should keep it at 0, but always below 1.0.";
@@ -1332,8 +1333,15 @@ namespace VRCWorldToolkit.WorldDebugger
                         {
                             postProcessing.addMessageGroup(new MessageGroup(volumeBlendingLayerNotSet, MessageType.Error).addSingleMessage(new InvidualMessage(sceneDescriptor.ReferenceCamera.gameObject)));
                         }
+
                         foreach (PostProcessVolume postprocess_volume in PostProcessVolumes)
                         {
+                            //Check if the layer matches the cameras post processing layer
+                            if (postprocess_layer.volumeLayer != (postprocess_layer.volumeLayer | (1 << postprocess_volume.gameObject.layer)))
+                            {
+                                postProcessing.addMessageGroup(new MessageGroup(volumeOnWrongLayer, MessageType.Error).addSingleMessage(new InvidualMessage(postprocess_volume.gameObject.name, Helper.GetAllLayersFromMask(postprocess_layer.volumeLayer)).setSelectObject(postprocess_volume.gameObject)));
+                            }
+
                             //Check if the volume has a profile set
                             if (!postprocess_volume.profile && !postprocess_volume.sharedProfile)
                             {
