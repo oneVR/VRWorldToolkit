@@ -62,5 +62,20 @@ namespace VRCWorldToolkit
             return String.Join(", ", layers.ToArray());
         }
 
+        public static string FormatTime(System.TimeSpan t)
+        {
+            return t.Days.ToString() + " days " + t.Hours.ToString() + " hours " + t.Minutes.ToString() + " minutes " + t.Seconds.ToString() + " seconds ago";
+        }
+
+        public static string FormatSize(ulong size)
+        {
+            if (size < 1024)
+                return size + " B";
+            if (size < 1024 * 1024)
+                return (size / 1024.00).ToString("F2") + " KB";
+            if (size < 1024 * 1024 * 1024)
+                return (size / (1024.0 * 1024.0)).ToString("F2") + " MB";
+            return (size / (1024.0 * 1024.0 * 1024.0)).ToString("F2") + " GB";
+        }
     }
 }

@@ -1557,21 +1557,9 @@ namespace VRCWorldToolkit.WorldDebugger
             }
         }
 
-        string FormatTime(System.TimeSpan t)
-        {
-            return t.Days.ToString() + " days " + t.Hours.ToString() + " hours " + t.Minutes.ToString() + " minutes " + t.Seconds.ToString() + " seconds ago";
-        }
 
-        string FormatSize(ulong size)
-        {
-            if (size < 1024)
-                return size + " B";
-            if (size < 1024 * 1024)
-                return (size / 1024.00).ToString("F2") + " KB";
-            if (size < 1024 * 1024 * 1024)
-                return (size / (1024.0 * 1024.0)).ToString("F2") + " MB";
-            return (size / (1024.0 * 1024.0 * 1024.0)).ToString("F2") + " GB";
-        }
+
+
 
         MessageGroupsList masterList;
 
@@ -1607,9 +1595,9 @@ namespace VRCWorldToolkit.WorldDebugger
 
             if (buildReport != null)
             {
-                GUILayout.Label("<b>Last build size:</b> " + FormatSize(buildReport.summary.totalSize), style);
+                GUILayout.Label("<b>Last build size:</b> " + Helper.FormatSize(buildReport.summary.totalSize), style);
 
-                GUILayout.Label("<b>Last build was done:</b> " + FormatTime(timeNow.Subtract(buildReport.summary.buildEndedAt)), style);
+                GUILayout.Label("<b>Last build was done:</b> " + Helper.FormatTime(timeNow.Subtract(buildReport.summary.buildEndedAt)), style);
 
                 GUILayout.Label("<b>Errors last build:</b> " + buildReport.summary.totalErrors.ToString(), style);
 
