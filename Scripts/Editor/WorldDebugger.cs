@@ -1482,6 +1482,9 @@ namespace VRCWorldToolkit.WorldDebugger
 
             foreach (GameObject gameObject in Resources.FindObjectsOfTypeAll(typeof(GameObject)))
             {
+                if (EditorUtility.IsPersistent(gameObject.transform.root.gameObject) && !(gameObject.hideFlags == HideFlags.NotEditable || gameObject.hideFlags == HideFlags.HideAndDontSave))
+                    continue;
+
                 if (gameObject.GetComponent<Renderer>())
                 {
                     // If baked lighting in the scene check for lightmap uvs
