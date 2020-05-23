@@ -1,28 +1,30 @@
-﻿using UnityEngine;
-using UnityEditor;
+﻿using UnityEditor;
 
-public static class TagHelper
+namespace VRWorldToolkit
 {
-    public static void AddTag(string tag)
+    public static class TagHelper
     {
-        UnityEngine.Object[] asset = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset");
-        if ((asset != null) && (asset.Length > 0))
+        public static void AddTag(string tag)
         {
-            SerializedObject so = new SerializedObject(asset[0]);
-            SerializedProperty tags = so.FindProperty("tags");
-
-            for (int i = 0; i < tags.arraySize; ++i)
+            UnityEngine.Object[] asset = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset");
+            if ((asset != null) && (asset.Length > 0))
             {
-                if (tags.GetArrayElementAtIndex(i).stringValue == tag)
-                {
-                    return;
-                }
-            }
+                SerializedObject so = new SerializedObject(asset[0]);
+                SerializedProperty tags = so.FindProperty("tags");
 
-            tags.InsertArrayElementAtIndex(tags.arraySize);
-            tags.GetArrayElementAtIndex(tags.arraySize - 1).stringValue = tag;
-            so.ApplyModifiedProperties();
-            so.Update();
+                for (int i = 0; i < tags.arraySize; ++i)
+                {
+                    if (tags.GetArrayElementAtIndex(i).stringValue == tag)
+                    {
+                        return;
+                    }
+                }
+
+                tags.InsertArrayElementAtIndex(tags.arraySize);
+                tags.GetArrayElementAtIndex(tags.arraySize - 1).stringValue = tag;
+                so.ApplyModifiedProperties();
+                so.Update();
+            }
         }
     }
 }
