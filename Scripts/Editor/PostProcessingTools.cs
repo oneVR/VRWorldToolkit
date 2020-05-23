@@ -3,7 +3,9 @@ using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
+#if UNITY_POST_PROCESSING_STACK_V2
 using UnityEngine.Rendering.PostProcessing;
+#endif
 #if VRC_SDK_VRCSDK3
 using VRC.SDKBase;
 using System.Reflection;
@@ -67,6 +69,7 @@ namespace VRWorldToolkit
 
         public static void SetupBasicPostProcessing(VRC_SceneDescriptor descriptor)
         {
+#if UNITY_POST_PROCESSING_STACK_V2
             if (!UpdateLayers.AreLayersSetup())
             {
                 EditorUtility.DisplayDialog("Layers Missing", "Start by setting up your layers in the VRCSDK builder tab", "OK");
@@ -114,6 +117,7 @@ namespace VRWorldToolkit
                     volume.gameObject.layer = LayerMask.NameToLayer("Water");
                 }
             }
+#endif
         }
 
         static AddRequest Request;
