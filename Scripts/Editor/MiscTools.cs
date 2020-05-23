@@ -3,7 +3,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using VRC.SDKBase;
 
-namespace VRCWorldToolkit
+namespace VRWorldToolkit
 {
     public class MiscTools : Editor
     {

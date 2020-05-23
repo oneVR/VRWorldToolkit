@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace VRCWorldToolkit
+namespace VRWorldToolkit
 {
     public class Helper
     {

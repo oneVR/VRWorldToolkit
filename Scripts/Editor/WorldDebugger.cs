@@ -7,9 +7,9 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using System.Linq;
 using VRC.Core;
+using System.Reflection;
 #if VRC_SDK_VRCSDK3
 using VRC.SDKBase;
-using System.Reflection;
 #endif
 #if VRC_SDK_VRCSDK2
 using VRCSDK2;
@@ -18,7 +18,7 @@ using VRCSDK2;
 using UnityEngine.Rendering.PostProcessing;
 #endif
 
-namespace VRCWorldToolkit.WorldDebugger
+namespace VRWorldToolkit.WorldDebugger
 {
     public class WorldDebugger : EditorWindow
     {

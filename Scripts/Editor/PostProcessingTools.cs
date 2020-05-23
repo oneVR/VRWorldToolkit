@@ -12,7 +12,7 @@ using System.Reflection;
 using VRCSDK2;
 #endif
 
-namespace VRCWorldToolkit
+namespace VRWorldToolkit
 {
     public class PostProcessingTools : MonoBehaviour
     {
