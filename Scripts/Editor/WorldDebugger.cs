@@ -831,6 +831,7 @@ namespace VRWorldToolkit.WorldDebugger
         private readonly string combinedTriggerTriggerWrongLayer = "You have %variable% OnEnterTrigger or OnExitTrigger Triggers that are not on the MirrorReflection layer. This can stop raycasts from working properly.";
         private readonly string mirrorOnByDefault = "Your mirror %variable% is on by default. This is a very bad practice and you should disable any mirrors in your world by default.";
         private readonly string combinedMirrorsOnByDefault = "You have %count% mirrors on by default. This is a very bad practice and you should disable any mirrors in your world by default.";
+        private readonly string mirrorWithDefaultLayers = "Your mirror %variable% has the default reflection layers set. Only including the layers you need in the mirror will save a lot of frames.";
         private readonly string bakedOcclusionCulling = "You currently have baked Occlusion Culling.";
         private readonly string noOcclusionCulling = "You haven't baked Occlusion Culling yet. Occlusion culling gives you a lot more performance in your world, especially in larger worlds that have multiple rooms/areas.";
         private readonly string activeCameraOutputtingToRenderTexture = "Your scene has an active camera (%variable%) outputting to a render texture. This will affect performance negatively by causing more drawcalls to happen. Ideally you would only have it enabled when needed.";
@@ -1513,6 +1514,15 @@ namespace VRWorldToolkit.WorldDebugger
                                     }
                                 }
                             }
+                        }
+                    }
+
+                    if (gameObject.GetComponent<VRC_MirrorReflection>())
+                    {
+                        LayerMask mirrorMask = gameObject.GetComponent<VRC_MirrorReflection>().m_ReflectLayers;
+                        if (mirrorMask.value == -1025)
+                        {
+                            optimization.addMessageGroup(new MessageGroup(mirrorWithDefaultLayers, MessageType.Tips).addSingleMessage(new InvidualMessage(gameObject.name).setSelectObject(gameObject)));
                         }
                     }
 
