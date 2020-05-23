@@ -120,37 +120,6 @@ namespace VRWorldToolkit
             return (DestroyCube != null);
         }
 
-        //Custom editor for VRCMirror for quickly setting layers correctly
-        [CustomEditor(typeof(VRC_MirrorReflection), true, isFallback = false)]
-        [CanEditMultipleObjects]
-        public class CustomMirrorInspector : Editor
-        {
-            public override void OnInspectorGUI()
-            {
-                DrawDefaultInspector();
-
-                EditorGUILayout.LabelField("Quick set layers:");
-
-                EditorGUILayout.BeginHorizontal();
-                if (GUILayout.Button("Show only players"))
-                {
-                    foreach (GameObject mirror in Selection.objects)
-                    {
-                        mirror.GetComponent<VRC_MirrorReflection>().m_ReflectLayers.value = 262656;
-                    }
-                }
-
-                if (GUILayout.Button("Show players/world"))
-                {
-                    foreach (GameObject mirror in Selection.objects)
-                    {
-                        mirror.GetComponent<VRC_MirrorReflection>().m_ReflectLayers.value = 262657;
-                    }
-                }
-                EditorGUILayout.EndHorizontal();
-            }
-        }
-
         [MenuItem("VRWorld Toolkit/Useful Links/VRCPrefabs Database")]
         private static void VRCPrefabsLink()
         {
