@@ -62,6 +62,11 @@ namespace VRWorldToolkit
             return String.Join(", ", layers.ToArray());
         }
 
+        public static bool LayerIncludedInMask(int layer, LayerMask layermask)
+        {
+            return layermask == (layermask | (1 << layer));
+        }
+
         public static string FormatTime(System.TimeSpan t)
         {
             return t.Days.ToString() + " days " + t.Hours.ToString() + " hours " + t.Minutes.ToString() + " minutes " + t.Seconds.ToString() + " seconds ago";
