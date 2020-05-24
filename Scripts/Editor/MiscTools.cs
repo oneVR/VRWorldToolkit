@@ -98,7 +98,7 @@ namespace VRWorldToolkit
         [MenuItem("VRWorld Toolkit/Disable On Build/Disable Objects", true)]
         private static bool DisableObjectsValidate()
         {
-            return (DestroyCube != null);
+            return TagHelper.TagExists("DisableOnBuild");
         }
 
         [MenuItem("VRWorld Toolkit/Disable On Build/Enable Objects", false, -100)]
@@ -117,7 +117,7 @@ namespace VRWorldToolkit
         [MenuItem("VRWorld Toolkit/Disable On Build/Enable Objects", true)]
         private static bool EnableObjectsLoopValidate()
         {
-            return (DestroyCube != null);
+            return TagHelper.TagExists("DisableOnBuild");
         }
 
         [MenuItem("VRWorld Toolkit/Useful Links/VRCPrefabs Database")]
