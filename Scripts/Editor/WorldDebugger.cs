@@ -831,7 +831,8 @@ namespace VRWorldToolkit.WorldDebugger
         private readonly string combinedTriggerTriggerWrongLayer = "You have %count% OnEnterTrigger or OnExitTrigger Triggers that are not on the MirrorReflection layer. This can stop raycasts from working properly.";
         private readonly string mirrorOnByDefault = "Your mirror %variable% is on by default. This is a very bad practice and you should disable any mirrors in your world by default.";
         private readonly string combinedMirrorsOnByDefault = "You have %count% mirrors on by default. This is a very bad practice and you should disable any mirrors in your world by default.";
-        private readonly string mirrorWithDefaultLayers = "Your mirror %variable% has the default reflection layers set. Only including the layers you need in the mirror will save a lot of frames.";
+        private readonly string mirrorWithDefaultLayers = "Your mirror %variable% has the default reflection layers set. Only having the layers you need enabled in mirrors can save a lot of frames especially in populated instances.";
+        private readonly string combinedMirrorWithDefaultLayers = "You have %count% mirrors that have the default reflection layers set. Only having the layers you need enabled in mirrors can save a lot of frames especially in populated instances.";
         private readonly string bakedOcclusionCulling = "You currently have baked Occlusion Culling.";
         private readonly string noOcclusionCulling = "You haven't baked Occlusion Culling yet. Occlusion culling gives you a lot more performance in your world, especially in larger worlds that have multiple rooms/areas.";
         private readonly string activeCameraOutputtingToRenderTexture = "Your scene has an active camera (%variable%) outputting to a render texture. This will affect performance negatively by causing more drawcalls to happen. Ideally you would only have it enabled when needed.";
@@ -1481,6 +1482,8 @@ namespace VRWorldToolkit.WorldDebugger
 
             List<Material> missingShaders = new List<Material>();
 
+            MessageGroup mirrorsDefaultLayers = new MessageGroup(mirrorWithDefaultLayers, combinedMirrorWithDefaultLayers, MessageType.Tips);
+
             foreach (GameObject gameObject in Resources.FindObjectsOfTypeAll(typeof(GameObject)))
             {
                 if (EditorUtility.IsPersistent(gameObject.transform.root.gameObject) && !(gameObject.hideFlags == HideFlags.NotEditable || gameObject.hideFlags == HideFlags.HideAndDontSave))
@@ -1522,7 +1525,7 @@ namespace VRWorldToolkit.WorldDebugger
                         LayerMask mirrorMask = gameObject.GetComponent<VRC_MirrorReflection>().m_ReflectLayers;
                         if (mirrorMask.value == -1025)
                         {
-                            optimization.addMessageGroup(new MessageGroup(mirrorWithDefaultLayers, MessageType.Tips).addSingleMessage(new InvidualMessage(gameObject.name).setSelectObject(gameObject)));
+                            mirrorsDefaultLayers.addSingleMessage(new InvidualMessage(gameObject.name).setSelectObject(gameObject));
                         }
                     }
 
@@ -1576,6 +1579,11 @@ namespace VRWorldToolkit.WorldDebugger
                         general.addMessageGroup(brokenShadersGroup);
                     }
                 }
+            }
+
+            if (mirrorsDefaultLayers.messageList.Count > 0)
+            {
+                optimization.addMessageGroup(mirrorsDefaultLayers);
             }
 
             //If more than 10% of shaders used in scene are toon shaders to leave room for people using them for avatar displays
