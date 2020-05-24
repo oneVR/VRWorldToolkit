@@ -828,7 +828,7 @@ namespace VRWorldToolkit.WorldDebugger
         private readonly string triggerTriggerNoCollider = "You have an OnEnterTrigger or OnExitTrigger Trigger \"%variable%\" that doesn't have a collider on it.";
         private readonly string colliderTriggerNoCollider = "You have an OnEnterCollider or OnExitCollider Trigger \"%variable%\" that doesn't have a collider on it.";
         private readonly string triggerTriggerWrongLayer = "You have an OnEnterTrigger or OnExitTrigger Trigger (%variable%) that is not on the MirrorReflection layer. This can stop raycasts from working properly.";
-        private readonly string combinedTriggerTriggerWrongLayer = "You have %variable% OnEnterTrigger or OnExitTrigger Triggers that are not on the MirrorReflection layer. This can stop raycasts from working properly.";
+        private readonly string combinedTriggerTriggerWrongLayer = "You have %count% OnEnterTrigger or OnExitTrigger Triggers that are not on the MirrorReflection layer. This can stop raycasts from working properly.";
         private readonly string mirrorOnByDefault = "Your mirror %variable% is on by default. This is a very bad practice and you should disable any mirrors in your world by default.";
         private readonly string combinedMirrorsOnByDefault = "You have %count% mirrors on by default. This is a very bad practice and you should disable any mirrors in your world by default.";
         private readonly string mirrorWithDefaultLayers = "Your mirror %variable% has the default reflection layers set. Only including the layers you need in the mirror will save a lot of frames.";
