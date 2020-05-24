@@ -620,7 +620,7 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
-        System.Action SetObjectLayer(string layer, GameObject[] objs)
+        System.Action SetObjectLayer(GameObject[] objs, string layer)
         {
             return () =>
             {
@@ -1047,7 +1047,7 @@ namespace VRWorldToolkit.WorldDebugger
                 {
                     triggerWrongLayerGroup.addSingleMessage(new InvidualMessage(item.name).setSelectObject(item.gameObject).setAutoFix(SetObjectLayer(item.gameObject, "MirrorReflection")));
                 }
-                general.addMessageGroup(triggerWrongLayerGroup);
+                general.addMessageGroup(triggerWrongLayerGroup.setGroupAutoFix(SetObjectLayer(triggerWrongLayerGroup.getSelectObjects(), "MirrorReflection")));
             }
 #endif
 
