@@ -1114,7 +1114,7 @@ namespace VRWorldToolkit.WorldDebugger
 
             if (RenderSettings.ambientMode.Equals(AmbientMode.Flat))
             {
-                lighting.addMessageGroup(new MessageGroup(singleColorEnviromentLighting, MessageType.Info));
+                lighting.addMessageGroup(new MessageGroup(singleColorEnviromentLighting, MessageType.Tips));
             }
 
             if ((Helper.GetBrightness(RenderSettings.ambientLight) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Flat)) || (Helper.GetBrightness(RenderSettings.ambientSkyColor) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Trilight)) || (Helper.GetBrightness(RenderSettings.ambientEquatorColor) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Trilight)) || (Helper.GetBrightness(RenderSettings.ambientGroundColor) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Trilight)))
