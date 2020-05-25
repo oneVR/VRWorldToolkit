@@ -1487,6 +1487,8 @@ namespace VRWorldToolkit.WorldDebugger
 
             List<Material> missingShaders = new List<Material>();
 
+            List<Material> checkedMaterials = new List<Material>();
+
             MessageGroup mirrorsDefaultLayers = new MessageGroup(mirrorWithDefaultLayers, combinedMirrorWithDefaultLayers, MessageType.Tips);
 
             foreach (GameObject gameObject in Resources.FindObjectsOfTypeAll(typeof(GameObject)))
@@ -1537,10 +1539,6 @@ namespace VRWorldToolkit.WorldDebugger
                     // Check materials for problems
                     Renderer meshRenderer = gameObject.GetComponent<Renderer>();
 
-                    MessageGroup brokenShadersGroup = new MessageGroup(brokenShader, combinedBrokenShader, MessageType.Error);
-
-                    List<Material> checkedMaterials = new List<Material>();
-
                     foreach (var material in meshRenderer.sharedMaterials)
                     {
                         if (material == null || checkedMaterials.Contains(material))
@@ -1560,7 +1558,7 @@ namespace VRWorldToolkit.WorldDebugger
                             if (ShaderUtil.GetPropertyType(shader, i) == ShaderUtil.ShaderPropertyType.TexEnv)
                             {
                                 Texture texture = material.GetTexture(ShaderUtil.GetPropertyName(shader, i));
-                                if (AssetDatabase.GetAssetPath(texture) != "")
+                                if (AssetDatabase.GetAssetPath(texture) != "" && !unCrunchedTextures.Contains(texture))
                                 {
                                     TextureImporter textureImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(texture)) as TextureImporter;
                                     if (textureImporter != null)
@@ -1578,11 +1576,6 @@ namespace VRWorldToolkit.WorldDebugger
                             }
                         }
                     }
-
-                    if (brokenShadersGroup.messageList.Count > 0)
-                    {
-                        general.addMessageGroup(brokenShadersGroup);
-                    }
                 }
             }
 
@@ -1592,18 +1585,23 @@ namespace VRWorldToolkit.WorldDebugger
             }
 
             //If more than 10% of shaders used in scene are toon shaders to leave room for people using them for avatar displays
-            if (sceneDescriptor.DynamicMaterials.Count > 0)
-                if ((badShaders / sceneDescriptor.DynamicMaterials.Count * 100) > 10)
+            if (checkedMaterials.Count > 0)
+            {
+                if ((badShaders / checkedMaterials.Count * 100) > 10)
                 {
                     optimization.addMessageGroup(new MessageGroup(noToonShaders, MessageType.Warning));
                 }
+            }
 
             //Suggest to crunch textures if there are any uncrunched textures found
             if (textureCount > 0)
-                if ((unCrunchedTextures.Count / textureCount * 100) > 20)
+            {
+                int percent = (int)((float)unCrunchedTextures.Count / (float)textureCount * 100f);
+                if (percent > 20)
                 {
-                    optimization.addMessageGroup(new MessageGroup(nonCrunchedTextures, MessageType.Tips).addSingleMessage(new InvidualMessage((unCrunchedTextures.Count / textureCount * 100).ToString())));
+                    optimization.addMessageGroup(new MessageGroup(nonCrunchedTextures, MessageType.Tips).addSingleMessage(new InvidualMessage(percent.ToString())));
                 }
+            }
 
 
             var modelsCount = importers.Count;
