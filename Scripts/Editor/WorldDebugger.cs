@@ -183,7 +183,7 @@ namespace VRWorldToolkit.WorldDebugger
                 return this;
             }
 
-            public int getObjectCount()
+            public int getTotalCount()
             {
                 int count = 0;
 
@@ -203,6 +203,11 @@ namespace VRWorldToolkit.WorldDebugger
                             }
                         }
                     }
+                }
+
+                if (count == 0)
+                {
+                    return messageList.Count;
                 }
 
                 return count;
@@ -366,7 +371,7 @@ namespace VRWorldToolkit.WorldDebugger
 
                                     string finalMessage = messageGroup.combinedMessage;
 
-                                    finalMessage = finalMessage.Replace(countVariable, messageGroup.getObjectCount().ToString());
+                                    finalMessage = finalMessage.Replace(countVariable, messageGroup.getTotalCount().ToString());
 
                                     if (hasButtons)
                                     {
