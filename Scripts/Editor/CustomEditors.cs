@@ -67,9 +67,10 @@ namespace VRWorldToolkit
                 {
                     GUIStyle style = new GUIStyle(GUI.skin.label);
                     style.richText = true;
+                    style.wordWrap = true;
 
                     GUILayout.Label("<b>Player:</b>\nThis layer is used for other players than yourself", style);
-                    GUILayout.Label("<b>PlayerLocal:</b>\nThis layer is only used for first-person view\nand should not be enabled in mirrors", style);
+                    GUILayout.Label("<b>PlayerLocal:</b>\nThis layer is only used for first-person view and should not be enabled in mirrors", style);
                     GUILayout.Label("<b>MirrorReflection:</b>\nThis layer is used for your own mirror version", style);
                 }
             }
