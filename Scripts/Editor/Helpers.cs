@@ -82,5 +82,14 @@ namespace VRWorldToolkit
                 return (size / (1024.0 * 1024.0)).ToString("F2") + " MB";
             return (size / (1024.0 * 1024.0 * 1024.0)).ToString("F2") + " GB";
         }
+
+        public static RuntimePlatform BuildPlatform()
+        {
+#if UNITY_ANDROID
+            return RuntimePlatform.Android;
+#else
+            return RuntimePlatform.WindowsPlayer;
+#endif
+        }
     }
 }
