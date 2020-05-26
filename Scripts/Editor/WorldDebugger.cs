@@ -362,7 +362,7 @@ namespace VRWorldToolkit.WorldDebugger
                         {
                             bool hasButtons = messageGroup.buttons();
 
-                            if (messageGroup.messageList.Count > 0 && messageGroup.documentation == null)
+                            if (messageGroup.messageList.Count > 0)
                             {
                                 if (combineMessages && messageGroup.combinedMessage != null && messageGroup.messageList.Count != 1)
                                 {
@@ -379,11 +379,27 @@ namespace VRWorldToolkit.WorldDebugger
 
                                         EditorGUILayout.BeginVertical();
 
-                                        EditorGUI.BeginDisabledGroup(messageGroup.getSelectObjects().Length == 0);
 
-                                        if (GUILayout.Button("Select", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
+                                        if (messageGroup.documentation != null)
                                         {
-                                            Selection.objects = messageGroup.getSelectObjects();
+                                            if (GUILayout.Button("Info", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
+                                            {
+                                                if (messageGroup.documentation != null)
+                                                {
+                                                    Application.OpenURL(messageGroup.documentation);
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            EditorGUI.BeginDisabledGroup(messageGroup.getSelectObjects().Length == 0);
+
+                                            if (GUILayout.Button("Select", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
+                                            {
+                                                Selection.objects = messageGroup.getSelectObjects();
+                                            }
+
+                                            EditorGUI.EndDisabledGroup();
                                         }
 
                                         EditorGUI.EndDisabledGroup();
