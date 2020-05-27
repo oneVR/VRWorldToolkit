@@ -874,7 +874,7 @@ namespace VRWorldToolkit.WorldDebugger
         private readonly string combinedNonBakedBakedLights = "Your world contains %count% baked/mixed lights that haven't been baked! Baked lights that haven't been baked yet function as realtime lights ingame.";
         private readonly string lightingDataAssetInfo = "Your lighting data asset takes up %variable% MB of your world's size. This contains your world's light probe data and realtime GI data.";
         private readonly string noLightProbes = "Your world currently has no light probes, which means your baked lights won't affect dynamic objects such as players and pickups.";
-        private readonly string lightProbeCountNotBaked = "Your world currently contains %variable% light probes, but %variable2% of them haven't been baked yet. This is sometimes \"normal\" because Unity can't bake all light probes in some cases.";
+        private readonly string lightProbeCountNotBaked = "Your world currently contains %variable% light probes, but %variable2% of them haven't been baked yet. This is sometimes normal because Unity skips over baking lightprobes that are overlapping.";
         private readonly string lightProbesRemovedNotReBaked = "You've removed some lightprobes after the last bake, bake them again to update your scenes lighting data. Currently the lighting data contains %variable% baked lightprobes and the scene has %variable2% lightprobes.";
         private readonly string lightProbeCount = "Your world currently contains %variable% baked light probes.";
         private readonly string noReflectionProbes = "Your world has no active reflection probes. Reflection probes are needed to have proper reflections on reflective materials.";
