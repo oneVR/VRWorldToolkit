@@ -710,7 +710,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Change shader?", "This operation will change the shader of the material " + material.name + " to " + shader + "?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Change shader?", "This operation will change the shader of the material " + material.name + " to " + shader + ". Do You want to continue?", "Yes", "Cancel"))
                 {
                     Shader standard = Shader.Find(shader);
                     material.shader = standard;
@@ -722,7 +722,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Change shader?", "This operation will change the shader of " + materials.Length + " materials to " + shader + "?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Change shader?", "This operation will change the shader of " + materials.Length + " materials to " + shader + ". Do You want to continue?", "Yes", "Cancel"))
                 {
                     Shader standard = Shader.Find(shader);
                     foreach (var material in materials)
