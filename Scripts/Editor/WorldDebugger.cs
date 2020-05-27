@@ -860,7 +860,7 @@ namespace VRWorldToolkit.WorldDebugger
         private readonly string noToonShaders = "You shouldn't use toon shaders for world building, as they're missing crucial things for making worlds. For world building the most recommended shader is Standard.";
         private readonly string brokenShader = "The material %variable% is using a shader %variable2% that isn't properly included with the current build of VRChat which will cause it to just appear pink in-game until the issue is fixed on VRChat's side.";
         private readonly string combinedBrokenShader = "You have %count% materials using broken shaders, these will just appear pink ingame.";
-        private readonly string nonCrunchedTextures = "%variable%% of the textures used in your scene haven't been crunch compressed. Crunch compression can greatly reduce the size of your world download. You can access crunch compression from the texture's import settings.";
+        private readonly string nonCrunchedTextures = "%variable%% of the textures used in your scene haven't been crunch compressed. Crunch compression can greatly reduce the size of your world download. It can be accessed from the textures import settings.";
         private readonly string switchToProgressive = "Your world is currently using Enlighten as your lightmapper, which is deprecated in newer versions of Unity. You should consider switching to Progressive.";
         private readonly string singleColorEnviromentLighting = "Consider changing your Enviroment Lighting to Gradient from Flat.";
         private readonly string darkEnviromentLighting = "Using dark colours for Environment Lighting can cause avatars to look weird. Only use dark Environment Lighting if your world has dark lighting.";
