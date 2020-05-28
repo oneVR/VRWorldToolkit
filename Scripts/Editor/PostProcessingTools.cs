@@ -2,6 +2,7 @@
 using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 #if UNITY_POST_PROCESSING_STACK_V2
 using UnityEngine.Rendering.PostProcessing;
@@ -115,6 +116,9 @@ namespace VRWorldToolkit
                         volume.sharedProfile = (PostProcessProfile)AssetDatabase.LoadAssetAtPath("Assets/Post Processing/SilentProfile.asset", typeof(PostProcessProfile));
                     volume.gameObject.name = "Post Processing Volume";
                     volume.gameObject.layer = LayerMask.NameToLayer("Water");
+
+                    //Mark the scene as dirty for saving
+                    EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
                 }
             }
 #endif
