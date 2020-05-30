@@ -19,7 +19,7 @@ namespace VRWorldToolkit
 {
     public class PostProcessingTools : MonoBehaviour
     {
-        [MenuItem("VRWorld Toolkit/Post Processing/Setup Post Processing")]
+        [MenuItem("VRWorld Toolkit/Post Processing/Setup Post Processing", false, -102)]
         private static void PostProcessingSetup()
         {
 #if UNITY_POST_PROCESSING_STACK_V2
@@ -45,7 +45,7 @@ namespace VRWorldToolkit
 #endif
         }
 
-        [MenuItem("VRWorld Toolkit/Post Processing/Import Post Processing")]
+        [MenuItem("VRWorld Toolkit/Post Processing/Import Post Processing", false, -101)]
         private static void PostProcessingInstall()
         {
             VRC_SceneDescriptor[] descriptors = FindObjectsOfType(typeof(VRC_SceneDescriptor)) as VRC_SceneDescriptor[];
@@ -62,7 +62,7 @@ namespace VRWorldToolkit
 #endif
         }
 
-        [MenuItem("VRWorld Toolkit/Post Processing/Post Processing Guide")]
+        [MenuItem("VRWorld Toolkit/Post Processing/Post Processing Guide", false, -100)]
         private static void PostProcessingGuide()
         {
             Application.OpenURL("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Post-Processing");

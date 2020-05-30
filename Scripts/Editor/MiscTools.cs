@@ -52,7 +52,7 @@ namespace VRWorldToolkit
             DestroyCube = GetDestroyCube(true);
         }
 
-        [MenuItem("VRWorld Toolkit/Disable On Build/Setup", false, 0)]
+        [MenuItem("VRWorld Toolkit/Disable On Build/Setup", false, -101)]
         private static void DisableOnUploadSetup()
         {
             //Create the tag if it doesn't exist yet
@@ -68,7 +68,7 @@ namespace VRWorldToolkit
             return (DestroyCube == null);
         }
 
-        [MenuItem("VRWorld Toolkit/Disable On Build/Remove", false, 1)]
+        [MenuItem("VRWorld Toolkit/Disable On Build/Remove", false, -100)]
         private static void DisableOnUploadRemove()
         {
             //Delete the cube
@@ -84,7 +84,7 @@ namespace VRWorldToolkit
             return (DestroyCube != null);
         }
 
-        [MenuItem("VRWorld Toolkit/Disable On Build/Disable Objects", false, -101)]
+        [MenuItem("VRWorld Toolkit/Disable On Build/Disable Objects", false, -10)]
         private static void DisableObjectsLoop()
         {
             //Loop trough the objects with the tag disabling them
@@ -101,7 +101,7 @@ namespace VRWorldToolkit
             return TagHelper.TagExists("DisableOnBuild");
         }
 
-        [MenuItem("VRWorld Toolkit/Disable On Build/Enable Objects", false, -100)]
+        [MenuItem("VRWorld Toolkit/Disable On Build/Enable Objects", false, -11)]
         private static void EnableObjectsLoop()
         {
             //Loop trough every game object in the scene since you can't find them with tag when disabled
@@ -119,39 +119,5 @@ namespace VRWorldToolkit
         {
             return TagHelper.TagExists("DisableOnBuild");
         }
-
-        [MenuItem("VRWorld Toolkit/Useful Links/VRCPrefabs Database")]
-        private static void VRCPrefabsLink()
-        {
-            Application.OpenURL("https://vrcprefabs.com/browse");
-        }
-
-        [MenuItem("VRWorld Toolkit/Useful Links/Unofficial VRChat Wiki (EN)")]
-        private static void UnofficialWikiEN()
-        {
-            Application.OpenURL("http://vrchat.wikidot.com/");
-        }
-
-        [MenuItem("VRWorld Toolkit/Useful Links/VRChat 技術メモ帳 (JP)")]
-        private static void UnofficialWikiJP()
-        {
-            Application.OpenURL("https://vrcworld.wiki.fc2.com/");
-        }
-
-#if UDON
-        [MenuItem("VRWorld Toolkit/Useful Links/UdonSharp")]
-        private static void UdonSharpLink()
-        {
-            Application.OpenURL("https://github.com/Merlin-san/UdonSharp/releases");
-        }
-#endif
-
-#if BAKERY_INCLUDED
-        [MenuItem("VRWorld Toolkit/Useful Links/Bakery Documentation")]
-        private static void BakeryDocumentationLink()
-        {
-            Application.OpenURL("https://geom.io/bakery/");
-        }
-#endif
     }
 }
