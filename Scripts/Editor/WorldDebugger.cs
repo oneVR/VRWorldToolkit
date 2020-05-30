@@ -107,7 +107,7 @@ namespace VRWorldToolkit.WorldDebugger
             {
                 this.autoFix = autoFix;
             }
-
+            
             public InvidualMessage setSelectObject(GameObject[] selectObjects)
             {
                 this.selectObjects = selectObjects;
