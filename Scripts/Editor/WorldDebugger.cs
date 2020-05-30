@@ -748,7 +748,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Remove overlapping light probes?", "This operation will remove any overlapping light probes found. Do You want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Remove overlapping light probes?", "This operation will remove any overlapping light probes found in your scene. Do You want to continue?", "Yes", "Cancel"))
                 {
                     foreach (var lpg in lpgs)
                     {
