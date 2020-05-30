@@ -949,6 +949,7 @@ namespace VRWorldToolkit.WorldDebugger
         private readonly string noPostProcessingImported = "You haven't imported Post Processing to your project yet.";
         private readonly string questBakedLightingWarning = "You should bake lights for content build for Quest.";
         private readonly string ambientModeSetToCustom = "Your Environment Lighting setting is broken. This will override all light probes in the scene with black ambient light. Please change it to something else.";
+        private readonly string noProblemsFoundInPP = "No problems found in your post processing setup. If post processing isn't currently working in game it's possible some imported asset is causing it not to function.";
         private readonly string bakeryLightNotSetEditorOnly = "Your Bakery light named %variable% is not set to be EditorOnly this causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
         private readonly string combinedBakeryLightNotSetEditorOnly = "You have %count% Bakery lights are not set to be EditorOnly this causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
         private readonly string bakeryLightUnityLight = "Your Bakery light named %variable% has a Unity Light component on it this won't get baked with Bakery and will keep acting as real time even if set to baked.";
@@ -1425,6 +1426,7 @@ namespace VRWorldToolkit.WorldDebugger
 #if UNITY_POST_PROCESSING_STACK_V2
             PostProcessVolume[] PostProcessVolumes = FindObjectsOfType(typeof(PostProcessVolume)) as PostProcessVolume[];
             bool postProcessLayerExists = false;
+
             if (Camera.main == null)
             {
                 if (sceneDescriptor.ReferenceCamera)
@@ -1442,6 +1444,7 @@ namespace VRWorldToolkit.WorldDebugger
                     postProcessLayerExists = true;
                 }
             }
+
             if (!sceneDescriptor.ReferenceCamera && PostProcessVolumes.Length == 0 && !postProcessLayerExists)
             {
                 postProcessing.addMessageGroup(new MessageGroup(postProcessingImportedButNotSetup, MessageType.Info));
@@ -1555,6 +1558,11 @@ namespace VRWorldToolkit.WorldDebugger
                             }
                         }
                     }
+                }
+                
+                if (postProcessing.messageGroups.Count == 0)
+                {
+                    postProcessing.addMessageGroup(new MessageGroup(noProblemsFoundInPP, MessageType.Info));
                 }
             }
 #else
