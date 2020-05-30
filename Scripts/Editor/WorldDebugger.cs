@@ -737,9 +737,9 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Remove overlapping light probes?", "This operation will remove any overlapping light probes in the group " + lpg + ". Do You want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Remove overlapping light probes?", "This operation will remove any overlapping light probes in the group \"" + lpg.gameObject.name + "\". Do You want to continue?", "Yes", "Cancel"))
                 {
-                    lpg.probePositions = lpg.probePositions.Distinct().ToList().ToArray();
+                    lpg.probePositions = lpg.probePositions.Distinct().ToArray();
                 }
             };
         }
@@ -752,8 +752,30 @@ namespace VRWorldToolkit.WorldDebugger
                 {
                     foreach (var lpg in lpgs)
                     {
-                        lpg.probePositions = lpg.probePositions.Distinct().ToList().ToArray();
+                        lpg.probePositions = lpg.probePositions.Distinct().ToArray();
                     }
+                }
+            };
+        }
+
+        System.Action RemoveRedundantLightProbes(LightProbeGroup[] lpgs)
+        {
+            return () =>
+            {
+                if (LightmapSettings.lightProbes != null)
+                {
+                    var probes = LightmapSettings.lightProbes.positions;
+                    if (EditorUtility.DisplayDialog("Remove redundant light probes?", "This operation will attempt to remove any redundant light probes in your scene. Bake your lighting before this operation to avoid any correct light probes getting removed. Do You want to continue?", "Yes", "Cancel"))
+                    {
+                        foreach (var lpg in lpgs)
+                        {
+                            lpg.probePositions = lpg.probePositions.Distinct().Where(p => !probes.Contains(p)).ToArray();
+                        }
+                    }
+                }
+                else
+                {
+                    EditorUtility.DisplayDialog("Baked lightprobes not found!", "Bake your lighting first before attempting to remove redundant light probes.", "Ok");
                 }
             };
         }
@@ -899,9 +921,11 @@ namespace VRWorldToolkit.WorldDebugger
         private readonly string combinedNonBakedBakedLights = "Your world contains %count% baked/mixed lights that haven't been baked! Baked lights that haven't been baked yet function as realtime lights ingame.";
         private readonly string lightingDataAssetInfo = "Your lighting data asset takes up %variable% MB of your world's size. This contains your world's light probe data and realtime GI data.";
         private readonly string noLightProbes = "Your world currently has no light probes, which means your baked lights won't affect dynamic objects such as players and pickups.";
-        private readonly string lightProbeCountNotBaked = "Your world currently contains %variable% light probes, but %variable2% of them haven't been baked yet. This is usually normal because Unity skips over probes that it deems unneeded.";
+        private readonly string lightProbeCountNotBaked = "Your world currently contains %variable% light probes, but %variable2% of them haven't been baked yet.";
         private readonly string lightProbesRemovedNotReBaked = "You've removed some light probes after the last bake, bake them again to update your scenes lighting data. Currently the lighting data contains %variable% baked light probes and the scene has %variable2% light probes.";
         private readonly string lightProbeCount = "Your world currently contains %variable% baked light probes.";
+        private readonly string overlappingLightProbes = "Light Probe Group \"%variable%\" has %variable2% overlapping light probes. These can cause a slowdown in the editor and won't get baked because Unity will skip any extra overlapping probes.";
+        private readonly string combinedOverlappingLightProbes = "%count% Light Probe Groups with overlapping light probes found. These can cause a slowdown in the editor and won't get baked because Unity will skip any extra overlapping probes.";
         private readonly string noReflectionProbes = "Your world has no active reflection probes. Reflection probes are needed to have proper reflections on reflective materials.";
         private readonly string reflectionProbesSomeUnbaked = "The reflection probe named \"%variable%\" is unbaked.";
         private readonly string combinedReflectionProbesSomeUnbaked = "Your world has %count% unbaked reflection probes.";
@@ -1280,13 +1304,13 @@ namespace VRWorldToolkit.WorldDebugger
 
                 LightProbeGroup[] lightprobegroups = GameObject.FindObjectsOfType<LightProbeGroup>();
 
-                MessageGroup overlappingLightProbes = new MessageGroup("Light Probe Group %variable% has %variable2% overlapping light probes. These can cause a slowdown in the editor and won't get baked because Unity will skip any extra overlapping probes.", "%count% Light Probe Groups with overlapping light probes found. These can cause a slowdown in the editor and won't get baked because Unity will skip any extra overlapping probes.", MessageType.Info);
+                MessageGroup overlappingLightProbesGroup = new MessageGroup(overlappingLightProbes, combinedOverlappingLightProbes, MessageType.Info);
 
                 foreach (LightProbeGroup lightprobegroup in lightprobegroups)
                 {
                     if (lightprobegroup.probePositions.GroupBy(p => p).Any(g => g.Count() > 1))
                     {
-                        overlappingLightProbes.addSingleMessage(new InvidualMessage(lightprobegroup.name, (lightprobegroup.probePositions.Length - lightprobegroup.probePositions.Distinct().ToArray().Length).ToString()).setSelectObject(lightprobegroup.gameObject).setAutoFix(RemoveOverlappingLightprobes(lightprobegroup)));
+                        overlappingLightProbesGroup.addSingleMessage(new InvidualMessage(lightprobegroup.name, (lightprobegroup.probePositions.Length - lightprobegroup.probePositions.Distinct().ToArray().Length).ToString()).setSelectObject(lightprobegroup.gameObject).setAutoFix(RemoveOverlappingLightprobes(lightprobegroup)));
                     }
 
                     probeCounter += lightprobegroup.probePositions.Length;
@@ -1300,7 +1324,7 @@ namespace VRWorldToolkit.WorldDebugger
                     }
                     else
                     {
-                        if ((bakedProbes - probeCounter) < 0)
+                        if ((bakedProbes - (0.9 * probeCounter)) < 0)
                         {
                             lighting.addMessageGroup(new MessageGroup(lightProbeCountNotBaked, MessageType.Info).addSingleMessage(new InvidualMessage(probeCounter.ToString("n0"), (probeCounter - bakedProbes).ToString("n0"))));
                         }
@@ -1311,14 +1335,14 @@ namespace VRWorldToolkit.WorldDebugger
                     }
                 }
 
-                if (overlappingLightProbes.getTotalCount() > 0)
+                if (overlappingLightProbesGroup.getTotalCount() > 0)
                 {
-                    if (overlappingLightProbes.getTotalCount() > 1)
+                    if (overlappingLightProbesGroup.getTotalCount() > 1)
                     {
-                        overlappingLightProbes.setGroupAutoFix(RemoveOverlappingLightprobes(lightprobegroups));
+                        overlappingLightProbesGroup.setGroupAutoFix(RemoveOverlappingLightprobes(lightprobegroups));
                     }
 
-                    lighting.addMessageGroup(overlappingLightProbes);
+                    lighting.addMessageGroup(overlappingLightProbesGroup);
                 }
 
                 //Since the scene has baked lights complain if there's no lightprobes
