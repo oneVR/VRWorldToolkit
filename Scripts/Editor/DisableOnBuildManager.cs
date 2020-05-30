@@ -5,7 +5,7 @@ using VRC.SDKBase;
 
 namespace VRWorldToolkit
 {
-    public class MiscTools : Editor
+    public class DisableOnBuildManager : Editor
     {
         const string dummyName = "_DisableOnBuild";
         static GameObject _disableOnBuild;
