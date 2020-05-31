@@ -953,8 +953,8 @@ namespace VRWorldToolkit.WorldDebugger
         private readonly string combinedBakeryLightNotSetEditorOnly = "You have %count% Bakery lights are not set to be EditorOnly this causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
         private readonly string bakeryLightUnityLight = "Your Bakery light named %variable% has a Unity Light component on it this won't get baked with Bakery and will keep acting as real time even if set to baked.";
         private readonly string combinedBakeryLightUnityLight = "You have %count% Bakery lights that have a Unity Light component on it these will not get baked with Bakery and will keep acting as real time lights even if set to baked.";
-        private readonly string missingShaderWarning = "The material %variable% in your scene has a missing shader.";
-        private readonly string combinedMissingShaderWarning = "You have %count% materials in your scene that have missing shaders.";
+        private readonly string missingShaderWarning = "The material %variable% in your scene has a missing or broken shader.";
+        private readonly string combinedMissingShaderWarning = "You have %count% materials in your scene that have missing or broken shaders.";
         private readonly string errorPauseWarning = "You have Error Pause enabled in your console this can cause your world upload to fail by interrupting the build process.";
 
         public void CheckScene()
