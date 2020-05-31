@@ -107,7 +107,7 @@ namespace VRWorldToolkit.WorldDebugger
             {
                 this.autoFix = autoFix;
             }
-            
+
             public InvidualMessage setSelectObject(GameObject[] selectObjects)
             {
                 this.selectObjects = selectObjects;
@@ -889,7 +889,7 @@ namespace VRWorldToolkit.WorldDebugger
         private readonly string nullSpawnPoint = "You currently have a null spawn point set in your Scene Descriptor. Spawning into a null spawn point will cause you to get thrown back to your home world.";
         private readonly string colliderUnderSpawnIsTrigger = "The only collider (%variable%) under your spawn point %variable2% has been set as a trigger! Spawning into a world with nothing to stand on will cause the players to fall forever.";
         private readonly string noColliderUnderSpawn = "Your spawn point %variable% doesn't have anything underneath it. Spawning into a world with nothing to stand on will cause the players to fall forever";
-        private readonly string noPlayerMods = "Your world currently has no Player Mods. Player mods are used for adding jumping and changing walking speed.";
+        private readonly string noPlayerMods = "Your scene currently has no Player Mods. Player mods are used for adding jumping and changing walking speed.";
         private readonly string triggerTriggerNotTrigger = "You have an OnEnterTrigger or OnExitTrigger Trigger \"%variable%\", but it's Collider has not been set as Is Trigger. These Triggers need to have a Collider set to be Is Trigger to work.";
         private readonly string colliderTriggerIsTrigger = "You have an OnEnterCollider or OnExitCollider Trigger \"%variable%\" that has a Collider set to be Is Trigger. These only react if the collider on the object has not been set to be Is Trigger.";
         private readonly string triggerTriggerNoCollider = "You have an OnEnterTrigger or OnExitTrigger Trigger \"%variable%\" that doesn't have a Collider on it.";
@@ -919,10 +919,10 @@ namespace VRWorldToolkit.WorldDebugger
         private readonly string nonBakedBakedLights = "The light \"%variable%\" is set to be baked/mixed but it hasn't been baked yet! Baked lights that haven't been baked yet function as realtime lights ingame.";
         private readonly string combinedNonBakedBakedLights = "Your scene contains %count% baked/mixed lights that haven't been baked! Baked lights that haven't been baked yet function as realtime lights ingame.";
         private readonly string lightingDataAssetInfo = "Your lighting data asset takes up %variable% MB of your world's size. This contains your scene's light probe data and realtime GI data.";
-        private readonly string noLightProbes = "Your scene currently has no light probes, which means your baked lights won't affect dynamic objects such as players and pickups.";
-        private readonly string lightProbeCountNotBaked = "Your world currently contains %variable% light probes, but %variable2% of them haven't been baked yet.";
-        private readonly string lightProbesRemovedNotReBaked = "You've removed some light probes after the last bake, bake them again to update your scene's lighting data. Currently the lighting data contains %variable% baked light probes and the scene has %variable2% light probes.";
-        private readonly string lightProbeCount = "Your scene currently contains %variable% baked light probes.";
+        private readonly string noLightProbes = "The current scene scene currently has no light probes, which means your baked lights won't affect dynamic objects such as players and pickups.";
+        private readonly string lightProbeCountNotBaked = "The current scene currently contains %variable% light probes, but %variable2% of them haven't been baked yet.";
+        private readonly string lightProbesRemovedNotReBaked = "You've removed some light probes after the last bake, bake them again to update your scene's lighting data. Currently the lighting data contains %variable% baked light probes and the current scene has %variable2% light probes.";
+        private readonly string lightProbeCount = "The current scene currently contains %variable% baked light probes.";
         private readonly string overlappingLightProbes = "Light Probe Group \"%variable%\" has %variable2% overlapping light probes. These can cause a slowdown in the editor and won't get baked because Unity will skip any extra overlapping probes.";
         private readonly string combinedOverlappingLightProbes = "%count% Light Probe Groups with overlapping light probes found. These can cause a slowdown in the editor and won't get baked because Unity will skip any extra overlapping probes.";
         private readonly string noReflectionProbes = "Your scene has no active reflection probes. Reflection probes are needed to have proper reflections on reflective materials.";
@@ -1558,7 +1558,7 @@ namespace VRWorldToolkit.WorldDebugger
                         }
                     }
                 }
-                
+
                 if (postProcessing.messageGroups.Count == 0)
                 {
                     postProcessing.addMessageGroup(new MessageGroup(noProblemsFoundInPP, MessageType.Info));
