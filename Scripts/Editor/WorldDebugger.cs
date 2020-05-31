@@ -1130,7 +1130,7 @@ namespace VRWorldToolkit.WorldDebugger
             }
             else
             {
-                optimization.addMessageGroup(new MessageGroup(noOcclusionCulling, MessageType.Tips));
+                optimization.addMessageGroup(new MessageGroup(noOcclusionCulling, MessageType.Tips).setDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/occlusion-culling-getting-started.html"));
             }
 
             //Check if there's any active cameras outputting to render textures
