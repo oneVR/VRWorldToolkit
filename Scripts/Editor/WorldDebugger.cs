@@ -478,11 +478,12 @@ namespace VRWorldToolkit.WorldDebugger
 
                                     group.setExpanded(messageGroup, expanded);
 
-                                    GUIStyle boxStyleGray = new GUIStyle("HelpBox");
-                                    boxStyleGray.margin = new RectOffset(18, 4, 4, 4);
-
                                     if (expanded)
                                     {
+                                        GUIStyle boxStylePadded = new GUIStyle("HelpBox");
+                                        boxStylePadded.margin = new RectOffset(18, 4, 4, 4);
+                                        boxStylePadded.alignment = TextAnchor.MiddleLeft;
+
                                         foreach (var message in messageGroup.messageList)
                                         {
                                             EditorGUILayout.BeginHorizontal();
@@ -501,8 +502,8 @@ namespace VRWorldToolkit.WorldDebugger
 
                                             if (hasButtons)
                                             {
-                                                GUIContent Box = new GUIContent(finalInvidualMessage, GetDebuggerIcon(messageGroup.messageType));
-                                                GUILayout.Box(Box, boxStyleGray, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 121));
+                                                GUIContent Box = new GUIContent(finalInvidualMessage);
+                                                GUILayout.Box(Box, boxStylePadded, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 121));
 
                                                 EditorGUILayout.BeginVertical();
 
