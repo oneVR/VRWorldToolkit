@@ -688,6 +688,7 @@ namespace VRWorldToolkit.WorldDebugger
             window.Show();
         }
 
+        #region Actions
         System.Action SelectAsset(GameObject obj)
         {
             return () =>
@@ -998,7 +999,9 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 #endif
+        #endregion
 
+        #region Texts
         private readonly string noSceneDescriptor = "Your scene has no Scene Descriptor. Please add one yourself, or drag the VRCWorld prefab to your scene.";
         private readonly string tooManySceneDescriptors = "You have multiple Scene Descriptors, you can only have one Scene Descriptor in a scene.";
         private readonly string tooManyPipelineManagers = "Your scene has multiple Pipeline Managers in it this can break the world upload process.";
@@ -1075,6 +1078,7 @@ namespace VRWorldToolkit.WorldDebugger
         private readonly string missingShaderWarning = "The material %variable% found in your scene has a missing or broken shader.";
         private readonly string combinedMissingShaderWarning = "You have %count% materials found in your scene that have missing or broken shaders.";
         private readonly string errorPauseWarning = "You have Error Pause enabled in your console this can cause your world upload to fail by interrupting the build process.";
+        #endregion
 
         MessageCategory general;
         MessageCategory optimization;
