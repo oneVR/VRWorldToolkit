@@ -74,7 +74,7 @@ namespace VRWorldToolkit.WorldDebugger
             return _Info;
         }
 
-        class InvidualMessage
+        class SingleMessage
         {
             public string variable;
             public string variable2;
@@ -82,59 +82,60 @@ namespace VRWorldToolkit.WorldDebugger
             public System.Action autoFix;
             public string assetPath;
 
-            public InvidualMessage(string variable)
+            public SingleMessage(string variable)
             {
                 this.variable = variable;
             }
 
-            public InvidualMessage(string variable, string variable2)
+            public SingleMessage(string variable, string variable2)
             {
                 this.variable = variable;
                 this.variable2 = variable2;
             }
 
-            public InvidualMessage(GameObject[] selectObjects)
+            public SingleMessage(GameObject[] selectObjects)
             {
                 this.selectObjects = selectObjects;
             }
 
-            public InvidualMessage(GameObject selectObjects)
+            public SingleMessage(GameObject selectObjects)
             {
                 this.selectObjects = new GameObject[] { selectObjects };
             }
 
-            public InvidualMessage(System.Action autoFix)
+            public SingleMessage(System.Action autoFix)
             {
                 this.autoFix = autoFix;
             }
 
-            public InvidualMessage setSelectObject(GameObject[] selectObjects)
+            public SingleMessage setSelectObject(GameObject[] selectObjects)
             {
                 this.selectObjects = selectObjects;
                 return this;
             }
 
-            public InvidualMessage setSelectObject(GameObject selectObjects)
+            public SingleMessage setSelectObject(GameObject selectObjects)
             {
                 this.selectObjects = new GameObject[] { selectObjects };
                 return this;
             }
 
-            public InvidualMessage setAutoFix(System.Action autoFix)
+            public SingleMessage setAutoFix(System.Action autoFix)
             {
                 this.autoFix = autoFix;
                 return this;
             }
 
-            public InvidualMessage setAssetPath(string assetPath)
+            public SingleMessage setAssetPath(string assetPath)
             {
                 this.assetPath = assetPath;
                 return this;
             }
         }
 
-        class MessageGroup
+        class MessageGroup : IEquatable<MessageGroup>
         {
+            public bool showAll = false;
             public string message;
             public string combinedMessage;
             public MessageType messageType;
@@ -143,7 +144,7 @@ namespace VRWorldToolkit.WorldDebugger
 
             public System.Action groupAutoFix;
 
-            public List<InvidualMessage> messageList = new List<InvidualMessage>();
+            public List<SingleMessage> messageList = new List<SingleMessage>();
 
             public MessageGroup(string message, MessageType messageType)
             {
@@ -170,13 +171,13 @@ namespace VRWorldToolkit.WorldDebugger
                 return this;
             }
 
-            public MessageGroup addSingleMessage(InvidualMessage message)
+            public MessageGroup addSingleMessage(SingleMessage message)
             {
                 messageList.Add(message);
                 return this;
             }
 
-            public MessageGroup setMessageList(List<InvidualMessage> messageList)
+            public MessageGroup setMessageList(List<SingleMessage> messageList)
             {
                 this.messageList = messageList;
                 return this;
@@ -215,43 +216,66 @@ namespace VRWorldToolkit.WorldDebugger
             public GameObject[] getSelectObjects()
             {
                 List<GameObject> objs = new List<GameObject>();
-                foreach (var item in messageList)
+                foreach (var item in messageList.Where(o => o.selectObjects != null))
                 {
-                    if (item.selectObjects != null && item.selectObjects.Any())
-                    {
-                        objs.AddRange(item.selectObjects);
-                    }
+                    objs.AddRange(item.selectObjects);
                 }
                 return objs.ToArray();
             }
 
-            public System.Action[] getActions()
+            public System.Action[] getSeparateActions()
             {
-                List<System.Action> actions = new List<System.Action>();
-                foreach (var item in messageList)
-                {
-                    if (item.autoFix != null)
-                    {
-                        actions.Add(item.autoFix);
-                    }
-                }
-                return actions.ToArray();
+                return messageList.Where(m => m.autoFix != null).Select(m => m.autoFix).ToArray();
             }
 
             public bool buttons()
             {
                 bool buttons = false;
-                if (getSelectObjects().Any() || groupAutoFix != null || getActions().Any() || groupAutoFix != null || documentation != null)
+                if (getSelectObjects().Any() || groupAutoFix != null || getSeparateActions().Any() || groupAutoFix != null || documentation != null)
                 {
                     buttons = true;
                 }
                 return buttons;
+            }
+
+            public override bool Equals(object obj)
+            {
+                return Equals(obj as MessageGroup);
+            }
+
+            public bool Equals(MessageGroup other)
+            {
+                return other != null &&
+                       message == other.message &&
+                       combinedMessage == other.combinedMessage &&
+                       messageType == other.messageType;
+            }
+
+            public override int GetHashCode()
+            {
+                var hashCode = 1898092009;
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(message);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(combinedMessage);
+                hashCode = hashCode * -1521134295 + messageType.GetHashCode();
+                return hashCode;
+            }
+
+            public static bool operator ==(MessageGroup group1, MessageGroup group2)
+            {
+                return EqualityComparer<MessageGroup>.Default.Equals(group1, group2);
+            }
+
+            public static bool operator !=(MessageGroup group1, MessageGroup group2)
+            {
+                return !(group1 == group2);
             }
         }
 
         class MessageCategory
         {
             public List<MessageGroup> messageGroups = new List<MessageGroup>();
+
+            Dictionary<int, bool> expandedGroups = new Dictionary<int, bool>();
 
             public string listName;
             public bool enabled;
@@ -271,29 +295,46 @@ namespace VRWorldToolkit.WorldDebugger
             {
                 messageGroups.Clear();
             }
+
+            public bool isExpanded(MessageGroup mg)
+            {
+                int hash = mg.GetHashCode();
+                if (expandedGroups.ContainsKey(hash))
+                {
+                    return expandedGroups[hash];
+                }
+                return false;
+            }
+
+            public void setExpanded(MessageGroup mg, bool expanded)
+            {
+                int hash = mg.GetHashCode();
+                if (expandedGroups.ContainsKey(hash))
+                {
+                    expandedGroups[hash] = expanded;
+                }
+                else
+                {
+                    expandedGroups.Add(hash, expanded);
+                }
+            }
         }
 
-        class MessageGroupsList
+        class MessageCategoryList
         {
             public List<MessageCategory> messageCategory = new List<MessageCategory>();
 
-            public bool combineMessages;
-
-            public MessageGroupsList()
+            public MessageCategory AddMessageCategory(string name)
             {
-                combineMessages = true;
-            }
-
-            public MessageCategory AddMessageGroup(string name)
-            {
-                MessageCategory newMessageGroup = new MessageCategory(name);
-                messageCategory.Add(newMessageGroup);
-                return newMessageGroup;
+                MessageCategory newMessageCategory = new MessageCategory(name);
+                messageCategory.Add(newMessageCategory);
+                return newMessageCategory;
             }
 
             public void DrawTabSelector()
             {
                 EditorGUILayout.BeginHorizontal();
+
                 bool disableAll = false;
 
                 foreach (var item in messageCategory)
@@ -321,7 +362,16 @@ namespace VRWorldToolkit.WorldDebugger
                         item2.enabled = false;
                     }
                 }
+
                 EditorGUILayout.EndHorizontal();
+            }
+
+            public void ClearCategories()
+            {
+                foreach (var item in messageCategory)
+                {
+                    item.ClearMessages();
+                }
             }
 
             private bool AllDisabled()
@@ -364,7 +414,7 @@ namespace VRWorldToolkit.WorldDebugger
 
                             if (messageGroup.messageList.Count > 0)
                             {
-                                if (combineMessages && messageGroup.combinedMessage != null && messageGroup.messageList.Count != 1)
+                                if (messageGroup.combinedMessage != null && messageGroup.messageList.Count != 1)
                                 {
                                     EditorGUILayout.BeginHorizontal();
 
@@ -378,7 +428,6 @@ namespace VRWorldToolkit.WorldDebugger
                                         GUILayout.Box(Box, boxStyle, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
 
                                         EditorGUILayout.BeginVertical();
-
 
                                         if (messageGroup.documentation != null)
                                         {
@@ -422,8 +471,75 @@ namespace VRWorldToolkit.WorldDebugger
                                     }
 
                                     EditorGUILayout.EndHorizontal();
+
+                                    bool expanded = group.isExpanded(messageGroup);
+
+                                    expanded = EditorGUILayout.Foldout(expanded, "Show separete messages");
+
+                                    group.setExpanded(messageGroup, expanded);
+
+                                    if (expanded)
+                                    {
+                                        foreach (var message in messageGroup.messageList)
+                                        {
+                                            EditorGUILayout.BeginHorizontal();
+
+                                            string finalInvidualMessage = messageGroup.message;
+
+                                            if (message.variable != null)
+                                            {
+                                                finalInvidualMessage = finalInvidualMessage.Replace(dynamicVariable, message.variable);
+                                            }
+
+                                            if (message.variable != null)
+                                            {
+                                                finalInvidualMessage = finalInvidualMessage.Replace(dynamicVariable2, message.variable2);
+                                            }
+
+                                            if (hasButtons)
+                                            {
+                                                GUIContent Box = new GUIContent(finalInvidualMessage, GetDebuggerIcon(messageGroup.messageType));
+                                                GUILayout.Box(Box, boxStyle, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
+
+                                                EditorGUILayout.BeginVertical();
+
+                                                EditorGUI.BeginDisabledGroup(!(message.selectObjects != null || message.assetPath != null));
+
+                                                if (GUILayout.Button("Select", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
+                                                {
+                                                    if (message.assetPath != null)
+                                                        EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(message.assetPath));
+
+                                                    else
+                                                        Selection.objects = message.selectObjects;
+                                                }
+
+                                                EditorGUI.EndDisabledGroup();
+
+                                                EditorGUI.BeginDisabledGroup(message.autoFix == null);
+
+                                                if (GUILayout.Button("Auto Fix", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
+                                                {
+                                                    message.autoFix();
+                                                    recheck = true;
+                                                }
+
+                                                EditorGUI.EndDisabledGroup();
+
+                                                EditorGUILayout.EndVertical();
+                                            }
+                                            else
+                                            {
+                                                DrawMessage(finalInvidualMessage, messageGroup.messageType);
+                                            }
+
+                                            EditorGUILayout.EndHorizontal();
+                                        }
+
+                                        EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+                                    }
                                 }
-                                else if (!combineMessages || messageGroup.messageList.Count == 1)
+                                else
                                 {
                                     foreach (var message in messageGroup.messageList)
                                     {
@@ -957,13 +1073,26 @@ namespace VRWorldToolkit.WorldDebugger
         private readonly string combinedMissingShaderWarning = "You have %count% materials found in your scene that have missing or broken shaders.";
         private readonly string errorPauseWarning = "You have Error Pause enabled in your console this can cause your world upload to fail by interrupting the build process.";
 
+        MessageCategory general;
+        MessageCategory optimization;
+        MessageCategory lighting;
+        MessageCategory postProcessing;
+
         public void CheckScene()
         {
-            masterList.messageCategory.Clear();
-            MessageCategory general = masterList.AddMessageGroup("General");
-            MessageCategory optimization = masterList.AddMessageGroup("Optimization");
-            MessageCategory lighting = masterList.AddMessageGroup("Lighting");
-            MessageCategory postProcessing = masterList.AddMessageGroup("Post Processing");
+            masterList.ClearCategories();
+
+            if (general == null)
+                general = masterList.AddMessageCategory("General");
+
+            if (optimization == null)
+                optimization = masterList.AddMessageCategory("Optimization");
+
+            if (lighting == null)
+                lighting = masterList.AddMessageCategory("Lighting");
+
+            if (postProcessing == null)
+                postProcessing = masterList.AddMessageCategory("Post Processing");
 
             //General Checks
 
@@ -986,12 +1115,12 @@ namespace VRWorldToolkit.WorldDebugger
                 //Make sure only one descriptor exists
                 if (descriptorCount > 1)
                 {
-                    general.addMessageGroup(new MessageGroup(tooManySceneDescriptors, MessageType.Info).addSingleMessage(new InvidualMessage(Array.ConvertAll(descriptors, s => s.gameObject))));
+                    general.addMessageGroup(new MessageGroup(tooManySceneDescriptors, MessageType.Info).addSingleMessage(new SingleMessage(Array.ConvertAll(descriptors, s => s.gameObject))));
                     return;
                 }
                 else if (pipelines.Length > 1)
                 {
-                    general.addMessageGroup(new MessageGroup(tooManyPipelineManagers, MessageType.Error).addSingleMessage(new InvidualMessage(Array.ConvertAll(pipelines.ToArray(), s => s.gameObject))));
+                    general.addMessageGroup(new MessageGroup(tooManyPipelineManagers, MessageType.Error).addSingleMessage(new SingleMessage(Array.ConvertAll(pipelines.ToArray(), s => s.gameObject))));
                 }
 
                 //Check how far the descriptor is from zero point for floating point errors
@@ -999,18 +1128,18 @@ namespace VRWorldToolkit.WorldDebugger
 
                 if (descriptorRemoteness > 1000)
                 {
-                    general.addMessageGroup(new MessageGroup(worldDescriptorFar, MessageType.Error).addSingleMessage(new InvidualMessage(descriptorRemoteness.ToString()).setSelectObject(Array.ConvertAll(descriptors, s => s.gameObject))));
+                    general.addMessageGroup(new MessageGroup(worldDescriptorFar, MessageType.Error).addSingleMessage(new SingleMessage(descriptorRemoteness.ToString()).setSelectObject(Array.ConvertAll(descriptors, s => s.gameObject))));
                 }
                 else if (descriptorRemoteness > 250)
                 {
-                    general.addMessageGroup(new MessageGroup(worldDescriptorOff, MessageType.Error).addSingleMessage(new InvidualMessage(descriptorRemoteness.ToString()).setSelectObject(Array.ConvertAll(descriptors, s => s.gameObject))));
+                    general.addMessageGroup(new MessageGroup(worldDescriptorOff, MessageType.Error).addSingleMessage(new SingleMessage(descriptorRemoteness.ToString()).setSelectObject(Array.ConvertAll(descriptors, s => s.gameObject))));
                 }
             }
 
             //Check if console has error pause on
             if (ConsoleFlagUtil.GetConsoleErrorPause())
             {
-                general.addMessageGroup(new MessageGroup(errorPauseWarning, MessageType.Error).addSingleMessage(new InvidualMessage(SetErrorPause(false))));
+                general.addMessageGroup(new MessageGroup(errorPauseWarning, MessageType.Error).addSingleMessage(new SingleMessage(SetErrorPause(false))));
             }
 
             //Get spawn points for any possible problems
@@ -1026,13 +1155,13 @@ namespace VRWorldToolkit.WorldDebugger
 
             if (spawns.Length == 0)
             {
-                general.addMessageGroup(new MessageGroup(noSpawnPointSet, MessageType.Error).addSingleMessage(new InvidualMessage(sceneDescriptor.gameObject).setAutoFix(FixSpawns(sceneDescriptor))));
+                general.addMessageGroup(new MessageGroup(noSpawnPointSet, MessageType.Error).addSingleMessage(new SingleMessage(sceneDescriptor.gameObject).setAutoFix(FixSpawns(sceneDescriptor))));
             }
             else
             {
                 if (emptySpawns)
                 {
-                    general.addMessageGroup(new MessageGroup(nullSpawnPoint, MessageType.Error).addSingleMessage(new InvidualMessage(sceneDescriptor.gameObject).setAutoFix(FixSpawns(sceneDescriptor))));
+                    general.addMessageGroup(new MessageGroup(nullSpawnPoint, MessageType.Error).addSingleMessage(new SingleMessage(sceneDescriptor.gameObject).setAutoFix(FixSpawns(sceneDescriptor))));
                 }
 
                 foreach (var item in sceneDescriptor.spawns)
@@ -1048,12 +1177,12 @@ namespace VRWorldToolkit.WorldDebugger
                         {
                             if (hit.collider.isTrigger)
                             {
-                                general.addMessageGroup(new MessageGroup(colliderUnderSpawnIsTrigger, MessageType.Error).addSingleMessage(new InvidualMessage(hit.collider.name, item.gameObject.name).setSelectObject(item.gameObject)));
+                                general.addMessageGroup(new MessageGroup(colliderUnderSpawnIsTrigger, MessageType.Error).addSingleMessage(new SingleMessage(hit.collider.name, item.gameObject.name).setSelectObject(item.gameObject)));
                             }
                         }
                         else
                         {
-                            general.addMessageGroup(new MessageGroup(noColliderUnderSpawn, MessageType.Error).addSingleMessage(new InvidualMessage(item.gameObject.name).setSelectObject(item.gameObject)));
+                            general.addMessageGroup(new MessageGroup(noColliderUnderSpawn, MessageType.Error).addSingleMessage(new SingleMessage(item.gameObject.name).setSelectObject(item.gameObject)));
                         }
                     }
                 }
@@ -1084,22 +1213,22 @@ namespace VRWorldToolkit.WorldDebugger
                             var collider = trigger_script.gameObject.GetComponent<Collider>();
                             if ((trigger.TriggerType.ToString() == "OnExitTrigger" || trigger.TriggerType.ToString() == "OnEnterTrigger") && !collider.isTrigger)
                             {
-                                general.addMessageGroup(new MessageGroup(triggerTriggerNotTrigger, MessageType.Error).addSingleMessage(new InvidualMessage(trigger_script.name).setSelectObject(trigger_script.gameObject)));
+                                general.addMessageGroup(new MessageGroup(triggerTriggerNotTrigger, MessageType.Error).addSingleMessage(new SingleMessage(trigger_script.name).setSelectObject(trigger_script.gameObject)));
                             }
                             else if ((trigger.TriggerType.ToString() == "OnExitCollider" || trigger.TriggerType.ToString() == "OnEnterCollider") && collider.isTrigger)
                             {
-                                general.addMessageGroup(new MessageGroup(colliderTriggerIsTrigger, MessageType.Error).addSingleMessage(new InvidualMessage(trigger_script.name).setSelectObject(trigger_script.gameObject)));
+                                general.addMessageGroup(new MessageGroup(colliderTriggerIsTrigger, MessageType.Error).addSingleMessage(new SingleMessage(trigger_script.name).setSelectObject(trigger_script.gameObject)));
                             }
                         }
                         else
                         {
                             if (trigger.TriggerType == VRC_Trigger.TriggerType.OnEnterTrigger || trigger.TriggerType == VRC_Trigger.TriggerType.OnExitTrigger)
                             {
-                                general.addMessageGroup(new MessageGroup(triggerTriggerNoCollider, MessageType.Error).addSingleMessage(new InvidualMessage(trigger_script.name).setSelectObject(trigger_script.gameObject)));
+                                general.addMessageGroup(new MessageGroup(triggerTriggerNoCollider, MessageType.Error).addSingleMessage(new SingleMessage(trigger_script.name).setSelectObject(trigger_script.gameObject)));
                             }
                             else if (trigger.TriggerType == VRC_Trigger.TriggerType.OnEnterCollider || trigger.TriggerType == VRC_Trigger.TriggerType.OnExitCollider)
                             {
-                                general.addMessageGroup(new MessageGroup(colliderTriggerNoCollider, MessageType.Error).addSingleMessage(new InvidualMessage(trigger_script.name).setSelectObject(trigger_script.gameObject)));
+                                general.addMessageGroup(new MessageGroup(colliderTriggerNoCollider, MessageType.Error).addSingleMessage(new SingleMessage(trigger_script.name).setSelectObject(trigger_script.gameObject)));
                             }
                         }
                         if ((trigger.TriggerType.ToString() == "OnEnterTrigger" || trigger.TriggerType.ToString() == "OnExitTrigger") && trigger_script.gameObject.layer != LayerMask.NameToLayer("MirrorReflection"))
@@ -1115,7 +1244,7 @@ namespace VRWorldToolkit.WorldDebugger
                 MessageGroup triggerWrongLayerGroup = new MessageGroup(triggerTriggerWrongLayer, combinedTriggerTriggerWrongLayer, MessageType.Warning);
                 foreach (var item in triggerWrongLayer)
                 {
-                    triggerWrongLayerGroup.addSingleMessage(new InvidualMessage(item.name).setSelectObject(item.gameObject).setAutoFix(SetObjectLayer(item.gameObject, "MirrorReflection")));
+                    triggerWrongLayerGroup.addSingleMessage(new SingleMessage(item.name).setSelectObject(item.gameObject).setAutoFix(SetObjectLayer(item.gameObject, "MirrorReflection")));
                 }
                 general.addMessageGroup(triggerWrongLayerGroup.setGroupAutoFix(SetObjectLayer(triggerWrongLayerGroup.getSelectObjects(), "MirrorReflection")));
             }
@@ -1152,7 +1281,7 @@ namespace VRWorldToolkit.WorldDebugger
                 MessageGroup activeCamerasMessages = new MessageGroup(activeCameraOutputtingToRenderTexture, combinedActiveCamerasOutputtingToRenderTextures, MessageType.BadFPS);
                 foreach (var camera in activeCameras)
                 {
-                    activeCamerasMessages.addSingleMessage(new InvidualMessage(cameraCount.ToString()).setSelectObject(camera.gameObject));
+                    activeCamerasMessages.addSingleMessage(new SingleMessage(cameraCount.ToString()).setSelectObject(camera.gameObject));
                 }
                 optimization.addMessageGroup(activeCamerasMessages);
             }
@@ -1164,7 +1293,7 @@ namespace VRWorldToolkit.WorldDebugger
                 MessageGroup activeCamerasMessage = new MessageGroup(mirrorOnByDefault, combinedMirrorsOnByDefault, MessageType.BadFPS);
                 foreach (var mirror in mirrors)
                 {
-                    activeCamerasMessage.addSingleMessage(new InvidualMessage(mirror.name).setSelectObject(mirror.gameObject));
+                    activeCamerasMessage.addSingleMessage(new SingleMessage(mirror.name).setSelectObject(mirror.gameObject));
                 }
                 optimization.addMessageGroup(activeCamerasMessage);
             }
@@ -1173,7 +1302,7 @@ namespace VRWorldToolkit.WorldDebugger
 
             if (RenderSettings.ambientMode.Equals(AmbientMode.Custom))
             {
-                lighting.addMessageGroup(new MessageGroup(ambientModeSetToCustom, MessageType.Error).addSingleMessage(new InvidualMessage(SetAmbientMode(AmbientMode.Skybox))));
+                lighting.addMessageGroup(new MessageGroup(ambientModeSetToCustom, MessageType.Error).addSingleMessage(new SingleMessage(SetAmbientMode(AmbientMode.Skybox))));
             }
 
             if (RenderSettings.ambientMode.Equals(AmbientMode.Flat))
@@ -1188,7 +1317,7 @@ namespace VRWorldToolkit.WorldDebugger
 
             if (RenderSettings.defaultReflectionMode.Equals(DefaultReflectionMode.Custom) && !RenderSettings.customReflection)
             {
-                lighting.addMessageGroup(new MessageGroup(customEnviromentReflectionsNull, MessageType.Error).addSingleMessage(new InvidualMessage(SetEnviromentReflections(DefaultReflectionMode.Skybox))));
+                lighting.addMessageGroup(new MessageGroup(customEnviromentReflectionsNull, MessageType.Error).addSingleMessage(new SingleMessage(SetEnviromentReflections(DefaultReflectionMode.Skybox))));
             }
 
             bool bakedLighting = false;
@@ -1229,7 +1358,7 @@ namespace VRWorldToolkit.WorldDebugger
                     MessageGroup notEditorOnlyGroup = new MessageGroup(bakeryLightNotSetEditorOnly, combinedBakeryLightNotSetEditorOnly, MessageType.Warning);
                     foreach (var item in notEditorOnly)
                     {
-                        notEditorOnlyGroup.addSingleMessage(new InvidualMessage(item.name).setAutoFix(SetGameObjectTag(item, "EditorOnly")).setSelectObject(item));
+                        notEditorOnlyGroup.addSingleMessage(new SingleMessage(item.name).setAutoFix(SetGameObjectTag(item, "EditorOnly")).setSelectObject(item));
                     }
                     lighting.addMessageGroup(notEditorOnlyGroup.setGroupAutoFix(SetGameObjectTag(notEditorOnly.ToArray(), "EditorOnly")));
                 }
@@ -1239,7 +1368,7 @@ namespace VRWorldToolkit.WorldDebugger
                     MessageGroup unityLightGroup = new MessageGroup(bakeryLightUnityLight, combinedBakeryLightUnityLight, MessageType.Warning);
                     foreach (var item in unityLightOnBakeryLight)
                     {
-                        unityLightGroup.addSingleMessage(new InvidualMessage(item.name).setAutoFix(DisableComponent(item.GetComponent<Light>())).setSelectObject(item));
+                        unityLightGroup.addSingleMessage(new SingleMessage(item.name).setAutoFix(DisableComponent(item.GetComponent<Light>())).setSelectObject(item));
                     }
                     lighting.addMessageGroup(unityLightGroup.setGroupAutoFix(DisableComponent(Array.ConvertAll(unityLightOnBakeryLight.ToArray(), s => s.GetComponent<Light>()))));
                 }
@@ -1283,14 +1412,14 @@ namespace VRWorldToolkit.WorldDebugger
                     {
                         if (LightmapSettings.lightmaps[0].lightmapColor.height != 4096)
                         {
-                            lighting.addMessageGroup(new MessageGroup(considerLargerLightmaps, MessageType.Tips).addSingleMessage(new InvidualMessage(lightMapSize.ToString()).setAutoFix(SetLightmapSize(4096))));
+                            lighting.addMessageGroup(new MessageGroup(considerLargerLightmaps, MessageType.Tips).addSingleMessage(new SingleMessage(lightMapSize.ToString()).setAutoFix(SetLightmapSize(4096))));
                         }
                     }
                 }
 
                 if (LightmapEditorSettings.lightmapper.Equals(LightmapEditorSettings.Lightmapper.ProgressiveGPU) && lightMapSize == 4096 && SystemInfo.graphicsMemorySize < 12000)
                 {
-                    lighting.addMessageGroup(new MessageGroup(considerSmallerLightmaps, MessageType.Warning).addSingleMessage(new InvidualMessage(lightMapSize.ToString()).setAutoFix(SetLightmapSize(2048))));
+                    lighting.addMessageGroup(new MessageGroup(considerSmallerLightmaps, MessageType.Warning).addSingleMessage(new SingleMessage(lightMapSize.ToString()).setAutoFix(SetLightmapSize(2048))));
                 }
 
                 //Count how many light probes the scene has
@@ -1310,7 +1439,7 @@ namespace VRWorldToolkit.WorldDebugger
                 {
                     if (lightprobegroup.probePositions.GroupBy(p => p).Any(g => g.Count() > 1))
                     {
-                        overlappingLightProbesGroup.addSingleMessage(new InvidualMessage(lightprobegroup.name, (lightprobegroup.probePositions.Length - lightprobegroup.probePositions.Distinct().ToArray().Length).ToString()).setSelectObject(lightprobegroup.gameObject).setAutoFix(RemoveOverlappingLightprobes(lightprobegroup)));
+                        overlappingLightProbesGroup.addSingleMessage(new SingleMessage(lightprobegroup.name, (lightprobegroup.probePositions.Length - lightprobegroup.probePositions.Distinct().ToArray().Length).ToString()).setSelectObject(lightprobegroup.gameObject).setAutoFix(RemoveOverlappingLightprobes(lightprobegroup)));
                     }
 
                     probeCounter += lightprobegroup.probePositions.Length;
@@ -1320,17 +1449,17 @@ namespace VRWorldToolkit.WorldDebugger
                 {
                     if ((probeCounter - bakedProbes) < 0)
                     {
-                        lighting.addMessageGroup(new MessageGroup(lightProbesRemovedNotReBaked, MessageType.Warning).addSingleMessage(new InvidualMessage(bakedProbes.ToString(), probeCounter.ToString())));
+                        lighting.addMessageGroup(new MessageGroup(lightProbesRemovedNotReBaked, MessageType.Warning).addSingleMessage(new SingleMessage(bakedProbes.ToString(), probeCounter.ToString())));
                     }
                     else
                     {
                         if ((bakedProbes - (0.9 * probeCounter)) < 0)
                         {
-                            lighting.addMessageGroup(new MessageGroup(lightProbeCountNotBaked, MessageType.Info).addSingleMessage(new InvidualMessage(probeCounter.ToString("n0"), (probeCounter - bakedProbes).ToString("n0"))));
+                            lighting.addMessageGroup(new MessageGroup(lightProbeCountNotBaked, MessageType.Info).addSingleMessage(new SingleMessage(probeCounter.ToString("n0"), (probeCounter - bakedProbes).ToString("n0"))));
                         }
                         else
                         {
-                            lighting.addMessageGroup(new MessageGroup(lightProbeCount, MessageType.Info).addSingleMessage(new InvidualMessage(probeCounter.ToString("n0"))));
+                            lighting.addMessageGroup(new MessageGroup(lightProbeCount, MessageType.Info).addSingleMessage(new SingleMessage(probeCounter.ToString("n0"))));
                         }
                     }
                 }
@@ -1358,7 +1487,7 @@ namespace VRWorldToolkit.WorldDebugger
                     string lmdName = Lightmapping.lightingDataAsset.name;
                     string pathTo = AssetDatabase.GetAssetPath(Lightmapping.lightingDataAsset);
                     length = new System.IO.FileInfo(pathTo).Length;
-                    lighting.addMessageGroup(new MessageGroup(lightingDataAssetInfo, MessageType.Info).addSingleMessage(new InvidualMessage((length / 1024.0f / 1024.0f).ToString("F2"))));
+                    lighting.addMessageGroup(new MessageGroup(lightingDataAssetInfo, MessageType.Info).addSingleMessage(new SingleMessage((length / 1024.0f / 1024.0f).ToString("F2"))));
                 }
 
 #if !BAKERY_INCLUDED
@@ -1373,7 +1502,7 @@ namespace VRWorldToolkit.WorldDebugger
                     MessageGroup nonBakedLightsGroup = new MessageGroup(nonBakedBakedLights, combinedNonBakedBakedLights, MessageType.BadFPS);
                     foreach (var item in nonBakedLights)
                     {
-                        nonBakedLightsGroup.addSingleMessage(new InvidualMessage(item.name).setSelectObject(item.gameObject));
+                        nonBakedLightsGroup.addSingleMessage(new SingleMessage(item.name).setSelectObject(item.gameObject));
                     }
                     lighting.addMessageGroup(nonBakedLightsGroup);
                 }
@@ -1383,7 +1512,7 @@ namespace VRWorldToolkit.WorldDebugger
 #if UNITY_ANDROID
                 lighting.addMessageGroup(new MessageGroup(questBakedLightingWarning, MessageType.BadFPS));
 #else
-                lighting.addMessageGroup(new MessageGroup(lightsNotBaked, MessageType.Tips).addSingleMessage(new InvidualMessage(nonBakedLights.ToArray())));
+                lighting.addMessageGroup(new MessageGroup(lightsNotBaked, MessageType.Tips).addSingleMessage(new SingleMessage(nonBakedLights.ToArray())));
 #endif
             }
 
@@ -1411,13 +1540,13 @@ namespace VRWorldToolkit.WorldDebugger
                 MessageGroup probesUnbakedGroup = new MessageGroup(reflectionProbesSomeUnbaked, combinedReflectionProbesSomeUnbaked, MessageType.Warning);
                 foreach (var item in unbakedprobes)
                 {
-                    probesUnbakedGroup.addSingleMessage(new InvidualMessage(item.name).setSelectObject(item));
+                    probesUnbakedGroup.addSingleMessage(new SingleMessage(item.name).setSelectObject(item));
                 }
                 lighting.addMessageGroup(probesUnbakedGroup);
             }
             else
             {
-                lighting.addMessageGroup(new MessageGroup(reflectionProbeCountText, MessageType.Info).addSingleMessage(new InvidualMessage(reflectionProbeCount.ToString())));
+                lighting.addMessageGroup(new MessageGroup(reflectionProbeCountText, MessageType.Info).addSingleMessage(new SingleMessage(reflectionProbeCount.ToString())));
             }
 
             //Post Processing Checks
@@ -1453,27 +1582,27 @@ namespace VRWorldToolkit.WorldDebugger
                 //Start by checking if reference camera has been set in the Scene Descriptor
                 if (!sceneDescriptor.ReferenceCamera)
                 {
-                    postProcessing.addMessageGroup(new MessageGroup(noReferenceCameraSet, MessageType.Info).addSingleMessage(new InvidualMessage(SetReferenceCamera(sceneDescriptor)).setSelectObject(sceneDescriptor.gameObject)));
+                    postProcessing.addMessageGroup(new MessageGroup(noReferenceCameraSet, MessageType.Info).addSingleMessage(new SingleMessage(SetReferenceCamera(sceneDescriptor)).setSelectObject(sceneDescriptor.gameObject)));
                 }
                 else
                 {
                     //Check for post process volumes in the scene
                     if (PostProcessVolumes.Length == 0)
                     {
-                        postProcessing.addMessageGroup(new MessageGroup(noPostProcessingVolumes, MessageType.Info).addSingleMessage(new InvidualMessage(AddDefaultPPVolume())));
+                        postProcessing.addMessageGroup(new MessageGroup(noPostProcessingVolumes, MessageType.Info).addSingleMessage(new SingleMessage(AddDefaultPPVolume())));
                     }
                     else
                     {
                         PostProcessLayer postprocess_layer = sceneDescriptor.ReferenceCamera.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
                         if (postprocess_layer == null)
                         {
-                            postProcessing.addMessageGroup(new MessageGroup(referenceCameraNoPostProcessingLayer, MessageType.Error).addSingleMessage(new InvidualMessage(postprocess_layer.gameObject)));
+                            postProcessing.addMessageGroup(new MessageGroup(referenceCameraNoPostProcessingLayer, MessageType.Error).addSingleMessage(new SingleMessage(postprocess_layer.gameObject)));
                         }
 
                         LayerMask volume_layer = postprocess_layer.volumeLayer;
                         if (volume_layer == LayerMask.GetMask("Nothing"))
                         {
-                            postProcessing.addMessageGroup(new MessageGroup(volumeBlendingLayerNotSet, MessageType.Error).addSingleMessage(new InvidualMessage(sceneDescriptor.ReferenceCamera.gameObject)));
+                            postProcessing.addMessageGroup(new MessageGroup(volumeBlendingLayerNotSet, MessageType.Error).addSingleMessage(new SingleMessage(sceneDescriptor.ReferenceCamera.gameObject)));
                         }
 
                         foreach (PostProcessVolume postprocess_volume in PostProcessVolumes)
@@ -1481,13 +1610,13 @@ namespace VRWorldToolkit.WorldDebugger
                             //Check if the layer matches the cameras post processing layer
                             if (postprocess_layer.volumeLayer != (postprocess_layer.volumeLayer | (1 << postprocess_volume.gameObject.layer)))
                             {
-                                postProcessing.addMessageGroup(new MessageGroup(volumeOnWrongLayer, MessageType.Error).addSingleMessage(new InvidualMessage(postprocess_volume.gameObject.name, Helper.GetAllLayersFromMask(postprocess_layer.volumeLayer)).setSelectObject(postprocess_volume.gameObject)));
+                                postProcessing.addMessageGroup(new MessageGroup(volumeOnWrongLayer, MessageType.Error).addSingleMessage(new SingleMessage(postprocess_volume.gameObject.name, Helper.GetAllLayersFromMask(postprocess_layer.volumeLayer)).setSelectObject(postprocess_volume.gameObject)));
                             }
 
                             //Check if the volume has a profile set
                             if (!postprocess_volume.profile && !postprocess_volume.sharedProfile)
                             {
-                                postProcessing.addMessageGroup(new MessageGroup(noProfileSet, MessageType.Error).addSingleMessage(new InvidualMessage(postprocess_volume.gameObject.name)));
+                                postProcessing.addMessageGroup(new MessageGroup(noProfileSet, MessageType.Error).addSingleMessage(new SingleMessage(postprocess_volume.gameObject.name)));
                                 continue;
                             }
 
@@ -1497,7 +1626,7 @@ namespace VRWorldToolkit.WorldDebugger
                                 if (!postprocess_volume.GetComponent<Collider>())
                                 {
                                     GameObject[] objs = { postprocess_volume.gameObject };
-                                    postProcessing.addMessageGroup(new MessageGroup(postProcessingVolumeNotGlobalNoCollider, MessageType.Error).addSingleMessage(new InvidualMessage(postprocess_volume.name).setSelectObject(postprocess_volume.gameObject)));
+                                    postProcessing.addMessageGroup(new MessageGroup(postProcessingVolumeNotGlobalNoCollider, MessageType.Error).addSingleMessage(new SingleMessage(postprocess_volume.name).setSelectObject(postprocess_volume.gameObject)));
                                 }
                             }
                             else
@@ -1514,7 +1643,7 @@ namespace VRWorldToolkit.WorldDebugger
                                 {
                                     if (postprocess_profile.GetSetting<ColorGrading>().tonemapper.value.ToString() == "None")
                                     {
-                                        postProcessing.addMessageGroup(new MessageGroup(dontUseNoneForTonemapping, MessageType.Error).addSingleMessage(new InvidualMessage(postprocess_layer.gameObject)));
+                                        postProcessing.addMessageGroup(new MessageGroup(dontUseNoneForTonemapping, MessageType.Error).addSingleMessage(new SingleMessage(postprocess_layer.gameObject)));
                                     }
                                 }
 
@@ -1522,37 +1651,37 @@ namespace VRWorldToolkit.WorldDebugger
                                 {
                                     if (postprocess_profile.GetSetting<Bloom>().intensity.value > 0.3f)
                                     {
-                                        postProcessing.addMessageGroup(new MessageGroup(tooHighBloomIntensity, MessageType.Warning).addSingleMessage(new InvidualMessage(postprocess_layer.gameObject)));
+                                        postProcessing.addMessageGroup(new MessageGroup(tooHighBloomIntensity, MessageType.Warning).addSingleMessage(new SingleMessage(postprocess_layer.gameObject)));
                                     }
 
                                     if (postprocess_profile.GetSetting<Bloom>().threshold.value > 1f)
                                     {
-                                        postProcessing.addMessageGroup(new MessageGroup(tooHighBloomThreshold, MessageType.Warning).addSingleMessage(new InvidualMessage(postprocess_layer.gameObject)));
+                                        postProcessing.addMessageGroup(new MessageGroup(tooHighBloomThreshold, MessageType.Warning).addSingleMessage(new SingleMessage(postprocess_layer.gameObject)));
                                     }
 
                                     if (postprocess_profile.GetSetting<Bloom>().dirtTexture.value || postprocess_profile.GetSetting<Bloom>().dirtIntensity.value != 0)
                                     {
-                                        postProcessing.addMessageGroup(new MessageGroup(noBloomDirtInVR, MessageType.Error).addSingleMessage(new InvidualMessage(RemovePostProcessSetting(postprocess_profile, RemovePSEffect.BloomDirt)).setSelectObject(postprocess_layer.gameObject)));
+                                        postProcessing.addMessageGroup(new MessageGroup(noBloomDirtInVR, MessageType.Error).addSingleMessage(new SingleMessage(RemovePostProcessSetting(postprocess_profile, RemovePSEffect.BloomDirt)).setSelectObject(postprocess_layer.gameObject)));
                                     }
                                 }
                                 if (postprocess_profile.GetSetting<AmbientOcclusion>())
                                 {
-                                    postProcessing.addMessageGroup(new MessageGroup(noAmbientOcclusion, MessageType.Error).addSingleMessage(new InvidualMessage(RemovePostProcessSetting(postprocess_profile, RemovePSEffect.AmbientOcclusion)).setSelectObject(postprocess_layer.gameObject)));
+                                    postProcessing.addMessageGroup(new MessageGroup(noAmbientOcclusion, MessageType.Error).addSingleMessage(new SingleMessage(RemovePostProcessSetting(postprocess_profile, RemovePSEffect.AmbientOcclusion)).setSelectObject(postprocess_layer.gameObject)));
                                 }
 
                                 if (postprocess_profile.GetSetting<DepthOfField>() && postprocess_volume.isGlobal)
                                 {
-                                    postProcessing.addMessageGroup(new MessageGroup(depthOfFieldWarning, MessageType.Warning).addSingleMessage(new InvidualMessage(postprocess_layer.gameObject)));
+                                    postProcessing.addMessageGroup(new MessageGroup(depthOfFieldWarning, MessageType.Warning).addSingleMessage(new SingleMessage(postprocess_layer.gameObject)));
                                 }
 
                                 if (postprocess_profile.GetSetting<ScreenSpaceReflections>())
                                 {
-                                    postProcessing.addMessageGroup(new MessageGroup(screenSpaceReflectionsWarning, MessageType.Warning).addSingleMessage(new InvidualMessage(RemovePostProcessSetting(postprocess_profile, RemovePSEffect.ScreenSpaceReflections)).setSelectObject(postprocess_layer.gameObject)));
+                                    postProcessing.addMessageGroup(new MessageGroup(screenSpaceReflectionsWarning, MessageType.Warning).addSingleMessage(new SingleMessage(RemovePostProcessSetting(postprocess_profile, RemovePSEffect.ScreenSpaceReflections)).setSelectObject(postprocess_layer.gameObject)));
                                 }
 
                                 if (postprocess_profile.GetSetting<Vignette>())
                                 {
-                                    postProcessing.addMessageGroup(new MessageGroup(vignetteWarning, MessageType.Warning).addSingleMessage(new InvidualMessage(postprocess_layer.gameObject)));
+                                    postProcessing.addMessageGroup(new MessageGroup(vignetteWarning, MessageType.Warning).addSingleMessage(new SingleMessage(postprocess_layer.gameObject)));
                                 }
                             }
                         }
@@ -1624,7 +1753,7 @@ namespace VRWorldToolkit.WorldDebugger
                         LayerMask mirrorMask = gameObject.GetComponent<VRC_MirrorReflection>().m_ReflectLayers;
                         if (mirrorMask.value == -1025)
                         {
-                            mirrorsDefaultLayers.addSingleMessage(new InvidualMessage(gameObject.name).setSelectObject(gameObject));
+                            mirrorsDefaultLayers.addSingleMessage(new SingleMessage(gameObject.name).setSelectObject(gameObject));
                         }
                     }
 
@@ -1691,7 +1820,7 @@ namespace VRWorldToolkit.WorldDebugger
                 int percent = (int)((float)unCrunchedTextures.Count / (float)textureCount * 100f);
                 if (percent > 20)
                 {
-                    optimization.addMessageGroup(new MessageGroup(nonCrunchedTextures, MessageType.Tips).addSingleMessage(new InvidualMessage(percent.ToString())));
+                    optimization.addMessageGroup(new MessageGroup(nonCrunchedTextures, MessageType.Tips).addSingleMessage(new SingleMessage(percent.ToString())));
                 }
             }
 
@@ -1704,7 +1833,7 @@ namespace VRWorldToolkit.WorldDebugger
                 {
                     string modelName = meshName[i];
                     ModelImporter modelImporter = importers[i];
-                    noUVGroup.addSingleMessage(new InvidualMessage(modelName).setAutoFix(SetGenerateLightmapUV(modelImporter)).setAssetPath(modelImporter.assetPath));
+                    noUVGroup.addSingleMessage(new SingleMessage(modelName).setAutoFix(SetGenerateLightmapUV(modelImporter)).setAssetPath(modelImporter.assetPath));
                 }
                 lighting.addMessageGroup(noUVGroup.setGroupAutoFix(SetGenerateLightmapUV(importers)).setDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/LightingGiUvs-GeneratingLightmappingUVs.html"));
             }
@@ -1715,13 +1844,13 @@ namespace VRWorldToolkit.WorldDebugger
                 MessageGroup missingsShadersGroup = new MessageGroup(missingShaderWarning, combinedMissingShaderWarning, MessageType.Error);
                 foreach (var material in missingShaders)
                 {
-                    missingsShadersGroup.addSingleMessage(new InvidualMessage(material.name).setAssetPath(AssetDatabase.GetAssetPath(material)).setAutoFix(ChangeShader(material, "Standard")));
+                    missingsShadersGroup.addSingleMessage(new SingleMessage(material.name).setAssetPath(AssetDatabase.GetAssetPath(material)).setAutoFix(ChangeShader(material, "Standard")));
                 }
                 general.addMessageGroup(missingsShadersGroup.setGroupAutoFix(ChangeShader(missingShaders.ToArray(), "Standard")));
             }
         }
 
-        MessageGroupsList masterList;
+        MessageCategoryList masterList;
 
         void Awake()
         {
@@ -1742,7 +1871,7 @@ namespace VRWorldToolkit.WorldDebugger
 
             if (masterList == null)
             {
-                masterList = new MessageGroupsList();
+                masterList = new MessageCategoryList();
             }
 
             if (recheck)
@@ -1769,8 +1898,6 @@ namespace VRWorldToolkit.WorldDebugger
             }
 
             GUILayout.EndVertical();
-
-            masterList.combineMessages = EditorGUILayout.Toggle("Combine messages", masterList.combineMessages);
 
             masterList.DrawTabSelector();
 
