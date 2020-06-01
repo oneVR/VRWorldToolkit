@@ -1045,7 +1045,7 @@ namespace VRWorldToolkit.WorldDebugger
         private readonly string lightProbeCountNotBaked = "The current scene contains %variable% light probes, but %variable2% of them haven't been baked yet.";
         private readonly string lightProbesRemovedNotReBaked = "You've removed some light probes after the last bake, bake them again to update your scene's lighting data. The lighting data contains %variable% baked light probes and the current scene has %variable2% light probes.";
         private readonly string lightProbeCount = "The current scene contains %variable% baked light probes.";
-        private readonly string overlappingLightProbes = "Light Probe Group \"%variable%\" has %variable2% overlapping light probes. These can cause a slowdown in the editor and won't get baked because Unity will skip any extra overlapping probes.";
+        private readonly string overlappingLightProbes = "Light Probe Group \"%variable%\" has %variable2% overlapping light probes.";
         private readonly string combinedOverlappingLightProbes = "%count% Light Probe Groups with overlapping light probes found. These can cause a slowdown in the editor and won't get baked because Unity will skip any extra overlapping probes.";
         private readonly string noReflectionProbes = "Your scene has no active reflection probes. Reflection probes are needed to have proper reflections on reflective materials.";
         private readonly string reflectionProbesSomeUnbaked = "The reflection probe named \"%variable%\" is unbaked.";
@@ -1073,10 +1073,10 @@ namespace VRWorldToolkit.WorldDebugger
         private readonly string noProblemsFoundInPP = "No problems found in your post processing setup. In some cases where post processing is working in editor but not in game it's possible some imported asset is causing it not to function properly.";
         private readonly string bakeryLightNotSetEditorOnly = "Your Bakery light named %variable% is not set to be EditorOnly this causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
         private readonly string combinedBakeryLightNotSetEditorOnly = "You have %count% Bakery lights are not set to be EditorOnly this causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
-        private readonly string bakeryLightUnityLight = "Your Bakery light named %variable% has a Unity Light component on it this won't get baked with Bakery and will keep acting as real time even if set to baked.";
-        private readonly string combinedBakeryLightUnityLight = "You have %count% Bakery lights that have a Unity Light component on it these will not get baked with Bakery and will keep acting as real time lights even if set to baked.";
+        private readonly string bakeryLightUnityLight = "Your Bakery light named %variable% has an active Unity Light component on it.";
+        private readonly string combinedBakeryLightUnityLight = "You have %count% Bakery lights that have an active Unity Light component on it these will not get baked with Bakery and will keep acting as real time lights even if set to baked.";
         private readonly string missingShaderWarning = "The material %variable% found in your scene has a missing or broken shader.";
-        private readonly string combinedMissingShaderWarning = "You have %count% materials found in your scene that have missing or broken shaders.";
+        private readonly string combinedMissingShaderWarning = "You have %count% materials found in your scene that have missing or broken shaders. These will fallback to the pink error shader.";
         private readonly string errorPauseWarning = "You have Error Pause enabled in your console this can cause your world upload to fail by interrupting the build process.";
         #endregion
 
