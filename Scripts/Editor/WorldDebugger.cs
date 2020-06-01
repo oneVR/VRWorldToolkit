@@ -138,6 +138,8 @@ namespace VRWorldToolkit.WorldDebugger
             public bool showAll = false;
             public string message;
             public string combinedMessage;
+            public string additionalInfo;
+
             public MessageType messageType;
 
             public string documentation;
@@ -156,6 +158,14 @@ namespace VRWorldToolkit.WorldDebugger
             {
                 this.message = message;
                 this.combinedMessage = combinedMessage;
+                this.messageType = messageType;
+            }
+
+            public MessageGroup(string message, string combinedMessage, string additionalInfo, MessageType messageType)
+            {
+                this.message = message;
+                this.combinedMessage = combinedMessage;
+                this.additionalInfo = additionalInfo;
                 this.messageType = messageType;
             }
 
@@ -248,14 +258,16 @@ namespace VRWorldToolkit.WorldDebugger
                 return other != null &&
                        message == other.message &&
                        combinedMessage == other.combinedMessage &&
+                       additionalInfo == other.additionalInfo &&
                        messageType == other.messageType;
             }
 
             public override int GetHashCode()
             {
-                var hashCode = 1898092009;
+                var hashCode = 842570769;
                 hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(message);
                 hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(combinedMessage);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(additionalInfo);
                 hashCode = hashCode * -1521134295 + messageType.GetHashCode();
                 return hashCode;
             }
@@ -420,6 +432,11 @@ namespace VRWorldToolkit.WorldDebugger
 
                                     string finalMessage = messageGroup.combinedMessage;
 
+                                    if (messageGroup.additionalInfo != null)
+                                    {
+                                        finalMessage += " " + messageGroup.additionalInfo;
+                                    }
+
                                     finalMessage = finalMessage.Replace(countVariable, messageGroup.getTotalCount().ToString());
 
                                     if (hasButtons)
@@ -559,6 +576,11 @@ namespace VRWorldToolkit.WorldDebugger
                                         if (message.variable != null)
                                         {
                                             finalMessage = finalMessage.Replace(dynamicVariable2, message.variable2);
+                                        }
+
+                                        if (messageGroup.additionalInfo != null)
+                                        {
+                                            finalMessage += " " + messageGroup.additionalInfo;
                                         }
 
                                         if (hasButtons)
@@ -1018,15 +1040,19 @@ namespace VRWorldToolkit.WorldDebugger
         private readonly string triggerTriggerNoCollider = "You have an OnEnterTrigger or OnExitTrigger Trigger \"%variable%\" that doesn't have a Collider on it.";
         private readonly string colliderTriggerNoCollider = "You have an OnEnterCollider or OnExitCollider Trigger \"%variable%\" that doesn't have a Collider on it.";
         private readonly string triggerTriggerWrongLayer = "You have an OnEnterTrigger or OnExitTrigger Trigger (%variable%) that is not on the MirrorReflection layer.";
-        private readonly string combinedTriggerTriggerWrongLayer = "You have %count% OnEnterTrigger or OnExitTrigger Triggers that are not on the MirrorReflection layer. This can stop raycasts from working properly breaking buttons, UI Menus and pickups for example.";
+        private readonly string combinedTriggerTriggerWrongLayer = "You have %count% OnEnterTrigger or OnExitTrigger Triggers that are not on the MirrorReflection layer.";
+        private readonly string triggerTriggerWrongLayerInfo = "This can stop raycasts from working properly breaking buttons, UI Menus and pickups for example.";
         private readonly string mirrorOnByDefault = "The mirror %variable% is on by default.";
-        private readonly string combinedMirrorsOnByDefault = "The scene has %count% mirrors on by default. This is a very bad practice and you should disable any mirrors in your world by default.";
+        private readonly string combinedMirrorsOnByDefault = "The scene has %count% mirrors on by default.";
+        private readonly string mirrorsOnByDefaultInfo = "This is a very bad practice and you should disable any mirrors in your world by default.";
         private readonly string mirrorWithDefaultLayers = "The mirror %variable% has the default Reflect Layers set.";
-        private readonly string combinedMirrorWithDefaultLayers = "You have %count% mirrors that have the default Reflect Layers set. Only having the layers you need enabled in mirrors can save a lot of frames especially in populated instances.";
+        private readonly string combinedMirrorWithDefaultLayers = "You have %count% mirrors that have the default Reflect Layers set.";
+        private readonly string mirrorWithDefaultLayersInfo = "Only having the layers you need enabled in mirrors can save a lot of frames especially in populated instances.";
         private readonly string bakedOcclusionCulling = "Baked Occlusion Culling found.";
         private readonly string noOcclusionCulling = "You haven't baked Occlusion Culling yet. Occlusion culling gives you a lot more performance in your world, especially in larger worlds that have multiple rooms/areas.";
-        private readonly string activeCameraOutputtingToRenderTexture = "Your scene has an active camera (%variable%) outputting to a render texture. This will affect performance negatively by causing more drawcalls to happen. Ideally you would only have it enabled when needed.";
-        private readonly string combinedActiveCamerasOutputtingToRenderTextures = "The current scene has %count% active cameras outputting to render textures. This will affect performance negatively by causing more drawcalls to happen. Ideally you would only have them enabled when needed.";
+        private readonly string activeCameraOutputtingToRenderTexture = "Your scene has an active camera (%variable%) outputting to a render texture.";
+        private readonly string combinedActiveCamerasOutputtingToRenderTextures = "The current scene has %count% active cameras outputting to render textures.";
+        private readonly string activeCamerasOutputtingToRenderTextureInfo = "This will affect performance negatively by causing more drawcalls to happen. Ideally you would only have them enabled when needed.";
         private readonly string noToonShaders = "You shouldn't use toon shaders for world building, as they're missing crucial things for making worlds. For world building the most recommended shader is Standard.";
         private readonly string nonCrunchedTextures = "%variable%% of the textures used in your scene haven't been crunch compressed. Crunch compression can greatly reduce the size of your world download. It can be accessed from the texture's import settings.";
         private readonly string switchToProgressive = "The scene is currently using the Enlighten lightmapper, which has been deprecated in newer versions of Unity. You should consider switching to Progressive for improved fidelity and performance.";
@@ -1038,15 +1064,17 @@ namespace VRWorldToolkit.WorldDebugger
         private readonly string lightsNotBaked = "The current scenes lighting is not baked. Consider baking your lights for improved performance.";
         private readonly string considerLargerLightmaps = "Consider increasing your Lightmap Size from %variable% to 4096. This allows for more stuff to fit on a single lightmap, leaving less textures that need to be sampled.";
         private readonly string considerSmallerLightmaps = "Baking lightmaps at 4096 with Progressive GPU will silently fall back to CPU Progressive because it needs more than 12GB GPU Memory to be able to bake with GPU Progressive.";
-        private readonly string nonBakedBakedLights = "The light \"%variable%\" is set to be baked/mixed but it hasn't been baked yet! Baked lights that haven't been baked yet function as realtime lights ingame.";
-        private readonly string combinedNonBakedBakedLights = "The scene contains %count% baked/mixed lights that haven't been baked! Baked lights that haven't been baked yet function as realtime lights ingame.";
+        private readonly string nonBakedBakedLights = "The light \"%variable%\" is set to be baked/mixed but it hasn't been baked yet!";
+        private readonly string combinedNonBakedBakedLights = "The scene contains %count% baked/mixed lights that haven't been baked!";
+        private readonly string nonBakedBakedLightsInfo = "Baked lights that haven't been baked yet function as realtime lights ingame.";
         private readonly string lightingDataAssetInfo = "Your lighting data asset takes up %variable% MB of your world's size. This contains your scene's light probe data and realtime GI data.";
         private readonly string noLightProbes = "No light probes found in the current scene, which means your baked lights won't affect dynamic objects such as players and pickups.";
         private readonly string lightProbeCountNotBaked = "The current scene contains %variable% light probes, but %variable2% of them haven't been baked yet.";
         private readonly string lightProbesRemovedNotReBaked = "You've removed some light probes after the last bake, bake them again to update your scene's lighting data. The lighting data contains %variable% baked light probes and the current scene has %variable2% light probes.";
         private readonly string lightProbeCount = "The current scene contains %variable% baked light probes.";
         private readonly string overlappingLightProbes = "Light Probe Group \"%variable%\" has %variable2% overlapping light probes.";
-        private readonly string combinedOverlappingLightProbes = "%count% Light Probe Groups with overlapping light probes found. These can cause a slowdown in the editor and won't get baked because Unity will skip any extra overlapping probes.";
+        private readonly string combinedOverlappingLightProbes = "%count% Light Probe Groups with overlapping light probes found.";
+        private readonly string overlappingLightProbesInfo = "These can cause a slowdown in the editor and won't get baked because Unity will skip any extra overlapping probes.";
         private readonly string noReflectionProbes = "Your scene has no active reflection probes. Reflection probes are needed to have proper reflections on reflective materials.";
         private readonly string reflectionProbesSomeUnbaked = "The reflection probe named \"%variable%\" is unbaked.";
         private readonly string combinedReflectionProbesSomeUnbaked = "Your scene has %count% unbaked reflection probes.";
@@ -1072,11 +1100,14 @@ namespace VRWorldToolkit.WorldDebugger
         private readonly string ambientModeSetToCustom = "Your Environment Lighting setting is broken. This will override all light probes in the scene with black ambient light. Please change it to something else.";
         private readonly string noProblemsFoundInPP = "No problems found in your post processing setup. In some cases where post processing is working in editor but not in game it's possible some imported asset is causing it not to function properly.";
         private readonly string bakeryLightNotSetEditorOnly = "Your Bakery light named %variable% is not set to be EditorOnly this causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
-        private readonly string combinedBakeryLightNotSetEditorOnly = "You have %count% Bakery lights are not set to be EditorOnly this causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
+        private readonly string combinedBakeryLightNotSetEditorOnly = "You have %count% Bakery lights are not set to be EditorOnly.";
+        private readonly string bakeryLightNotSetEditorOnlyInfo = "This causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
         private readonly string bakeryLightUnityLight = "Your Bakery light named %variable% has an active Unity Light component on it.";
-        private readonly string combinedBakeryLightUnityLight = "You have %count% Bakery lights that have an active Unity Light component on it these will not get baked with Bakery and will keep acting as real time lights even if set to baked.";
+        private readonly string combinedBakeryLightUnityLight = "You have %count% Bakery lights that have an active Unity Light component on it.";
+        private readonly string bakeryLightUnityLightInfo = "These will not get baked with Bakery and will keep acting as real time lights even if set to baked.";
         private readonly string missingShaderWarning = "The material %variable% found in your scene has a missing or broken shader.";
-        private readonly string combinedMissingShaderWarning = "You have %count% materials found in your scene that have missing or broken shaders. These will fallback to the pink error shader.";
+        private readonly string combinedMissingShaderWarning = "You have %count% materials found in your scene that have missing or broken shaders.";
+        private readonly string missingShaderWarningInfo = "These will fallback to the pink error shader.";
         private readonly string errorPauseWarning = "You have Error Pause enabled in your console this can cause your world upload to fail by interrupting the build process.";
         #endregion
 
@@ -1248,7 +1279,7 @@ namespace VRWorldToolkit.WorldDebugger
 
             if (triggerWrongLayer.Count > 0)
             {
-                MessageGroup triggerWrongLayerGroup = new MessageGroup(triggerTriggerWrongLayer, combinedTriggerTriggerWrongLayer, MessageType.Warning);
+                MessageGroup triggerWrongLayerGroup = new MessageGroup(triggerTriggerWrongLayer, combinedTriggerTriggerWrongLayer, triggerTriggerWrongLayerInfo, MessageType.Warning);
                 foreach (var item in triggerWrongLayer)
                 {
                     triggerWrongLayerGroup.addSingleMessage(new SingleMessage(item.name).setSelectObject(item.gameObject).setAutoFix(SetObjectLayer(item.gameObject, "MirrorReflection")));
@@ -1285,7 +1316,7 @@ namespace VRWorldToolkit.WorldDebugger
 
             if (cameraCount > 0 && cameraCount != 1)
             {
-                MessageGroup activeCamerasMessages = new MessageGroup(activeCameraOutputtingToRenderTexture, combinedActiveCamerasOutputtingToRenderTextures, MessageType.BadFPS);
+                MessageGroup activeCamerasMessages = new MessageGroup(activeCameraOutputtingToRenderTexture, combinedActiveCamerasOutputtingToRenderTextures, activeCamerasOutputtingToRenderTextureInfo, MessageType.BadFPS);
                 foreach (var camera in activeCameras)
                 {
                     activeCamerasMessages.addSingleMessage(new SingleMessage(cameraCount.ToString()).setSelectObject(camera.gameObject));
@@ -1297,7 +1328,7 @@ namespace VRWorldToolkit.WorldDebugger
             VRC_MirrorReflection[] mirrors = FindObjectsOfType(typeof(VRC_MirrorReflection)) as VRC_MirrorReflection[];
             if (mirrors.Length > 0)
             {
-                MessageGroup activeCamerasMessage = new MessageGroup(mirrorOnByDefault, combinedMirrorsOnByDefault, MessageType.BadFPS);
+                MessageGroup activeCamerasMessage = new MessageGroup(mirrorOnByDefault, combinedMirrorsOnByDefault, mirrorsOnByDefaultInfo, MessageType.BadFPS);
                 foreach (var mirror in mirrors)
                 {
                     activeCamerasMessage.addSingleMessage(new SingleMessage(mirror.name).setSelectObject(mirror.gameObject));
@@ -1362,7 +1393,7 @@ namespace VRWorldToolkit.WorldDebugger
 
                 if (notEditorOnly.Count > 0)
                 {
-                    MessageGroup notEditorOnlyGroup = new MessageGroup(bakeryLightNotSetEditorOnly, combinedBakeryLightNotSetEditorOnly, MessageType.Warning);
+                    MessageGroup notEditorOnlyGroup = new MessageGroup(bakeryLightNotSetEditorOnly, combinedBakeryLightNotSetEditorOnly, bakeryLightNotSetEditorOnlyInfo, MessageType.Warning);
                     foreach (var item in notEditorOnly)
                     {
                         notEditorOnlyGroup.addSingleMessage(new SingleMessage(item.name).setAutoFix(SetGameObjectTag(item, "EditorOnly")).setSelectObject(item));
@@ -1372,7 +1403,7 @@ namespace VRWorldToolkit.WorldDebugger
 
                 if (unityLightOnBakeryLight.Count > 0)
                 {
-                    MessageGroup unityLightGroup = new MessageGroup(bakeryLightUnityLight, combinedBakeryLightUnityLight, MessageType.Warning);
+                    MessageGroup unityLightGroup = new MessageGroup(bakeryLightUnityLight, combinedBakeryLightUnityLight, bakeryLightUnityLightInfo, MessageType.Warning);
                     foreach (var item in unityLightOnBakeryLight)
                     {
                         unityLightGroup.addSingleMessage(new SingleMessage(item.name).setAutoFix(DisableComponent(item.GetComponent<Light>())).setSelectObject(item));
@@ -1440,7 +1471,7 @@ namespace VRWorldToolkit.WorldDebugger
 
                 LightProbeGroup[] lightprobegroups = GameObject.FindObjectsOfType<LightProbeGroup>();
 
-                MessageGroup overlappingLightProbesGroup = new MessageGroup(overlappingLightProbes, combinedOverlappingLightProbes, MessageType.Info);
+                MessageGroup overlappingLightProbesGroup = new MessageGroup(overlappingLightProbes, combinedOverlappingLightProbes, overlappingLightProbesInfo, MessageType.Info);
 
                 foreach (LightProbeGroup lightprobegroup in lightprobegroups)
                 {
@@ -1506,7 +1537,7 @@ namespace VRWorldToolkit.WorldDebugger
 
                 if (nonBakedLights.Count != 0)
                 {
-                    MessageGroup nonBakedLightsGroup = new MessageGroup(nonBakedBakedLights, combinedNonBakedBakedLights, MessageType.BadFPS);
+                    MessageGroup nonBakedLightsGroup = new MessageGroup(nonBakedBakedLights, combinedNonBakedBakedLights, nonBakedBakedLightsInfo, MessageType.Warning);
                     foreach (var item in nonBakedLights)
                     {
                         nonBakedLightsGroup.addSingleMessage(new SingleMessage(item.name).setSelectObject(item.gameObject));
@@ -1717,7 +1748,7 @@ namespace VRWorldToolkit.WorldDebugger
 
             List<Material> checkedMaterials = new List<Material>();
 
-            MessageGroup mirrorsDefaultLayers = new MessageGroup(mirrorWithDefaultLayers, combinedMirrorWithDefaultLayers, MessageType.Tips);
+            MessageGroup mirrorsDefaultLayers = new MessageGroup(mirrorWithDefaultLayers, combinedMirrorWithDefaultLayers, mirrorWithDefaultLayersInfo, MessageType.Tips);
 
             foreach (GameObject gameObject in Resources.FindObjectsOfTypeAll(typeof(GameObject)))
             {
@@ -1848,7 +1879,7 @@ namespace VRWorldToolkit.WorldDebugger
             var missingShadersCount = missingShaders.Count;
             if (missingShadersCount > 0)
             {
-                MessageGroup missingsShadersGroup = new MessageGroup(missingShaderWarning, combinedMissingShaderWarning, MessageType.Error);
+                MessageGroup missingsShadersGroup = new MessageGroup(missingShaderWarning, combinedMissingShaderWarning, missingShaderWarningInfo, MessageType.Error);
                 foreach (var material in missingShaders)
                 {
                     missingsShadersGroup.addSingleMessage(new SingleMessage(material.name).setAssetPath(AssetDatabase.GetAssetPath(material)).setAutoFix(ChangeShader(material, "Standard")));
