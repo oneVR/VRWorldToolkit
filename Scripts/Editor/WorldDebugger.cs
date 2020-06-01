@@ -474,7 +474,7 @@ namespace VRWorldToolkit.WorldDebugger
 
                                     bool expanded = group.isExpanded(messageGroup);
 
-                                    expanded = EditorGUILayout.Foldout(expanded, "Show separete messages");
+                                    expanded = EditorGUILayout.Foldout(expanded, "Show separate messages");
 
                                     group.setExpanded(messageGroup, expanded);
 
