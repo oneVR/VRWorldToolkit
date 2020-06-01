@@ -1908,6 +1908,8 @@ namespace VRWorldToolkit.WorldDebugger
 
             masterList.DrawTabSelector();
 
+            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+
             EditorGUILayout.BeginHorizontal();
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
 
