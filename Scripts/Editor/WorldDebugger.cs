@@ -853,7 +853,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Change shader?", "This operation will change the shader of the material " + material.name + " to " + shader + ". Do You want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Change shader?", "This operation will change the shader of the material " + material.name + " to " + shader + ". Do you want to continue?", "Yes", "Cancel"))
                 {
                     Shader standard = Shader.Find(shader);
                     material.shader = standard;
@@ -865,7 +865,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Change shader?", "This operation will change the shader of " + materials.Length + " materials to " + shader + ". Do You want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Change shader?", "This operation will change the shader of " + materials.Length + " materials to " + shader + ". Do you want to continue?", "Yes", "Cancel"))
                 {
                     Shader standard = Shader.Find(shader);
                     foreach (var material in materials)
@@ -880,7 +880,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Remove overlapping light probes?", "This operation will remove any overlapping light probes in the group \"" + lpg.gameObject.name + "\". Do You want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Remove overlapping light probes?", "This operation will remove any overlapping light probes in the group \"" + lpg.gameObject.name + "\". Do you want to continue?", "Yes", "Cancel"))
                 {
                     lpg.probePositions = lpg.probePositions.Distinct().ToArray();
                 }
@@ -891,7 +891,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Remove overlapping light probes?", "This operation will remove any overlapping light probes found in the current scene. Do You want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Remove overlapping light probes?", "This operation will remove any overlapping light probes found in the current scene. Do you want to continue?", "Yes", "Cancel"))
                 {
                     foreach (var lpg in lpgs)
                     {
@@ -908,7 +908,7 @@ namespace VRWorldToolkit.WorldDebugger
                 if (LightmapSettings.lightProbes != null)
                 {
                     var probes = LightmapSettings.lightProbes.positions;
-                    if (EditorUtility.DisplayDialog("Remove redundant light probes?", "This operation will attempt to remove any redundant light probes in the current scene. Bake your lighting before this operation to avoid any correct light probes getting removed. Do You want to continue?", "Yes", "Cancel"))
+                    if (EditorUtility.DisplayDialog("Remove redundant light probes?", "This operation will attempt to remove any redundant light probes in the current scene. Bake your lighting before this operation to avoid any correct light probes getting removed. Do you want to continue?", "Yes", "Cancel"))
                     {
                         foreach (var lpg in lpgs)
                         {
@@ -1032,25 +1032,25 @@ namespace VRWorldToolkit.WorldDebugger
         private readonly string worldDescriptorOff = "Your Scene Descriptor is %variable% units far from the the zero point in Unity. It's usually good practice to try to keep it as close as possible to the absolute zero point to avoid floating point errors.";
         private readonly string noSpawnPointSet = "There are no spawn points set in your Scene Descriptor. Spawning into a world with no spawn point will cause you to get thrown back to your home world.";
         private readonly string nullSpawnPoint = "There is a null spawn point set in your Scene Descriptor. Spawning into a null spawn point will cause you to get thrown back to your home world.";
-        private readonly string colliderUnderSpawnIsTrigger = "The only collider (%variable%) under your spawn point %variable2% has been set as a trigger! Spawning into a world with nothing to stand on will cause the players to fall forever.";
+        private readonly string colliderUnderSpawnIsTrigger = "The collider \"%variable%\" under your spawn point %variable2% has been set as Is Trigger! Spawning into a world with nothing to stand on will cause the players to fall forever.";
         private readonly string noColliderUnderSpawn = "Your spawn point %variable% doesn't have anything underneath it. Spawning into a world with nothing to stand on will cause the players to fall forever";
         private readonly string noPlayerMods = "No Player Mods found in the scene. Player mods are used for adding jumping and changing walking speed.";
         private readonly string triggerTriggerNotTrigger = "You have an OnEnterTrigger or OnExitTrigger Trigger \"%variable%\", but it's Collider has not been set as Is Trigger. These Triggers need to have a Collider set to be Is Trigger to work.";
         private readonly string colliderTriggerIsTrigger = "You have an OnEnterCollider or OnExitCollider Trigger \"%variable%\" that has a Collider set to be Is Trigger. These only react if the collider on the object has not been set to be Is Trigger.";
         private readonly string triggerTriggerNoCollider = "You have an OnEnterTrigger or OnExitTrigger Trigger \"%variable%\" that doesn't have a Collider on it.";
         private readonly string colliderTriggerNoCollider = "You have an OnEnterCollider or OnExitCollider Trigger \"%variable%\" that doesn't have a Collider on it.";
-        private readonly string triggerTriggerWrongLayer = "You have an OnEnterTrigger or OnExitTrigger Trigger (%variable%) that is not on the MirrorReflection layer.";
+        private readonly string triggerTriggerWrongLayer = "You have an OnEnterTrigger or OnExitTrigger Trigger \"%variable%\" that is not on the MirrorReflection layer.";
         private readonly string combinedTriggerTriggerWrongLayer = "You have %count% OnEnterTrigger or OnExitTrigger Triggers that are not on the MirrorReflection layer.";
         private readonly string triggerTriggerWrongLayerInfo = "This can stop raycasts from working properly breaking buttons, UI Menus and pickups for example.";
         private readonly string mirrorOnByDefault = "The mirror %variable% is on by default.";
         private readonly string combinedMirrorsOnByDefault = "The scene has %count% mirrors on by default.";
         private readonly string mirrorsOnByDefaultInfo = "This is a very bad practice and you should disable any mirrors in your world by default.";
-        private readonly string mirrorWithDefaultLayers = "The mirror %variable% has the default Reflect Layers set.";
+        private readonly string mirrorWithDefaultLayers = "The mirror \"%variable%\" has the default Reflect Layers set.";
         private readonly string combinedMirrorWithDefaultLayers = "You have %count% mirrors that have the default Reflect Layers set.";
         private readonly string mirrorWithDefaultLayersInfo = "Only having the layers you need enabled in mirrors can save a lot of frames especially in populated instances.";
         private readonly string bakedOcclusionCulling = "Baked Occlusion Culling found.";
         private readonly string noOcclusionCulling = "You haven't baked Occlusion Culling yet. Occlusion culling gives you a lot more performance in your world, especially in larger worlds that have multiple rooms/areas.";
-        private readonly string activeCameraOutputtingToRenderTexture = "Your scene has an active camera (%variable%) outputting to a render texture.";
+        private readonly string activeCameraOutputtingToRenderTexture = "Your scene has an active camera \"%variable%\" outputting to a render texture.";
         private readonly string combinedActiveCamerasOutputtingToRenderTextures = "The current scene has %count% active cameras outputting to render textures.";
         private readonly string activeCamerasOutputtingToRenderTextureInfo = "This will affect performance negatively by causing more drawcalls to happen. Ideally you would only have them enabled when needed.";
         private readonly string noToonShaders = "You shouldn't use toon shaders for world building, as they're missing crucial things for making worlds. For world building the most recommended shader is Standard.";
@@ -1059,12 +1059,12 @@ namespace VRWorldToolkit.WorldDebugger
         private readonly string singleColorEnviromentLighting = "Consider changing your Enviroment Lighting to Gradient from Flat.";
         private readonly string darkEnviromentLighting = "Using dark colours for Environment Lighting can cause avatars to look weird. Only use dark Environment Lighting if your world has dark lighting.";
         private readonly string customEnviromentReflectionsNull = "Your Enviroment Reflections have been set to custom, but you haven't defined a custom cubemap!";
-        private readonly string noLightmapUV = "Model found in the scene %variable% is set to be lightmapped but doesn't have Lightmap UVs.";
+        private readonly string noLightmapUV = "Model found in the scene \"%variable%\" is set to be lightmapped but doesn't have Lightmap UVs.";
         private readonly string combineNoLightmapUV = "The current scene has %count% models set to be lightmapped that don't have Lightmap UVs. This causes issues when baking lighting. You can enable generating Lightmap UV's in the model's import settings.";
         private readonly string lightsNotBaked = "The current scenes lighting is not baked. Consider baking your lights for improved performance.";
         private readonly string considerLargerLightmaps = "Consider increasing your Lightmap Size from %variable% to 4096. This allows for more stuff to fit on a single lightmap, leaving less textures that need to be sampled.";
         private readonly string considerSmallerLightmaps = "Baking lightmaps at 4096 with Progressive GPU will silently fall back to CPU Progressive because it needs more than 12GB GPU Memory to be able to bake with GPU Progressive.";
-        private readonly string nonBakedBakedLights = "The light \"%variable%\" is set to be baked/mixed but it hasn't been baked yet!";
+        private readonly string nonBakedBakedLights = "The light %variable% is set to be baked/mixed but it hasn't been baked yet!";
         private readonly string combinedNonBakedBakedLights = "The scene contains %count% baked/mixed lights that haven't been baked!";
         private readonly string nonBakedBakedLightsInfo = "Baked lights that haven't been baked yet function as realtime lights ingame.";
         private readonly string lightingDataAssetInfo = "Your lighting data asset takes up %variable% MB of your world's size. This contains your scene's light probe data and realtime GI data.";
@@ -1076,7 +1076,7 @@ namespace VRWorldToolkit.WorldDebugger
         private readonly string combinedOverlappingLightProbes = "%count% Light Probe Groups with overlapping light probes found.";
         private readonly string overlappingLightProbesInfo = "These can cause a slowdown in the editor and won't get baked because Unity will skip any extra overlapping probes.";
         private readonly string noReflectionProbes = "Your scene has no active reflection probes. Reflection probes are needed to have proper reflections on reflective materials.";
-        private readonly string reflectionProbesSomeUnbaked = "The reflection probe named \"%variable%\" is unbaked.";
+        private readonly string reflectionProbesSomeUnbaked = "The reflection probe \"%variable%\" is unbaked.";
         private readonly string combinedReflectionProbesSomeUnbaked = "Your scene has %count% unbaked reflection probes.";
         private readonly string reflectionProbeCountText = "Your scene has %variable% baked reflection probes.";
         private readonly string postProcessingImportedButNotSetup = "Your project has Post Processing imported, but you haven't set it up yet.";
@@ -1105,7 +1105,7 @@ namespace VRWorldToolkit.WorldDebugger
         private readonly string bakeryLightUnityLight = "Your Bakery light named %variable% has an active Unity Light component on it.";
         private readonly string combinedBakeryLightUnityLight = "You have %count% Bakery lights that have an active Unity Light component on it.";
         private readonly string bakeryLightUnityLightInfo = "These will not get baked with Bakery and will keep acting as real time lights even if set to baked.";
-        private readonly string missingShaderWarning = "The material %variable% found in your scene has a missing or broken shader.";
+        private readonly string missingShaderWarning = "The material \"%variable%\" found in your scene has a missing or broken shader.";
         private readonly string combinedMissingShaderWarning = "You have %count% materials found in your scene that have missing or broken shaders.";
         private readonly string missingShaderWarningInfo = "These will fallback to the pink error shader.";
         private readonly string errorPauseWarning = "You have Error Pause enabled in your console this can cause your world upload to fail by interrupting the build process.";
