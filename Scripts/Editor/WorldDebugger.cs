@@ -1115,7 +1115,7 @@ namespace VRWorldToolkit.WorldDebugger
         private static readonly string postProcessingVolumeNotGlobalNoCollider = "The Post Processing Volume \"%variable%\" isn't marked as Global and doesn't have a collider. It won't affect the camera without one of these set on it.";
         private static readonly string noProfileSet = "You don't have a profile set in the Post Processing Volume %variable%";
         private static readonly string volumeOnWrongLayer = "Your Post Processing Volume \"%variable%\" is not on one of the layers set in your cameras Post Processing Layer setting. (Currently: %variable2%)";
-        private static readonly string dontUseNoneForTonemapping = "Use either Neutral or ACES for Color Grading tonemapping, using None is the same as not using Color Grading.";
+        private static readonly string dontUseNoneForTonemapping = "Use either Neutral or ACES for Color Grading tonemapping, selecting None for Tonemapping is essentially the same as leaving Tonemapping unchecked.";
         private static readonly string tooHighBloomIntensity = "Don't raise the Bloom intensity too high! You should use a low Bloom intensity, between 0.01 to 0.3.";
         private static readonly string tooHighBloomThreshold = "You should avoid having your Bloom threshold set high. It might cause unexpected problems with avatars. Ideally you should keep it at 0, but always below 1.0.";
         private static readonly string noBloomDirtInVR = "Don't use Bloom Dirt, it looks really bad in VR!";
