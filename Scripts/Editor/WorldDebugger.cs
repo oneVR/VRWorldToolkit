@@ -1961,11 +1961,11 @@ namespace VRWorldToolkit.WorldDebugger
             buildReport = AssetDatabase.LoadAssetAtPath<BuildReport>(assetPath);
         }
 
-        private static string lastBuild = "Library/LastBuild.buildreport";
+        private static readonly string lastBuild = "Library/LastBuild.buildreport";
 
-        private static string buildReportDir = "Assets/_LastBuild/";
+        private static readonly string buildReportDir = "Assets/_LastBuild/";
 
-        private static string assetPath = "Assets/_LastBuild/LastBuild.buildreport";
+        private static readonly string assetPath = "Assets/_LastBuild/LastBuild.buildreport";
 
         private static DateTime timeNow;
 
