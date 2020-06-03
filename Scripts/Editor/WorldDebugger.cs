@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using System.Linq;
 using VRC.Core;
+using System.Threading.Tasks;
 #if VRC_SDK_VRCSDK3
 using VRC.SDKBase;
 #endif
@@ -1138,6 +1139,8 @@ namespace VRWorldToolkit.WorldDebugger
         private static readonly string errorPauseWarning = "You have Error Pause enabled in your console this can cause your world upload to fail by interrupting the build process.";
         #endregion
 
+        static long occlusionCacheFiles = 0;
+
         private static MessageCategory general;
         private static MessageCategory optimization;
         private static MessageCategory lighting;
@@ -1325,6 +1328,37 @@ namespace VRWorldToolkit.WorldDebugger
             else
             {
                 optimization.addMessageGroup(new MessageGroup(noOcclusionCulling, MessageType.Tips).setDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/occlusion-culling-getting-started.html"));
+            }
+
+            if (Directory.Exists("Library/Occlusion/"))
+            {
+                if (occlusionCacheFiles == 0)
+                {
+                    System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
+                    foreach (var file in Directory.EnumerateFiles("Library/Occlusion/"))
+                    {
+                        occlusionCacheFiles++;
+                        //if (occlusionCacheFiles >= 5000)
+                        //{
+                        //    break;
+                        //}
+                    };
+                    watch.Stop();
+                    Debug.Log("Files counted in: " + watch.ElapsedMilliseconds + " ms. Files found " + occlusionCacheFiles);
+                }
+                MessageType cacheWarningType = MessageType.Info;
+                if (occlusionCacheFiles > 50000)
+                {
+                    cacheWarningType = MessageType.Error;
+                }
+                else if (occlusionCacheFiles > 5000)
+                {
+                    cacheWarningType = MessageType.Warning;
+                }
+                if (occlusionCacheFiles > 0)
+                {
+                    optimization.addMessageGroup(new MessageGroup(occlusionCullingCacheWarning, cacheWarningType).addSingleMessage(new SingleMessage(occlusionCacheFiles.ToString()).setAutoFix(ClearOcclusionCache())));
+                }
             }
 
             //Check if there's any active cameras outputting to render textures
