@@ -927,26 +927,46 @@ namespace VRWorldToolkit.WorldDebugger
 
         public static System.Action ClearOcclusionCache(long fileCount)
         {
-            return () =>
+            return async () =>
             {
-                if (EditorUtility.DisplayDialog("Clear Occlusion Cache?", "This will clear your occlusion culling cache, make sure to bake your occlusion again after running this. Be careful when deleting a massive amount of files as it can take a while. Do you want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Clear Occlusion Cache?", "This will clear your occlusion culling cache. Which has ~" + fileCount + " files currently. Be careful when deleting a massive amount of files as it can take a while. Do you want to continue?", "Yes", "Cancel"))
                 {
                     long deleteCount = 0;
-                    System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
-                    Parallel.ForEach(Directory.EnumerateFiles("Library/Occlusion/"), file =>
+
+                    CancellationTokenSource tokenSource = new CancellationTokenSource();
+
+                    var deleteFiles = new Progress<string>(fileName =>
                     {
-                        if (file != null)
+                        deleteCount++;
+                        if (EditorUtility.DisplayCancelableProgressBar("Clearing Occlusion Cache", fileName, (float)deleteCount / (float)fileCount))
                         {
-                            File.Delete(file);
-                            deleteCount++;
+                            tokenSource.Cancel();
                         }
                     });
-                    EditorUtility.DisplayDialog("Files Deleted", "Deleted " + deleteCount + " files.", "Ok");
-                    watch.Stop();
-                    Debug.Log("Files deleted in: " + watch.ElapsedMilliseconds + " ms. Files deleted " + deleteCount);
+
+                    var token = tokenSource.Token;
+
+                    await Task.Run(() => DeleteFiles(deleteFiles, token));
+                    EditorUtility.ClearProgressBar();
+
                     occlusionCacheFiles = 0;
+                    EditorUtility.DisplayDialog("Files Deleted", "Deleted " + deleteCount + " files.", "Ok");
                 }
             };
+        }
+
+        public static void DeleteFiles(IProgress<string> deleted, CancellationToken cancellationToken)
+        {
+            Parallel.ForEach(Directory.EnumerateFiles("Library/Occlusion/"), (file, state) =>
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    state.Break();
+                }
+
+                File.Delete(file);
+                deleted.Report(file);
+            });
         }
 
         public static System.Action FixSpawns(VRC_SceneDescriptor descriptor)
