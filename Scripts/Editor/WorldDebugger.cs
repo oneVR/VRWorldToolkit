@@ -2013,7 +2013,7 @@ namespace VRWorldToolkit.WorldDebugger
             }
             else
             {
-                GUILayout.Label("No build done yet");
+                GUILayout.Label("No build found");
             }
 
             GUILayout.EndVertical();
