@@ -1974,7 +1974,10 @@ namespace VRWorldToolkit.WorldDebugger
 
             if (recheck)
             {
+                //System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
                 CheckScene();
+                //watch.Stop();
+                //Debug.Log("Scene checked in: " + watch.ElapsedMilliseconds + " ms.");
                 recheck = false;
             }
 
