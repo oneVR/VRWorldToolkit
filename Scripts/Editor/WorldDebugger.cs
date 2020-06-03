@@ -1075,7 +1075,7 @@ namespace VRWorldToolkit.WorldDebugger
         private static readonly string mirrorWithDefaultLayersInfo = "Only having the layers you need enabled in mirrors can save a lot of frames especially in populated instances.";
         private static readonly string bakedOcclusionCulling = "Baked Occlusion Culling found.";
         private static readonly string noOcclusionCulling = "You haven't baked Occlusion Culling yet. Occlusion culling gives you a lot more performance in your world, especially in larger worlds that have multiple rooms/areas.";
-        private static readonly string occlusionCullingCacheWarning = "Your occlusion culling cache has %variable% files. When the occlusion culling cache grows too big baking occlusion culling can take much longer than intended.";
+        private static readonly string occlusionCullingCacheWarning = "Your occlusion culling cache has %variable% files. When the occlusion culling cache grows too big baking occlusion culling can take much longer than intended. It can be cleared with no negative effects.";
         private static readonly string activeCameraOutputtingToRenderTexture = "Your scene has an active camera \"%variable%\" outputting to a render texture.";
         private static readonly string combinedActiveCamerasOutputtingToRenderTextures = "The current scene has %count% active cameras outputting to render textures.";
         private static readonly string activeCamerasOutputtingToRenderTextureInfo = "This will affect performance negatively by causing more drawcalls to happen. Ideally you would only have them enabled when needed.";
