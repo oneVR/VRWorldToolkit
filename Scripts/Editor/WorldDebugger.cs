@@ -1145,7 +1145,7 @@ namespace VRWorldToolkit.WorldDebugger
         private static MessageCategory lighting;
         private static MessageCategory postProcessing;
 
-        private static void CheckScene()
+        private void CheckScene()
         {
             masterList.ClearCategories();
 
