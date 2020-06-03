@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using UnityEditor;
-using UnityEditor.Build.Reporting;
-using UnityEngine;
-using UnityEngine.Rendering;
-using System.Linq;
-using VRC.Core;
-using System.Threading.Tasks;
-#if VRC_SDK_VRCSDK3
+﻿#if VRC_SDK_VRCSDK3
 using VRC.SDKBase;
 #endif
 #if VRC_SDK_VRCSDK2
@@ -17,6 +7,17 @@ using VRCSDK2;
 #if UNITY_POST_PROCESSING_STACK_V2
 using UnityEngine.Rendering.PostProcessing;
 #endif
+using System;
+using System.Collections.Generic;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
+using UnityEngine.Rendering;
+using System.Linq;
+using VRC.Core;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace VRWorldToolkit.WorldDebugger
 {
