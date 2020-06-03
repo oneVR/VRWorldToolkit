@@ -1349,33 +1349,31 @@ namespace VRWorldToolkit.WorldDebugger
                 optimization.addMessageGroup(new MessageGroup(noOcclusionCulling, MessageType.Tips).setDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/occlusion-culling-getting-started.html"));
             }
 
+            //Check for bloat in occlusion cache
             if (Directory.Exists("Library/Occlusion/"))
             {
+                //Count the files
                 if (occlusionCacheFiles == 0)
                 {
-                    System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
                     foreach (var file in Directory.EnumerateFiles("Library/Occlusion/"))
                     {
                         occlusionCacheFiles++;
-                        //if (occlusionCacheFiles >= 5000)
-                        //{
-                        //    break;
-                        //}
                     };
-                    watch.Stop();
-                    Debug.Log("Files counted in: " + watch.ElapsedMilliseconds + " ms. Files found " + occlusionCacheFiles);
                 }
-                MessageType cacheWarningType = MessageType.Info;
-                if (occlusionCacheFiles > 50000)
-                {
-                    cacheWarningType = MessageType.Error;
-                }
-                else if (occlusionCacheFiles > 5000)
-                {
-                    cacheWarningType = MessageType.Warning;
-                }
+
                 if (occlusionCacheFiles > 0)
                 {
+                    //Set the message type depending on how many files found
+                    MessageType cacheWarningType = MessageType.Info;
+                    if (occlusionCacheFiles > 50000)
+                    {
+                        cacheWarningType = MessageType.Error;
+                    }
+                    else if (occlusionCacheFiles > 5000)
+                    {
+                        cacheWarningType = MessageType.Warning;
+                    }
+
                     optimization.addMessageGroup(new MessageGroup(occlusionCullingCacheWarning, cacheWarningType).addSingleMessage(new SingleMessage(occlusionCacheFiles.ToString()).setAutoFix(ClearOcclusionCache(occlusionCacheFiles))));
                 }
             }
