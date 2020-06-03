@@ -683,15 +683,15 @@ namespace VRWorldToolkit.WorldDebugger
 
         Vector2 scrollPos;
 
-        static string lastBuild = "Library/LastBuild.buildreport";
+        private static string lastBuild = "Library/LastBuild.buildreport";
 
-        static string buildReportDir = "Assets/_LastBuild/";
+        private static string buildReportDir = "Assets/_LastBuild/";
 
-        static string assetPath = "Assets/_LastBuild/LastBuild.buildreport";
+        private static string assetPath = "Assets/_LastBuild/LastBuild.buildreport";
 
-        static DateTime timeNow;
+        private static DateTime timeNow;
 
-        private BuildReport buildReport;
+        private static BuildReport buildReport;
 
         [MenuItem("VRWorld Toolkit/Open World Debugger", false, 0)]
         public static void ShowWindow()
@@ -712,7 +712,7 @@ namespace VRWorldToolkit.WorldDebugger
         }
 
         #region Actions
-        System.Action SelectAsset(GameObject obj)
+        public static System.Action SelectAsset(GameObject obj)
         {
             return () =>
             {
@@ -720,7 +720,7 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
-        System.Action SetGenerateLightmapUV(ModelImporter importer)
+        public static System.Action SetGenerateLightmapUV(ModelImporter importer)
         {
             return () =>
             {
@@ -732,7 +732,7 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
-        System.Action SetGenerateLightmapUV(List<ModelImporter> importers)
+        public static System.Action SetGenerateLightmapUV(List<ModelImporter> importers)
         {
             return () =>
             {
@@ -747,7 +747,7 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
-        System.Action DisableComponent(Behaviour behaviour)
+        public static System.Action DisableComponent(Behaviour behaviour)
         {
             return () =>
             {
@@ -758,7 +758,7 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
-        System.Action DisableComponent(Behaviour[] behaviours)
+        public static System.Action DisableComponent(Behaviour[] behaviours)
         {
             return () =>
             {
@@ -772,7 +772,7 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
-        System.Action SetObjectLayer(GameObject obj, string layer)
+        public static System.Action SetObjectLayer(GameObject obj, string layer)
         {
             return () =>
             {
@@ -783,7 +783,7 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
-        System.Action SetObjectLayer(GameObject[] objs, string layer)
+        public static System.Action SetObjectLayer(GameObject[] objs, string layer)
         {
             return () =>
             {
@@ -797,7 +797,7 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
-        System.Action SetLightmapSize(int newSize)
+        public static System.Action SetLightmapSize(int newSize)
         {
             return () =>
             {
@@ -808,7 +808,7 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
-        System.Action SetEnviromentReflections(DefaultReflectionMode reflections)
+        public static System.Action SetEnviromentReflections(DefaultReflectionMode reflections)
         {
             return () =>
             {
@@ -816,7 +816,7 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
-        System.Action SetAmbientMode(AmbientMode ambientMode)
+        public static System.Action SetAmbientMode(AmbientMode ambientMode)
         {
             return () =>
             {
@@ -824,7 +824,7 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
-        System.Action SetGameObjectTag(GameObject obj, string tag)
+        public static System.Action SetGameObjectTag(GameObject obj, string tag)
         {
             return () =>
             {
@@ -835,7 +835,7 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
-        System.Action SetGameObjectTag(GameObject[] objs, string tag)
+        public static System.Action SetGameObjectTag(GameObject[] objs, string tag)
         {
             return () =>
             {
@@ -849,7 +849,7 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
-        System.Action ChangeShader(Material material, String shader)
+        public static System.Action ChangeShader(Material material, String shader)
         {
             return () =>
             {
@@ -861,7 +861,7 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
-        System.Action ChangeShader(Material[] materials, String shader)
+        public static System.Action ChangeShader(Material[] materials, String shader)
         {
             return () =>
             {
@@ -876,7 +876,7 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
-        System.Action RemoveOverlappingLightprobes(LightProbeGroup lpg)
+        public static System.Action RemoveOverlappingLightprobes(LightProbeGroup lpg)
         {
             return () =>
             {
@@ -887,7 +887,7 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
-        System.Action RemoveOverlappingLightprobes(LightProbeGroup[] lpgs)
+        public static System.Action RemoveOverlappingLightprobes(LightProbeGroup[] lpgs)
         {
             return () =>
             {
@@ -901,7 +901,7 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
-        System.Action RemoveRedundantLightProbes(LightProbeGroup[] lpgs)
+        public static System.Action RemoveRedundantLightProbes(LightProbeGroup[] lpgs)
         {
             return () =>
             {
@@ -949,7 +949,7 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
-        System.Action FixSpawns(VRC_SceneDescriptor descriptor)
+        public static System.Action FixSpawns(VRC_SceneDescriptor descriptor)
         {
             return () =>
             {
@@ -961,7 +961,7 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
-        System.Action SetErrorPause(bool enabled)
+        public static System.Action SetErrorPause(bool enabled)
         {
             return () =>
             {
@@ -970,7 +970,7 @@ namespace VRWorldToolkit.WorldDebugger
         }
 
 #if UNITY_POST_PROCESSING_STACK_V2
-        System.Action SetReferenceCamera(VRC_SceneDescriptor descriptor)
+        public static System.Action SetReferenceCamera(VRC_SceneDescriptor descriptor)
         {
             return () =>
             {
@@ -994,7 +994,7 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
-        System.Action AddDefaultPPVolume()
+        public static System.Action AddDefaultPPVolume()
         {
             return () =>
             {
@@ -1026,7 +1026,7 @@ namespace VRWorldToolkit.WorldDebugger
             BloomDirt = 2
         }
 
-        System.Action RemovePostProcessSetting(PostProcessProfile postprocess_profile, RemovePSEffect effect)
+        public static System.Action RemovePostProcessSetting(PostProcessProfile postprocess_profile, RemovePSEffect effect)
         {
             return () =>
             {
@@ -1051,98 +1051,99 @@ namespace VRWorldToolkit.WorldDebugger
         #endregion
 
         #region Texts
-        private readonly string noSceneDescriptor = "Your scene has no Scene Descriptor. Please add one yourself, or drag the VRCWorld prefab to your scene.";
-        private readonly string tooManySceneDescriptors = "You have multiple Scene Descriptors, you can only have one Scene Descriptor in a scene.";
-        private readonly string tooManyPipelineManagers = "Your scene has multiple Pipeline Managers in it this can break the world upload process.";
-        private readonly string worldDescriptorFar = "Your Scene Descriptor is %variable% units far from the the zero point in Unity. Having your world center out this far will cause some noticable jittering on models. You should move your world closer to the zero point of your scene.";
-        private readonly string worldDescriptorOff = "Your Scene Descriptor is %variable% units far from the the zero point in Unity. It's usually good practice to try to keep it as close as possible to the absolute zero point to avoid floating point errors.";
-        private readonly string noSpawnPointSet = "There are no spawn points set in your Scene Descriptor. Spawning into a world with no spawn point will cause you to get thrown back to your home world.";
-        private readonly string nullSpawnPoint = "There is a null spawn point set in your Scene Descriptor. Spawning into a null spawn point will cause you to get thrown back to your home world.";
-        private readonly string colliderUnderSpawnIsTrigger = "The collider \"%variable%\" under your spawn point %variable2% has been set as Is Trigger! Spawning into a world with nothing to stand on will cause the players to fall forever.";
-        private readonly string noColliderUnderSpawn = "Your spawn point %variable% doesn't have anything underneath it. Spawning into a world with nothing to stand on will cause the players to fall forever";
-        private readonly string noPlayerMods = "No Player Mods found in the scene. Player mods are used for adding jumping and changing walking speed.";
-        private readonly string triggerTriggerNotTrigger = "You have an OnEnterTrigger or OnExitTrigger Trigger \"%variable%\", but it's Collider has not been set as Is Trigger. These Triggers need to have a Collider set to be Is Trigger to work.";
-        private readonly string colliderTriggerIsTrigger = "You have an OnEnterCollider or OnExitCollider Trigger \"%variable%\" that has a Collider set to be Is Trigger. These only react if the collider on the object has not been set to be Is Trigger.";
-        private readonly string triggerTriggerNoCollider = "You have an OnEnterTrigger or OnExitTrigger Trigger \"%variable%\" that doesn't have a Collider on it.";
-        private readonly string colliderTriggerNoCollider = "You have an OnEnterCollider or OnExitCollider Trigger \"%variable%\" that doesn't have a Collider on it.";
-        private readonly string triggerTriggerWrongLayer = "You have an OnEnterTrigger or OnExitTrigger Trigger \"%variable%\" that is not on the MirrorReflection layer.";
-        private readonly string combinedTriggerTriggerWrongLayer = "You have %count% OnEnterTrigger or OnExitTrigger Triggers that are not on the MirrorReflection layer.";
-        private readonly string triggerTriggerWrongLayerInfo = "This can stop raycasts from working properly breaking buttons, UI Menus and pickups for example.";
-        private readonly string mirrorOnByDefault = "The mirror %variable% is on by default.";
-        private readonly string combinedMirrorsOnByDefault = "The scene has %count% mirrors on by default.";
-        private readonly string mirrorsOnByDefaultInfo = "This is a very bad practice and you should disable any mirrors in your world by default.";
-        private readonly string mirrorWithDefaultLayers = "The mirror \"%variable%\" has the default Reflect Layers set.";
-        private readonly string combinedMirrorWithDefaultLayers = "You have %count% mirrors that have the default Reflect Layers set.";
-        private readonly string mirrorWithDefaultLayersInfo = "Only having the layers you need enabled in mirrors can save a lot of frames especially in populated instances.";
-        private readonly string bakedOcclusionCulling = "Baked Occlusion Culling found.";
-        private readonly string noOcclusionCulling = "You haven't baked Occlusion Culling yet. Occlusion culling gives you a lot more performance in your world, especially in larger worlds that have multiple rooms/areas.";
-        private readonly string activeCameraOutputtingToRenderTexture = "Your scene has an active camera \"%variable%\" outputting to a render texture.";
-        private readonly string combinedActiveCamerasOutputtingToRenderTextures = "The current scene has %count% active cameras outputting to render textures.";
-        private readonly string activeCamerasOutputtingToRenderTextureInfo = "This will affect performance negatively by causing more drawcalls to happen. Ideally you would only have them enabled when needed.";
-        private readonly string noToonShaders = "You shouldn't use toon shaders for world building, as they're missing crucial things for making worlds. For world building the most recommended shader is Standard.";
-        private readonly string nonCrunchedTextures = "%variable%% of the textures used in your scene haven't been crunch compressed. Crunch compression can greatly reduce the size of your world download. It can be accessed from the texture's import settings.";
-        private readonly string switchToProgressive = "The scene is currently using the Enlighten lightmapper, which has been deprecated in newer versions of Unity. You should consider switching to Progressive for improved fidelity and performance.";
-        private readonly string singleColorEnviromentLighting = "Consider changing your Enviroment Lighting to Gradient from Flat.";
-        private readonly string darkEnviromentLighting = "Using dark colours for Environment Lighting can cause avatars to look weird. Only use dark Environment Lighting if your world has dark lighting.";
-        private readonly string customEnviromentReflectionsNull = "Your Enviroment Reflections have been set to custom, but you haven't defined a custom cubemap!";
-        private readonly string noLightmapUV = "Model found in the scene \"%variable%\" is set to be lightmapped but doesn't have Lightmap UVs.";
-        private readonly string combineNoLightmapUV = "The current scene has %count% models set to be lightmapped that don't have Lightmap UVs. This causes issues when baking lighting. You can enable generating Lightmap UV's in the model's import settings.";
-        private readonly string lightsNotBaked = "The current scenes lighting is not baked. Consider baking your lights for improved performance.";
-        private readonly string considerLargerLightmaps = "Consider increasing your Lightmap Size from %variable% to 4096. This allows for more stuff to fit on a single lightmap, leaving less textures that need to be sampled.";
-        private readonly string considerSmallerLightmaps = "Baking lightmaps at 4096 with Progressive GPU will silently fall back to CPU Progressive because it needs more than 12GB GPU Memory to be able to bake with GPU Progressive.";
-        private readonly string nonBakedBakedLights = "The light %variable% is set to be baked/mixed but it hasn't been baked yet!";
-        private readonly string combinedNonBakedBakedLights = "The scene contains %count% baked/mixed lights that haven't been baked!";
-        private readonly string nonBakedBakedLightsInfo = "Baked lights that haven't been baked yet function as realtime lights ingame.";
-        private readonly string lightingDataAssetInfo = "Your lighting data asset takes up %variable% MB of your world's size. This contains your scene's light probe data and realtime GI data.";
-        private readonly string noLightProbes = "No light probes found in the current scene, which means your baked lights won't affect dynamic objects such as players and pickups.";
-        private readonly string lightProbeCountNotBaked = "The current scene contains %variable% light probes, but %variable2% of them haven't been baked yet.";
-        private readonly string lightProbesRemovedNotReBaked = "You've removed some light probes after the last bake, bake them again to update your scene's lighting data. The lighting data contains %variable% baked light probes and the current scene has %variable2% light probes.";
-        private readonly string lightProbeCount = "The current scene contains %variable% baked light probes.";
-        private readonly string overlappingLightProbes = "Light Probe Group \"%variable%\" has %variable2% overlapping light probes.";
-        private readonly string combinedOverlappingLightProbes = "%count% Light Probe Groups with overlapping light probes found.";
-        private readonly string overlappingLightProbesInfo = "These can cause a slowdown in the editor and won't get baked because Unity will skip any extra overlapping probes.";
-        private readonly string noReflectionProbes = "Your scene has no active reflection probes. Reflection probes are needed to have proper reflections on reflective materials.";
-        private readonly string reflectionProbesSomeUnbaked = "The reflection probe \"%variable%\" is unbaked.";
-        private readonly string combinedReflectionProbesSomeUnbaked = "Your scene has %count% unbaked reflection probes.";
-        private readonly string reflectionProbeCountText = "Your scene has %variable% baked reflection probes.";
-        private readonly string postProcessingImportedButNotSetup = "Your project has Post Processing imported, but you haven't set it up yet.";
-        private readonly string noReferenceCameraSet = "Your Scene Descriptor has no Reference Camera set. Without a Reference Camera set, you won't be able to see Post Processing ingame.";
-        private readonly string noPostProcessingVolumes = "You don't have any Post Processing Volumes in your scene. A Post Processing Volume is needed to apply effects to the camera's Post Processing Layer.";
-        private readonly string referenceCameraNoPostProcessingLayer = "Your Reference Camera doesn't have a Post Processing Layer on it. A Post Processing Layer is needed for the Post Processing Volume to affect the camera.";
-        private readonly string volumeBlendingLayerNotSet = "You don't have a Volume Blending Layer set in your Post Process Layer, so post processing won't work. Using the Water layer is recommended.";
-        private readonly string postProcessingVolumeNotGlobalNoCollider = "The Post Processing Volume \"%variable%\" isn't marked as Global and doesn't have a collider. It won't affect the camera without one of these set on it.";
-        private readonly string noProfileSet = "You don't have a profile set in the Post Processing Volume %variable%";
-        private readonly string volumeOnWrongLayer = "Your Post Processing Volume \"%variable%\" is not on one of the layers set in your cameras Post Processing Layer setting. (Currently: %variable2%)";
-        private readonly string dontUseNoneForTonemapping = "Use either Neutral or ACES for Color Grading tonemapping, using None is the same as not using Color Grading.";
-        private readonly string tooHighBloomIntensity = "Don't raise the Bloom intensity too high! You should use a low Bloom intensity, between 0.01 to 0.3.";
-        private readonly string tooHighBloomThreshold = "You should avoid having your Bloom threshold set high. It might cause unexpected problems with avatars. Ideally you should keep it at 0, but always below 1.0.";
-        private readonly string noBloomDirtInVR = "Don't use Bloom Dirt, it looks really bad in VR!";
-        private readonly string noAmbientOcclusion = "Don't use Ambient Occlusion in VRChat! VRchat is using Forward rendering, so it gets applied on top of everything else, which is bad! It also has a super high rendering cost in VR.";
-        private readonly string depthOfFieldWarning = "Depth of field has a high performance cost, and is very disorientating in VR. If you really want to use depth of field, have it be disabled by default.";
-        private readonly string screenSpaceReflectionsWarning = "Screen Space Reflections only works when using deferred rendering. VRchat isn't using deferred rendering, so this will have no effect on the main camera.";
-        private readonly string vignetteWarning = "Only use vignette in very small amounts. A powerful vignette can cause sickness in VR.";
-        private readonly string noPostProcessingImported = "You haven't imported Post Processing to your project yet.";
-        private readonly string questBakedLightingWarning = "You should bake lights for content build for Quest.";
-        private readonly string ambientModeSetToCustom = "Your Environment Lighting setting is broken. This will override all light probes in the scene with black ambient light. Please change it to something else.";
-        private readonly string noProblemsFoundInPP = "No problems found in your post processing setup. In some cases where post processing is working in editor but not in game it's possible some imported asset is causing it not to function properly.";
-        private readonly string bakeryLightNotSetEditorOnly = "Your Bakery light named %variable% is not set to be EditorOnly this causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
-        private readonly string combinedBakeryLightNotSetEditorOnly = "You have %count% Bakery lights are not set to be EditorOnly.";
-        private readonly string bakeryLightNotSetEditorOnlyInfo = "This causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
-        private readonly string bakeryLightUnityLight = "Your Bakery light named %variable% has an active Unity Light component on it.";
-        private readonly string combinedBakeryLightUnityLight = "You have %count% Bakery lights that have an active Unity Light component on it.";
-        private readonly string bakeryLightUnityLightInfo = "These will not get baked with Bakery and will keep acting as real time lights even if set to baked.";
-        private readonly string missingShaderWarning = "The material \"%variable%\" found in your scene has a missing or broken shader.";
-        private readonly string combinedMissingShaderWarning = "You have %count% materials found in your scene that have missing or broken shaders.";
-        private readonly string missingShaderWarningInfo = "These will fallback to the pink error shader.";
-        private readonly string errorPauseWarning = "You have Error Pause enabled in your console this can cause your world upload to fail by interrupting the build process.";
+        private static readonly string noSceneDescriptor = "Your scene has no Scene Descriptor. Please add one yourself, or drag the VRCWorld prefab to your scene.";
+        private static readonly string tooManySceneDescriptors = "You have multiple Scene Descriptors, you can only have one Scene Descriptor in a scene.";
+        private static readonly string tooManyPipelineManagers = "Your scene has multiple Pipeline Managers in it this can break the world upload process.";
+        private static readonly string worldDescriptorFar = "Your Scene Descriptor is %variable% units far from the the zero point in Unity. Having your world center out this far will cause some noticable jittering on models. You should move your world closer to the zero point of your scene.";
+        private static readonly string worldDescriptorOff = "Your Scene Descriptor is %variable% units far from the the zero point in Unity. It's usually good practice to try to keep it as close as possible to the absolute zero point to avoid floating point errors.";
+        private static readonly string noSpawnPointSet = "There are no spawn points set in your Scene Descriptor. Spawning into a world with no spawn point will cause you to get thrown back to your home world.";
+        private static readonly string nullSpawnPoint = "There is a null spawn point set in your Scene Descriptor. Spawning into a null spawn point will cause you to get thrown back to your home world.";
+        private static readonly string colliderUnderSpawnIsTrigger = "The collider \"%variable%\" under your spawn point %variable2% has been set as Is Trigger! Spawning into a world with nothing to stand on will cause the players to fall forever.";
+        private static readonly string noColliderUnderSpawn = "Your spawn point %variable% doesn't have anything underneath it. Spawning into a world with nothing to stand on will cause the players to fall forever";
+        private static readonly string noPlayerMods = "No Player Mods found in the scene. Player mods are used for adding jumping and changing walking speed.";
+        private static readonly string triggerTriggerNotTrigger = "You have an OnEnterTrigger or OnExitTrigger Trigger \"%variable%\", but it's Collider has not been set as Is Trigger. These Triggers need to have a Collider set to be Is Trigger to work.";
+        private static readonly string colliderTriggerIsTrigger = "You have an OnEnterCollider or OnExitCollider Trigger \"%variable%\" that has a Collider set to be Is Trigger. These only react if the collider on the object has not been set to be Is Trigger.";
+        private static readonly string triggerTriggerNoCollider = "You have an OnEnterTrigger or OnExitTrigger Trigger \"%variable%\" that doesn't have a Collider on it.";
+        private static readonly string colliderTriggerNoCollider = "You have an OnEnterCollider or OnExitCollider Trigger \"%variable%\" that doesn't have a Collider on it.";
+        private static readonly string triggerTriggerWrongLayer = "You have an OnEnterTrigger or OnExitTrigger Trigger \"%variable%\" that is not on the MirrorReflection layer.";
+        private static readonly string combinedTriggerTriggerWrongLayer = "You have %count% OnEnterTrigger or OnExitTrigger Triggers that are not on the MirrorReflection layer.";
+        private static readonly string triggerTriggerWrongLayerInfo = "This can stop raycasts from working properly breaking buttons, UI Menus and pickups for example.";
+        private static readonly string mirrorOnByDefault = "The mirror %variable% is on by default.";
+        private static readonly string combinedMirrorsOnByDefault = "The scene has %count% mirrors on by default.";
+        private static readonly string mirrorsOnByDefaultInfo = "This is a very bad practice and you should disable any mirrors in your world by default.";
+        private static readonly string mirrorWithDefaultLayers = "The mirror \"%variable%\" has the default Reflect Layers set.";
+        private static readonly string combinedMirrorWithDefaultLayers = "You have %count% mirrors that have the default Reflect Layers set.";
+        private static readonly string mirrorWithDefaultLayersInfo = "Only having the layers you need enabled in mirrors can save a lot of frames especially in populated instances.";
+        private static readonly string bakedOcclusionCulling = "Baked Occlusion Culling found.";
+        private static readonly string noOcclusionCulling = "You haven't baked Occlusion Culling yet. Occlusion culling gives you a lot more performance in your world, especially in larger worlds that have multiple rooms/areas.";
+        private static readonly string occlusionCullingCacheWarning = "Your occlusion culling cache has %variable% files. When the occlusion culling cache grows too big baking occlusion culling can take much longer than intended.";
+        private static readonly string activeCameraOutputtingToRenderTexture = "Your scene has an active camera \"%variable%\" outputting to a render texture.";
+        private static readonly string combinedActiveCamerasOutputtingToRenderTextures = "The current scene has %count% active cameras outputting to render textures.";
+        private static readonly string activeCamerasOutputtingToRenderTextureInfo = "This will affect performance negatively by causing more drawcalls to happen. Ideally you would only have them enabled when needed.";
+        private static readonly string noToonShaders = "You shouldn't use toon shaders for world building, as they're missing crucial things for making worlds. For world building the most recommended shader is Standard.";
+        private static readonly string nonCrunchedTextures = "%variable%% of the textures used in your scene haven't been crunch compressed. Crunch compression can greatly reduce the size of your world download. It can be accessed from the texture's import settings.";
+        private static readonly string switchToProgressive = "The scene is currently using the Enlighten lightmapper, which has been deprecated in newer versions of Unity. You should consider switching to Progressive for improved fidelity and performance.";
+        private static readonly string singleColorEnviromentLighting = "Consider changing your Enviroment Lighting to Gradient from Flat.";
+        private static readonly string darkEnviromentLighting = "Using dark colours for Environment Lighting can cause avatars to look weird. Only use dark Environment Lighting if your world has dark lighting.";
+        private static readonly string customEnviromentReflectionsNull = "Your Enviroment Reflections have been set to custom, but you haven't defined a custom cubemap!";
+        private static readonly string noLightmapUV = "Model found in the scene \"%variable%\" is set to be lightmapped but doesn't have Lightmap UVs.";
+        private static readonly string combineNoLightmapUV = "The current scene has %count% models set to be lightmapped that don't have Lightmap UVs. This causes issues when baking lighting. You can enable generating Lightmap UV's in the model's import settings.";
+        private static readonly string lightsNotBaked = "The current scenes lighting is not baked. Consider baking your lights for improved performance.";
+        private static readonly string considerLargerLightmaps = "Consider increasing your Lightmap Size from %variable% to 4096. This allows for more stuff to fit on a single lightmap, leaving less textures that need to be sampled.";
+        private static readonly string considerSmallerLightmaps = "Baking lightmaps at 4096 with Progressive GPU will silently fall back to CPU Progressive because it needs more than 12GB GPU Memory to be able to bake with GPU Progressive.";
+        private static readonly string nonBakedBakedLights = "The light %variable% is set to be baked/mixed but it hasn't been baked yet!";
+        private static readonly string combinedNonBakedBakedLights = "The scene contains %count% baked/mixed lights that haven't been baked!";
+        private static readonly string nonBakedBakedLightsInfo = "Baked lights that haven't been baked yet function as realtime lights ingame.";
+        private static readonly string lightingDataAssetInfo = "Your lighting data asset takes up %variable% MB of your world's size. This contains your scene's light probe data and realtime GI data.";
+        private static readonly string noLightProbes = "No light probes found in the current scene, which means your baked lights won't affect dynamic objects such as players and pickups.";
+        private static readonly string lightProbeCountNotBaked = "The current scene contains %variable% light probes, but %variable2% of them haven't been baked yet.";
+        private static readonly string lightProbesRemovedNotReBaked = "You've removed some light probes after the last bake, bake them again to update your scene's lighting data. The lighting data contains %variable% baked light probes and the current scene has %variable2% light probes.";
+        private static readonly string lightProbeCount = "The current scene contains %variable% baked light probes.";
+        private static readonly string overlappingLightProbes = "Light Probe Group \"%variable%\" has %variable2% overlapping light probes.";
+        private static readonly string combinedOverlappingLightProbes = "%count% Light Probe Groups with overlapping light probes found.";
+        private static readonly string overlappingLightProbesInfo = "These can cause a slowdown in the editor and won't get baked because Unity will skip any extra overlapping probes.";
+        private static readonly string noReflectionProbes = "Your scene has no active reflection probes. Reflection probes are needed to have proper reflections on reflective materials.";
+        private static readonly string reflectionProbesSomeUnbaked = "The reflection probe \"%variable%\" is unbaked.";
+        private static readonly string combinedReflectionProbesSomeUnbaked = "Your scene has %count% unbaked reflection probes.";
+        private static readonly string reflectionProbeCountText = "Your scene has %variable% baked reflection probes.";
+        private static readonly string postProcessingImportedButNotSetup = "Your project has Post Processing imported, but you haven't set it up yet.";
+        private static readonly string noReferenceCameraSet = "Your Scene Descriptor has no Reference Camera set. Without a Reference Camera set, you won't be able to see Post Processing ingame.";
+        private static readonly string noPostProcessingVolumes = "You don't have any Post Processing Volumes in your scene. A Post Processing Volume is needed to apply effects to the camera's Post Processing Layer.";
+        private static readonly string referenceCameraNoPostProcessingLayer = "Your Reference Camera doesn't have a Post Processing Layer on it. A Post Processing Layer is needed for the Post Processing Volume to affect the camera.";
+        private static readonly string volumeBlendingLayerNotSet = "You don't have a Volume Blending Layer set in your Post Process Layer, so post processing won't work. Using the Water layer is recommended.";
+        private static readonly string postProcessingVolumeNotGlobalNoCollider = "The Post Processing Volume \"%variable%\" isn't marked as Global and doesn't have a collider. It won't affect the camera without one of these set on it.";
+        private static readonly string noProfileSet = "You don't have a profile set in the Post Processing Volume %variable%";
+        private static readonly string volumeOnWrongLayer = "Your Post Processing Volume \"%variable%\" is not on one of the layers set in your cameras Post Processing Layer setting. (Currently: %variable2%)";
+        private static readonly string dontUseNoneForTonemapping = "Use either Neutral or ACES for Color Grading tonemapping, using None is the same as not using Color Grading.";
+        private static readonly string tooHighBloomIntensity = "Don't raise the Bloom intensity too high! You should use a low Bloom intensity, between 0.01 to 0.3.";
+        private static readonly string tooHighBloomThreshold = "You should avoid having your Bloom threshold set high. It might cause unexpected problems with avatars. Ideally you should keep it at 0, but always below 1.0.";
+        private static readonly string noBloomDirtInVR = "Don't use Bloom Dirt, it looks really bad in VR!";
+        private static readonly string noAmbientOcclusion = "Don't use Ambient Occlusion in VRChat! VRchat is using Forward rendering, so it gets applied on top of everything else, which is bad! It also has a super high rendering cost in VR.";
+        private static readonly string depthOfFieldWarning = "Depth of field has a high performance cost, and is very disorientating in VR. If you really want to use depth of field, have it be disabled by default.";
+        private static readonly string screenSpaceReflectionsWarning = "Screen Space Reflections only works when using deferred rendering. VRchat isn't using deferred rendering, so this will have no effect on the main camera.";
+        private static readonly string vignetteWarning = "Only use vignette in very small amounts. A powerful vignette can cause sickness in VR.";
+        private static readonly string noPostProcessingImported = "You haven't imported Post Processing to your project yet.";
+        private static readonly string questBakedLightingWarning = "You should bake lights for content build for Quest.";
+        private static readonly string ambientModeSetToCustom = "Your Environment Lighting setting is broken. This will override all light probes in the scene with black ambient light. Please change it to something else.";
+        private static readonly string noProblemsFoundInPP = "No problems found in your post processing setup. In some cases where post processing is working in editor but not in game it's possible some imported asset is causing it not to function properly.";
+        private static readonly string bakeryLightNotSetEditorOnly = "Your Bakery light named %variable% is not set to be EditorOnly this causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
+        private static readonly string combinedBakeryLightNotSetEditorOnly = "You have %count% Bakery lights are not set to be EditorOnly.";
+        private static readonly string bakeryLightNotSetEditorOnlyInfo = "This causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
+        private static readonly string bakeryLightUnityLight = "Your Bakery light named %variable% has an active Unity Light component on it.";
+        private static readonly string combinedBakeryLightUnityLight = "You have %count% Bakery lights that have an active Unity Light component on it.";
+        private static readonly string bakeryLightUnityLightInfo = "These will not get baked with Bakery and will keep acting as real time lights even if set to baked.";
+        private static readonly string missingShaderWarning = "The material \"%variable%\" found in your scene has a missing or broken shader.";
+        private static readonly string combinedMissingShaderWarning = "You have %count% materials found in your scene that have missing or broken shaders.";
+        private static readonly string missingShaderWarningInfo = "These will fallback to the pink error shader.";
+        private static readonly string errorPauseWarning = "You have Error Pause enabled in your console this can cause your world upload to fail by interrupting the build process.";
         #endregion
 
-        MessageCategory general;
-        MessageCategory optimization;
-        MessageCategory lighting;
-        MessageCategory postProcessing;
+        private static MessageCategory general;
+        private static MessageCategory optimization;
+        private static MessageCategory lighting;
+        private static MessageCategory postProcessing;
 
-        public void CheckScene()
+        private static void CheckScene()
         {
             masterList.ClearCategories();
 
@@ -1914,7 +1915,7 @@ namespace VRWorldToolkit.WorldDebugger
             }
         }
 
-        MessageCategoryList masterList;
+        static MessageCategoryList masterList;
 
         void Awake()
         {
