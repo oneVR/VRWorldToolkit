@@ -924,22 +924,20 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
-        public static System.Action ClearOcclusionCache()
+        public static System.Action ClearOcclusionCache(long fileCount)
         {
             return () =>
             {
                 if (EditorUtility.DisplayDialog("Clear Occlusion Cache?", "This will clear your occlusion culling cache, make sure to bake your occlusion again after running this. Be careful when deleting a massive amount of files as it can take a while. Do you want to continue?", "Yes", "Cancel"))
                 {
                     long deleteCount = 0;
-                    bool cancel = false;
                     System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
-                    Parallel.ForEach(Directory.EnumerateFiles("Library/Occlusion/"), (currentFile, state) =>
+                    Parallel.ForEach(Directory.EnumerateFiles("Library/Occlusion/"), file =>
                     {
-                        File.Delete(currentFile);
-                        deleteCount++;
-                        if (cancel)
+                        if (file != null)
                         {
-                            state.Break();
+                            File.Delete(file);
+                            deleteCount++;
                         }
                     });
                     EditorUtility.DisplayDialog("Files Deleted", "Deleted " + deleteCount + " files.", "Ok");
@@ -1357,7 +1355,7 @@ namespace VRWorldToolkit.WorldDebugger
                 }
                 if (occlusionCacheFiles > 0)
                 {
-                    optimization.addMessageGroup(new MessageGroup(occlusionCullingCacheWarning, cacheWarningType).addSingleMessage(new SingleMessage(occlusionCacheFiles.ToString()).setAutoFix(ClearOcclusionCache())));
+                    optimization.addMessageGroup(new MessageGroup(occlusionCullingCacheWarning, cacheWarningType).addSingleMessage(new SingleMessage(occlusionCacheFiles.ToString()).setAutoFix(ClearOcclusionCache(occlusionCacheFiles))));
                 }
             }
 
