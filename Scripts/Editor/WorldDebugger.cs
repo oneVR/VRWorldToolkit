@@ -923,6 +923,32 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
+        public static System.Action ClearOcclusionCache()
+        {
+            return () =>
+            {
+                if (EditorUtility.DisplayDialog("Clear Occlusion Cache?", "This will clear your occlusion culling cache, make sure to bake your occlusion again after running this. Be careful when deleting a massive amount of files as it can take a while. Do you want to continue?", "Yes", "Cancel"))
+                {
+                    long deleteCount = 0;
+                    bool cancel = false;
+                    System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
+                    Parallel.ForEach(Directory.EnumerateFiles("Library/Occlusion/"), (currentFile, state) =>
+                    {
+                        File.Delete(currentFile);
+                        deleteCount++;
+                        if (cancel)
+                        {
+                            state.Break();
+                        }
+                    });
+                    EditorUtility.DisplayDialog("Files Deleted", "Deleted " + deleteCount + " files.", "Ok");
+                    watch.Stop();
+                    Debug.Log("Files deleted in: " + watch.ElapsedMilliseconds + " ms. Files deleted " + deleteCount);
+                    occlusionCacheFiles = 0;
+                }
+            };
+        }
+
         System.Action FixSpawns(VRC_SceneDescriptor descriptor)
         {
             return () =>
