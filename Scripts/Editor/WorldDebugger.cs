@@ -685,28 +685,9 @@ namespace VRWorldToolkit.WorldDebugger
 
         Vector2 scrollPos;
 
-        private static string lastBuild = "Library/LastBuild.buildreport";
-
-        private static string buildReportDir = "Assets/_LastBuild/";
-
-        private static string assetPath = "Assets/_LastBuild/LastBuild.buildreport";
-
-        private static DateTime timeNow;
-
-        private static BuildReport buildReport;
-
         [MenuItem("VRWorld Toolkit/Open World Debugger", false, 0)]
         public static void ShowWindow()
         {
-            if (!Directory.Exists(buildReportDir))
-                Directory.CreateDirectory(buildReportDir);
-
-            if (File.Exists(lastBuild))
-            {
-                File.Copy(lastBuild, assetPath, true);
-                AssetDatabase.ImportAsset(assetPath);
-            }
-
             var window = EditorWindow.GetWindow(typeof(WorldDebugger));
             window.titleContent = new GUIContent("World Debugger");
             window.minSize = new Vector2(530, 600);
@@ -1970,14 +1951,42 @@ namespace VRWorldToolkit.WorldDebugger
 
         void Awake()
         {
-            timeNow = DateTime.Now.ToUniversalTime();
-            buildReport = AssetDatabase.LoadAssetAtPath<BuildReport>(assetPath);
+            refreshBuild();
         }
 
         void OnFocus()
         {
-            timeNow = DateTime.Now.ToUniversalTime();
             recheck = true;
+            refreshBuild();
+            buildReport = AssetDatabase.LoadAssetAtPath<BuildReport>(assetPath);
+        }
+
+        private static string lastBuild = "Library/LastBuild.buildreport";
+
+        private static string buildReportDir = "Assets/_LastBuild/";
+
+        private static string assetPath = "Assets/_LastBuild/LastBuild.buildreport";
+
+        private static DateTime timeNow;
+
+        private static BuildReport buildReport;
+
+        static void refreshBuild()
+        {
+            timeNow = DateTime.Now.ToUniversalTime();
+
+            if (!Directory.Exists(buildReportDir))
+                Directory.CreateDirectory(buildReportDir);
+
+            if (File.Exists(lastBuild))
+            {
+                if (!File.Exists(assetPath) || File.GetLastWriteTime(lastBuild) > File.GetLastWriteTime(assetPath))
+                {
+                    File.Copy(lastBuild, assetPath, true);
+                    AssetDatabase.ImportAsset(assetPath);
+                    buildReport = AssetDatabase.LoadAssetAtPath<BuildReport>(assetPath);
+                }
+            }
         }
 
         void OnGUI()
