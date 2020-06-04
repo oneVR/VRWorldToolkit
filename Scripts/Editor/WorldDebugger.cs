@@ -1062,8 +1062,6 @@ namespace VRWorldToolkit.WorldDebugger
         private static readonly string colliderUnderSpawnIsTrigger = "The collider \"%variable%\" under your spawn point %variable2% has been set as Is Trigger! Spawning into a world with nothing to stand on will cause the players to fall forever.";
         private static readonly string noColliderUnderSpawn = "Your spawn point %variable% doesn't have anything underneath it. Spawning into a world with nothing to stand on will cause the players to fall forever";
         private static readonly string noPlayerMods = "No Player Mods found in the scene. Player mods are used for adding jumping and changing walking speed.";
-        private static readonly string triggerTriggerNotTrigger = "You have an OnEnterTrigger or OnExitTrigger Trigger \"%variable%\", but it's Collider has not been set as Is Trigger. These Triggers need to have a Collider set to be Is Trigger to work.";
-        private static readonly string colliderTriggerIsTrigger = "You have an OnEnterCollider or OnExitCollider Trigger \"%variable%\" that has a Collider set to be Is Trigger. These only react if the collider on the object has not been set to be Is Trigger.";
         private static readonly string triggerTriggerNoCollider = "You have an OnEnterTrigger or OnExitTrigger Trigger \"%variable%\" that doesn't have a Collider on it.";
         private static readonly string colliderTriggerNoCollider = "You have an OnEnterCollider or OnExitCollider Trigger \"%variable%\" that doesn't have a Collider on it.";
         private static readonly string triggerTriggerWrongLayer = "You have an OnEnterTrigger or OnExitTrigger Trigger \"%variable%\" that is not on the MirrorReflection layer.";
@@ -1276,19 +1274,7 @@ namespace VRWorldToolkit.WorldDebugger
                 {
                     if (trigger.TriggerType == VRC_Trigger.TriggerType.OnEnterTrigger || trigger.TriggerType == VRC_Trigger.TriggerType.OnExitTrigger || trigger.TriggerType == VRC_Trigger.TriggerType.OnEnterCollider || trigger.TriggerType == VRC_Trigger.TriggerType.OnExitCollider)
                     {
-                        if (trigger_script.gameObject.GetComponent<Collider>())
-                        {
-                            var collider = trigger_script.gameObject.GetComponent<Collider>();
-                            if ((trigger.TriggerType.ToString() == "OnExitTrigger" || trigger.TriggerType.ToString() == "OnEnterTrigger") && !collider.isTrigger)
-                            {
-                                general.addMessageGroup(new MessageGroup(triggerTriggerNotTrigger, MessageType.Error).addSingleMessage(new SingleMessage(trigger_script.name).setSelectObject(trigger_script.gameObject)));
-                            }
-                            else if ((trigger.TriggerType.ToString() == "OnExitCollider" || trigger.TriggerType.ToString() == "OnEnterCollider") && collider.isTrigger)
-                            {
-                                general.addMessageGroup(new MessageGroup(colliderTriggerIsTrigger, MessageType.Error).addSingleMessage(new SingleMessage(trigger_script.name).setSelectObject(trigger_script.gameObject)));
-                            }
-                        }
-                        else
+                        if (!trigger_script.gameObject.GetComponent<Collider>())
                         {
                             if (trigger.TriggerType == VRC_Trigger.TriggerType.OnEnterTrigger || trigger.TriggerType == VRC_Trigger.TriggerType.OnExitTrigger)
                             {
