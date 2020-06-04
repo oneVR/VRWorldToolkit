@@ -910,7 +910,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return async () =>
             {
-                if (EditorUtility.DisplayDialog("Clear Occlusion Cache?", "This will clear your occlusion culling cache. Which has ~" + fileCount + " files currently. Be careful when deleting a massive amount of files as it can take a while. Do you want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Clear Occlusion Cache?", "This will clear your occlusion culling cache. Which has " + fileCount + " files currently. Deleting a massive amount of files can take a while. Do you want to continue?", "Yes", "Cancel"))
                 {
                     long deleteCount = 0;
 
