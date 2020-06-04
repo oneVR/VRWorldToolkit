@@ -1139,6 +1139,11 @@ namespace VRWorldToolkit.WorldDebugger
 
         static long occlusionCacheFiles = 0;
 
+        private static void CountOcclusionCacheFiles()
+        {
+            occlusionCacheFiles = Directory.EnumerateFiles("Library/Occlusion/").Count();
+        }
+
         private static MessageCategory general;
         private static MessageCategory optimization;
         private static MessageCategory lighting;
@@ -1322,10 +1327,7 @@ namespace VRWorldToolkit.WorldDebugger
                 //Count the files
                 if (occlusionCacheFiles == 0)
                 {
-                    foreach (var file in Directory.EnumerateFiles("Library/Occlusion/"))
-                    {
-                        occlusionCacheFiles++;
-                    };
+                    Task task = Task.Run(CountOcclusionCacheFiles);
                 }
 
                 if (occlusionCacheFiles > 0)
