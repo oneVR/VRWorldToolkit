@@ -349,8 +349,6 @@ namespace VRWorldToolkit.WorldDebugger
             {
                 EditorGUILayout.BeginHorizontal();
 
-                bool disableAll = false;
-
                 foreach (var item in messageCategory)
                 {
                     string button = "miniButtonMid";
@@ -364,17 +362,6 @@ namespace VRWorldToolkit.WorldDebugger
                     }
                     bool currentState = item.enabled;
                     item.enabled = GUILayout.Toggle(item.enabled, item.listName, button);
-                    if (currentState != item.enabled)
-                    {
-                        disableAll = true;
-                    }
-                }
-                if (disableAll && Event.current.clickCount == 2)
-                {
-                    foreach (var item2 in messageCategory)
-                    {
-                        item2.enabled = false;
-                    }
                 }
 
                 EditorGUILayout.EndHorizontal();
@@ -382,23 +369,12 @@ namespace VRWorldToolkit.WorldDebugger
 
             public void ClearCategories()
             {
-                foreach (var item in messageCategory)
-                {
-                    item.ClearMessages();
-                }
+                messageCategory.ForEach(m => m.ClearMessages());
             }
 
             private bool AllDisabled()
             {
-                bool disabled = true;
-                foreach (var item in messageCategory)
-                {
-                    if (item.enabled)
-                    {
-                        disabled = false;
-                    }
-                }
-                return disabled;
+                return messageCategory.All(m => !m.enabled);
             }
             
             private static GUIStyle boxStyle = new GUIStyle("HelpBox");
@@ -696,11 +672,7 @@ namespace VRWorldToolkit.WorldDebugger
             {
                 if (EditorUtility.DisplayDialog("Enable lightmap UV generation?", "This operation will enable the lightmap UV generation on " + importers.Count + " meshes. Do you want to continue?", "Yes", "Cancel"))
                 {
-                    foreach (var importer in importers)
-                    {
-                        importer.generateSecondaryUV = true;
-                        importer.SaveAndReimport();
-                    }
+                    importers.ForEach(i => { i.generateSecondaryUV = true; i.SaveAndReimport(); });
                 }
             };
         }
@@ -722,10 +694,7 @@ namespace VRWorldToolkit.WorldDebugger
             {
                 if (EditorUtility.DisplayDialog("Disable component?", "This operation will disable the " + behaviours[0].GetType() + " component on " + behaviours.Count().ToString() + " GameObjects. Do you want to continue?", "Yes", "Cancel"))
                 {
-                    foreach (var behaviour in behaviours)
-                    {
-                        behaviour.enabled = false;
-                    }
+                    behaviours.ToList().ForEach(b => b.enabled = false);
                 }
             };
         }
@@ -747,10 +716,7 @@ namespace VRWorldToolkit.WorldDebugger
             {
                 if (EditorUtility.DisplayDialog("Change layer?", "This operation will change " + objs.Length + " GameObjects layer to " + layer + ". Do you want to continue?", "Yes", "Cancel"))
                 {
-                    foreach (var obj in objs)
-                    {
-                        obj.layer = LayerMask.NameToLayer(layer);
-                    }
+                    objs.ToList().ForEach(o => o.layer = LayerMask.NameToLayer(layer));
                 }
             };
         }
@@ -799,10 +765,7 @@ namespace VRWorldToolkit.WorldDebugger
             {
                 if (EditorUtility.DisplayDialog("Change tag?", "This operation will change " + objs.Length + " GameObjects tag to " + tag + ". Do you want to continue?", "Yes", "Cancel"))
                 {
-                    foreach (var obj in objs)
-                    {
-                        obj.tag = tag;
-                    }
+                    objs.ToList().ForEach(o => o.tag = tag);
                 }
             };
         }
@@ -814,6 +777,7 @@ namespace VRWorldToolkit.WorldDebugger
                 if (EditorUtility.DisplayDialog("Change shader?", "This operation will change the shader of the material " + material.name + " to " + shader + ". Do you want to continue?", "Yes", "Cancel"))
                 {
                     Shader standard = Shader.Find(shader);
+
                     material.shader = standard;
                 }
             };
@@ -825,11 +789,9 @@ namespace VRWorldToolkit.WorldDebugger
             {
                 if (EditorUtility.DisplayDialog("Change shader?", "This operation will change the shader of " + materials.Length + " materials to " + shader + ". Do you want to continue?", "Yes", "Cancel"))
                 {
-                    Shader standard = Shader.Find(shader);
-                    foreach (var material in materials)
-                    {
-                        material.shader = standard;
-                    }
+                    Shader newShader = Shader.Find(shader);
+
+                    materials.ToList().ForEach(m => m.shader = newShader);
                 }
             };
         }
