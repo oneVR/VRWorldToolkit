@@ -400,10 +400,7 @@ namespace VRWorldToolkit.WorldDebugger
                 }
                 return disabled;
             }
-
-            private static string dynamicVariable = "%variable%";
-            private static string dynamicVariable2 = "%variable2%";
-            private static string countVariable = "%count%";
+            
             private static GUIStyle boxStyle = new GUIStyle("HelpBox");
 
             public void DrawMessages()
@@ -432,14 +429,12 @@ namespace VRWorldToolkit.WorldDebugger
                                 {
                                     EditorGUILayout.BeginHorizontal();
 
-                                    string finalMessage = messageGroup.combinedMessage;
+                                    string finalMessage = string.Format(messageGroup.combinedMessage, messageGroup.getTotalCount().ToString());
 
                                     if (messageGroup.additionalInfo != null)
                                     {
                                         finalMessage += " " + messageGroup.additionalInfo;
                                     }
-
-                                    finalMessage = finalMessage.Replace(countVariable, messageGroup.getTotalCount().ToString());
 
                                     if (hasButtons)
                                     {
@@ -507,21 +502,11 @@ namespace VRWorldToolkit.WorldDebugger
                                         {
                                             EditorGUILayout.BeginHorizontal();
 
-                                            string finalInvidualMessage = messageGroup.message;
-
-                                            if (message.variable != null)
-                                            {
-                                                finalInvidualMessage = finalInvidualMessage.Replace(dynamicVariable, message.variable);
-                                            }
-
-                                            if (message.variable != null)
-                                            {
-                                                finalInvidualMessage = finalInvidualMessage.Replace(dynamicVariable2, message.variable2);
-                                            }
+                                            string finalSingleMessage = string.Format(messageGroup.message, message.variable, message.variable2);
 
                                             if (hasButtons)
                                             {
-                                                GUIContent Box = new GUIContent(finalInvidualMessage);
+                                                GUIContent Box = new GUIContent(finalSingleMessage);
                                                 GUILayout.Box(Box, boxStylePadded, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 121));
 
                                                 EditorGUILayout.BeginVertical();
@@ -553,7 +538,7 @@ namespace VRWorldToolkit.WorldDebugger
                                             }
                                             else
                                             {
-                                                DrawMessage(finalInvidualMessage, messageGroup.messageType);
+                                                DrawMessage(finalSingleMessage, messageGroup.messageType);
                                             }
 
                                             EditorGUILayout.EndHorizontal();
@@ -568,21 +553,11 @@ namespace VRWorldToolkit.WorldDebugger
                                     {
                                         EditorGUILayout.BeginHorizontal();
 
-                                        string finalMessage = messageGroup.message;
-
-                                        if (message.variable != null)
-                                        {
-                                            finalMessage = finalMessage.Replace(dynamicVariable, message.variable);
-                                        }
-
-                                        if (message.variable != null)
-                                        {
-                                            finalMessage = finalMessage.Replace(dynamicVariable2, message.variable2);
-                                        }
+                                        string finalMessage = string.Format(messageGroup.message, message.variable, message.variable2);
 
                                         if (messageGroup.additionalInfo != null)
                                         {
-                                            finalMessage += " " + messageGroup.additionalInfo;
+                                            finalMessage = string.Concat(finalMessage, " ", messageGroup.additionalInfo);
                                         }
 
                                         if (hasButtons)
@@ -1055,64 +1030,64 @@ namespace VRWorldToolkit.WorldDebugger
         private static readonly string noSceneDescriptor = "Current scene has no Scene Descriptor. Please add one yourself, or drag the VRCWorld prefab to your scene.";
         private static readonly string tooManySceneDescriptors = "Multiple Scene Descriptors found, you can only have one Scene Descriptor in a scene.";
         private static readonly string tooManyPipelineManagers = "Current scene has multiple Pipeline Managers in it this can break the world upload process.";
-        private static readonly string worldDescriptorFar = "Scene Descriptor is %variable% units far from the the zero point in Unity. Having your world center out this far will cause some noticable jittering on models. You should move your world closer to the zero point of your scene.";
-        private static readonly string worldDescriptorOff = "Scene Descriptor is %variable% units far from the the zero point in Unity. It's usually good practice to try to keep it as close as possible to the absolute zero point to avoid floating point errors.";
+        private static readonly string worldDescriptorFar = "Scene Descriptor is {0} units far from the the zero point in Unity. Having your world center out this far will cause some noticable jittering on models. You should move your world closer to the zero point of your scene.";
+        private static readonly string worldDescriptorOff = "Scene Descriptor is {0} units far from the the zero point in Unity. It's usually good practice to try to keep it as close as possible to the absolute zero point to avoid floating point errors.";
         private static readonly string noSpawnPointSet = "There are no spawn points set in your Scene Descriptor. Spawning into a world with no spawn point will cause you to get thrown back to your home world.";
         private static readonly string nullSpawnPoint = "There is a null spawn point set in your Scene Descriptor. Spawning into a null spawn point will cause you to get thrown back to your home world.";
-        private static readonly string colliderUnderSpawnIsTrigger = "The collider \"%variable%\" under your spawn point %variable2% has been set as Is Trigger! Spawning into a world with nothing to stand on will cause the players to fall forever.";
-        private static readonly string noColliderUnderSpawn = "Spawn point %variable% doesn't have anything underneath it. Spawning into a world with nothing to stand on will cause the players to fall forever";
+        private static readonly string colliderUnderSpawnIsTrigger = "The collider \"{0}\" under your spawn point {1} has been set as Is Trigger! Spawning into a world with nothing to stand on will cause the players to fall forever.";
+        private static readonly string noColliderUnderSpawn = "Spawn point {0} doesn't have anything underneath it. Spawning into a world with nothing to stand on will cause the players to fall forever";
         private static readonly string noPlayerMods = "No Player Mods found in the scene. Player mods are used for adding jumping and changing walking speed.";
-        private static readonly string triggerTriggerNoCollider = "You have an OnEnterTrigger or OnExitTrigger Trigger \"%variable%\" that doesn't have a Collider on it.";
-        private static readonly string colliderTriggerNoCollider = "You have an OnEnterCollider or OnExitCollider Trigger \"%variable%\" that doesn't have a Collider on it.";
-        private static readonly string triggerTriggerWrongLayer = "You have an OnEnterTrigger or OnExitTrigger Trigger \"%variable%\" that is not on the MirrorReflection layer.";
-        private static readonly string combinedTriggerTriggerWrongLayer = "You have %count% OnEnterTrigger or OnExitTrigger Triggers that are not on the MirrorReflection layer.";
+        private static readonly string triggerTriggerNoCollider = "You have an OnEnterTrigger or OnExitTrigger Trigger \"{0}\" that doesn't have a Collider on it.";
+        private static readonly string colliderTriggerNoCollider = "You have an OnEnterCollider or OnExitCollider Trigger \"{0}\" that doesn't have a Collider on it.";
+        private static readonly string triggerTriggerWrongLayer = "You have an OnEnterTrigger or OnExitTrigger Trigger \"{0}\" that is not on the MirrorReflection layer.";
+        private static readonly string combinedTriggerTriggerWrongLayer = "You have {0} OnEnterTrigger or OnExitTrigger Triggers that are not on the MirrorReflection layer.";
         private static readonly string triggerTriggerWrongLayerInfo = "This can stop raycasts from working properly breaking buttons, UI Menus and pickups for example.";
-        private static readonly string mirrorOnByDefault = "The mirror %variable% is on by default.";
-        private static readonly string combinedMirrorsOnByDefault = "The scene has %count% mirrors on by default.";
+        private static readonly string mirrorOnByDefault = "The mirror {0} is on by default.";
+        private static readonly string combinedMirrorsOnByDefault = "The scene has {0} mirrors on by default.";
         private static readonly string mirrorsOnByDefaultInfo = "This is a very bad practice and you should disable any mirrors in your world by default.";
-        private static readonly string mirrorWithDefaultLayers = "The mirror \"%variable%\" has the default Reflect Layers set.";
-        private static readonly string combinedMirrorWithDefaultLayers = "You have %count% mirrors that have the default Reflect Layers set.";
+        private static readonly string mirrorWithDefaultLayers = "The mirror \"{0}\" has the default Reflect Layers set.";
+        private static readonly string combinedMirrorWithDefaultLayers = "You have {0} mirrors that have the default Reflect Layers set.";
         private static readonly string mirrorWithDefaultLayersInfo = "Only having the layers you need enabled in mirrors can save a lot of frames especially in populated instances.";
         private static readonly string bakedOcclusionCulling = "Baked Occlusion Culling found.";
         private static readonly string noOcclusionCulling = "Current scene doesn't have baked Occlusion Culling. Occlusion culling gives you a lot more performance in your world, especially in larger worlds that have multiple rooms or areas.";
-        private static readonly string occlusionCullingCacheWarning = "Current projects occlusion culling cache has %variable% files. When the occlusion culling cache grows too big baking occlusion culling can take much longer than intended. It can be cleared with no negative effects.";
-        private static readonly string activeCameraOutputtingToRenderTexture = "Current scene has an active camera \"%variable%\" outputting to a render texture.";
-        private static readonly string combinedActiveCamerasOutputtingToRenderTextures = "Current scene has %count% active cameras outputting to render textures.";
+        private static readonly string occlusionCullingCacheWarning = "Current projects occlusion culling cache has {0} files. When the occlusion culling cache grows too big baking occlusion culling can take much longer than intended. It can be cleared with no negative effects.";
+        private static readonly string activeCameraOutputtingToRenderTexture = "Current scene has an active camera \"{0}\" outputting to a render texture.";
+        private static readonly string combinedActiveCamerasOutputtingToRenderTextures = "Current scene has {0} active cameras outputting to render textures.";
         private static readonly string activeCamerasOutputtingToRenderTextureInfo = "This will affect performance negatively by causing more drawcalls to happen. Ideally you would only have them enabled when needed.";
         private static readonly string noToonShaders = "You shouldn't use toon shaders for world building, as they're missing crucial things for making worlds. For world building the most recommended shader is Standard.";
-        private static readonly string nonCrunchedTextures = "%variable%% of the textures used in your scene haven't been crunch compressed. Crunch compression can greatly reduce the size of your world download. It can be accessed from the texture's import settings.";
+        private static readonly string nonCrunchedTextures = "{0}% of the textures used in your scene haven't been crunch compressed. Crunch compression can greatly reduce the size of your world download. It can be accessed from the texture's import settings.";
         private static readonly string switchToProgressive = "Current scene is using the Enlighten lightmapper, which has been deprecated in newer versions of Unity. You should consider switching to Progressive for improved fidelity and performance.";
         private static readonly string singleColorEnviromentLighting = "Consider changing your Enviroment Lighting to Gradient from Flat.";
         private static readonly string darkEnviromentLighting = "Using dark colours for Environment Lighting can cause avatars to look weird. Only use dark Environment Lighting if your world has dark lighting.";
         private static readonly string customEnviromentReflectionsNull = "Your Enviroment Reflections have been set to custom, but you haven't defined a custom cubemap!";
-        private static readonly string noLightmapUV = "Model found in the scene \"%variable%\" is set to be lightmapped but doesn't have Lightmap UVs.";
-        private static readonly string combineNoLightmapUV = "Current scene has %count% models set to be lightmapped that don't have Lightmap UVs. This causes issues when baking lighting. You can enable generating Lightmap UV's in the model's import settings.";
+        private static readonly string noLightmapUV = "Model found in the scene \"{0}\" is set to be lightmapped but doesn't have Lightmap UVs.";
+        private static readonly string combineNoLightmapUV = "Current scene has {0} models set to be lightmapped that don't have Lightmap UVs. This causes issues when baking lighting. You can enable generating Lightmap UV's in the model's import settings.";
         private static readonly string lightsNotBaked = "Current scenes lighting is not baked. Consider baking your lights for improved performance.";
-        private static readonly string considerLargerLightmaps = "Consider increasing your Lightmap Size from %variable% to 4096. This allows for more stuff to fit on a single lightmap, leaving less textures that need to be sampled.";
+        private static readonly string considerLargerLightmaps = "Consider increasing your Lightmap Size from {0} to 4096. This allows for more stuff to fit on a single lightmap, leaving less textures that need to be sampled.";
         private static readonly string considerSmallerLightmaps = "Baking lightmaps at 4096 with Progressive GPU will silently fall back to CPU Progressive because it needs more than 12GB GPU Memory to be able to bake with GPU Progressive.";
-        private static readonly string nonBakedBakedLights = "The light %variable% is set to be baked/mixed but it hasn't been baked yet!";
-        private static readonly string combinedNonBakedBakedLights = "The scene contains %count% baked/mixed lights that haven't been baked!";
+        private static readonly string nonBakedBakedLights = "The light {0} is set to be baked/mixed but it hasn't been baked yet!";
+        private static readonly string combinedNonBakedBakedLights = "The scene contains {0} baked/mixed lights that haven't been baked!";
         private static readonly string nonBakedBakedLightsInfo = "Baked lights that haven't been baked yet function as realtime lights ingame.";
-        private static readonly string lightingDataAssetInfo = "Your lighting data asset takes up %variable% MB of your world's size. This contains your scene's light probe data and realtime GI data.";
+        private static readonly string lightingDataAssetInfo = "Your lighting data asset takes up {0} MB of your world's size. This contains your scene's light probe data and realtime GI data.";
         private static readonly string noLightProbes = "No light probes found in the current scene, which means your baked lights won't affect dynamic objects such as players and pickups.";
-        private static readonly string lightProbeCountNotBaked = "Current scene contains %variable% light probes, but %variable2% of them haven't been baked yet.";
-        private static readonly string lightProbesRemovedNotReBaked = "Some light probes have been removed after the last bake, bake them again to update your scene's lighting data. The lighting data contains %variable% baked light probes and the current scene has %variable2% light probes.";
-        private static readonly string lightProbeCount = "Current scene contains %variable% baked light probes.";
-        private static readonly string overlappingLightProbes = "Light Probe Group \"%variable%\" has %variable2% overlapping light probes.";
-        private static readonly string combinedOverlappingLightProbes = "%count% Light Probe Groups with overlapping light probes found.";
+        private static readonly string lightProbeCountNotBaked = "Current scene contains {0} light probes, but {1} of them haven't been baked yet.";
+        private static readonly string lightProbesRemovedNotReBaked = "Some light probes have been removed after the last bake, bake them again to update your scene's lighting data. The lighting data contains {0} baked light probes and the current scene has {1} light probes.";
+        private static readonly string lightProbeCount = "Current scene contains {0} baked light probes.";
+        private static readonly string overlappingLightProbes = "Light Probe Group \"{0}\" has {1} overlapping light probes.";
+        private static readonly string combinedOverlappingLightProbes = "{0} Light Probe Groups with overlapping light probes found.";
         private static readonly string overlappingLightProbesInfo = "These can cause a slowdown in the editor and won't get baked because Unity will skip any extra overlapping probes.";
         private static readonly string noReflectionProbes = "Current scene has no active reflection probes. Reflection probes are needed to have proper reflections on reflective materials.";
-        private static readonly string reflectionProbesSomeUnbaked = "The reflection probe \"%variable%\" is unbaked.";
-        private static readonly string combinedReflectionProbesSomeUnbaked = "Current scene has %count% unbaked reflection probes.";
-        private static readonly string reflectionProbeCountText = "Current scene has %variable% baked reflection probes.";
+        private static readonly string reflectionProbesSomeUnbaked = "The reflection probe \"{0}\" is unbaked.";
+        private static readonly string combinedReflectionProbesSomeUnbaked = "Current scene has {0} unbaked reflection probes.";
+        private static readonly string reflectionProbeCountText = "Current scene has {0} baked reflection probes.";
         private static readonly string postProcessingImportedButNotSetup = "Current project has Post Processing imported, but you haven't set it up yet.";
         private static readonly string noReferenceCameraSet = "Current scenes Scene Descriptor has no Reference Camera set. Without a Reference Camera set, you won't be able to see Post Processing ingame.";
         private static readonly string noPostProcessingVolumes = "You don't have any Post Processing Volumes in your scene. A Post Processing Volume is needed to apply effects to the camera's Post Processing Layer.";
         private static readonly string referenceCameraNoPostProcessingLayer = "Your Reference Camera doesn't have a Post Processing Layer on it. A Post Processing Layer is needed for the Post Processing Volume to affect the camera.";
         private static readonly string volumeBlendingLayerNotSet = "You don't have a Volume Blending Layer set in your Post Process Layer, so post processing won't work. Using the Water layer is recommended.";
-        private static readonly string postProcessingVolumeNotGlobalNoCollider = "The Post Processing Volume \"%variable%\" isn't marked as Global and doesn't have a collider. It won't affect the camera without one of these set on it.";
-        private static readonly string noProfileSet = "You don't have a profile set in the Post Processing Volume %variable%";
-        private static readonly string volumeOnWrongLayer = "Your Post Processing Volume \"%variable%\" is not on one of the layers set in your cameras Post Processing Layer setting. (Currently: %variable2%)";
+        private static readonly string postProcessingVolumeNotGlobalNoCollider = "The Post Processing Volume \"{0}\" isn't marked as Global and doesn't have a collider. It won't affect the camera without one of these set on it.";
+        private static readonly string noProfileSet = "You don't have a profile set in the Post Processing Volume {0}";
+        private static readonly string volumeOnWrongLayer = "Your Post Processing Volume \"{0}\" is not on one of the layers set in your cameras Post Processing Layer setting. (Currently: {1})";
         private static readonly string dontUseNoneForTonemapping = "Use either Neutral or ACES for Color Grading tonemapping, selecting None for Tonemapping is essentially the same as leaving Tonemapping unchecked.";
         private static readonly string tooHighBloomIntensity = "Don't raise the Bloom intensity too high! You should use a low Bloom intensity, between 0.01 to 0.3.";
         private static readonly string tooHighBloomThreshold = "You should avoid having your Bloom threshold set high. It might cause unexpected problems with avatars. Ideally you should keep it at 0, but always below 1.0.";
@@ -1125,14 +1100,14 @@ namespace VRWorldToolkit.WorldDebugger
         private static readonly string questBakedLightingWarning = "You should bake lights for content build for Quest.";
         private static readonly string ambientModeSetToCustom = "Your Environment Lighting setting is broken. This will override all light probes in the scene with black ambient light. Please change it to something else.";
         private static readonly string noProblemsFoundInPP = "No problems found in your post processing setup. In some cases where post processing is working in editor but not in game it's possible some imported asset is causing it not to function properly.";
-        private static readonly string bakeryLightNotSetEditorOnly = "Your Bakery light named %variable% is not set to be EditorOnly this causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
-        private static readonly string combinedBakeryLightNotSetEditorOnly = "You have %count% Bakery lights are not set to be EditorOnly.";
+        private static readonly string bakeryLightNotSetEditorOnly = "Your Bakery light named {0} is not set to be EditorOnly this causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
+        private static readonly string combinedBakeryLightNotSetEditorOnly = "You have {0} Bakery lights are not set to be EditorOnly.";
         private static readonly string bakeryLightNotSetEditorOnlyInfo = "This causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
-        private static readonly string bakeryLightUnityLight = "Your Bakery light named %variable% has an active Unity Light component on it.";
-        private static readonly string combinedBakeryLightUnityLight = "You have %count% Bakery lights that have an active Unity Light component on it.";
+        private static readonly string bakeryLightUnityLight = "Your Bakery light named {0} has an active Unity Light component on it.";
+        private static readonly string combinedBakeryLightUnityLight = "You have {0} Bakery lights that have an active Unity Light component on it.";
         private static readonly string bakeryLightUnityLightInfo = "These will not get baked with Bakery and will keep acting as real time lights even if set to baked.";
-        private static readonly string missingShaderWarning = "The material \"%variable%\" found in your scene has a missing or broken shader.";
-        private static readonly string combinedMissingShaderWarning = "You have %count% materials found in your scene that have missing or broken shaders.";
+        private static readonly string missingShaderWarning = "The material \"{0}\" found in your scene has a missing or broken shader.";
+        private static readonly string combinedMissingShaderWarning = "You have {0} materials found in your scene that have missing or broken shaders.";
         private static readonly string missingShaderWarningInfo = "These will fallback to the pink error shader.";
         private static readonly string errorPauseWarning = "You have Error Pause enabled in your console this can cause your world upload to fail by interrupting the build process.";
         #endregion
