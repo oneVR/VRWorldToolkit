@@ -30,6 +30,7 @@ namespace VRWorldToolkit
                 EditorGUILayout.LabelField("Quick set Reflect Layers:");
 
                 EditorGUILayout.BeginHorizontal();
+
                 if (GUILayout.Button("Show only players"))
                 {
                     foreach (GameObject mirror in Selection.objects)
@@ -45,6 +46,7 @@ namespace VRWorldToolkit
                         mirror.GetComponent<VRC_MirrorReflection>().m_ReflectLayers.value = 262657;
                     }
                 }
+
                 EditorGUILayout.EndHorizontal();
 
                 if (Selection.gameObjects.Length == 1)
@@ -63,11 +65,14 @@ namespace VRWorldToolkit
                 }
 
                 showExplanations = EditorGUILayout.Foldout(showExplanations, "VRChat specific layer explanations");
+
                 if (showExplanations)
                 {
-                    GUIStyle style = new GUIStyle(GUI.skin.label);
-                    style.richText = true;
-                    style.wordWrap = true;
+                    GUIStyle style = new GUIStyle(GUI.skin.label)
+                    {
+                        richText = true,
+                        wordWrap = true
+                    };
 
                     GUILayout.Label("<b>Player:</b>\nThis layer is used for other players than yourself", style);
                     GUILayout.Label("<b>PlayerLocal:</b>\nThis layer is only used for first-person view and should not be enabled in mirrors", style);
