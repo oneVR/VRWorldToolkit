@@ -1023,7 +1023,8 @@ namespace VRWorldToolkit.WorldDebugger
         private static readonly string darkEnviromentLighting = "Using dark colours for Environment Lighting can cause avatars to look weird. Only use dark Environment Lighting if your world has dark lighting.";
         private static readonly string customEnviromentReflectionsNull = "Your Enviroment Reflections have been set to custom, but you haven't defined a custom cubemap!";
         private static readonly string noLightmapUV = "Model found in the scene \"{0}\" is set to be lightmapped but doesn't have Lightmap UVs.";
-        private static readonly string combineNoLightmapUV = "Current scene has {0} models set to be lightmapped that don't have Lightmap UVs. This causes issues when baking lighting. You can enable generating Lightmap UV's in the model's import settings.";
+        private static readonly string combineNoLightmapUV = "Current scene has {0} models set to be lightmapped that don't have Lightmap UVs.";
+        private static readonly string noLightmapUVInfo = "This causes issues when baking lighting. You can enable generating Lightmap UV's in the model's import settings.";
         private static readonly string lightsNotBaked = "Current scenes lighting is not baked. Consider baking your lights for improved performance.";
         private static readonly string considerLargerLightmaps = "Consider increasing your Lightmap Size from {0} to 4096. This allows for more stuff to fit on a single lightmap, leaving less textures that need to be sampled.";
         private static readonly string considerSmallerLightmaps = "Baking lightmaps at 4096 with Progressive GPU will silently fall back to CPU Progressive because it needs more than 12GB GPU Memory to be able to bake with GPU Progressive.";
@@ -1854,7 +1855,7 @@ namespace VRWorldToolkit.WorldDebugger
             var modelsCount = importers.Count;
             if (modelsCount > 0)
             {
-                MessageGroup noUVGroup = new MessageGroup(noLightmapUV, combineNoLightmapUV, MessageType.Warning);
+                MessageGroup noUVGroup = new MessageGroup(noLightmapUV, combineNoLightmapUV, noLightmapUVInfo, MessageType.Warning);
                 for (int i = 0; i < modelsCount; i++)
                 {
                     string modelName = meshName[i];
