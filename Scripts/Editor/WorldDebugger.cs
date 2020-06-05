@@ -1142,6 +1142,7 @@ namespace VRWorldToolkit.WorldDebugger
         private static void CountOcclusionCacheFiles()
         {
             occlusionCacheFiles = Directory.EnumerateFiles("Library/Occlusion/").Count();
+            recheck = true;
         }
 
         private static MessageCategory general;
