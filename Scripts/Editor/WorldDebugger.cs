@@ -1121,7 +1121,7 @@ namespace VRWorldToolkit.WorldDebugger
         private static readonly string depthOfFieldWarning = "Depth of field has a high performance cost, and is very disorientating in VR. If you really want to use depth of field, have it be disabled by default.";
         private static readonly string screenSpaceReflectionsWarning = "Screen Space Reflections only works when using deferred rendering. VRchat isn't using deferred rendering, so this will have no effect on the main camera.";
         private static readonly string vignetteWarning = "Only use vignette in very small amounts. A powerful vignette can cause sickness in VR.";
-        private static readonly string noPostProcessingImported = "You haven't imported Post Processing to your project yet.";
+        private static readonly string noPostProcessingImported = "Post Processing package not found in the project.";
         private static readonly string questBakedLightingWarning = "You should bake lights for content build for Quest.";
         private static readonly string ambientModeSetToCustom = "Your Environment Lighting setting is broken. This will override all light probes in the scene with black ambient light. Please change it to something else.";
         private static readonly string noProblemsFoundInPP = "No problems found in your post processing setup. In some cases where post processing is working in editor but not in game it's possible some imported asset is causing it not to function properly.";
