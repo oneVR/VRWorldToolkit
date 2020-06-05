@@ -376,7 +376,7 @@ namespace VRWorldToolkit.WorldDebugger
             {
                 return messageCategory.All(m => !m.enabled);
             }
-            
+
             private readonly static GUIStyle boxStyle = new GUIStyle("HelpBox");
 
             public void DrawMessages()
@@ -1079,13 +1079,10 @@ namespace VRWorldToolkit.WorldDebugger
 
         static long occlusionCacheFiles = 0;
 
+        //TODO: Better check threading
         private static void CountOcclusionCacheFiles()
         {
             occlusionCacheFiles = Directory.EnumerateFiles("Library/Occlusion/").Count();
-            if (occlusionCacheFiles > 0)
-            {
-                recheck = true;
-            }   
         }
 
         private static MessageCategory general;
@@ -1265,30 +1262,20 @@ namespace VRWorldToolkit.WorldDebugger
                 optimization.AddMessageGroup(new MessageGroup(noOcclusionCulling, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/occlusion-culling-getting-started.html"));
             }
 
-            //Check for bloat in occlusion cache
-            if (Directory.Exists("Library/Occlusion/"))
+            if (occlusionCacheFiles > 0)
             {
-                //Count the files
-                if (occlusionCacheFiles == 0)
+                //Set the message type depending on how many files found
+                MessageType cacheWarningType = MessageType.Info;
+                if (occlusionCacheFiles > 50000)
                 {
-                    Task task = Task.Run(CountOcclusionCacheFiles);
+                    cacheWarningType = MessageType.Error;
+                }
+                else if (occlusionCacheFiles > 5000)
+                {
+                    cacheWarningType = MessageType.Warning;
                 }
 
-                if (occlusionCacheFiles > 0)
-                {
-                    //Set the message type depending on how many files found
-                    MessageType cacheWarningType = MessageType.Info;
-                    if (occlusionCacheFiles > 50000)
-                    {
-                        cacheWarningType = MessageType.Error;
-                    }
-                    else if (occlusionCacheFiles > 5000)
-                    {
-                        cacheWarningType = MessageType.Warning;
-                    }
-
-                    optimization.AddMessageGroup(new MessageGroup(occlusionCullingCacheWarning, cacheWarningType).AddSingleMessage(new SingleMessage(occlusionCacheFiles.ToString()).SetAutoFix(ClearOcclusionCache(occlusionCacheFiles))));
-                }
+                optimization.AddMessageGroup(new MessageGroup(occlusionCullingCacheWarning, cacheWarningType).AddSingleMessage(new SingleMessage(occlusionCacheFiles.ToString()).SetAutoFix(ClearOcclusionCache(occlusionCacheFiles))));
             }
 
             //Check if there's any active cameras outputting to render textures
@@ -1938,6 +1925,12 @@ namespace VRWorldToolkit.WorldDebugger
 #if VRWTOOLKIT_BENCHMARK_MODE
                 System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
 #endif
+                //Check for bloat in occlusion cache
+                if (occlusionCacheFiles == 0 && Directory.Exists("Library/Occlusion/"))
+                {
+                    Task task = Task.Run(CountOcclusionCacheFiles);
+                }
+
                 recheck = false;
                 CheckScene();
 #if VRWTOOLKIT_BENCHMARK_MODE
