@@ -1993,11 +1993,15 @@ namespace VRWorldToolkit.WorldDebugger
 
             if (recheck)
             {
-                //System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
-                CheckScene();
-                //watch.Stop();
-                //Debug.Log("Scene checked in: " + watch.ElapsedMilliseconds + " ms.");
+#if VRWTOOLKIT_BENCHMARK_MODE
+                System.Diagnostics.Stopwatch watch = System.Diagnostics.Stopwatch.StartNew();
+#endif
                 recheck = false;
+                CheckScene();
+#if VRWTOOLKIT_BENCHMARK_MODE
+                watch.Stop();
+                Debug.Log("Scene checked in: " + watch.ElapsedMilliseconds + " ms.");
+#endif
             }
 
             GUILayout.BeginVertical(EditorStyles.helpBox);
