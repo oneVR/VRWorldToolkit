@@ -1509,7 +1509,7 @@ namespace VRWorldToolkit.WorldDebugger
 #if !BAKERY_INCLUDED
                 if (LightmapEditorSettings.lightmapper.Equals(LightmapEditorSettings.Lightmapper.Enlighten))
                 {
-                    lighting.addMessageGroup(new MessageGroup(switchToProgressive, MessageType.Tips));
+                    lighting.AddMessageGroup(new MessageGroup(switchToProgressive, MessageType.Tips));
                 }
 #endif
 
@@ -1526,7 +1526,7 @@ namespace VRWorldToolkit.WorldDebugger
             else
             {
 #if UNITY_ANDROID
-                lighting.addMessageGroup(new MessageGroup(questBakedLightingWarning, MessageType.BadFPS));
+                lighting.AddMessageGroup(new MessageGroup(questBakedLightingWarning, MessageType.BadFPS));
 #else
                 lighting.AddMessageGroup(new MessageGroup(lightsNotBaked, MessageType.Tips).AddSingleMessage(new SingleMessage(nonBakedLights.ToArray())));
 #endif
@@ -1710,7 +1710,7 @@ namespace VRWorldToolkit.WorldDebugger
                 }
             }
 #else
-            postProcessing.addMessageGroup(new MessageGroup(noPostProcessingImported, MessageType.Info));
+            postProcessing.AddMessageGroup(new MessageGroup(noPostProcessingImported, MessageType.Info));
 #endif
 
             //Gameobject checks
