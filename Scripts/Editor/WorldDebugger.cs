@@ -381,7 +381,9 @@ namespace VRWorldToolkit.WorldDebugger
 
             public void DrawMessages()
             {
-                foreach (var group in messageCategory)
+                List<MessageCategory> drawList = messageCategory;
+
+                foreach (var group in drawList)
                 {
                     if (group.enabled || AllDisabled())
                     {
@@ -1083,6 +1085,11 @@ namespace VRWorldToolkit.WorldDebugger
         private static void CountOcclusionCacheFiles()
         {
             occlusionCacheFiles = Directory.EnumerateFiles("Library/Occlusion/").Count();
+            
+            if (occlusionCacheFiles > 0)
+            {
+                recheck = true;
+            }
         }
 
         private static MessageCategory general;
