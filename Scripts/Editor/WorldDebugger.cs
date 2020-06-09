@@ -18,6 +18,7 @@ using System.Linq;
 using VRC.Core;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEditor.SceneManagement;
 
 namespace VRWorldToolkit.WorldDebugger
 {
@@ -434,6 +435,9 @@ namespace VRWorldToolkit.WorldDebugger
                                         if (GUILayout.Button("Auto Fix", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
                                         {
                                             messageGroup.GroupAutoFix();
+                                            
+                                            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+                                            
                                             _recheck = true;
                                         }
 
@@ -493,6 +497,9 @@ namespace VRWorldToolkit.WorldDebugger
                                                 if (GUILayout.Button("Auto Fix", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
                                                 {
                                                     message.AutoFix();
+                                            
+                                                    EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+                                                    
                                                     _recheck = true;
                                                 }
 
@@ -549,6 +556,9 @@ namespace VRWorldToolkit.WorldDebugger
                                             if (GUILayout.Button("Auto Fix", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
                                             {
                                                 message.AutoFix();
+                                            
+                                                EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+                                                
                                                 _recheck = true;
                                             }
 
