@@ -1018,9 +1018,9 @@ namespace VRWorldToolkit.WorldDebugger
         private const string NoToonShaders = "You shouldn't use toon shaders for world building, as they're missing crucial things for making worlds. For world building the most recommended shader is Standard.";
         private const string NonCrunchedTextures = "{0}% of the textures used in your scene haven't been crunch compressed. Crunch compression can greatly reduce the size of your world download. It can be accessed from the texture's import settings.";
         private const string SwitchToProgressive = "Current scene is using the Enlighten lightmapper, which has been deprecated in newer versions of Unity. You should consider switching to Progressive for improved fidelity and performance.";
-        private const string SingleColorEnviromentLighting = "Consider changing your Enviroment Lighting to Gradient from Flat.";
-        private const string DarkEnviromentLighting = "Using dark colours for Environment Lighting can cause avatars to look weird. Only use dark Environment Lighting if your world has dark lighting.";
-        private const string CustomEnviromentReflectionsNull = "Your Enviroment Reflections have been set to custom, but you haven't defined a custom cubemap!";
+        private const string SingleColorEnvironmentLighting = "Consider changing your Enviroment Lighting to Gradient from Flat.";
+        private const string DarkEnvironmentLighting = "Using dark colours for Environment Lighting can cause avatars to look weird. Only use dark Environment Lighting if your world has dark lighting.";
+        private const string CustomEnvironmentReflectionsNull = "Your Enviroment Reflections have been set to custom, but you haven't defined a custom cubemap!";
         private const string NoLightmapUV = "Model found in the scene \"{0}\" is set to be lightmapped but doesn't have Lightmap UVs.";
         private const string CombineNoLightmapUV = "Current scene has {0} models set to be lightmapped that don't have Lightmap UVs.";
         private const string NoLightmapUVInfo = "This causes issues when baking lighting. You can enable generating Lightmap UV's in the model's import settings.";
@@ -1318,18 +1318,18 @@ namespace VRWorldToolkit.WorldDebugger
                     _lighting.AddMessageGroup(new MessageGroup(AmbientModeSetToCustom, MessageType.Error).AddSingleMessage(new SingleMessage(SetAmbientMode(AmbientMode.Skybox))));
                     break;
                 case AmbientMode.Flat:
-                    _lighting.AddMessageGroup(new MessageGroup(SingleColorEnviromentLighting, MessageType.Tips));
+                    _lighting.AddMessageGroup(new MessageGroup(SingleColorEnvironmentLighting, MessageType.Tips));
                     break;
             }
 
             if ((Helper.GetBrightness(RenderSettings.ambientLight) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Flat)) || (Helper.GetBrightness(RenderSettings.ambientSkyColor) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Trilight)) || (Helper.GetBrightness(RenderSettings.ambientEquatorColor) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Trilight)) || (Helper.GetBrightness(RenderSettings.ambientGroundColor) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Trilight)))
             {
-                _lighting.AddMessageGroup(new MessageGroup(DarkEnviromentLighting, MessageType.Tips));
+                _lighting.AddMessageGroup(new MessageGroup(DarkEnvironmentLighting, MessageType.Tips));
             }
 
             if (RenderSettings.defaultReflectionMode.Equals(DefaultReflectionMode.Custom) && !RenderSettings.customReflection)
             {
-                _lighting.AddMessageGroup(new MessageGroup(CustomEnviromentReflectionsNull, MessageType.Error).AddSingleMessage(new SingleMessage(SetEnviromentReflections(DefaultReflectionMode.Skybox))));
+                _lighting.AddMessageGroup(new MessageGroup(CustomEnvironmentReflectionsNull, MessageType.Error).AddSingleMessage(new SingleMessage(SetEnviromentReflections(DefaultReflectionMode.Skybox))));
             }
 
             var bakedLighting = false;
