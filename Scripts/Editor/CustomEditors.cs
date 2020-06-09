@@ -1,4 +1,5 @@
 ﻿using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 #if VRC_SDK_VRCSDK3
 using VRC.SDKBase;
@@ -38,6 +39,8 @@ namespace VRWorldToolkit
                         var mirror = (GameObject) o;
                         mirror.GetComponent<VRC_MirrorReflection>().m_ReflectLayers.value = 262656;
                     }
+                    
+                    EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
                 }
 
                 if (GUILayout.Button("Show players/world"))
@@ -47,6 +50,8 @@ namespace VRWorldToolkit
                         var mirror = (GameObject) o;
                         mirror.GetComponent<VRC_MirrorReflection>().m_ReflectLayers.value = 262657;
                     }
+                    
+                    EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
                 }
 
                 EditorGUILayout.EndHorizontal();
