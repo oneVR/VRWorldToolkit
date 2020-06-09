@@ -14,12 +14,14 @@ namespace VRWorldToolkit
 {
     public class CustomEditors : MonoBehaviour
     {
-        //Custom editor for VRCMirror for quickly setting layers correctly
+        /// <summary>
+        /// Custom editor for VRC_MirrorReflection with added quick actions
+        /// </summary>
         [CustomEditor(typeof(VRC_MirrorReflection), true, isFallback = false)]
         [CanEditMultipleObjects]
         public class CustomMirrorInspector : Editor
         {
-            private bool _showExplanations;
+            bool showExplanations;
 
             public override void OnInspectorGUI()
             {
@@ -50,9 +52,9 @@ namespace VRWorldToolkit
                         EditorGUILayout.HelpBox("Having UiMenu enabled on mirrors causes VRChat UI elements to render twice which can cause noticeable performance drop in populated instances", MessageType.Warning);
                 }
 
-                _showExplanations = EditorGUILayout.Foldout(_showExplanations, "VRChat specific layer explanations");
+                showExplanations = EditorGUILayout.Foldout(showExplanations, "VRChat specific layer explanations");
 
-                if (_showExplanations)
+                if (showExplanations)
                 {
                     var style = new GUIStyle(GUI.skin.label)
                     {
@@ -66,10 +68,18 @@ namespace VRWorldToolkit
                 }
             }
 
+            /// <summary>
+            /// Change selected Reflect Layers on selected VRC_MirrorReflections to the supplied LayerMask value
+            /// </summary>
+            /// <param name="layerMask">New LayerMask value to set for Reflect Layers</param>
             private static void MirrorLayerChange(int layerMask)
             {
-                foreach (GameObject gameObject in Selection.objects)
+                for (var index = 0; index < Selection.objects.Length; index++)
                 {
+                    var gameObject = Selection.objects[index] as GameObject;
+                    
+                    if (gameObject == null) continue;
+                    
                     var mirror = gameObject.GetComponent<VRC_MirrorReflection>();
 
                     mirror.m_ReflectLayers.value = layerMask;
