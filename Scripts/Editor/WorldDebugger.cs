@@ -200,9 +200,10 @@ namespace VRWorldToolkit.WorldDebugger
                 var count = 0;
 
                 if (MessageList == null) return count;
-                
-                foreach (var item in MessageList)
+
+                for (int i = 0; i < MessageList.Count; i++)
                 {
+                    SingleMessage item = MessageList[i];
                     if (item.SelectObjects != null)
                     {
                         count += item.SelectObjects.Count();
@@ -334,8 +335,9 @@ namespace VRWorldToolkit.WorldDebugger
             {
                 EditorGUILayout.BeginHorizontal();
 
-                foreach (var item in _messageCategory)
+                for (int i = 0; i < _messageCategory.Count; i++)
                 {
+                    MessageCategory item = _messageCategory[i];
                     var button = "miniButtonMid";
                     if (_messageCategory.First() == item)
                     {
@@ -368,8 +370,9 @@ namespace VRWorldToolkit.WorldDebugger
             {
                 var drawList = _messageCategory;
 
-                foreach (var group in drawList)
+                for (int i = 0; i < drawList.Count; i++)
                 {
+                    MessageCategory group = drawList[i];
                     if (group.Enabled || AllDisabled())
                     {
                         GUILayout.Label(group.ListName, EditorStyles.boldLabel);
@@ -382,8 +385,9 @@ namespace VRWorldToolkit.WorldDebugger
                             DrawMessage("No messages found for " + group.ListName + ".", MessageType.Info);
                         }
 
-                        foreach (var messageGroup in group.MessageGroups)
+                        for (int l = 0; l < group.MessageGroups.Count; l++)
                         {
+                            MessageGroup messageGroup = group.MessageGroups[l];
                             var hasButtons = messageGroup.Buttons();
 
                             if (messageGroup.MessageList.Count > 0)
@@ -466,8 +470,10 @@ namespace VRWorldToolkit.WorldDebugger
                                             alignment = TextAnchor.MiddleLeft
                                         };
 
-                                        foreach (var message in messageGroup.MessageList)
+                                        for (int j = 0; j < messageGroup.MessageList.Count; j++)
                                         {
+                                            SingleMessage message = messageGroup.MessageList[j];
+
                                             EditorGUILayout.BeginHorizontal();
 
                                             var finalSingleMessage = string.Format(messageGroup.Message, message.Variable, message.Variable2);
@@ -520,8 +526,9 @@ namespace VRWorldToolkit.WorldDebugger
                                 }
                                 else
                                 {
-                                    foreach (var message in messageGroup.MessageList)
+                                    for (int j = 0; j < messageGroup.MessageList.Count; j++)
                                     {
+                                        SingleMessage message = messageGroup.MessageList[j];
                                         EditorGUILayout.BeginHorizontal();
 
                                         var finalMessage = string.Format(messageGroup.Message, message.Variable, message.Variable2);
@@ -1173,25 +1180,25 @@ namespace VRWorldToolkit.WorldDebugger
                     _general.AddMessageGroup(new MessageGroup(NullSpawnPoint, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject).SetAutoFix(FixSpawns(sceneDescriptor))));
                 }
 
-                foreach (var item in sceneDescriptor.spawns)
+                for (int i = 0; i < sceneDescriptor.spawns.Length; i++)
                 {
-                    if (item == null)
+                    if (sceneDescriptor.spawns[i] == null)
                     {
                         continue;
                     }
 
-                    if (!Physics.Raycast(item.position + new Vector3(0, 0.01f, 0), Vector3.down, out RaycastHit hit, Mathf.Infinity, 0, QueryTriggerInteraction.Ignore))
+                    if (!Physics.Raycast(sceneDescriptor.spawns[i].position + new Vector3(0, 0.01f, 0), Vector3.down, out RaycastHit hit, Mathf.Infinity, 0, QueryTriggerInteraction.Ignore))
                     {
-                        if (Physics.Raycast(item.position + new Vector3(0, 0.01f, 0), Vector3.down, out hit, Mathf.Infinity))
+                        if (Physics.Raycast(sceneDescriptor.spawns[i].position + new Vector3(0, 0.01f, 0), Vector3.down, out hit, Mathf.Infinity))
                         {
                             if (hit.collider.isTrigger)
                             {
-                                _general.AddMessageGroup(new MessageGroup(ColliderUnderSpawnIsTrigger, MessageType.Error).AddSingleMessage(new SingleMessage(hit.collider.name, item.gameObject.name).SetSelectObject(item.gameObject)));
+                                _general.AddMessageGroup(new MessageGroup(ColliderUnderSpawnIsTrigger, MessageType.Error).AddSingleMessage(new SingleMessage(hit.collider.name, sceneDescriptor.spawns[i].gameObject.name).SetSelectObject(sceneDescriptor.spawns[i].gameObject)));
                             }
                         }
                         else
                         {
-                            _general.AddMessageGroup(new MessageGroup(NoColliderUnderSpawn, MessageType.Error).AddSingleMessage(new SingleMessage(item.gameObject.name).SetSelectObject(item.gameObject)));
+                            _general.AddMessageGroup(new MessageGroup(NoColliderUnderSpawn, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.spawns[i].gameObject.name).SetSelectObject(sceneDescriptor.spawns[i].gameObject)));
                         }
                     }
                 }
@@ -1239,9 +1246,9 @@ namespace VRWorldToolkit.WorldDebugger
             if (triggerWrongLayer.Count > 0)
             {
                 var triggerWrongLayerGroup = new MessageGroup(TriggerTriggerWrongLayer, CombinedTriggerTriggerWrongLayer, TriggerTriggerWrongLayerInfo, MessageType.Warning);
-                foreach (var item in triggerWrongLayer)
+                for (int i = 0; i < triggerWrongLayer.Count; i++)
                 {
-                    triggerWrongLayerGroup.AddSingleMessage(new SingleMessage(item.name).SetSelectObject(item.gameObject).SetAutoFix(SetObjectLayer(item.gameObject, "MirrorReflection")));
+                    triggerWrongLayerGroup.AddSingleMessage(new SingleMessage(triggerWrongLayer[i].name).SetSelectObject(triggerWrongLayer[i].gameObject).SetAutoFix(SetObjectLayer(triggerWrongLayer[i].gameObject, "MirrorReflection")));
                 }
                 _general.AddMessageGroup(triggerWrongLayerGroup.SetGroupAutoFix(SetObjectLayer(triggerWrongLayerGroup.GetSelectObjects(), "MirrorReflection")));
             }
@@ -1280,20 +1287,20 @@ namespace VRWorldToolkit.WorldDebugger
             var cameraCount = 0;
             var cameras = GameObject.FindObjectsOfType<Camera>();
 
-            foreach (var camera in cameras)
+            for (int i = 0; i < cameras.Length; i++)
             {
-                if (!camera.targetTexture) continue;
+                if (!cameras[i].targetTexture) continue;
                 
                 cameraCount++;
-                activeCameras.Add(camera.gameObject);
+                activeCameras.Add(cameras[i].gameObject);
             }
 
-            if (cameraCount > 0 && cameraCount != 1)
+            if (cameraCount > 0)
             {
                 var activeCamerasMessages = new MessageGroup(ActiveCameraOutputtingToRenderTexture, CombinedActiveCamerasOutputtingToRenderTextures, ActiveCamerasOutputtingToRenderTextureInfo, MessageType.BadFPS);
-                foreach (var camera in activeCameras)
+                for (int i = 0; i < activeCameras.Count; i++)
                 {
-                    activeCamerasMessages.AddSingleMessage(new SingleMessage(cameraCount.ToString()).SetSelectObject(camera.gameObject));
+                    activeCamerasMessages.AddSingleMessage(new SingleMessage(activeCameras[i].name).SetSelectObject(activeCameras[i].gameObject));
                 }
                 _optimization.AddMessageGroup(activeCamerasMessages);
             }
@@ -1303,9 +1310,9 @@ namespace VRWorldToolkit.WorldDebugger
             if (mirrors.Length > 0)
             {
                 var activeCamerasMessage = new MessageGroup(MirrorOnByDefault, CombinedMirrorsOnByDefault, MirrorsOnByDefaultInfo, MessageType.BadFPS);
-                foreach (var mirror in mirrors)
+                for (int i = 0; i < mirrors.Length; i++)
                 {
-                    activeCamerasMessage.AddSingleMessage(new SingleMessage(mirror.name).SetSelectObject(mirror.gameObject));
+                    activeCamerasMessage.AddSingleMessage(new SingleMessage(mirrors[i].name).SetSelectObject(mirrors[i].gameObject));
                 }
                 _optimization.AddMessageGroup(activeCamerasMessage);
             }
@@ -1348,19 +1355,19 @@ namespace VRWorldToolkit.WorldDebugger
 
                 bakedLighting = true;
 
-                foreach (var obj in bakeryLights)
+                for (int i = 0; i < bakeryLights.Count; i++)
                 {
-                    if (!obj.CompareTag("EditorOnly"))
+                    if (!bakeryLights[i].CompareTag("EditorOnly"))
                     {
-                        notEditorOnly.Add(obj);
+                        notEditorOnly.Add(bakeryLights[i]);
                     }
 
-                    if (!obj.GetComponent<Light>()) continue;
+                    if (!bakeryLights[i].GetComponent<Light>()) continue;
                     
-                    var light = obj.GetComponent<Light>();
+                    var light = bakeryLights[i].GetComponent<Light>();
                     if (!light.bakingOutput.isBaked && light.enabled)
                     {
-                        unityLightOnBakeryLight.Add(obj);
+                        unityLightOnBakeryLight.Add(bakeryLights[i]);
                     }
                 }
 
@@ -1392,16 +1399,16 @@ namespace VRWorldToolkit.WorldDebugger
             var nonBakedLights = new List<GameObject>();
 
             //Go trough the lights to check if the scene contains lights set to be baked
-            foreach (var light in lights)
+            for (int i = 0; i < lights.Length; i++)
             {
-                if (light.lightmapBakeType != LightmapBakeType.Baked &&
-                    light.lightmapBakeType != LightmapBakeType.Mixed) continue;
+                if (lights[i].lightmapBakeType != LightmapBakeType.Baked &&
+                    lights[i].lightmapBakeType != LightmapBakeType.Mixed) continue;
                 
                 bakedLighting = true;
                 
-                if (!light.bakingOutput.isBaked && light.GetComponent<Light>().enabled)
+                if (!lights[i].bakingOutput.isBaked && lights[i].GetComponent<Light>().enabled)
                 {
-                    nonBakedLights.Add(light.gameObject);
+                    nonBakedLights.Add(lights[i].gameObject);
                 }
             }
 
@@ -1447,14 +1454,14 @@ namespace VRWorldToolkit.WorldDebugger
 
                 var overlappingLightProbesGroup = new MessageGroup(OverlappingLightProbes, CombinedOverlappingLightProbes, OverlappingLightProbesInfo, MessageType.Info);
 
-                foreach (var lightprobegroup in lightprobegroups)
+                for (int i = 0; i < lightprobegroups.Length; i++)
                 {
-                    if (lightprobegroup.probePositions.GroupBy(p => p).Any(g => g.Count() > 1))
+                    if (lightprobegroups[i].probePositions.GroupBy(p => p).Any(g => g.Count() > 1))
                     {
-                        overlappingLightProbesGroup.AddSingleMessage(new SingleMessage(lightprobegroup.name, (lightprobegroup.probePositions.Length - lightprobegroup.probePositions.Distinct().ToArray().Length).ToString()).SetSelectObject(lightprobegroup.gameObject).SetAutoFix(RemoveOverlappingLightprobes(lightprobegroup)));
+                        overlappingLightProbesGroup.AddSingleMessage(new SingleMessage(lightprobegroups[i].name, (lightprobegroups[i].probePositions.Length - lightprobegroups[i].probePositions.Distinct().ToArray().Length).ToString()).SetSelectObject(lightprobegroups[i].gameObject).SetAutoFix(RemoveOverlappingLightprobes(lightprobegroups[i])));
                     }
 
-                    probeCounter += lightprobegroup.probePositions.Length;
+                    probeCounter += lightprobegroups[i].probePositions.Length;
                 }
 
                 if (probeCounter > 0)
@@ -1511,9 +1518,9 @@ namespace VRWorldToolkit.WorldDebugger
                 if (nonBakedLights.Count != 0)
                 {
                     var nonBakedLightsGroup = new MessageGroup(NonBakedBakedLights, CombinedNonBakedBakedLights, NonBakedBakedLightsInfo, MessageType.Warning);
-                    foreach (var item in nonBakedLights)
+                    for (int i = 0; i < nonBakedLights.Count; i++)
                     {
-                        nonBakedLightsGroup.AddSingleMessage(new SingleMessage(item.name).SetSelectObject(item.gameObject));
+                        nonBakedLightsGroup.AddSingleMessage(new SingleMessage(nonBakedLights[i].name).SetSelectObject(nonBakedLights[i].gameObject));
                     }
                     _lighting.AddMessageGroup(nonBakedLightsGroup);
                 }
@@ -1530,16 +1537,14 @@ namespace VRWorldToolkit.WorldDebugger
             //ReflectionProbes
             var reflectionprobes = GameObject.FindObjectsOfType<ReflectionProbe>();
             var unbakedprobes = new List<GameObject>();
-            var reflectionProbeCount = 0;
+            var reflectionProbeCount = reflectionprobes.Count();
             var reflectionProbesUnbaked = 0;
-            foreach (var reflectionprobe in reflectionprobes)
+            for (int i = 0; i < reflectionprobes.Length; i++)
             {
-                reflectionProbeCount++;
-                
-                if (reflectionprobe.texture) continue;
+                if (reflectionprobes[i]) continue;
                 
                 reflectionProbesUnbaked++;
-                unbakedprobes.Add(reflectionprobe.gameObject);
+                unbakedprobes.Add(reflectionprobes[i].gameObject);
             }
 
             if (reflectionProbeCount == 0)
@@ -1723,9 +1728,10 @@ namespace VRWorldToolkit.WorldDebugger
 
             var mirrorsDefaultLayers = new MessageGroup(MirrorWithDefaultLayers, CombinedMirrorWithDefaultLayers, MirrorWithDefaultLayersInfo, MessageType.Tips);
 
-            foreach (var o in Resources.FindObjectsOfTypeAll(typeof(GameObject)))
+            UnityEngine.Object[] allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
+            for (int i = 0; i < allGameObjects.Length; i++)
             {
-                var gameObject = (GameObject) o;
+                GameObject gameObject = allGameObjects[i] as GameObject;
                 
                 if (EditorUtility.IsPersistent(gameObject.transform.root.gameObject) && !(gameObject.hideFlags == HideFlags.NotEditable || gameObject.hideFlags == HideFlags.HideAndDontSave))
                     continue;
@@ -1773,8 +1779,9 @@ namespace VRWorldToolkit.WorldDebugger
                     // Check materials for problems
                     var meshRenderer = gameObject.GetComponent<Renderer>();
 
-                    foreach (var material in meshRenderer.sharedMaterials)
+                    for (int l = 0; l < meshRenderer.sharedMaterials.Length; l++)
                     {
+                        Material material = meshRenderer.sharedMaterials[l];
                         if (material == null || checkedMaterials.Contains(material))
                             continue;
 
@@ -1787,11 +1794,11 @@ namespace VRWorldToolkit.WorldDebugger
                         if (shader.name.StartsWith(".poiyomi") || shader.name.StartsWith("poiyomi") || shader.name.StartsWith("arktoon") || shader.name.StartsWith("Cubedparadox") || shader.name.StartsWith("Silent's Cel Shading") || shader.name.StartsWith("Xiexe"))
                             badShaders++;
 
-                        for (int i = 0; i < ShaderUtil.GetPropertyCount(shader); i++)
+                        for (int j = 0; j < ShaderUtil.GetPropertyCount(shader); j++)
                         {
-                            if (ShaderUtil.GetPropertyType(shader, i) == ShaderUtil.ShaderPropertyType.TexEnv)
+                            if (ShaderUtil.GetPropertyType(shader, j) == ShaderUtil.ShaderPropertyType.TexEnv)
                             {
-                                var texture = material.GetTexture(ShaderUtil.GetPropertyName(shader, i));
+                                var texture = material.GetTexture(ShaderUtil.GetPropertyName(shader, j));
                                 if (AssetDatabase.GetAssetPath(texture) != "" && !unCrunchedTextures.Contains(texture))
                                 {
                                     var textureImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(texture)) as TextureImporter;
@@ -1856,9 +1863,9 @@ namespace VRWorldToolkit.WorldDebugger
             if (missingShadersCount > 0)
             {
                 var missingShadersGroup = new MessageGroup(MissingShaderWarning, CombinedMissingShaderWarning, MissingShaderWarningInfo, MessageType.Error);
-                foreach (var material in missingShaders)
+                for (int i = 0; i < missingShaders.Count; i++)
                 {
-                    missingShadersGroup.AddSingleMessage(new SingleMessage(material.name).SetAssetPath(AssetDatabase.GetAssetPath(material)).SetAutoFix(ChangeShader(material, "Standard")));
+                    missingShadersGroup.AddSingleMessage(new SingleMessage(missingShaders[i].name).SetAssetPath(AssetDatabase.GetAssetPath(missingShaders[i])).SetAutoFix(ChangeShader(missingShaders[i], "Standard")));
                 }
                 _general.AddMessageGroup(missingShadersGroup.SetGroupAutoFix(ChangeShader(missingShaders.ToArray(), "Standard")));
             }
