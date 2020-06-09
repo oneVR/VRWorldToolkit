@@ -23,7 +23,7 @@ namespace VRWorldToolkit
         private static void PostProcessingSetup()
         {
 #if UNITY_POST_PROCESSING_STACK_V2
-            VRC_SceneDescriptor[] descriptors = FindObjectsOfType(typeof(VRC_SceneDescriptor)) as VRC_SceneDescriptor[];
+            var descriptors = FindObjectsOfType(typeof(VRC_SceneDescriptor)) as VRC_SceneDescriptor[];
             if (descriptors.Length == 0)
             {
                 EditorUtility.DisplayDialog("Scene descriptor missing", "You haven't added a scene descriptor yet, you can add one by dragging in the VRCWorld prefab.", "OK");
@@ -68,7 +68,7 @@ namespace VRWorldToolkit
             Application.OpenURL("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Post-Processing");
         }
 
-        public static void SetupBasicPostProcessing(VRC_SceneDescriptor descriptor)
+        private static void SetupBasicPostProcessing(VRC_SceneDescriptor descriptor)
         {
 #if UNITY_POST_PROCESSING_STACK_V2
             if (!UpdateLayers.AreLayersSetup())
@@ -95,15 +95,15 @@ namespace VRWorldToolkit
                     //Make sure the post process layer exists and set it up
                     if (!descriptor.ReferenceCamera.gameObject.GetComponent<PostProcessLayer>())
                         descriptor.ReferenceCamera.gameObject.AddComponent(typeof(PostProcessLayer));
-                    PostProcessLayer postprocess_layer = descriptor.ReferenceCamera.gameObject.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
-                    postprocess_layer.volumeLayer = LayerMask.GetMask("Water");
+                    var postprocessLayer = descriptor.ReferenceCamera.gameObject.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
+                    postprocessLayer.volumeLayer = LayerMask.GetMask("Water");
 
                     //Copy the example profile to the Post Processing folder
                     if (!Directory.Exists("Assets/Post Processing"))
                         AssetDatabase.CreateFolder("Assets", "Post Processing");
                     if (AssetDatabase.LoadAssetAtPath("Assets/Post Processing/SilentProfile.asset", typeof(PostProcessProfile)) == null)
                     {
-                        string path = AssetDatabase.GUIDToAssetPath("eaac6f7291834264f97854154e89bf76");
+                        var path = AssetDatabase.GUIDToAssetPath("eaac6f7291834264f97854154e89bf76");
                         if (path != null)
                         {
                             AssetDatabase.CopyAsset(path, "Assets/Post Processing/SilentProfile.asset");
@@ -111,7 +111,7 @@ namespace VRWorldToolkit
                     }
 
                     //Set up the post process volume
-                    PostProcessVolume volume = GameObject.Instantiate(PostProcessManager.instance.QuickVolume(16, 100f));
+                    var volume = GameObject.Instantiate(PostProcessManager.instance.QuickVolume(16, 100f));
                     if (File.Exists("Assets/Post Processing/SilentProfile.asset"))
                         volume.sharedProfile = (PostProcessProfile)AssetDatabase.LoadAssetAtPath("Assets/Post Processing/SilentProfile.asset", typeof(PostProcessProfile));
                     volume.gameObject.name = "Post Processing Volume";
@@ -124,22 +124,22 @@ namespace VRWorldToolkit
 #endif
         }
 
-        static AddRequest Request;
+        private static AddRequest _request;
 
-        public static void ImportPostProcessing()
+        private static void ImportPostProcessing()
         {
-            Request = Client.Add("com.unity.postprocessing");
+            _request = Client.Add("com.unity.postprocessing");
             EditorApplication.update += PPImportProgress;
         }
 
-        static void PPImportProgress()
+        private static void PPImportProgress()
         {
-            if (Request.IsCompleted)
+            if (_request.IsCompleted)
             {
-                if (Request.Status == StatusCode.Success)
-                    Debug.Log("Installed: " + Request.Result.packageId);
-                else if (Request.Status >= StatusCode.Failure)
-                    Debug.Log(Request.Error.message);
+                if (_request.Status == StatusCode.Success)
+                    Debug.Log("Installed: " + _request.Result.packageId);
+                else if (_request.Status >= StatusCode.Failure)
+                    Debug.Log(_request.Error.message);
 
                 EditorApplication.update -= PPImportProgress;
             }

@@ -17,7 +17,7 @@ namespace VRWorldToolkit
         [CanEditMultipleObjects]
         public class CustomMirrorInspector : Editor
         {
-            bool showExplanations = false;
+            private bool _showExplanations = false;
 
             public override void OnInspectorGUI()
             {
@@ -33,16 +33,18 @@ namespace VRWorldToolkit
 
                 if (GUILayout.Button("Show only players"))
                 {
-                    foreach (GameObject mirror in Selection.objects)
+                    foreach (var o in Selection.objects)
                     {
+                        var mirror = (GameObject) o;
                         mirror.GetComponent<VRC_MirrorReflection>().m_ReflectLayers.value = 262656;
                     }
                 }
 
                 if (GUILayout.Button("Show players/world"))
                 {
-                    foreach (GameObject mirror in Selection.objects)
+                    foreach (var o in Selection.objects)
                     {
+                        var mirror = (GameObject) o;
                         mirror.GetComponent<VRC_MirrorReflection>().m_ReflectLayers.value = 262657;
                     }
                 }
@@ -64,11 +66,11 @@ namespace VRWorldToolkit
                     }
                 }
 
-                showExplanations = EditorGUILayout.Foldout(showExplanations, "VRChat specific layer explanations");
+                _showExplanations = EditorGUILayout.Foldout(_showExplanations, "VRChat specific layer explanations");
 
-                if (showExplanations)
+                if (_showExplanations)
                 {
-                    GUIStyle style = new GUIStyle(GUI.skin.label)
+                    var style = new GUIStyle(GUI.skin.label)
                     {
                         richText = true,
                         wordWrap = true
