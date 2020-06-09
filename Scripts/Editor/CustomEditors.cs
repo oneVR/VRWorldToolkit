@@ -1,12 +1,13 @@
-﻿using UnityEditor;
-using UnityEditor.SceneManagement;
-using UnityEngine;
-#if VRC_SDK_VRCSDK3
+﻿#if VRC_SDK_VRCSDK3
 using VRC.SDKBase;
 #endif
 #if VRC_SDK_VRCSDK2
 using VRCSDK2;
 #endif
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 #if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
 namespace VRWorldToolkit
@@ -18,7 +19,7 @@ namespace VRWorldToolkit
         [CanEditMultipleObjects]
         public class CustomMirrorInspector : Editor
         {
-            private bool _showExplanations = false;
+            private bool _showExplanations;
 
             public override void OnInspectorGUI()
             {
@@ -32,43 +33,21 @@ namespace VRWorldToolkit
 
                 EditorGUILayout.BeginHorizontal();
 
-                if (GUILayout.Button("Show only players"))
-                {
-                    foreach (var o in Selection.objects)
-                    {
-                        var mirror = (GameObject) o;
-                        mirror.GetComponent<VRC_MirrorReflection>().m_ReflectLayers.value = 262656;
-                    }
-                    
-                    EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
-                }
+                if (GUILayout.Button("Show only players")) MirrorLayerChange(262656);
 
-                if (GUILayout.Button("Show players/world"))
-                {
-                    foreach (var o in Selection.objects)
-                    {
-                        var mirror = (GameObject) o;
-                        mirror.GetComponent<VRC_MirrorReflection>().m_ReflectLayers.value = 262657;
-                    }
-                    
-                    EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
-                }
+                if (GUILayout.Button("Show players/world")) MirrorLayerChange(262657);
 
                 EditorGUILayout.EndHorizontal();
 
                 if (Selection.gameObjects.Length == 1)
                 {
-                    VRC_MirrorReflection currentMirror = (VRC_MirrorReflection)target;
+                    var currentMirror = (VRC_MirrorReflection) target;
 
                     if (currentMirror.m_ReflectLayers == -1025)
-                    {
                         EditorGUILayout.HelpBox("Avoid using default layers on mirrors to save on frames, you should disable all layers that aren't needed in this mirror.", MessageType.Info);
-                    }
 
                     if (Helper.LayerIncludedInMask(LayerMask.NameToLayer("UiMenu"), currentMirror.m_ReflectLayers))
-                    {
-                        EditorGUILayout.HelpBox("Having UiMenu enabled on mirrors causes VRChat UI elements to render twice which can cause noticable performance drop in populated instances", MessageType.Warning);
-                    }
+                        EditorGUILayout.HelpBox("Having UiMenu enabled on mirrors causes VRChat UI elements to render twice which can cause noticeable performance drop in populated instances", MessageType.Warning);
                 }
 
                 _showExplanations = EditorGUILayout.Foldout(_showExplanations, "VRChat specific layer explanations");
@@ -85,6 +64,20 @@ namespace VRWorldToolkit
                     GUILayout.Label("<b>PlayerLocal:</b>\nThis layer is only used for first-person view and should not be enabled in mirrors", style);
                     GUILayout.Label("<b>MirrorReflection:</b>\nThis layer is used for your own mirror version", style);
                 }
+            }
+
+            private static void MirrorLayerChange(int layerMask)
+            {
+                foreach (GameObject gameObject in Selection.objects)
+                {
+                    var mirror = gameObject.GetComponent<VRC_MirrorReflection>();
+
+                    mirror.m_ReflectLayers.value = layerMask;
+
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(mirror);
+                }
+
+                EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
             }
         }
     }
