@@ -12,6 +12,9 @@ using UnityEngine.SceneManagement;
 #if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
 namespace VRWorldToolkit
 {
+    /// <summary>
+    /// Custom editors to improve functionality on the built in VRChat components
+    /// </summary>
     public class CustomEditors : MonoBehaviour
     {
         /// <summary>
@@ -43,7 +46,7 @@ namespace VRWorldToolkit
 
                 if (Selection.gameObjects.Length == 1)
                 {
-                    var currentMirror = (VRC_MirrorReflection) target;
+                    var currentMirror = (VRC_MirrorReflection)target;
 
                     if (currentMirror.m_ReflectLayers == -1025)
                         EditorGUILayout.HelpBox("Avoid using default layers on mirrors to save on frames, you should disable all layers that aren't needed in this mirror.", MessageType.Info);
@@ -77,9 +80,9 @@ namespace VRWorldToolkit
                 for (var index = 0; index < Selection.objects.Length; index++)
                 {
                     var gameObject = Selection.objects[index] as GameObject;
-                    
+
                     if (gameObject == null) continue;
-                    
+
                     var mirror = gameObject.GetComponent<VRC_MirrorReflection>();
 
                     mirror.m_ReflectLayers.value = layerMask;
@@ -88,6 +91,71 @@ namespace VRWorldToolkit
                 }
 
                 EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+            }
+        }
+
+        /// <summary>
+        /// Custom editor addition for drawing avatar pedestal bounds
+        /// </summary>
+        [CustomEditor(typeof(VRC_AvatarPedestal), true, isFallback = false)]
+        [CanEditMultipleObjects]
+        public class CustomAvatarInspector : Editor
+        {
+            [DrawGizmo(GizmoType.Selected | GizmoType.Active)]
+            static void DrawGizmoForMyScript(VRC_AvatarPedestal pedestal, GizmoType gizmoType)
+            {
+                Transform pedestalTransform = pedestal.transform;
+
+                if (pedestal.Placement != null)
+                {
+                    pedestalTransform = pedestal.Placement;
+                }
+
+                if (Vector3.Distance(pedestalTransform.position, Camera.current.transform.position) < 50f)
+                {
+                    Gizmos.DrawSphere(pedestalTransform.position, 0.1f);
+
+                    DrawBound(pedestalTransform, 1.5f, Color.green, true);
+
+                    DrawBound(pedestalTransform, 2f, Color.red, false);
+                }
+            }
+
+            /// <summary>
+            /// Helper function for drawing gizmo bounds
+            /// </summary>
+            /// <param name="placement">Center of the bounds</param>
+            /// <param name="size">Size of the bounds</param>
+            /// <param name="color">Color of the bounds</param>
+            /// <param name="showFront">Whether to change the color depending on which side is being looked at</param>
+            private static void DrawBound(Transform placement, float size, Color color, bool showFront)
+            {
+                //Set color of the bounds
+                if (showFront)
+                {
+                    Vector3 cameraDirection = placement.position - Camera.current.transform.position;
+
+                    float angle = Vector3.Angle(placement.forward, cameraDirection);
+
+                    if (Mathf.Abs(angle) > 90)
+                    {
+                        Gizmos.color = color;
+                    }
+                    else
+                    {
+                        Gizmos.color = Color.red;
+                    }
+                }
+                else
+                {
+                    Gizmos.color = color;
+                }
+
+                //Change gizmo matrix to match pedestal rotation
+                Gizmos.matrix = placement.localToWorldMatrix;
+
+                //Draw the bounds
+                Gizmos.DrawWireCube(Vector3.up * 1.2f, new Vector3(1f * size, 1f * size));
             }
         }
     }
