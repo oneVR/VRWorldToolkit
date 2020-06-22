@@ -102,7 +102,7 @@ namespace VRWorldToolkit
         public class CustomAvatarInspector : Editor
         {
             [DrawGizmo(GizmoType.Selected | GizmoType.Active)]
-            static void DrawGizmoForMyScript(VRC_AvatarPedestal pedestal, GizmoType gizmoType)
+            static void DrawAvatarPedestalGizmos(VRC_AvatarPedestal pedestal, GizmoType gizmoType)
             {
                 Transform pedestalTransform = pedestal.transform;
 
