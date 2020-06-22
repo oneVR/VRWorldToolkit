@@ -104,11 +104,15 @@ namespace VRWorldToolkit
             [DrawGizmo(GizmoType.Selected | GizmoType.Active)]
             static void DrawAvatarPedestalGizmos(VRC_AvatarPedestal pedestal, GizmoType gizmoType)
             {
-                Transform pedestalTransform = pedestal.transform;
+                Transform pedestalTransform;
 
                 if (pedestal.Placement != null)
                 {
                     pedestalTransform = pedestal.Placement;
+                }
+                else
+                {
+                    pedestalTransform = pedestal.transform;
                 }
 
                 if (Vector3.Distance(pedestalTransform.position, Camera.current.transform.position) < 50f)
@@ -128,29 +132,22 @@ namespace VRWorldToolkit
             /// <param name="showFront">Whether to change the color depending on which side is being looked at</param>
             private static void DrawBound(Transform placement, float size, Color color, bool showFront)
             {
-                //Set color of the bounds
+                //Change gizmo matrix to match pedestal rotation and set gizmo color
+                Gizmos.matrix = placement.localToWorldMatrix;
+                Gizmos.color = color;
+
+                //Change color to red if showing the front is active and active camera is behind the pedestal
                 if (showFront)
                 {
                     Vector3 cameraDirection = placement.position - Camera.current.transform.position;
 
                     float angle = Vector3.Angle(placement.forward, cameraDirection);
 
-                    if (Mathf.Abs(angle) > 90)
-                    {
-                        Gizmos.color = color;
-                    }
-                    else
+                    if (Mathf.Abs(angle) < 90)
                     {
                         Gizmos.color = Color.red;
                     }
                 }
-                else
-                {
-                    Gizmos.color = color;
-                }
-
-                //Change gizmo matrix to match pedestal rotation
-                Gizmos.matrix = placement.localToWorldMatrix;
 
                 //Draw the bounds
                 Gizmos.DrawWireCube(Vector3.up * 1.2f, new Vector3(1f * size, 1f * size));
