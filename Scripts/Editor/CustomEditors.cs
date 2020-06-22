@@ -113,8 +113,6 @@ namespace VRWorldToolkit
 
                 if (Vector3.Distance(pedestalTransform.position, Camera.current.transform.position) < 50f)
                 {
-                    Gizmos.DrawSphere(pedestalTransform.position, 0.1f);
-
                     DrawBound(pedestalTransform, 1.5f, Color.green, true);
 
                     DrawBound(pedestalTransform, 2f, Color.red, false);
