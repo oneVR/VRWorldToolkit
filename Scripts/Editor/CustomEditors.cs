@@ -101,7 +101,35 @@ namespace VRWorldToolkit
         [CanEditMultipleObjects]
         public class CustomAvatarInspector : Editor
         {
-            [DrawGizmo(GizmoType.Selected | GizmoType.Active)]
+            public override void OnInspectorGUI()
+            {
+                DrawDefaultInspector();
+
+                if (Selection.gameObjects.Length > 1)
+                {
+                    EditorGUILayout.Space();
+
+                    EditorGUILayout.LabelField("VRWorld Toolkit Additions", EditorStyles.boldLabel);
+
+                    GUILayout.Label("Multiple Selected:");
+
+                    for (int i = 0; i < serializedObject.targetObjects.Length; i++)
+                    {
+                        VRC_AvatarPedestal item = serializedObject.targetObjects[i] as VRC_AvatarPedestal;
+
+                        string currentValue = item.blueprintId;
+                        item.blueprintId = EditorGUILayout.TextField("\"" + item.name + "\"" + " Id: ", item.blueprintId);
+
+                        if (currentValue != item.blueprintId)
+                        {
+                            PrefabUtility.RecordPrefabInstancePropertyModifications(item);
+                            EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+                        }
+                    }
+                }
+            }
+
+            [DrawGizmo(GizmoType.InSelectionHierarchy | GizmoType.Active)]
             static void DrawAvatarPedestalGizmos(VRC_AvatarPedestal pedestal, GizmoType gizmoType)
             {
                 Transform pedestalTransform;
