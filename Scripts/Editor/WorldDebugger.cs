@@ -439,9 +439,9 @@ namespace VRWorldToolkit.WorldDebugger
                                         if (GUILayout.Button("Auto Fix", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
                                         {
                                             messageGroup.GroupAutoFix();
-                                            
+
                                             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
-                                            
+
                                             _recheck = true;
                                         }
 
@@ -503,9 +503,9 @@ namespace VRWorldToolkit.WorldDebugger
                                                 if (GUILayout.Button("Auto Fix", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
                                                 {
                                                     message.AutoFix();
-                                            
+
                                                     EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
-                                                    
+
                                                     _recheck = true;
                                                 }
 
@@ -563,9 +563,9 @@ namespace VRWorldToolkit.WorldDebugger
                                             if (GUILayout.Button("Auto Fix", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
                                             {
                                                 message.AutoFix();
-                                            
+
                                                 EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
-                                                
+
                                                 _recheck = true;
                                             }
 
@@ -1087,7 +1087,7 @@ namespace VRWorldToolkit.WorldDebugger
         private static void CountOcclusionCacheFiles()
         {
             _occlusionCacheFiles = Directory.EnumerateFiles("Library/Occlusion/").Count();
-            
+
             if (_occlusionCacheFiles > 0)
             {
                 _recheck = true;
@@ -1290,7 +1290,7 @@ namespace VRWorldToolkit.WorldDebugger
             for (int i = 0; i < cameras.Length; i++)
             {
                 if (!cameras[i].targetTexture) continue;
-                
+
                 cameraCount++;
                 activeCameras.Add(cameras[i].gameObject);
             }
@@ -1363,7 +1363,7 @@ namespace VRWorldToolkit.WorldDebugger
                     }
 
                     if (!bakeryLights[i].GetComponent<Light>()) continue;
-                    
+
                     var light = bakeryLights[i].GetComponent<Light>();
                     if (!light.bakingOutput.isBaked && light.enabled)
                     {
@@ -1403,9 +1403,9 @@ namespace VRWorldToolkit.WorldDebugger
             {
                 if (lights[i].lightmapBakeType != LightmapBakeType.Baked &&
                     lights[i].lightmapBakeType != LightmapBakeType.Mixed) continue;
-                
+
                 bakedLighting = true;
-                
+
                 if (!lights[i].bakingOutput.isBaked && lights[i].GetComponent<Light>().enabled)
                 {
                     nonBakedLights.Add(lights[i].gameObject);
@@ -1734,7 +1734,7 @@ namespace VRWorldToolkit.WorldDebugger
             for (int i = 0; i < allGameObjects.Length; i++)
             {
                 GameObject gameObject = allGameObjects[i] as GameObject;
-                
+
                 if (EditorUtility.IsPersistent(gameObject.transform.root.gameObject) && !(gameObject.hideFlags == HideFlags.NotEditable || gameObject.hideFlags == HideFlags.HideAndDontSave))
                     continue;
 
@@ -1804,7 +1804,7 @@ namespace VRWorldToolkit.WorldDebugger
                                 if (AssetDatabase.GetAssetPath(texture) != "" && !unCrunchedTextures.Contains(texture))
                                 {
                                     var textureImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(texture)) as TextureImporter;
-                                    
+
                                     if (textureImporter != null)
                                     {
                                         if (!unCrunchedTextures.Contains(texture))
