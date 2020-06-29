@@ -1048,7 +1048,7 @@ namespace VRWorldToolkit.WorldDebugger
         private const string NoReflectionProbes = "Current scene has no active reflection probes. Reflection probes are needed to have proper reflections on reflective materials.";
         private const string ReflectionProbesSomeUnbaked = "The reflection probe \"{0}\" is unbaked.";
         private const string CombinedReflectionProbesSomeUnbaked = "Current scene has {0} unbaked reflection probes.";
-        private const string ReflectionProbeCountText = "Current scene has {0} baked reflection probes.";
+        private const string ReflectionProbeCountText = "Current scene has {0} reflection probes.";
         private const string PostProcessingImportedButNotSetup = "Current project has Post Processing imported, but you haven't set it up yet.";
         private const string NoReferenceCameraSet = "Current scenes Scene Descriptor has no Reference Camera set. Without a Reference Camera set, you won't be able to see Post Processing ingame.";
         private const string NoPostProcessingVolumes = "You don't have any Post Processing Volumes in your scene. A Post Processing Volume is needed to apply effects to the camera's Post Processing Layer.";
@@ -1538,31 +1538,33 @@ namespace VRWorldToolkit.WorldDebugger
             var reflectionprobes = GameObject.FindObjectsOfType<ReflectionProbe>();
             var unbakedprobes = new List<GameObject>();
             var reflectionProbeCount = reflectionprobes.Count();
-            var reflectionProbesUnbaked = 0;
             for (int i = 0; i < reflectionprobes.Length; i++)
             {
-                if (reflectionprobes[i]) continue;
-                
-                reflectionProbesUnbaked++;
-                unbakedprobes.Add(reflectionprobes[i].gameObject);
+                if (!reflectionprobes[i].bakedTexture && reflectionprobes[i].mode == ReflectionProbeMode.Baked)
+                {
+                    unbakedprobes.Add(reflectionprobes[i].gameObject);
+                }
             }
 
             if (reflectionProbeCount == 0)
             {
                 _lighting.AddMessageGroup(new MessageGroup(NoReflectionProbes, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/class-ReflectionProbe.html"));
             }
-            else if (reflectionProbesUnbaked > 0)
-            {
-                var probesUnbakedGroup = new MessageGroup(ReflectionProbesSomeUnbaked, CombinedReflectionProbesSomeUnbaked, MessageType.Warning);
-                foreach (var item in unbakedprobes)
-                {
-                    probesUnbakedGroup.AddSingleMessage(new SingleMessage(item.name).SetSelectObject(item));
-                }
-                _lighting.AddMessageGroup(probesUnbakedGroup);
-            }
-            else
+            else if (reflectionProbeCount > 0)
             {
                 _lighting.AddMessageGroup(new MessageGroup(ReflectionProbeCountText, MessageType.Info).AddSingleMessage(new SingleMessage(reflectionProbeCount.ToString())));
+
+                if (unbakedprobes.Count > 0)
+                {
+                    var probesUnbakedGroup = new MessageGroup(ReflectionProbesSomeUnbaked, CombinedReflectionProbesSomeUnbaked, MessageType.Warning);
+
+                    foreach (var item in unbakedprobes)
+                    {
+                        probesUnbakedGroup.AddSingleMessage(new SingleMessage(item.name).SetSelectObject(item));
+                    }
+
+                    _lighting.AddMessageGroup(probesUnbakedGroup);
+                }
             }
 
             //Post Processing Checks
