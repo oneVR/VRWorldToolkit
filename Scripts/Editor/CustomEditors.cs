@@ -48,6 +48,9 @@ namespace VRWorldToolkit
                 {
                     var currentMirror = (VRC_MirrorReflection)target;
 
+                    if (LightmapSettings.lightProbes != null && LightmapSettings.lightProbes.positions.Length == 0 && currentMirror.m_DisablePixelLights || LightmapSettings.lightProbes is null)
+                        EditorGUILayout.HelpBox("No baked light probes found in lighting data. Dynamic objects objects such as players and pickups won't appear lit in mirrors without having baked light probes.", MessageType.Warning);
+
                     if (currentMirror.m_ReflectLayers == -1025)
                         EditorGUILayout.HelpBox("Avoid using default layers on mirrors to save on frames, you should disable all layers that aren't needed in this mirror.", MessageType.Info);
 
