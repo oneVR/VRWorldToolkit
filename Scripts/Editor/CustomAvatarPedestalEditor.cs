@@ -61,56 +61,30 @@ namespace VRWorldToolkit
         [DrawGizmo(GizmoType.Selected | GizmoType.Active)]
         static void DrawAvatarPedestalGizmos(VRC_AvatarPedestal pedestal, GizmoType gizmoType)
         {
-            Transform pedestalTransform;
+            if (Vector3.Distance(pedestal.transform.position, Camera.current.transform.position) > 25f) return;
 
             //Get transform from the pedestal placement value otherwise get transform of the pedestal itself
-            if (pedestal.Placement != null)
-            {
-                pedestalTransform = pedestal.Placement;
-            }
-            else
-            {
-                pedestalTransform = pedestal.transform;
-            }
+            var pedestalTransform = pedestal.Placement != null ? pedestal.Placement : pedestal.transform;
 
             //Set gizmo matrix to match the pedestal for proper placement and rotation
             Gizmos.matrix = pedestalTransform.localToWorldMatrix;
+            Gizmos.color = Color.green;
 
-            //Draw the inner and outer bounds
-            DrawBound(pedestalTransform, innerBound, Color.green, true);
-            DrawBound(pedestalTransform, outerBound, Color.red, false);
-        }
+            //Draw the outer bound of the pedestal
+            Gizmos.DrawWireCube(Vector3.up * 1.2f, new Vector3(1f * OuterBound, 1f * OuterBound));
 
-        /// <summary>
-        /// Helper function for drawing gizmo bounds
-        /// </summary>
-        /// <param name="placement">Center of the bounds</param>
-        /// <param name="size">Size of the bounds</param>
-        /// <param name="color">Color of the bounds</param>
-        /// <param name="showFront">Whether to change the color depending on which side is being looked at</param>
-        private static void DrawBound(Transform placement, float size, Color color, bool showFront)
-        {
-            if (Vector3.Distance(placement.position, Camera.current.transform.position) < 25f)
+            //Change color to red if showing the front is active and active camera is behind the pedestal
+            var cameraDirection = pedestalTransform.position - Camera.current.transform.position;
+
+            var angle = Vector3.Angle(pedestalTransform.forward, cameraDirection);
+
+            if (Mathf.Abs(angle) < 90)
             {
-                //Set gizmo color to the passed variable
-                Gizmos.color = color;
-
-                //Change color to red if showing the front is active and active camera is behind the pedestal
-                if (showFront)
-                {
-                    Vector3 cameraDirection = placement.position - Camera.current.transform.position;
-
-                    float angle = Vector3.Angle(placement.forward, cameraDirection);
-
-                    if (Mathf.Abs(angle) < 90)
-                    {
-                        Gizmos.color = Color.red;
-                    }
-                }
-
-                //Draw the bounds
-                Gizmos.DrawWireCube(Vector3.up * 1.2f, new Vector3(1f * size, 1f * size));
+                Gizmos.color = Color.red;
             }
+
+            //Draw the inner bound of the pedestal
+            Gizmos.DrawWireCube(Vector3.up * 1.2f, new Vector3(1f * InnerBound, 1f * InnerBound));
         }
     }
 }
