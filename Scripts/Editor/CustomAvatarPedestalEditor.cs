@@ -8,10 +8,9 @@ using UnityEditor;
 using UnityEngine;
 using System.Linq;
 using UnityEngine.SceneManagement;
-using System;
 using UnityEditor.SceneManagement;
 
-#if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
+#if (VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3) && VRWTOOLKIT_PEDESTAL_EDITOR
 namespace VRWorldToolkit
 {
     /// <summary>
