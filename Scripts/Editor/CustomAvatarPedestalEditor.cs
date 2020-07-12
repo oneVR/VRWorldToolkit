@@ -21,8 +21,8 @@ namespace VRWorldToolkit
     [CanEditMultipleObjects]
     public class CustomAvatarPedestalEditor : Editor
     {
-        const float innerBound = 1.5f;
-        const float outerBound = 2f;
+        private const float InnerBound = 1.5f;
+        private const float OuterBound = 2f;
 
         public override void OnInspectorGUI()
         {
@@ -51,7 +51,7 @@ namespace VRWorldToolkit
 
             if (GUILayout.Button("Copy selected IDs"))
             {
-                EditorGUIUtility.systemCopyBuffer = String.Join("\n", pedestals.Select(x => x.blueprintId));
+                EditorGUIUtility.systemCopyBuffer = string.Join("\n", pedestals.Select(x => x.blueprintId));
             }
         }
 
