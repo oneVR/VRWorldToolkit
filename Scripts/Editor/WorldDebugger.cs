@@ -592,8 +592,8 @@ namespace VRWorldToolkit.WorldDebugger
                                 {
                                     EditorGUILayout.BeginHorizontal();
 
-                                    GUIContent Box = new GUIContent(messageGroup.Message, GetDebuggerIcon(messageGroup.MessageType));
-                                    GUILayout.Box(Box, BoxStyle, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
+                                    GUIContent box = new GUIContent(messageGroup.Message, GetDebuggerIcon(messageGroup.MessageType));
+                                    GUILayout.Box(box, BoxStyle, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
 
                                     EditorGUILayout.BeginVertical();
 
@@ -1447,12 +1447,7 @@ namespace VRWorldToolkit.WorldDebugger
 
                 //Count how many light probes the scene has
                 long probeCounter = 0;
-                long bakedProbes = 0;
-
-                if (probes != null)
-                {
-                    bakedProbes = probes.count;
-                }
+                long bakedProbes = probes != null ? probes.count : 0;
 
                 var lightprobegroups = GameObject.FindObjectsOfType<LightProbeGroup>();
 
