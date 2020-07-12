@@ -4,6 +4,9 @@ using VRC.SDKBase;
 #if VRC_SDK_VRCSDK2
 using VRCSDK2;
 #endif
+#if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
+using VRC.Core;
+#endif
 #if UNITY_POST_PROCESSING_STACK_V2
 using UnityEngine.Rendering.PostProcessing;
 #endif
@@ -15,11 +18,12 @@ using UnityEditor.Build.Reporting;
 using UnityEngine;
 using UnityEngine.Rendering;
 using System.Linq;
-using VRC.Core;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEditor.SceneManagement;
+using UnityEngine.Profiling;
 
+#if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
 namespace VRWorldToolkit.WorldDebugger
 {
     public class WorldDebugger : EditorWindow
@@ -1984,3 +1988,4 @@ namespace VRWorldToolkit.WorldDebugger
         }
     }
 }
+#endif

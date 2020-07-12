@@ -1,7 +1,6 @@
 ﻿using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-using VRC.SDKBase;
 
 namespace VRWorldToolkit
 {

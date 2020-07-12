@@ -15,6 +15,7 @@ using System.Reflection;
 using VRCSDK2;
 #endif
 
+#if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
 namespace VRWorldToolkit
 {
     public class PostProcessingTools : MonoBehaviour
@@ -146,3 +147,4 @@ namespace VRWorldToolkit
         }
     }
 }
+#endif
