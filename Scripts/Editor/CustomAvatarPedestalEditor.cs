@@ -10,7 +10,7 @@ using System.Linq;
 using UnityEngine.SceneManagement;
 using UnityEditor.SceneManagement;
 
-#if (VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3) && VRWTOOLKIT_PEDESTAL_EDITOR
+#if (VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3) && VRWTOOLKIT_EXPERIMENTAL
 namespace VRWorldToolkit
 {
     /// <summary>

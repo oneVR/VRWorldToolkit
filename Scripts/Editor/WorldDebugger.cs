@@ -1789,6 +1789,21 @@ namespace VRWorldToolkit.WorldDebugger
                         }
                     }
 
+#if VRWTOOLKIT_EXPERIMENTAL
+                    if (gameObject.GetComponent<SkinnedMeshRenderer>())
+                    {
+                        if (AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(gameObject.GetComponent<SkinnedMeshRenderer>())) != null)
+                        {
+                            Mesh mesh = gameObject.GetComponent<SkinnedMeshRenderer>().sharedMesh;
+                            ModelImporter importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(gameObject.GetComponent<SkinnedMeshRenderer>())) as ModelImporter;
+                            if (mesh.blendShapeCount > 0 && (!ModelImporterUtil.GetLegacyBlendShapeNormals(importer) || importer.importBlendShapeNormals == ModelImporterNormals.Calculate))
+                            {
+                                _general.AddMessageGroup(new MessageGroup("Found model {0} ({1}) with blend shapes without Legacy Blend Shape Normals enabled this can drastically increase the size of the world.", MessageType.Warning).AddSingleMessage(new SingleMessage(Path.GetFileName(AssetDatabase.GetAssetPath(gameObject.GetComponent<SkinnedMeshRenderer>())), Helper.FormatSize(Profiler.GetRuntimeMemorySizeLong(mesh))).SetAssetPath(importer.assetPath).SetAutoFix(SetLegacyBlendShapeNormals(importer))));
+                            }
+                        }
+                    }
+#endif
+
                     // Check materials for problems
                     var meshRenderer = gameObject.GetComponent<Renderer>();
 
