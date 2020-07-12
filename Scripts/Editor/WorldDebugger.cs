@@ -686,6 +686,18 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
+        public static System.Action SetLegacyBlendShapeNormals(ModelImporter importer)
+        {
+            return () =>
+            {
+                if (EditorUtility.DisplayDialog("Enable Legacy Blend Shape Normals?", "This operation will enable Legacy Blend Shape Normals on the model " + importer.name + ". Do you want to continue?", "Yes", "Cancel"))
+                {
+                    ModelImporterUtil.SetLegacyBlendShapeNormals(importer, true);
+                    importer.SaveAndReimport();
+                }
+            };
+        }
+
         public static System.Action DisableComponent(Behaviour behaviour)
         {
             return () =>
