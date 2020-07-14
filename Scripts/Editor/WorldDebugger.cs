@@ -1067,7 +1067,7 @@ namespace VRWorldToolkit.WorldDebugger
         private const string ReflectionProbeCountText = "Current scene has {0} reflection probes.";
         private const string PostProcessingImportedButNotSetup = "Current project has Post Processing imported, but you haven't set it up yet.";
         private const string NoReferenceCameraSet = "Current scenes Scene Descriptor has no Reference Camera set. Without a Reference Camera set, you won't be able to see Post Processing ingame.";
-        private const string NoPostProcessingVolumes = "You don't have any Post Processing Volumes in your scene. A Post Processing Volume is needed to apply effects to the camera's Post Processing Layer.";
+        private const string NoPostProcessingVolumes = "No enabled Post Processing Volumes found in the scene. A Post Processing Volume is needed to apply effects to the camera's Post Processing Layer.";
         private const string ReferenceCameraNoPostProcessingLayer = "Your Reference Camera doesn't have a Post Processing Layer on it. A Post Processing Layer is needed for the Post Processing Volume to affect the camera.";
         private const string VolumeBlendingLayerNotSet = "You don't have a Volume Blending Layer set in your Post Process Layer, so post processing won't work. Using the Water layer is recommended.";
         private const string PostProcessingVolumeNotGlobalNoCollider = "The Post Processing Volume \"{0}\" isn't marked as Global and doesn't have a collider. It won't affect the camera without one of these set on it.";
