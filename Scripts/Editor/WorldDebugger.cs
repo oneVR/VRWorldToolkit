@@ -1783,6 +1783,7 @@ namespace VRWorldToolkit.WorldDebugger
                     if (gameObject.GetComponent<VRC_MirrorReflection>())
                     {
                         var mirrorMask = gameObject.GetComponent<VRC_MirrorReflection>().m_ReflectLayers;
+
                         if (mirrorMask.value == -1025)
                         {
                             mirrorsDefaultLayers.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject));
@@ -1796,6 +1797,7 @@ namespace VRWorldToolkit.WorldDebugger
                         {
                             Mesh mesh = gameObject.GetComponent<SkinnedMeshRenderer>().sharedMesh;
                             ModelImporter importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(gameObject.GetComponent<SkinnedMeshRenderer>())) as ModelImporter;
+
                             if (mesh.blendShapeCount > 0 && (!ModelImporterUtil.GetLegacyBlendShapeNormals(importer) || importer.importBlendShapeNormals == ModelImporterNormals.Calculate))
                             {
                                 _general.AddMessageGroup(new MessageGroup("Found model {0} ({1}) with blend shapes without Legacy Blend Shape Normals enabled this can drastically increase the size of the world.", MessageType.Warning).AddSingleMessage(new SingleMessage(Path.GetFileName(AssetDatabase.GetAssetPath(gameObject.GetComponent<SkinnedMeshRenderer>())), Helper.FormatSize(Profiler.GetRuntimeMemorySizeLong(mesh))).SetAssetPath(importer.assetPath).SetAutoFix(SetLegacyBlendShapeNormals(importer))));
@@ -1810,12 +1812,14 @@ namespace VRWorldToolkit.WorldDebugger
                     for (int l = 0; l < meshRenderer.sharedMaterials.Length; l++)
                     {
                         Material material = meshRenderer.sharedMaterials[l];
+
                         if (material == null || checkedMaterials.Contains(material))
                             continue;
 
                         checkedMaterials.Add(material);
 
                         var shader = material.shader;
+
                         if (shader.name == "Hidden/InternalErrorShader" && !missingShaders.Contains(material))
                             missingShaders.Add(material);
 
@@ -1827,6 +1831,7 @@ namespace VRWorldToolkit.WorldDebugger
                             if (ShaderUtil.GetPropertyType(shader, j) == ShaderUtil.ShaderPropertyType.TexEnv)
                             {
                                 var texture = material.GetTexture(ShaderUtil.GetPropertyName(shader, j));
+
                                 if (AssetDatabase.GetAssetPath(texture) != "" && !unCrunchedTextures.Contains(texture))
                                 {
                                     var textureImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(texture)) as TextureImporter;
@@ -1837,6 +1842,7 @@ namespace VRWorldToolkit.WorldDebugger
                                         {
                                             textureCount++;
                                         }
+
                                         if (!textureImporter.crunchedCompression && !unCrunchedTextures.Contains(texture) && !textureImporter.textureCompression.Equals(TextureImporterCompression.Uncompressed) && EditorTextureUtil.GetStorageMemorySize(texture) > 500000)
                                         {
                                             unCrunchedTextures.Add(texture);
