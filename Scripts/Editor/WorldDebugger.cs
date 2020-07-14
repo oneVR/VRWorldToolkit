@@ -929,55 +929,6 @@ namespace VRWorldToolkit.WorldDebugger
         }
 
 #if UNITY_POST_PROCESSING_STACK_V2
-        public static System.Action SetReferenceCamera(VRC_SceneDescriptor descriptor)
-        {
-            return () =>
-            {
-                if (EditorUtility.DisplayDialog("Setup reference camera?", "This operation will try to set the reference camera in your scene descriptor. Do you want to continue?", "Yes", "Cancel"))
-                {
-                    if (Camera.main == null)
-                    {
-                        var camera = new GameObject("Main Camera");
-                        camera.AddComponent<Camera>();
-                        camera.AddComponent<AudioListener>();
-                        camera.tag = "MainCamera";
-                    }
-                    descriptor.ReferenceCamera = Camera.main.gameObject;
-                    if (!Camera.main.gameObject.GetComponent<PostProcessLayer>())
-                    {
-                        descriptor.ReferenceCamera.gameObject.AddComponent(typeof(PostProcessLayer));
-                        var postprocessLayer = descriptor.ReferenceCamera.gameObject.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
-                        postprocessLayer.volumeLayer = LayerMask.GetMask("Water");
-                    }
-                }
-            };
-        }
-
-        public static System.Action AddDefaultPPVolume()
-        {
-            return () =>
-            {
-                //Copy the example profile to the Post Processing folder
-                if (!Directory.Exists("Assets/Post Processing"))
-                    AssetDatabase.CreateFolder("Assets", "Post Processing");
-                if (AssetDatabase.LoadAssetAtPath("Assets/Post Processing/SilentProfile.asset", typeof(PostProcessProfile)) == null)
-                {
-                    var path = AssetDatabase.GUIDToAssetPath("eaac6f7291834264f97854154e89bf76");
-                    if (path != null)
-                    {
-                        AssetDatabase.CopyAsset(path, "Assets/Post Processing/SilentProfile.asset");
-                    }
-                }
-
-                //Set up the post process volume
-                var volume = GameObject.Instantiate(PostProcessManager.instance.QuickVolume(16, 100f));
-                if (File.Exists("Assets/Post Processing/SilentProfile.asset"))
-                    volume.sharedProfile = (PostProcessProfile)AssetDatabase.LoadAssetAtPath("Assets/Post Processing/SilentProfile.asset", typeof(PostProcessProfile));
-                volume.gameObject.name = "Post Processing Volume";
-                volume.gameObject.layer = LayerMask.NameToLayer("Water");
-            };
-        }
-
         public enum RemovePPEffect
         {
             AmbientOcclusion = 0,
@@ -985,21 +936,21 @@ namespace VRWorldToolkit.WorldDebugger
             BloomDirt = 2
         }
 
-        public static System.Action RemovePostProcessSetting(PostProcessProfile postprocessProfile, RemovePPEffect effect)
+        public static System.Action DisablePostProcessEffect(PostProcessProfile postprocessProfile, RemovePPEffect effect)
         {
             return () =>
             {
                 switch (effect)
                 {
                     case RemovePPEffect.AmbientOcclusion:
-                        postprocessProfile.RemoveSettings<AmbientOcclusion>();
+                        postprocessProfile.GetSetting<AmbientOcclusion>().active = false;
                         break;
                     case RemovePPEffect.ScreenSpaceReflections:
-                        postprocessProfile.RemoveSettings<ScreenSpaceReflections>();
+                        postprocessProfile.GetSetting<ScreenSpaceReflections>().active = false;
                         break;
                     case RemovePPEffect.BloomDirt:
-                        postprocessProfile.GetSetting<Bloom>().dirtTexture.value = null;
-                        postprocessProfile.GetSetting<Bloom>().dirtIntensity.value = 0;
+                        postprocessProfile.GetSetting<Bloom>().dirtTexture.overrideState = false;
+                        postprocessProfile.GetSetting<Bloom>().dirtIntensity.overrideState = false;
                         break;
                     default:
                         break;
@@ -1611,14 +1562,14 @@ namespace VRWorldToolkit.WorldDebugger
                 //Start by checking if reference camera has been set in the Scene Descriptor
                 if (!sceneDescriptor.ReferenceCamera)
                 {
-                    _postProcessing.AddMessageGroup(new MessageGroup(NoReferenceCameraSet, MessageType.Info).AddSingleMessage(new SingleMessage(SetReferenceCamera(sceneDescriptor)).SetSelectObject(sceneDescriptor.gameObject)));
+                    _postProcessing.AddMessageGroup(new MessageGroup(NoReferenceCameraSet, MessageType.Info).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject)));
                 }
                 else
                 {
                     //Check for post process volumes in the scene
                     if (postProcessVolumes.Length == 0)
                     {
-                        _postProcessing.AddMessageGroup(new MessageGroup(NoPostProcessingVolumes, MessageType.Info).AddSingleMessage(new SingleMessage(AddDefaultPPVolume())));
+                        _postProcessing.AddMessageGroup(new MessageGroup(NoPostProcessingVolumes, MessageType.Info));
                     }
                     else
                     {
@@ -1634,83 +1585,86 @@ namespace VRWorldToolkit.WorldDebugger
                             _postProcessing.AddMessageGroup(new MessageGroup(VolumeBlendingLayerNotSet, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.ReferenceCamera.gameObject)));
                         }
 
-                        foreach (var postprocessVolume in postProcessVolumes)
+                        foreach (var postProcessVolume in postProcessVolumes)
                         {
                             //Check if the layer matches the cameras post processing layer
-                            if (postprocessLayer.volumeLayer != (postprocessLayer.volumeLayer | (1 << postprocessVolume.gameObject.layer)))
+                            if (postprocessLayer.volumeLayer != (postprocessLayer.volumeLayer | (1 << postProcessVolume.gameObject.layer)))
                             {
-                                _postProcessing.AddMessageGroup(new MessageGroup(VolumeOnWrongLayer, MessageType.Error).AddSingleMessage(new SingleMessage(postprocessVolume.gameObject.name, Helper.GetAllLayersFromMask(postprocessLayer.volumeLayer)).SetSelectObject(postprocessVolume.gameObject)));
+                                _postProcessing.AddMessageGroup(new MessageGroup(VolumeOnWrongLayer, MessageType.Error).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject.name, Helper.GetAllLayersFromMask(postprocessLayer.volumeLayer)).SetSelectObject(postProcessVolume.gameObject)));
                             }
 
                             //Check if the volume has a profile set
-                            if (!postprocessVolume.profile && !postprocessVolume.sharedProfile)
+                            if (!postProcessVolume.profile && !postProcessVolume.sharedProfile)
                             {
-                                _postProcessing.AddMessageGroup(new MessageGroup(NoProfileSet, MessageType.Error).AddSingleMessage(new SingleMessage(postprocessVolume.gameObject.name)));
+                                _postProcessing.AddMessageGroup(new MessageGroup(NoProfileSet, MessageType.Error).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject.name)));
                                 continue;
                             }
 
-                            if (!postprocessVolume.isGlobal)
+                            //Check if the collider is either global or has a collider on it
+                            if (!postProcessVolume.isGlobal && !postProcessVolume.GetComponent<Collider>())
                             {
-                                //Check if the collider is either global or has a collider on it
-                                if (!postprocessVolume.GetComponent<Collider>())
-                                {
-                                    GameObject[] objs = { postprocessVolume.gameObject };
-                                    _postProcessing.AddMessageGroup(new MessageGroup(PostProcessingVolumeNotGlobalNoCollider, MessageType.Error).AddSingleMessage(new SingleMessage(postprocessVolume.name).SetSelectObject(postprocessVolume.gameObject)));
-                                }
+                                _postProcessing.AddMessageGroup(new MessageGroup(PostProcessingVolumeNotGlobalNoCollider, MessageType.Error).AddSingleMessage(new SingleMessage(postProcessVolume.name).SetSelectObject(postProcessVolume.gameObject)));
                             }
                             else
                             {
                                 //Go trough the profile settings and see if any bad one's are used
-                                PostProcessProfile postprocessProfile;
+                                PostProcessProfile postProcessProfile;
 
-                                if (postprocessVolume.profile)
-                                    postprocessProfile = postprocessVolume.profile as PostProcessProfile;
+                                if (postProcessVolume.profile)
+                                {
+                                    postProcessProfile = postProcessVolume.profile as PostProcessProfile;
+                                }
                                 else
-                                    postprocessProfile = postprocessVolume.sharedProfile as PostProcessProfile;
-
-                                if (postprocessProfile.GetSetting<ColorGrading>())
                                 {
-                                    if (postprocessProfile.GetSetting<ColorGrading>().tonemapper.value.ToString() == "None")
+                                    postProcessProfile = postProcessVolume.sharedProfile as PostProcessProfile;
+                                }
+
+                                if (postProcessProfile.GetSetting<ColorGrading>() && postProcessProfile.GetSetting<ColorGrading>().enabled && postProcessProfile.GetSetting<ColorGrading>().active)
+                                {
+                                    if (postProcessProfile.GetSetting<ColorGrading>().tonemapper.value.ToString() == "None")
                                     {
-                                        _postProcessing.AddMessageGroup(new MessageGroup(DontUseNoneForTonemapping, MessageType.Error).AddSingleMessage(new SingleMessage(postprocessLayer.gameObject)));
+                                        _postProcessing.AddMessageGroup(new MessageGroup(DontUseNoneForTonemapping, MessageType.Error).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
                                     }
                                 }
 
-                                if (postprocessProfile.GetSetting<Bloom>())
+                                if (postProcessProfile.GetSetting<Bloom>() && postProcessProfile.GetSetting<Bloom>().enabled && postProcessProfile.GetSetting<Bloom>().active)
                                 {
-                                    if (postprocessProfile.GetSetting<Bloom>().intensity.value > 0.3f)
+                                    var bloom = postProcessProfile.GetSetting<Bloom>();
+
+                                    if (bloom.intensity.overrideState && bloom.intensity.value > 0.3f)
                                     {
-                                        _postProcessing.AddMessageGroup(new MessageGroup(TooHighBloomIntensity, MessageType.Warning).AddSingleMessage(new SingleMessage(postprocessLayer.gameObject)));
+                                        _postProcessing.AddMessageGroup(new MessageGroup(TooHighBloomIntensity, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
                                     }
 
-                                    if (postprocessProfile.GetSetting<Bloom>().threshold.value > 1f)
+                                    if (bloom.threshold.overrideState && bloom.threshold.value > 1f)
                                     {
-                                        _postProcessing.AddMessageGroup(new MessageGroup(TooHighBloomThreshold, MessageType.Warning).AddSingleMessage(new SingleMessage(postprocessLayer.gameObject)));
+                                        _postProcessing.AddMessageGroup(new MessageGroup(TooHighBloomThreshold, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
                                     }
 
-                                    if (postprocessProfile.GetSetting<Bloom>().dirtTexture.value || postprocessProfile.GetSetting<Bloom>().dirtIntensity.value != 0)
+                                    if (bloom.dirtTexture.overrideState && bloom.dirtTexture.value || bloom.dirtIntensity.overrideState && bloom.dirtIntensity.value > 0)
                                     {
-                                        _postProcessing.AddMessageGroup(new MessageGroup(NoBloomDirtInVr, MessageType.Error).AddSingleMessage(new SingleMessage(RemovePostProcessSetting(postprocessProfile, RemovePPEffect.BloomDirt)).SetSelectObject(postprocessLayer.gameObject)));
+                                        _postProcessing.AddMessageGroup(new MessageGroup(NoBloomDirtInVr, MessageType.Error).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePPEffect.BloomDirt)).SetSelectObject(postProcessVolume.gameObject)));
                                     }
                                 }
-                                if (postprocessProfile.GetSetting<AmbientOcclusion>())
+
+                                if (postProcessProfile.GetSetting<AmbientOcclusion>() && postProcessProfile.GetSetting<AmbientOcclusion>().enabled && postProcessProfile.GetSetting<AmbientOcclusion>().active)
                                 {
-                                    _postProcessing.AddMessageGroup(new MessageGroup(NoAmbientOcclusion, MessageType.Error).AddSingleMessage(new SingleMessage(RemovePostProcessSetting(postprocessProfile, RemovePPEffect.AmbientOcclusion)).SetSelectObject(postprocessLayer.gameObject)));
+                                    _postProcessing.AddMessageGroup(new MessageGroup(NoAmbientOcclusion, MessageType.Error).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePPEffect.AmbientOcclusion)).SetSelectObject(postProcessVolume.gameObject)));
                                 }
 
-                                if (postprocessProfile.GetSetting<DepthOfField>() && postprocessVolume.isGlobal)
+                                if (postProcessVolume.isGlobal && postProcessProfile.GetSetting<DepthOfField>() && postProcessProfile.GetSetting<DepthOfField>().enabled && postProcessProfile.GetSetting<DepthOfField>().active)
                                 {
-                                    _postProcessing.AddMessageGroup(new MessageGroup(DepthOfFieldWarning, MessageType.Warning).AddSingleMessage(new SingleMessage(postprocessLayer.gameObject)));
+                                    _postProcessing.AddMessageGroup(new MessageGroup(DepthOfFieldWarning, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
                                 }
 
-                                if (postprocessProfile.GetSetting<ScreenSpaceReflections>())
+                                if (postProcessProfile.GetSetting<ScreenSpaceReflections>() && postProcessProfile.GetSetting<ScreenSpaceReflections>().enabled && postProcessProfile.GetSetting<ScreenSpaceReflections>().active)
                                 {
-                                    _postProcessing.AddMessageGroup(new MessageGroup(ScreenSpaceReflectionsWarning, MessageType.Warning).AddSingleMessage(new SingleMessage(RemovePostProcessSetting(postprocessProfile, RemovePPEffect.ScreenSpaceReflections)).SetSelectObject(postprocessLayer.gameObject)));
+                                    _postProcessing.AddMessageGroup(new MessageGroup(ScreenSpaceReflectionsWarning, MessageType.Warning).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePPEffect.ScreenSpaceReflections)).SetSelectObject(postProcessVolume.gameObject)));
                                 }
 
-                                if (postprocessProfile.GetSetting<Vignette>())
+                                if (postProcessProfile.GetSetting<Vignette>() && postProcessProfile.GetSetting<Vignette>().enabled && postProcessProfile.GetSetting<Vignette>().active)
                                 {
-                                    _postProcessing.AddMessageGroup(new MessageGroup(VignetteWarning, MessageType.Warning).AddSingleMessage(new SingleMessage(postprocessLayer.gameObject)));
+                                    _postProcessing.AddMessageGroup(new MessageGroup(VignetteWarning, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
                                 }
                             }
                         }
