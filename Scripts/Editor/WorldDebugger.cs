@@ -928,6 +928,14 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
+        public static System.Action SetReferenceCamera(VRC_SceneDescriptor descriptor, Camera camera)
+        {
+            return () =>
+            {
+                descriptor.ReferenceCamera = camera.gameObject;
+            };
+        }
+
 #if UNITY_POST_PROCESSING_STACK_V2
         public enum RemovePPEffect
         {
@@ -1562,7 +1570,14 @@ namespace VRWorldToolkit.WorldDebugger
                 //Start by checking if reference camera has been set in the Scene Descriptor
                 if (!sceneDescriptor.ReferenceCamera)
                 {
-                    _postProcessing.AddMessageGroup(new MessageGroup(NoReferenceCameraSet, MessageType.Info).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject)));
+                    SingleMessage noReferenceCameraMessage = new SingleMessage(sceneDescriptor.gameObject);
+
+                    if (Camera.main && Camera.main.GetComponent<PostProcessLayer>())
+                    {
+                        noReferenceCameraMessage.SetAutoFix(SetReferenceCamera(sceneDescriptor, Camera.main));
+                    }
+
+                    _postProcessing.AddMessageGroup(new MessageGroup(NoReferenceCameraSet, MessageType.Info).AddSingleMessage(noReferenceCameraMessage));
                 }
                 else
                 {
