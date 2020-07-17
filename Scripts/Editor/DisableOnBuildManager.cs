@@ -1,86 +1,58 @@
-﻿using UnityEditor;
+﻿#if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
+using VRC.SDKBase.Editor.BuildPipeline;
+using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace VRWorldToolkit
 {
+    public class DisableOnBuildCallback : IVRCSDKBuildRequestedCallback
+    {
+        public int callbackOrder => 1;
+
+        public bool OnBuildRequested(VRCSDKRequestedBuildType requestedBuildType)
+        {
+            if (TagHelper.TagExists("DisableOnBuild"))
+            {
+                var toDisableOnBuild = GameObject.FindGameObjectsWithTag("DisableOnBuild");
+
+                foreach (var disableThis in toDisableOnBuild)
+                    disableThis.SetActive(false);
+            }
+
+            return true;
+        }
+    }
+
+    [InitializeOnLoad]
+    public class DestroyRedundantOnBuildMethod : Editor
+    {
+        static DestroyRedundantOnBuildMethod()
+        {
+            var cube = GameObject.Find("/_DisableOnBuild");
+
+            if (cube && cube.hideFlags == HideFlags.HideInHierarchy)
+            {
+                DestroyImmediate(cube);
+
+                Debug.Log("VRWorld Toolkit: Removed old Disable On Build object");
+            }
+        }
+    }
+
     public class DisableOnBuildManager : Editor
     {
-        const string dummyName = "_DisableOnBuild";
-        static GameObject _disableOnBuild;
-
-        public static GameObject DestroyCube
-        {
-            get
-            {
-                if (!_disableOnBuild)
-                    _disableOnBuild = GameObject.Find("/" + dummyName);
-
-                return _disableOnBuild;
-            }
-
-            private set
-            {
-                _disableOnBuild = value;
-            }
-        }
-
-        static GameObject GetDestroyCube(bool createIfMissing)
-        {
-            if (!_disableOnBuild && createIfMissing)
-            {
-                _disableOnBuild = new GameObject(dummyName);
-
-                //Prevent it from showing in hierarchy
-                _disableOnBuild.hideFlags = HideFlags.HideInHierarchy;
-
-                _disableOnBuild.tag = "EditorOnly";
-                var comp = _disableOnBuild.GetComponent<DisableOnBuild>();
-                if (!comp)
-                    _disableOnBuild.AddComponent<DisableOnBuild>();
-
-                //Mark the scene as dirty for saving
-                EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
-            }
-
-            return _disableOnBuild;
-        }
-
-        private static void CreateCube()
-        {
-            DestroyCube = GetDestroyCube(true);
-        }
-
         [MenuItem("VRWorld Toolkit/Disable On Build/Setup", false, -101)]
         private static void DisableOnUploadSetup()
         {
-            //Create the tag if it doesn't exist yet
+            //Add the tag
             TagHelper.AddTag("DisableOnBuild");
-
-            //Spawn the cube
-            CreateCube();
         }
 
         [MenuItem("VRWorld Toolkit/Disable On Build/Setup", true)]
         private static bool DisableOnUploadSetupValidate()
         {
-            return (DestroyCube == null);
-        }
-
-        [MenuItem("VRWorld Toolkit/Disable On Build/Remove", false, -100)]
-        private static void DisableOnUploadRemove()
-        {
-            //Delete the cube
-            DestroyImmediate(DestroyCube);
-
-            //Mark the scene dirty for saving
-            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
-        }
-
-        [MenuItem("VRWorld Toolkit/Disable On Build/Remove", true)]
-        private static bool DisableOnUploadRemoveValidate()
-        {
-            return (DestroyCube != null);
+            return !TagHelper.TagExists("DisableOnBuild");
         }
 
         [MenuItem("VRWorld Toolkit/Disable On Build/Disable Objects", false, -10)]
@@ -92,6 +64,8 @@ namespace VRWorldToolkit
             {
                 disableThis.SetActive(false);
             }
+
+            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
         }
 
         [MenuItem("VRWorld Toolkit/Disable On Build/Disable Objects", true)]
@@ -111,6 +85,8 @@ namespace VRWorldToolkit
                     obj.SetActive(true);
                 }
             }
+
+            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
         }
 
         [MenuItem("VRWorld Toolkit/Disable On Build/Enable Objects", true)]
@@ -120,3 +96,4 @@ namespace VRWorldToolkit
         }
     }
 }
+#endif
