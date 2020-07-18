@@ -9,8 +9,10 @@ using UnityEngine;
 using System.Linq;
 using UnityEngine.SceneManagement;
 using UnityEditor.SceneManagement;
+using System.Text.RegularExpressions;
+using System;
 
-#if (VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3) && VRWTOOLKIT_EXPERIMENTAL
+#if (VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3) && !VRWTOOLKIT_DISABLE_CUSTOM_EDITORS
 namespace VRWorldToolkit
 {
     /// <summary>
@@ -23,6 +25,14 @@ namespace VRWorldToolkit
         private const float InnerBound = 1.5f;
         private const float OuterBound = 2f;
 
+        private const string AvatarIDRegex = "avtr_[A-Za-z0-9]{8}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{12}";
+
+        private bool setIDsFoldout = false;
+        private string avatarIDArea;
+
+        private string[] avatarIDs;
+
+
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
@@ -31,19 +41,50 @@ namespace VRWorldToolkit
 
             EditorGUILayout.LabelField("VRWorld Toolkit Additions", EditorStyles.boldLabel);
 
+            var pedestals = serializedObject.targetObjects.Select(x => x as VRC_AvatarPedestal).OrderBy(x => x.transform.GetSiblingIndex()).ToArray();
+
+            setIDsFoldout = EditorGUILayout.Foldout(setIDsFoldout, "Mass set avatar IDs");
+            if (setIDsFoldout)
+            {
+                if (Selection.activeTransform)
+                {
+                    avatarIDArea = EditorGUILayout.TextArea(avatarIDArea);
+
+                    avatarIDs = Regex.Matches(avatarIDArea, AvatarIDRegex).Cast<Match>().Select(m => m.Value).ToArray();
+
+                    var textStyle = new GUIStyle();
+
+                    if (avatarIDs.Length > serializedObject.targetObjects.Length)
+                    {
+                        textStyle.normal.textColor = Color.red;
+                    }
+
+                    EditorGUILayout.LabelField("IDs found: ", avatarIDs.Length + "/" + serializedObject.targetObjects.Length, textStyle);
+
+                    if (GUILayout.Button("Set IDs"))
+                    {
+                        for (int i = 0; i < Math.Min(serializedObject.targetObjects.Length, avatarIDs.Length); i++)
+                        {
+                            pedestals[i].blueprintId = avatarIDs[i];
+                            PrefabUtility.RecordPrefabInstancePropertyModifications(pedestals[i]);
+                        }
+
+                        EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+                    }
+                }
+            }
+
             GUILayout.Label("Selected IDs (Ordered by hierarchy):");
 
-            var pedestals = serializedObject.targetObjects.Select(x => x as VRC_AvatarPedestal).OrderBy(x => x.transform.GetSiblingIndex());
-
-            foreach (VRC_AvatarPedestal pedestal in pedestals)
+            for (var i = 0; i < pedestals.Length; i++)
             {
                 EditorGUI.BeginChangeCheck();
 
-                pedestal.blueprintId = EditorGUILayout.DelayedTextField(pedestal.name + " ID: ", pedestal.blueprintId);
+                pedestals[i].blueprintId = EditorGUILayout.DelayedTextField(pedestals[i].name + " ID: ", pedestals[i].blueprintId);
 
                 if (EditorGUI.EndChangeCheck())
                 {
-                    PrefabUtility.RecordPrefabInstancePropertyModifications(pedestal);
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(pedestals[i]);
                     EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
                 }
             }
