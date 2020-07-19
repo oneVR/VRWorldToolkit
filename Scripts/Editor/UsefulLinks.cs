@@ -1,25 +1,43 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-public class UsefulLinks : MonoBehaviour
+namespace VRWorldToolkit
 {
-    [MenuItem("VRWorld Toolkit/Useful Links/VRCPrefabs Database", false, 200)]
-    private static void VRCPrefabsLink()
+    public class UsefulLinks : MonoBehaviour
     {
-        Application.OpenURL("https://vrcprefabs.com/browse");
-    }
+#if VRC_SDK_VRCSDK2 && !VRC_SDK_VRCSDK3
+        [MenuItem("VRWorld Toolkit/Useful Links/Download SDK2", false, 100)]
+        private static void SDK2Download()
+        {
+            Application.OpenURL("https://vrchat.com/download/sdk2");
+        }
+#endif
 
-    [MenuItem("VRWorld Toolkit/Useful Links/Unofficial VRChat Wiki (EN)", false, 200)]
-    private static void UnofficialWikiEN()
-    {
-        Application.OpenURL("http://vrchat.wikidot.com/");
-    }
+#if !VRC_SDK_VRCSDK2 && VRC_SDK_VRCSDK3
+        [MenuItem("VRWorld Toolkit/Useful Links/VRCPrefabs Database", false, 100)]
+        private static void SDK3Download()
+        {
+            Application.OpenURL("https://vrchat.com/download/sdk3");
+        }
+#endif
 
-    [MenuItem("VRWorld Toolkit/Useful Links/VRChat 技術メモ帳 (JP)", false, 200)]
-    private static void UnofficialWikiJP()
-    {
-        Application.OpenURL("https://vrcworld.wiki.fc2.com/");
-    }
+        [MenuItem("VRWorld Toolkit/Useful Links/VRCPrefabs Database", false, 200)]
+        private static void VRCPrefabsLink()
+        {
+            Application.OpenURL("https://vrcprefabs.com/browse");
+        }
+
+        [MenuItem("VRWorld Toolkit/Useful Links/Unofficial VRChat Wiki (EN)", false, 200)]
+        private static void UnofficialWikiEN()
+        {
+            Application.OpenURL("http://vrchat.wikidot.com/");
+        }
+
+        [MenuItem("VRWorld Toolkit/Useful Links/VRChat 技術メモ帳 (JP)", false, 200)]
+        private static void UnofficialWikiJP()
+        {
+            Application.OpenURL("https://vrcworld.wiki.fc2.com/");
+        }
 
 #if UDON
         [MenuItem("VRWorld Toolkit/Useful Links/UdonSharp", false, 200)]
@@ -30,10 +48,11 @@ public class UsefulLinks : MonoBehaviour
 #endif
 
 #if BAKERY_INCLUDED
-    [MenuItem("VRWorld Toolkit/Useful Links/Bakery Documentation", false, 200)]
-    private static void BakeryDocumentationLink()
-    {
-        Application.OpenURL("https://geom.io/bakery/");
-    }
+        [MenuItem("VRWorld Toolkit/Useful Links/Bakery Documentation", false, 200)]
+        private static void BakeryDocumentationLink()
+        {
+            Application.OpenURL("https://geom.io/bakery/");
+        }
 #endif
+    }
 }
