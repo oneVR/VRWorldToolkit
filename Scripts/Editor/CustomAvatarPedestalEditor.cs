@@ -71,6 +71,8 @@ namespace VRWorldToolkit
 
                         EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
                     }
+
+                    EditorGUILayout.Space();
                 }
             }
 
