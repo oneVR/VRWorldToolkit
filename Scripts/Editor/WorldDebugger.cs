@@ -1730,14 +1730,18 @@ namespace VRWorldToolkit.WorldDebugger
                         if (GameObjectUtility.AreStaticEditorFlagsSet(gameObject, StaticEditorFlags.LightmapStatic) && gameObject.GetComponent<MeshRenderer>())
                         {
                             var meshFilter = gameObject.GetComponent<MeshFilter>();
+
                             if (meshFilter == null)
                             {
                                 continue;
                             }
+
                             var sharedMesh = meshFilter.sharedMesh;
+
                             if (AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(sharedMesh)) != null)
                             {
                                 var modelImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(sharedMesh)) as ModelImporter;
+
                                 if (!importers.Contains(modelImporter))
                                 {
                                     if (modelImporter != null)
