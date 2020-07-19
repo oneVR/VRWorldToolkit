@@ -9,7 +9,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-#if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
+#if (VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3) && !VRWT_DISABLE_EDITORS
 namespace VRWorldToolkit
 {
     /// <summary>

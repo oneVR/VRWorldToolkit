@@ -12,7 +12,7 @@ using UnityEditor.SceneManagement;
 using System.Text.RegularExpressions;
 using System;
 
-#if (VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3) && !VRWTOOLKIT_DISABLE_CUSTOM_EDITORS
+#if (VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3) && !VRWT_DISABLE_EDITORS
 namespace VRWorldToolkit
 {
     /// <summary>

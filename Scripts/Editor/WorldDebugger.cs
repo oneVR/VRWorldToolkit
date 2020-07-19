@@ -1937,7 +1937,7 @@ namespace VRWorldToolkit.WorldDebugger
 
             if (_recheck)
             {
-#if VRWTOOLKIT_BENCHMARK_MODE
+#if VRWT_BENCHMARK
                 var watch = System.Diagnostics.Stopwatch.StartNew();
 #endif
                 //Check for bloat in occlusion cache
@@ -1948,7 +1948,7 @@ namespace VRWorldToolkit.WorldDebugger
 
                 _recheck = false;
                 CheckScene();
-#if VRWTOOLKIT_BENCHMARK_MODE
+#if VRWT_BENCHMARK
                 watch.Stop();
                 Debug.Log("Scene checked in: " + watch.ElapsedMilliseconds + " ms.");
 #endif
