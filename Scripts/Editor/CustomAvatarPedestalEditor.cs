@@ -28,7 +28,7 @@ namespace VRWorldToolkit
         private const string AvatarIDRegex = "avtr_[A-Za-z0-9]{8}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{12}";
 
         private bool setIDsFoldout = false;
-        private string avatarIDArea;
+        private string avatarIDArea = "";
 
         private string[] avatarIDs;
 
@@ -48,7 +48,7 @@ namespace VRWorldToolkit
             {
                 if (Selection.activeTransform)
                 {
-                    avatarIDArea = EditorGUILayout.TextArea(avatarIDArea);
+                    avatarIDArea = EditorGUILayout.TextArea(avatarIDArea, GUILayout.ExpandWidth(true));
 
                     avatarIDs = Regex.Matches(avatarIDArea, AvatarIDRegex).Cast<Match>().Select(m => m.Value).ToArray();
 
@@ -59,7 +59,7 @@ namespace VRWorldToolkit
                         textStyle.normal.textColor = Color.red;
                     }
 
-                    EditorGUILayout.LabelField("IDs found: ", avatarIDs.Length + "/" + serializedObject.targetObjects.Length, textStyle);
+                    EditorGUILayout.LabelField("IDs found/Pedestals selected: ", avatarIDs.Length + "/" + serializedObject.targetObjects.Length, textStyle);
 
                     if (GUILayout.Button("Set IDs"))
                     {
