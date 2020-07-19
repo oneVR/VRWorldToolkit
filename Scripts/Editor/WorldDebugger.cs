@@ -690,7 +690,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Enable Legacy Blend Shape Normals?", "This operation will enable Legacy Blend Shape Normals on the model " + importer.name + ". Do you want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Enable Legacy Blend Shape Normals?", "This operation will enable Legacy Blend Shape Normals on the model \"" + AssetDatabase.GetAssetPath(importer) + "\". Do you want to continue?", "Yes", "Cancel"))
                 {
                     ModelImporterUtil.SetLegacyBlendShapeNormals(importer, true);
                     importer.SaveAndReimport();
@@ -991,6 +991,9 @@ namespace VRWorldToolkit.WorldDebugger
         private const string MirrorWithDefaultLayers = "The mirror \"{0}\" has the default Reflect Layers set.";
         private const string CombinedMirrorWithDefaultLayers = "You have {0} mirrors that have the default Reflect Layers set.";
         private const string MirrorWithDefaultLayersInfo = "Only having the layers you need enabled in mirrors can save a lot of frames especially in populated instances.";
+        private const string LegacyBlendShapeIssues = "Skinned mesh renderer found with model {0} ({1}) without Legacy Blend Shape Normals enabled.";
+        private const string LegacyBlendShapeIssuesCombined = "Found {0} models without Legacy Blend Shape Normals enabled.";
+        private const string LegacyBlendShapeIssuesInfo = "This can significantly increase the size of the world.";
         private const string BakedOcclusionCulling = "Baked Occlusion Culling found.";
         private const string NoOcclusionCulling = "Current scene doesn't have baked Occlusion Culling. Occlusion culling gives you a lot more performance in your world, especially in larger worlds that have multiple rooms or areas.";
         private const string OcclusionCullingCacheWarning = "Current projects occlusion culling cache has {0} files. When the occlusion culling cache grows too big baking occlusion culling can take much longer than intended. It can be cleared with no negative effects.";
@@ -1709,6 +1712,7 @@ namespace VRWorldToolkit.WorldDebugger
             var checkedMaterials = new List<Material>();
 
             var mirrorsDefaultLayers = new MessageGroup(MirrorWithDefaultLayers, CombinedMirrorWithDefaultLayers, MirrorWithDefaultLayersInfo, MessageType.Tips);
+            var legacyBlendShapeIssues = new MessageGroup(LegacyBlendShapeIssues, LegacyBlendShapeIssuesCombined, LegacyBlendShapeIssuesInfo, MessageType.Warning);
 
             UnityEngine.Object[] allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
             for (int i = 0; i < allGameObjects.Length; i++)
@@ -1759,7 +1763,6 @@ namespace VRWorldToolkit.WorldDebugger
                         }
                     }
 
-#if VRWTOOLKIT_EXPERIMENTAL
                     if (gameObject.GetComponent<SkinnedMeshRenderer>())
                     {
                         if (AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(gameObject.GetComponent<SkinnedMeshRenderer>())) != null)
@@ -1767,13 +1770,12 @@ namespace VRWorldToolkit.WorldDebugger
                             Mesh mesh = gameObject.GetComponent<SkinnedMeshRenderer>().sharedMesh;
                             ModelImporter importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(gameObject.GetComponent<SkinnedMeshRenderer>())) as ModelImporter;
 
-                            if (mesh.blendShapeCount > 0 && (!ModelImporterUtil.GetLegacyBlendShapeNormals(importer) || importer.importBlendShapeNormals == ModelImporterNormals.Calculate))
+                            if (mesh.blendShapeCount > 0 && (importer.importBlendShapeNormals == ModelImporterNormals.Calculate && !ModelImporterUtil.GetLegacyBlendShapeNormals(importer)))
                             {
-                                _general.AddMessageGroup(new MessageGroup("Found model {0} ({1}) with blend shapes without Legacy Blend Shape Normals enabled this can drastically increase the size of the world.", MessageType.Warning).AddSingleMessage(new SingleMessage(Path.GetFileName(AssetDatabase.GetAssetPath(gameObject.GetComponent<SkinnedMeshRenderer>())), Helper.FormatSize(Profiler.GetRuntimeMemorySizeLong(mesh))).SetAssetPath(importer.assetPath).SetAutoFix(SetLegacyBlendShapeNormals(importer))));
+                                legacyBlendShapeIssues.AddSingleMessage(new SingleMessage(Path.GetFileName(AssetDatabase.GetAssetPath(gameObject.GetComponent<SkinnedMeshRenderer>())), Helper.FormatSize(Profiler.GetRuntimeMemorySizeLong(mesh))).SetAssetPath(importer.assetPath).SetAutoFix(SetLegacyBlendShapeNormals(importer)));
                             }
                         }
                     }
-#endif
 
                     // Check materials for problems
                     var meshRenderer = gameObject.GetComponent<Renderer>();
@@ -1827,6 +1829,11 @@ namespace VRWorldToolkit.WorldDebugger
             if (mirrorsDefaultLayers.MessageList.Count > 0)
             {
                 _optimization.AddMessageGroup(mirrorsDefaultLayers);
+            }
+
+            if (legacyBlendShapeIssues.MessageList.Count > 0)
+            {
+                _general.AddMessageGroup(legacyBlendShapeIssues);
             }
 
             //If more than 10% of shaders used in scene are toon shaders to leave room for people using them for avatar displays
