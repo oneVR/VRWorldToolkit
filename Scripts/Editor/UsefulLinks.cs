@@ -5,7 +5,7 @@ namespace VRWorldToolkit
 {
     public class UsefulLinks : MonoBehaviour
     {
-#if VRC_SDK_VRCSDK2 && !VRC_SDK_VRCSDK3
+#if VRC_SDK_VRCSDK2 || !VRC_SDK_VRCSDK3
         [MenuItem("VRWorld Toolkit/Useful Links/Download SDK2", false, 100)]
         private static void SDK2Download()
         {
@@ -13,8 +13,8 @@ namespace VRWorldToolkit
         }
 #endif
 
-#if !VRC_SDK_VRCSDK2 && VRC_SDK_VRCSDK3
-        [MenuItem("VRWorld Toolkit/Useful Links/VRCPrefabs Database", false, 100)]
+#if VRC_SDK_VRCSDK3 || !VRC_SDK_VRCSDK2
+        [MenuItem("VRWorld Toolkit/Useful Links/Download SDK3", false, 100)]
         private static void SDK3Download()
         {
             Application.OpenURL("https://vrchat.com/download/sdk3");
