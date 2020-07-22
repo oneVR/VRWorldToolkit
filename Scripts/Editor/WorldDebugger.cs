@@ -965,6 +965,16 @@ namespace VRWorldToolkit.WorldDebugger
                 }
             };
         }
+
+        public static System.Action SetPostProcessingInSceneView(bool isActive)
+        {
+            return () =>
+            {
+                var sceneView = UnityEditor.EditorWindow.GetWindow<SceneView>();
+
+                sceneView.sceneViewState.showImageEffects = isActive;
+            };
+        }
 #endif
         #endregion
 
@@ -1032,6 +1042,7 @@ namespace VRWorldToolkit.WorldDebugger
         private const string CombinedReflectionProbesSomeUnbaked = "Current scene has {0} unbaked reflection probes.";
         private const string ReflectionProbeCountText = "Current scene has {0} reflection probes.";
         private const string PostProcessingImportedButNotSetup = "Current project has Post Processing imported, but you haven't set it up yet.";
+        private const string PostProcessingDisabledInSceneView = "Post processing is disabled in the scene view. You won't be able to preview any post processing effects without enabling it first.";
         private const string NoReferenceCameraSet = "Current scenes Scene Descriptor has no Reference Camera set. Without a Reference Camera set, you won't be able to see Post Processing ingame.";
         private const string NoPostProcessingVolumes = "No enabled Post Processing Volumes found in the scene. A Post Processing Volume is needed to apply effects to the camera's Post Processing Layer.";
         private const string ReferenceCameraNoPostProcessingLayer = "Your Reference Camera doesn't have a Post Processing Layer on it. A Post Processing Layer is needed for the Post Processing Volume to affect the camera.";
@@ -1601,6 +1612,13 @@ namespace VRWorldToolkit.WorldDebugger
             }
             else
             {
+                var sceneView = UnityEditor.EditorWindow.GetWindow<SceneView>();
+
+                if (!sceneView.sceneViewState.showImageEffects)
+                {
+                    _postProcessing.AddMessageGroup(new MessageGroup(PostProcessingDisabledInSceneView, MessageType.Info).SetGroupAutoFix(SetPostProcessingInSceneView(true)));
+                }
+
                 //Start by checking if reference camera has been set in the Scene Descriptor
                 if (!sceneDescriptor.ReferenceCamera)
                 {
