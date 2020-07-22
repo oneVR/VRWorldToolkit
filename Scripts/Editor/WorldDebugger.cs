@@ -995,6 +995,10 @@ namespace VRWorldToolkit.WorldDebugger
         private const string LegacyBlendShapeIssuesCombined = "Found {0} models without Legacy Blend Shape Normals enabled.";
         private const string LegacyBlendShapeIssuesInfo = "This can significantly increase the size of the world.";
         private const string BakedOcclusionCulling = "Baked Occlusion Culling found.";
+        private const string NoOcclusionAreas = "No occlusion areas found. Occlusion Areas are recommended to help generate higher precision data where the camera is likely to be otherwise the area is created automatically containing all Occluders and Occludees.";
+        private const string DisabledOcclusionAreas = "Occlusion Area {0} found with Is View Volume disabled.";
+        private const string DisabledOcclusionAreasCombined = "Occlusion Areas found with Is View Volume disabled.";
+        private const string DisabledOcclusionAreasInfo = "Without this enabled the Occlusion Area does not get used for the occlusion bake.";
         private const string NoOcclusionCulling = "Current scene doesn't have baked Occlusion Culling. Occlusion culling gives you a lot more performance in your world, especially in larger worlds that have multiple rooms or areas.";
         private const string OcclusionCullingCacheWarning = "Current projects occlusion culling cache has {0} files. When the occlusion culling cache grows too big baking occlusion culling can take much longer than intended. It can be cleared with no negative effects.";
         private const string ActiveCameraOutputtingToRenderTexture = "Current scene has an active camera \"{0}\" outputting to a render texture.";
@@ -1238,6 +1242,33 @@ namespace VRWorldToolkit.WorldDebugger
             if (StaticOcclusionCulling.umbraDataSize > 0)
             {
                 _optimization.AddMessageGroup(new MessageGroup(BakedOcclusionCulling, MessageType.GoodFPS));
+
+                var occlusionAreas = GameObject.FindObjectsOfType<OcclusionArea>();
+
+                if (occlusionAreas.Length == 0)
+                {
+                    _optimization.AddMessageGroup(new MessageGroup(NoOcclusionAreas, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/class-OcclusionArea.html"));
+                }
+                else
+                {
+                    var disabledOcclusionAreasGroup = new MessageGroup(DisabledOcclusionAreas, DisabledOcclusionAreasCombined, DisabledOcclusionAreasInfo, MessageType.Warning);
+
+                    foreach (var occlusionArea in occlusionAreas)
+                    {
+                        var so = new SerializedObject(occlusionArea);
+                        var sp = so.FindProperty("m_IsViewVolume");
+
+                        if (!sp.boolValue)
+                        {
+                            disabledOcclusionAreasGroup.AddSingleMessage(new SingleMessage(occlusionArea.name).SetSelectObject(occlusionArea.gameObject));
+                        }
+                    }
+
+                    if (disabledOcclusionAreasGroup.MessageList.Count > 0)
+                    {
+                        _optimization.AddMessageGroup(disabledOcclusionAreasGroup);
+                    }
+                }
             }
             else
             {
