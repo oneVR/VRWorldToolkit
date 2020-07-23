@@ -8,19 +8,19 @@ To report problems you can either contact me on discord at 1.#0001 or create a n
 
 ### Current features
 
-1. World Debugger
+1. **World Debugger**
 
 Goes over trough your scene and checks for common issues and makes suggestions what to improve. Includes over 70 different tips, warnings, errors and general messages currently!
 
-2. Disable On Build
+2. **Disable On Build**
 
 Adds a Tag you can assign to GameObjects you want to disable when the world is uploaded. Biggest use case is using this for trigger based occlusion.
 
-3. Post Processing setup
+3. **Post Processing setup**
 
 Automatically import and setup a simple starter Post Processing setup for you to edit further
 
-4. Custom Editors
+4. **Custom Editors**
 
 Adding more features to the pre-existing VRChat components to make them easier to use and provide quality of life improvements. If not needed they can also be easily disabled.
 
@@ -30,7 +30,7 @@ Adding more features to the pre-existing VRChat components to make them easier t
 	<img src="https://user-images.githubusercontent.com/4764355/88247874-004f7200-cca8-11ea-873b-ef479ec078b2.png" height="300"></a>
 </p>
 
-5. Useful Links
+5. **Useful Links**
 
 Quick access to download latest SDK versions and other useful links that are often needed when working on worlds.
 
