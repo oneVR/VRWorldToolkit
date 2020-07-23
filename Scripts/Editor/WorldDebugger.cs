@@ -1547,9 +1547,9 @@ namespace VRWorldToolkit.WorldDebugger
             else
             {
 #if UNITY_ANDROID
-                _lighting.AddMessageGroup(new MessageGroup(QuestBakedLightingWarning, MessageType.BadFPS));
+                _lighting.AddMessageGroup(new MessageGroup(QuestBakedLightingWarning, MessageType.BadFPS).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/Lightmapping.html"));
 #else
-                _lighting.AddMessageGroup(new MessageGroup(LightsNotBaked, MessageType.Tips).AddSingleMessage(new SingleMessage(nonBakedLights.ToArray())));
+                _lighting.AddMessageGroup(new MessageGroup(LightsNotBaked, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/Lightmapping.html"));
 #endif
             }
 
