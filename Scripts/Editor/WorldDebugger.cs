@@ -1062,7 +1062,7 @@ namespace VRWorldToolkit.WorldDebugger
         private const string QuestBakedLightingWarning = "You should bake lights for content build for Quest.";
         private const string AmbientModeSetToCustom = "Your Environment Lighting setting is broken. This will override all light probes in the scene with black ambient light. Please change it to something else.";
         private const string NoProblemsFoundInPP = "No problems found in your post processing setup. In some cases where post processing is working in editor but not in game it's possible some imported asset is causing it not to function properly.";
-        private const string BakeryLightNotSetEditorOnly = "Your Bakery light named \"{0}\" is not set to be EditorOnly this causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
+        private const string BakeryLightNotSetEditorOnly = "Your Bakery light named \"{0}\" is not set to be EditorOnly.";
         private const string CombinedBakeryLightNotSetEditorOnly = "You have {0} Bakery lights are not set to be EditorOnly.";
         private const string BakeryLightNotSetEditorOnlyInfo = "This causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
         private const string BakeryLightUnityLight = "Your Bakery light named \"{0}\" has an active Unity Light component on it.";
