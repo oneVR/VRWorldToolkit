@@ -368,7 +368,17 @@ namespace VRWorldToolkit.WorldDebugger
                 return _messageCategory.All(m => !m.Enabled);
             }
 
-            private static readonly GUIStyle BoxStyle = new GUIStyle("HelpBox");
+            private static readonly GUIStyle BoxStyle = new GUIStyle("HelpBox")
+            {
+                richText = true
+            };
+
+            private static readonly GUIStyle BoxStylePadded = new GUIStyle("HelpBox")
+            {
+                margin = new RectOffset(18, 4, 4, 4),
+                alignment = TextAnchor.MiddleLeft,
+                richText = true
+            };
 
             public void DrawMessages()
             {
@@ -468,12 +478,6 @@ namespace VRWorldToolkit.WorldDebugger
 
                                     if (expanded)
                                     {
-                                        var boxStylePadded = new GUIStyle("HelpBox")
-                                        {
-                                            margin = new RectOffset(18, 4, 4, 4),
-                                            alignment = TextAnchor.MiddleLeft
-                                        };
-
                                         for (int j = 0; j < messageGroup.MessageList.Count; j++)
                                         {
                                             SingleMessage message = messageGroup.MessageList[j];
@@ -485,7 +489,7 @@ namespace VRWorldToolkit.WorldDebugger
                                             if (hasButtons)
                                             {
                                                 var box = new GUIContent(finalSingleMessage);
-                                                GUILayout.Box(box, boxStylePadded, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 121));
+                                                GUILayout.Box(box, BoxStylePadded, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 121));
 
                                                 EditorGUILayout.BeginVertical();
 
