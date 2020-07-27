@@ -1313,7 +1313,7 @@ namespace VRWorldToolkit.WorldDebugger
 
             for (int i = 0; i < cameras.Length; i++)
             {
-                if (!cameras[i].targetTexture) continue;
+                if (!cameras[i].targetTexture || cameras[i].name == "VRCCam") continue;
 
                 cameraCount++;
                 activeCameras.Add(cameras[i].gameObject);
