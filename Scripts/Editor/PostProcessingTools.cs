@@ -93,11 +93,14 @@ namespace VRWorldToolkit
                         descriptor.ReferenceCamera = Camera.main.gameObject;
                     }
 
-                    //Make sure the post process layer exists and set it up
+                    //Use PostProcessing layer if it exists otherwise use Water
+                    var layer = LayerMask.NameToLayer("PostProcessing") > -1 ? "PostProcessing" : "Water";
+
+                    //Make sure the Post Process Layer exists and set it up
                     if (!descriptor.ReferenceCamera.gameObject.GetComponent<PostProcessLayer>())
                         descriptor.ReferenceCamera.gameObject.AddComponent(typeof(PostProcessLayer));
                     var postprocessLayer = descriptor.ReferenceCamera.gameObject.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
-                    postprocessLayer.volumeLayer = LayerMask.GetMask("Water");
+                    postprocessLayer.volumeLayer = LayerMask.GetMask(layer);
 
                     //Copy the example profile to the Post Processing folder
                     if (!Directory.Exists("Assets/Post Processing"))
@@ -116,7 +119,7 @@ namespace VRWorldToolkit
                     if (File.Exists("Assets/Post Processing/SilentProfile.asset"))
                         volume.sharedProfile = (PostProcessProfile)AssetDatabase.LoadAssetAtPath("Assets/Post Processing/SilentProfile.asset", typeof(PostProcessProfile));
                     volume.gameObject.name = "Post Processing Volume";
-                    volume.gameObject.layer = LayerMask.NameToLayer("Water");
+                    volume.gameObject.layer = LayerMask.NameToLayer(layer);
 
                     //Mark the scene as dirty for saving
                     EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
