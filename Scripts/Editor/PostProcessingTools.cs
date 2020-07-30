@@ -27,11 +27,18 @@ namespace VRWorldToolkit
             var descriptors = FindObjectsOfType(typeof(VRC_SceneDescriptor)) as VRC_SceneDescriptor[];
             if (descriptors.Length == 0)
             {
-                EditorUtility.DisplayDialog("Scene descriptor missing", "You haven't added a scene descriptor yet, you can add one by dragging in the VRCWorld prefab.", "OK");
+                if (EditorUtility.DisplayDialog("Scene descriptor missing!", "No scene descriptor was found. A scene descriptor must exist and contain a reference camera for post-processing to appear in-game.\r\n\r\nYou can add a scene descriptor by adding a VRCWorld prefab included with the SDK.\r\n\r\nSelect Cancel to return and add a scene descriptor so the setup can set the reference camera for you, or select Continue to ignore this warning.", "Continue", "Cancel"))
+                {
+                    SetupBasicPostProcessing(descriptors);
+                }
+            }
+            else if (descriptors.Length > 1)
+            {
+                EditorUtility.DisplayDialog("Multiple scene descriptors!", "Multiple scene descriptors found, remove any you aren't using and run the setup again.", "OK");
             }
             else
             {
-                SetupBasicPostProcessing(descriptors[0]);
+                SetupBasicPostProcessing(descriptors);
             }
 #endif
         }
@@ -69,61 +76,78 @@ namespace VRWorldToolkit
             Application.OpenURL("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Post-Processing");
         }
 
-        private static void SetupBasicPostProcessing(VRC_SceneDescriptor descriptor)
+        private static void SetupBasicPostProcessing(VRC_SceneDescriptor[] descriptors)
         {
 #if UNITY_POST_PROCESSING_STACK_V2
-            if (!UpdateLayers.AreLayersSetup())
+            if (descriptors.Length > 0 && !UpdateLayers.AreLayersSetup())
             {
-                EditorUtility.DisplayDialog("Layers Missing", "Start by setting up your layers in the VRCSDK builder tab", "OK");
-            }
-            else
-            {
-                if (EditorUtility.DisplayDialog("Setup Post Processing?", "This will setup your scenes Reference Camera and make a new global volume using the included example Post Processing Profile", "OK", "Cancel"))
+                if (EditorUtility.DisplayDialog("Layers Missing!", "You haven't setup the project layers from the VRCSDK Builder tab.\r\n\r\nSelect Continue to set them up now or Cancel if you want to set them up yourself from the Builder tab.", "Continue", "Cancel"))
                 {
-                    //Check if reference camera exists
-                    if (!descriptor.ReferenceCamera)
-                    {
-                        if (Camera.main == null)
-                        {
-                            GameObject camera = new GameObject("Main Camera");
-                            camera.AddComponent<Camera>();
-                            camera.AddComponent<AudioListener>();
-                            camera.tag = "MainCamera";
-                        }
-                        descriptor.ReferenceCamera = Camera.main.gameObject;
-                    }
-
-                    //Use PostProcessing layer if it exists otherwise use Water
-                    var layer = LayerMask.NameToLayer("PostProcessing") > -1 ? "PostProcessing" : "Water";
-
-                    //Make sure the Post Process Layer exists and set it up
-                    if (!descriptor.ReferenceCamera.gameObject.GetComponent<PostProcessLayer>())
-                        descriptor.ReferenceCamera.gameObject.AddComponent(typeof(PostProcessLayer));
-                    var postprocessLayer = descriptor.ReferenceCamera.gameObject.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
-                    postprocessLayer.volumeLayer = LayerMask.GetMask(layer);
-
-                    //Copy the example profile to the Post Processing folder
-                    if (!Directory.Exists("Assets/Post Processing"))
-                        AssetDatabase.CreateFolder("Assets", "Post Processing");
-                    if (AssetDatabase.LoadAssetAtPath("Assets/Post Processing/SilentProfile.asset", typeof(PostProcessProfile)) == null)
-                    {
-                        var path = AssetDatabase.GUIDToAssetPath("eaac6f7291834264f97854154e89bf76");
-                        if (path != null)
-                        {
-                            AssetDatabase.CopyAsset(path, "Assets/Post Processing/SilentProfile.asset");
-                        }
-                    }
-
-                    //Set up the post process volume
-                    var volume = GameObject.Instantiate(PostProcessManager.instance.QuickVolume(16, 100f));
-                    if (File.Exists("Assets/Post Processing/SilentProfile.asset"))
-                        volume.sharedProfile = (PostProcessProfile)AssetDatabase.LoadAssetAtPath("Assets/Post Processing/SilentProfile.asset", typeof(PostProcessProfile));
-                    volume.gameObject.name = "Post Processing Volume";
-                    volume.gameObject.layer = LayerMask.NameToLayer(layer);
-
-                    //Mark the scene as dirty for saving
-                    EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+                    UpdateLayers.SetupEditorLayers();
                 }
+            }
+
+            if (UpdateLayers.AreLayersSetup() && EditorUtility.DisplayDialog("Setup Post Processing?", "This will setup your scenes Reference Camera and make a new global volume using the included example Post Processing Profile.", "OK", "Cancel"))
+            {
+                bool referenceCamera = descriptors.Length > 0 && descriptors[0].ReferenceCamera;
+                bool referenceCameraNeeded = descriptors.Length > 0 && !descriptors[0].ReferenceCamera;
+
+                GameObject camera;
+
+                if (!referenceCamera && Camera.main is null)
+                {
+                    camera = new GameObject("Main Camera");
+                    camera.AddComponent<Camera>();
+                    camera.AddComponent<AudioListener>();
+                    camera.tag = "MainCamera";
+
+                    if (referenceCameraNeeded)
+                    {
+                        descriptors[0].ReferenceCamera = camera;
+                    }
+                }
+                else
+                {
+                    if (referenceCamera)
+                    {
+                        camera = descriptors[0].ReferenceCamera;
+                    }
+                    else
+                    {
+                        camera = Camera.main.gameObject;
+                    }
+                }
+
+                //Use PostProcessing layer if it exists otherwise use Water
+                var layer = LayerMask.NameToLayer("PostProcessing") > -1 ? "PostProcessing" : "Water";
+
+                //Make sure the Post Process Layer exists and set it up
+                if (!camera.GetComponent<PostProcessLayer>())
+                    camera.AddComponent(typeof(PostProcessLayer));
+                var postprocessLayer = camera.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
+                postprocessLayer.volumeLayer = LayerMask.GetMask(layer);
+
+                //Copy the example profile to the Post Processing folder
+                if (!Directory.Exists("Assets/Post Processing"))
+                    AssetDatabase.CreateFolder("Assets", "Post Processing");
+                if (AssetDatabase.LoadAssetAtPath("Assets/Post Processing/SilentProfile.asset", typeof(PostProcessProfile)) == null)
+                {
+                    var path = AssetDatabase.GUIDToAssetPath("eaac6f7291834264f97854154e89bf76");
+                    if (path != null)
+                    {
+                        AssetDatabase.CopyAsset(path, "Assets/Post Processing/SilentProfile.asset");
+                    }
+                }
+
+                //Set up the post process volume
+                var volume = GameObject.Instantiate(PostProcessManager.instance.QuickVolume(16, 100f));
+                if (File.Exists("Assets/Post Processing/SilentProfile.asset"))
+                    volume.sharedProfile = (PostProcessProfile)AssetDatabase.LoadAssetAtPath("Assets/Post Processing/SilentProfile.asset", typeof(PostProcessProfile));
+                volume.gameObject.name = "Post Processing Volume";
+                volume.gameObject.layer = LayerMask.NameToLayer(layer);
+
+                //Mark the scene as dirty for saving
+                EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
             }
 #endif
         }
