@@ -22,6 +22,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEditor.SceneManagement;
 using UnityEngine.Profiling;
+using UnityEngine.SceneManagement;
 
 #if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
 namespace VRWorldToolkit.WorldDebugger
@@ -1076,6 +1077,7 @@ namespace VRWorldToolkit.WorldDebugger
         private const string CombinedMissingShaderWarning = "You have {0} materials found in your scene that have missing or broken shaders.";
         private const string MissingShaderWarningInfo = "These will fallback to the pink error shader.";
         private const string ErrorPauseWarning = "You have Error Pause enabled in your console this can cause your world upload to fail by interrupting the build process.";
+        private const string MultipleScenesLoaded = "Multiple scenes loaded, this is not supported by VRChat and can cause the world upload to fail. You should only use one scene at a time for world making.";
         #endregion
 
         private static long _occlusionCacheFiles = 0;
@@ -1152,6 +1154,12 @@ namespace VRWorldToolkit.WorldDebugger
                 {
                     _general.AddMessageGroup(new MessageGroup(WorldDescriptorOff, MessageType.Error).AddSingleMessage(new SingleMessage(descriptorRemoteness.ToString()).SetSelectObject(Array.ConvertAll(descriptors, s => s.gameObject))));
                 }
+            }
+
+            //Check if multiple scenes loaded
+            if (SceneManager.sceneCount > 1)
+            {
+                _general.AddMessageGroup(new MessageGroup(MultipleScenesLoaded, MessageType.Error));
             }
 
             //Check if console has error pause on
