@@ -1094,6 +1094,8 @@ namespace VRWorldToolkit.WorldDebugger
         private const string MissingShaderWarningInfo = "These will fallback to the pink error shader.";
         private const string ErrorPauseWarning = "You have Error Pause enabled in your console this can cause your world upload to fail by interrupting the build process.";
         private const string MultipleScenesLoaded = "Multiple scenes loaded, this is not supported by VRChat and can cause the world upload to fail. You should only use one scene at a time for world making.";
+        private const string LayersNotSetup = "Project layers not setup for VRChat yet.";
+        private const string CollisionMatrixNotSetup = "Project collision matrix not setup for VRChat yet.";
         #endregion
 
         private static long _occlusionCacheFiles = 0;
@@ -1174,12 +1176,12 @@ namespace VRWorldToolkit.WorldDebugger
 
             if (!UpdateLayers.AreLayersSetup())
             {
-                _general.AddMessageGroup(new MessageGroup("Project layers not setup for VRChat yet.", MessageType.Warning).SetGroupAutoFix(SetVRChatLayers()));
+                _general.AddMessageGroup(new MessageGroup(LayersNotSetup, MessageType.Warning).SetGroupAutoFix(SetVRChatLayers()));
             }
 
             if (!UpdateLayers.IsCollisionLayerMatrixSetup())
             {
-                _general.AddMessageGroup(new MessageGroup("Project collision matrix not setup for VRChat yet.", MessageType.Warning).SetGroupAutoFix(SetVRChatCollisionMatrix()));
+                _general.AddMessageGroup(new MessageGroup(CollisionMatrixNotSetup, MessageType.Warning).SetGroupAutoFix(SetVRChatCollisionMatrix()));
             }
 
             //Check if multiple scenes loaded
