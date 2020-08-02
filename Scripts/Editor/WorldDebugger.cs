@@ -933,6 +933,22 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
+        public static System.Action SetVRChatLayers()
+        {
+            return () =>
+            {
+                UpdateLayers.SetupEditorLayers();
+            };
+        }
+
+        public static System.Action SetVRChatCollisionMatrix()
+        {
+            return () =>
+            {
+                UpdateLayers.SetupCollisionLayerMatrix();
+            };
+        }
+
         public static System.Action SetReferenceCamera(VRC_SceneDescriptor descriptor, Camera camera)
         {
             return () =>
@@ -1154,6 +1170,16 @@ namespace VRWorldToolkit.WorldDebugger
                 {
                     _general.AddMessageGroup(new MessageGroup(WorldDescriptorOff, MessageType.Error).AddSingleMessage(new SingleMessage(descriptorRemoteness.ToString()).SetSelectObject(Array.ConvertAll(descriptors, s => s.gameObject))));
                 }
+            }
+
+            if (!UpdateLayers.AreLayersSetup())
+            {
+                _general.AddMessageGroup(new MessageGroup("Project layers not setup for VRChat yet.", MessageType.Warning).SetGroupAutoFix(SetVRChatLayers()));
+            }
+
+            if (!UpdateLayers.IsCollisionLayerMatrixSetup())
+            {
+                _general.AddMessageGroup(new MessageGroup("Project collision matrix not setup for VRChat yet.", MessageType.Warning).SetGroupAutoFix(SetVRChatCollisionMatrix()));
             }
 
             //Check if multiple scenes loaded
