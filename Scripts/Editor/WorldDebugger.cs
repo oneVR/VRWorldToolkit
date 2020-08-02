@@ -405,6 +405,8 @@ namespace VRWorldToolkit.WorldDebugger
                             MessageGroup messageGroup = group.MessageGroups[l];
                             var hasButtons = messageGroup.Buttons();
 
+                            if (messageGroup.AdditionalInfo != null && messageGroup.GetTotalCount() == 0) continue;
+
                             if (messageGroup.MessageList.Count > 0)
                             {
                                 if (messageGroup.CombinedMessage != null && messageGroup.MessageList.Count != 1)
