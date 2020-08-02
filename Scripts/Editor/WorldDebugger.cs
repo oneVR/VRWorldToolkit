@@ -1369,12 +1369,16 @@ namespace VRWorldToolkit.WorldDebugger
 
             //Get active mirrors in the world and complain about them
             var mirrors = FindObjectsOfType(typeof(VRC_MirrorReflection)) as VRC_MirrorReflection[];
+
             if (mirrors.Length > 0)
             {
                 var activeCamerasMessage = new MessageGroup(MirrorOnByDefault, CombinedMirrorsOnByDefault, MirrorsOnByDefaultInfo, MessageType.BadFPS);
                 for (int i = 0; i < mirrors.Length; i++)
                 {
-                    activeCamerasMessage.AddSingleMessage(new SingleMessage(mirrors[i].name).SetSelectObject(mirrors[i].gameObject));
+                    if (mirrors[i].enabled)
+                    {
+                        activeCamerasMessage.AddSingleMessage(new SingleMessage(mirrors[i].name).SetSelectObject(mirrors[i].gameObject));
+                    }
                 }
                 _optimization.AddMessageGroup(activeCamerasMessage);
             }
