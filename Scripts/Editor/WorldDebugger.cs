@@ -674,7 +674,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Enable lightmap UV generation?", "This operation will enable the lightmap UV generation on the mesh " + importer.name + ". Do you want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Enable lightmap UV generation?", "This operation will enable the lightmap UV generation on the mesh \"" + Path.GetFileName(AssetDatabase.GetAssetPath(importer)) + "\".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     importer.generateSecondaryUV = true;
                     importer.SaveAndReimport();
@@ -686,7 +686,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Enable lightmap UV generation?", "This operation will enable the lightmap UV generation on " + importers.Count + " meshes. Do you want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Enable lightmap UV generation?", "This operation will enable the lightmap UV generation on " + importers.Count + " meshes.\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     importers.ForEach(i => { i.generateSecondaryUV = true; i.SaveAndReimport(); });
                 }
@@ -697,7 +697,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Enable Legacy Blend Shape Normals?", "This operation will enable Legacy Blend Shape Normals on the model \"" + AssetDatabase.GetAssetPath(importer) + "\". Do you want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Enable Legacy Blend Shape Normals?", "This operation will enable Legacy Blend Shape Normals on the model \"" + Path.GetFileName(AssetDatabase.GetAssetPath(importer)) + "\".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     ModelImporterUtil.SetLegacyBlendShapeNormals(importer, true);
                     importer.SaveAndReimport();
@@ -709,7 +709,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Disable component?", "This operation will disable the " + behaviour.GetType() + " on the GameObject \"" + behaviour.gameObject.name + "\". Do you want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Disable component?", "This operation will disable the " + behaviour.GetType() + " on the GameObject \"" + behaviour.gameObject.name + "\".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     behaviour.enabled = false;
                 }
@@ -720,7 +720,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Disable component?", "This operation will disable the " + behaviours[0].GetType() + " component on " + behaviours.Count().ToString() + " GameObjects. Do you want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Disable component?", "This operation will disable the " + behaviours[0].GetType() + " component on " + behaviours.Count().ToString() + " GameObjects.\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     behaviours.ToList().ForEach(b => b.enabled = false);
                 }
@@ -731,7 +731,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Change tag?", "This operation will change " + obj.name + " layer to " + layer + ". Do you want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Change tag?", "This operation will change " + obj.name + " layer to " + layer + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     obj.layer = LayerMask.NameToLayer(layer);
                 }
@@ -742,7 +742,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Change layer?", "This operation will change " + objs.Length + " GameObjects layer to " + layer + ". Do you want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Change layer?", "This operation will change " + objs.Length + " GameObjects layer to " + layer + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     objs.ToList().ForEach(o => o.layer = LayerMask.NameToLayer(layer));
                 }
@@ -753,7 +753,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Change lightmap size?", "This operation will change your lightmap size from " + LightmapEditorSettings.maxAtlasSize + " to " + newSize + ". Do you want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Change lightmap size?", "This operation will change your lightmap size from " + LightmapEditorSettings.maxAtlasSize + " to " + newSize + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     LightmapEditorSettings.maxAtlasSize = newSize;
                 }
@@ -780,7 +780,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Change tag?", "This operation will change " + obj.name + " tag to " + tag + ". Do you want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Change tag?", "This operation will change " + obj.name + " tag to " + tag + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     obj.tag = tag;
                 }
@@ -791,7 +791,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Change tag?", "This operation will change " + objs.Length + " GameObjects tag to " + tag + ". Do you want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Change tag?", "This operation will change " + objs.Length + " GameObjects tag to " + tag + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     objs.ToList().ForEach(o => o.tag = tag);
                 }
@@ -802,7 +802,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Change shader?", "This operation will change the shader of the material " + material.name + " to " + shader + ". Do you want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Change shader?", "This operation will change the shader of the material " + material.name + " to " + shader + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     Shader standard = Shader.Find(shader);
 
@@ -815,7 +815,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Change shader?", "This operation will change the shader of " + materials.Length + " materials to " + shader + ". Do you want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Change shader?", "This operation will change the shader of " + materials.Length + " materials to " + shader + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     Shader newShader = Shader.Find(shader);
 
@@ -828,7 +828,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Remove overlapping light probes?", "This operation will remove any overlapping light probes in the group \"" + lpg.gameObject.name + "\". Do you want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Remove overlapping light probes?", "This operation will remove any overlapping light probes in the group \"" + lpg.gameObject.name + "\".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     lpg.probePositions = lpg.probePositions.Distinct().ToArray();
                 }
@@ -839,7 +839,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Remove overlapping light probes?", "This operation will remove any overlapping light probes found in the current scene. Do you want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Remove overlapping light probes?", "This operation will remove any overlapping light probes found in the current scene.\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     foreach (var lpg in lpgs)
                     {
@@ -856,7 +856,7 @@ namespace VRWorldToolkit.WorldDebugger
                 if (LightmapSettings.lightProbes != null)
                 {
                     var probes = LightmapSettings.lightProbes.positions;
-                    if (EditorUtility.DisplayDialog("Remove redundant light probes?", "This operation will attempt to remove any redundant light probes in the current scene. Bake your lighting before this operation to avoid any correct light probes getting removed. Do you want to continue?", "Yes", "Cancel"))
+                    if (EditorUtility.DisplayDialog("Remove redundant light probes?", "This operation will attempt to remove any redundant light probes in the current scene. Bake your lighting before this operation to avoid any correct light probes getting removed.\n\nDo you want to continue?", "Yes", "Cancel"))
                     {
                         foreach (var lpg in lpgs)
                         {
@@ -875,7 +875,7 @@ namespace VRWorldToolkit.WorldDebugger
         {
             return async () =>
             {
-                if (EditorUtility.DisplayDialog("Clear Occlusion Cache?", "This will clear your occlusion culling cache. Which has " + fileCount + " files currently. Deleting a massive amount of files can take a while. Do you want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Clear Occlusion Cache?", "This will clear your occlusion culling cache. Which has " + fileCount + " files currently. Deleting a massive amount of files can take a while.\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     long deleteCount = 0;
 
@@ -1961,9 +1961,9 @@ namespace VRWorldToolkit.WorldDebugger
                 var noUVGroup = new MessageGroup(NoLightmapUV, CombineNoLightmapUV, NoLightmapUVInfo, MessageType.Warning);
                 for (int i = 0; i < modelsCount; i++)
                 {
-                    var modelName = meshName[i];
                     var modelImporter = importers[i];
-                    noUVGroup.AddSingleMessage(new SingleMessage(modelName).SetAutoFix(SetGenerateLightmapUV(modelImporter)).SetAssetPath(modelImporter.assetPath));
+                    
+                    noUVGroup.AddSingleMessage(new SingleMessage(Path.GetFileName(AssetDatabase.GetAssetPath(modelImporter))).SetAutoFix(SetGenerateLightmapUV(modelImporter)).SetAssetPath(modelImporter.assetPath));
                 }
                 _lighting.AddMessageGroup(noUVGroup.SetGroupAutoFix(SetGenerateLightmapUV(importers)).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/LightingGiUvs-GeneratingLightmappingUVs.html"));
             }
