@@ -154,7 +154,7 @@ namespace VRWorldToolkit
 
         private static AddRequest _request;
 
-        private static void ImportPostProcessing()
+        public static void ImportPostProcessing()
         {
             _request = Client.Add("com.unity.postprocessing");
             EditorApplication.update += PPImportProgress;
