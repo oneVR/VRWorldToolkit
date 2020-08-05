@@ -1863,14 +1863,15 @@ namespace VRWorldToolkit.WorldDebugger
 
                     if (gameObject.GetComponent<SkinnedMeshRenderer>())
                     {
-                        if (AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(gameObject.GetComponent<SkinnedMeshRenderer>())) != null)
+                        var mesh = gameObject.GetComponent<SkinnedMeshRenderer>().sharedMesh;
+
+                        if (AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(mesh)) != null)
                         {
-                            Mesh mesh = gameObject.GetComponent<SkinnedMeshRenderer>().sharedMesh;
-                            ModelImporter importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(gameObject.GetComponent<SkinnedMeshRenderer>())) as ModelImporter;
+                            ModelImporter importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(mesh)) as ModelImporter;
 
                             if (mesh.blendShapeCount > 0 && (importer.importBlendShapeNormals == ModelImporterNormals.Calculate && !ModelImporterUtil.GetLegacyBlendShapeNormals(importer)))
                             {
-                                legacyBlendShapeIssues.AddSingleMessage(new SingleMessage(Path.GetFileName(AssetDatabase.GetAssetPath(gameObject.GetComponent<SkinnedMeshRenderer>())), Helper.FormatSize(Profiler.GetRuntimeMemorySizeLong(mesh))).SetAssetPath(importer.assetPath).SetAutoFix(SetLegacyBlendShapeNormals(importer)));
+                                legacyBlendShapeIssues.AddSingleMessage(new SingleMessage(Path.GetFileName(AssetDatabase.GetAssetPath(mesh)), Helper.FormatSize(Profiler.GetRuntimeMemorySizeLong(mesh))).SetAssetPath(importer.assetPath).SetAutoFix(SetLegacyBlendShapeNormals(importer)));
                             }
                         }
                     }
