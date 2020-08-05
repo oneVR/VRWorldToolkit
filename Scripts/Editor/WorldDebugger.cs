@@ -1796,7 +1796,6 @@ namespace VRWorldToolkit.WorldDebugger
             //Gameobject checks
 
             var importers = new List<ModelImporter>();
-            var meshName = new List<string>();
 
             var unCrunchedTextures = new List<Texture>();
             var badShaders = 0;
@@ -1844,7 +1843,6 @@ namespace VRWorldToolkit.WorldDebugger
                                         if (!modelImporter.generateSecondaryUV && sharedMesh.uv2.Length == 0)
                                         {
                                             importers.Add(modelImporter);
-                                            meshName.Add(sharedMesh.name);
                                         }
                                     }
                                 }
