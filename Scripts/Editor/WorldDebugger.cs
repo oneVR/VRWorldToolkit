@@ -1989,7 +1989,6 @@ namespace VRWorldToolkit.WorldDebugger
         {
             _recheck = true;
             RefreshBuild();
-            _buildReport = AssetDatabase.LoadAssetAtPath<BuildReport>(AssetPath);
         }
 
         private const string LastBuild = "Library/LastBuild.buildreport";
@@ -2015,8 +2014,9 @@ namespace VRWorldToolkit.WorldDebugger
                 {
                     File.Copy(LastBuild, AssetPath, true);
                     AssetDatabase.ImportAsset(AssetPath);
-                    _buildReport = AssetDatabase.LoadAssetAtPath<BuildReport>(AssetPath);
                 }
+
+                _buildReport = AssetDatabase.LoadAssetAtPath<BuildReport>(AssetPath);
             }
         }
 
