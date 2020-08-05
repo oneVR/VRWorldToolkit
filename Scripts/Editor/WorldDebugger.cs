@@ -295,9 +295,10 @@ namespace VRWorldToolkit.WorldDebugger
                 Enabled = false;
             }
 
-            public void AddMessageGroup(MessageGroup debuggerMessage)
+            public MessageGroup AddMessageGroup(MessageGroup debuggerMessage)
             {
                 MessageGroups.Add(debuggerMessage);
+                return debuggerMessage;
             }
 
             public void ClearMessages()
@@ -1805,15 +1806,15 @@ namespace VRWorldToolkit.WorldDebugger
 
             var checkedMaterials = new List<Material>();
 
-            var mirrorsDefaultLayers = new MessageGroup(MirrorWithDefaultLayers, CombinedMirrorWithDefaultLayers, MirrorWithDefaultLayersInfo, MessageType.Tips);
-            var legacyBlendShapeIssues = new MessageGroup(LegacyBlendShapeIssues, LegacyBlendShapeIssuesCombined, LegacyBlendShapeIssuesInfo, MessageType.Warning);
+            var mirrorsDefaultLayers = _optimization.AddMessageGroup(new MessageGroup(MirrorWithDefaultLayers, CombinedMirrorWithDefaultLayers, MirrorWithDefaultLayersInfo, MessageType.Tips));
+            var legacyBlendShapeIssues = _general.AddMessageGroup(new MessageGroup(LegacyBlendShapeIssues, LegacyBlendShapeIssuesCombined, LegacyBlendShapeIssuesInfo, MessageType.Warning));
 
             UnityEngine.Object[] allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
             for (int i = 0; i < allGameObjects.Length; i++)
             {
                 GameObject gameObject = allGameObjects[i] as GameObject;
 
-                if (EditorUtility.IsPersistent(gameObject.transform.root.gameObject) && !(gameObject.hideFlags == HideFlags.NotEditable || gameObject.hideFlags == HideFlags.HideAndDontSave))
+                if (EditorUtility.IsPersistent(gameObject.transform.root.gameObject) && (gameObject.hideFlags == HideFlags.NotEditable || gameObject.hideFlags == HideFlags.HideAndDontSave))
                     continue;
 
                 if (gameObject.GetComponent<Renderer>())
@@ -1921,16 +1922,6 @@ namespace VRWorldToolkit.WorldDebugger
                         }
                     }
                 }
-            }
-
-            if (mirrorsDefaultLayers.MessageList.Count > 0)
-            {
-                _optimization.AddMessageGroup(mirrorsDefaultLayers);
-            }
-
-            if (legacyBlendShapeIssues.MessageList.Count > 0)
-            {
-                _general.AddMessageGroup(legacyBlendShapeIssues);
             }
 
             //If more than 10% of shaders used in scene are toon shaders to leave room for people using them for avatar displays
