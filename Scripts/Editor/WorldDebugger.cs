@@ -1007,7 +1007,6 @@ namespace VRWorldToolkit.WorldDebugger
         #endregion
 
         #region Texts
-
         private const string NoSceneDescriptor = "Current scene has no Scene Descriptor. Please add one yourself, or drag the VRCWorld prefab to your scene.";
         private const string TooManySceneDescriptors = "Multiple Scene Descriptors found, you can only have one Scene Descriptor in a scene.";
         private const string TooManyPipelineManagers = "Current scene has multiple Pipeline Managers in it this can break the world upload process.";
