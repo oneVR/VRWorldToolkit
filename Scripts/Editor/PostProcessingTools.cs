@@ -79,7 +79,7 @@ namespace VRWorldToolkit
         private static void SetupBasicPostProcessing(VRC_SceneDescriptor[] descriptors)
         {
 #if UNITY_POST_PROCESSING_STACK_V2
-            if (descriptors.Length > 0 && !UpdateLayers.AreLayersSetup())
+            if (!UpdateLayers.AreLayersSetup())
             {
                 if (EditorUtility.DisplayDialog("Layers Missing!", "You haven't setup the project layers from the VRCSDK Builder tab.\r\n\r\nSelect Continue to set them up now or Cancel if you want to set them up yourself from the Builder tab.", "Continue", "Cancel"))
                 {
