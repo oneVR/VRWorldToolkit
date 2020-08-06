@@ -1305,7 +1305,7 @@ namespace VRWorldToolkit.WorldDebugger
                 }
                 else
                 {
-                    var disabledOcclusionAreasGroup = new MessageGroup(DisabledOcclusionAreas, DisabledOcclusionAreasCombined, DisabledOcclusionAreasInfo, MessageType.Warning);
+                    var disabledOcclusionAreasGroup = _optimization.AddMessageGroup(new MessageGroup(DisabledOcclusionAreas, DisabledOcclusionAreasCombined, DisabledOcclusionAreasInfo, MessageType.Warning));
 
                     foreach (var occlusionArea in occlusionAreas)
                     {
@@ -1316,11 +1316,6 @@ namespace VRWorldToolkit.WorldDebugger
                         {
                             disabledOcclusionAreasGroup.AddSingleMessage(new SingleMessage(occlusionArea.name).SetSelectObject(occlusionArea.gameObject));
                         }
-                    }
-
-                    if (disabledOcclusionAreasGroup.MessageList.Count > 0)
-                    {
-                        _optimization.AddMessageGroup(disabledOcclusionAreasGroup);
                     }
                 }
             }
