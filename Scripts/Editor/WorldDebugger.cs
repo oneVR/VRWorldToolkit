@@ -344,7 +344,9 @@ namespace VRWorldToolkit.WorldDebugger
                 for (int i = 0; i < _messageCategory.Count; i++)
                 {
                     MessageCategory item = _messageCategory[i];
+
                     var button = "miniButtonMid";
+                    
                     if (_messageCategory.First() == item)
                     {
                         button = "miniButtonLeft";
@@ -353,7 +355,9 @@ namespace VRWorldToolkit.WorldDebugger
                     {
                         button = "miniButtonRight";
                     }
+                    
                     var currentState = item.Enabled;
+                    
                     item.Enabled = GUILayout.Toggle(item.Enabled, item.ListName, button);
                 }
 
