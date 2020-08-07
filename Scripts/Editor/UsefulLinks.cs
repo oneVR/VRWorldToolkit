@@ -14,10 +14,16 @@ namespace VRWorldToolkit
 #endif
 
 #if VRC_SDK_VRCSDK3 || !VRC_SDK_VRCSDK2
-        [MenuItem("VRWorld Toolkit/Useful Links/Download SDK3", false, 100)]
-        private static void SDK3Download()
+        [MenuItem("VRWorld Toolkit/Useful Links/Download SDK3 Worlds", false, 100)]
+        private static void SDK3WorldsDownload()
         {
             Application.OpenURL("https://vrchat.com/download/sdk3-worlds");
+        }
+
+        [MenuItem("VRWorld Toolkit/Useful Links/Download SDK3 Avatars", false, 100)]
+        private static void SDK3AvatarsDownload()
+        {
+            Application.OpenURL("https://vrchat.com/download/sdk3-avatars");
         }
 #endif
 
