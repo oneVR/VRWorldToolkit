@@ -1829,7 +1829,7 @@ namespace VRWorldToolkit.WorldDebugger
             {
                 GameObject gameObject = allGameObjects[i] as GameObject;
 
-                if (EditorUtility.IsPersistent(gameObject.transform.root.gameObject) && (gameObject.hideFlags == HideFlags.NotEditable || gameObject.hideFlags == HideFlags.HideAndDontSave))
+                if (EditorUtility.IsPersistent(gameObject.transform.root.gameObject) && !(gameObject.hideFlags == HideFlags.NotEditable || gameObject.hideFlags == HideFlags.HideAndDontSave))
                     continue;
 
                 if (gameObject.GetComponent<Renderer>())
