@@ -17,7 +17,7 @@ namespace VRWorldToolkit
         [MenuItem("VRWorld Toolkit/Useful Links/Download SDK3", false, 100)]
         private static void SDK3Download()
         {
-            Application.OpenURL("https://vrchat.com/download/sdk3");
+            Application.OpenURL("https://vrchat.com/download/sdk3-worlds");
         }
 #endif
 
