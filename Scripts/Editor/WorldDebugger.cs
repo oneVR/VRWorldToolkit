@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using UnityEditor.SceneManagement;
 using UnityEngine.Profiling;
 using UnityEngine.SceneManagement;
+using System.Text.RegularExpressions;
 
 #if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
 namespace VRWorldToolkit.WorldDebugger
@@ -235,6 +236,16 @@ namespace VRWorldToolkit.WorldDebugger
                 return objs.ToArray();
             }
 
+            public string[] GetAssetPaths()
+            {
+                var paths = new List<string>();
+                foreach (var item in MessageList.Where(a => a.AssetPath != null))
+                {
+                    paths.Add(item.AssetPath);
+                }
+                return paths.ToArray();
+            }
+
             public System.Action[] GetSeparateActions()
             {
                 return MessageList.Where(m => m.AutoFix != null).Select(m => m.AutoFix).ToArray();
@@ -242,7 +253,7 @@ namespace VRWorldToolkit.WorldDebugger
 
             public bool Buttons()
             {
-                return GetSelectObjects().Any() || GroupAutoFix != null || GetSeparateActions().Any() || GroupAutoFix != null || Documentation != null;
+                return GetSelectObjects().Any() || GetAssetPaths().Any() || GroupAutoFix != null || GetSeparateActions().Any() || GroupAutoFix != null || Documentation != null;
             }
 
             public override bool Equals(object obj)
@@ -1102,6 +1113,10 @@ namespace VRWorldToolkit.WorldDebugger
         private const string MultipleScenesLoaded = "Multiple scenes loaded, this is not supported by VRChat and can cause the world upload to fail. You should only use one scene at a time for world making.";
         private const string LayersNotSetup = "Project layers not setup for VRChat yet.";
         private const string CollisionMatrixNotSetup = "Project collision matrix not setup for VRChat yet.";
+        private const string GrabPassShaders = "A material ({0}) in the scene is using a GrabPass due to shader \"{1}\".";
+        private const string GrabPassShadersCombined = "Found {0} materials in the scene using a GrabPass.";
+        private const string GrabPassShadersInfoPC = "When a shader uses a GrabPass, it will halt the rendering process to copy the contents of the screen into a texture it can read. This has a notable effect on performance.";
+        private const string GrabPassShadersInfoQuest = "Please change the shader for this material. When a shader uses a GrabPass on Quest, it will cause painful visual artifacts to occur, as they are not supported.";
         #endregion
 
         private static long _occlusionCacheFiles = 0;
@@ -1803,9 +1818,11 @@ namespace VRWorldToolkit.WorldDebugger
             var missingShaders = new List<Material>();
 
             var checkedMaterials = new List<Material>();
+            var checkedShaders = new List<Shader>();
 
             var mirrorsDefaultLayers = _optimization.AddMessageGroup(new MessageGroup(MirrorWithDefaultLayers, CombinedMirrorWithDefaultLayers, MirrorWithDefaultLayersInfo, MessageType.Tips));
             var legacyBlendShapeIssues = _general.AddMessageGroup(new MessageGroup(LegacyBlendShapeIssues, LegacyBlendShapeIssuesCombined, LegacyBlendShapeIssuesInfo, MessageType.Warning));
+            var grabPassShaders = _general.AddMessageGroup(new MessageGroup(GrabPassShaders, GrabPassShadersCombined, Helper.BuildPlatform() == RuntimePlatform.WindowsPlayer ? GrabPassShadersInfoPC : GrabPassShadersInfoQuest, Helper.BuildPlatform() == RuntimePlatform.Android ? MessageType.Error : MessageType.Info));
 
             UnityEngine.Object[] allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
             for (int i = 0; i < allGameObjects.Length; i++)
@@ -1887,6 +1904,28 @@ namespace VRWorldToolkit.WorldDebugger
                         checkedMaterials.Add(material);
 
                         var shader = material.shader;
+
+                        if (AssetDatabase.GetAssetPath(shader) != null)
+                        {
+                            string assetPath = AssetDatabase.GetAssetPath(shader);
+
+                            if (File.Exists(assetPath))
+                            {
+                                //Read shader file to string
+                                string word = File.ReadAllText(assetPath);
+
+                                //Strip comments
+                                word = Regex.Replace(word, "(\\/\\/.*)|(\\/\\*)(.*)(\\*\\/)", "");
+
+                                //Match for GrabPass
+                                if (Regex.IsMatch(word, "GrabPass\\s*{"))
+                                {
+                                    grabPassShaders.AddSingleMessage(new SingleMessage(material.name, shader.name).SetAssetPath(AssetDatabase.GetAssetPath(material)));
+                                }
+                            }
+                        }
+
+                        checkedShaders.Add(shader);
 
                         if (shader.name == "Hidden/InternalErrorShader" && !missingShaders.Contains(material))
                             missingShaders.Add(material);
