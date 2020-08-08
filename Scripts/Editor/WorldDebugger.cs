@@ -577,10 +577,13 @@ namespace VRWorldToolkit.WorldDebugger
                                             if (GUILayout.Button("Select", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
                                             {
                                                 if (message.AssetPath != null)
+                                                {
                                                     EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(message.AssetPath));
-
+                                                }
                                                 else
+                                                {
                                                     Selection.objects = message.SelectObjects;
+                                                }
                                             }
 
                                             EditorGUI.EndDisabledGroup();
