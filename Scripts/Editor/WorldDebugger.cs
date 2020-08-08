@@ -712,6 +712,20 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
+        public static System.Action RemoveBadPipelineManagers(GameObject[] gameObjects)
+        {
+            return () =>
+            {
+                foreach (var gameObject in gameObjects)
+                {
+                    if (gameObject.GetComponent<VRC_SceneDescriptor>())
+                        continue;
+
+                    DestroyImmediate(gameObject.GetComponent<PipelineManager>());
+                }
+            };
+        }
+
         public static System.Action SetLegacyBlendShapeNormals(ModelImporter importer)
         {
             return () =>
@@ -1023,7 +1037,7 @@ namespace VRWorldToolkit.WorldDebugger
         #region Texts
         private const string NoSceneDescriptor = "Current scene has no Scene Descriptor. Please add one yourself, or drag the VRCWorld prefab to your scene.";
         private const string TooManySceneDescriptors = "Multiple Scene Descriptors found, you can only have one Scene Descriptor in a scene.";
-        private const string TooManyPipelineManagers = "Current scene has multiple Pipeline Managers in it this can break the world upload process.";
+        private const string TooManyPipelineManagers = "Current scene has multiple Pipeline Managers in it this can break the world upload process, and cause you not to be able to load into the world.";
         private const string WorldDescriptorFar = "Scene Descriptor is {0} units far from the the zero point in Unity. Having your world center out this far will cause some noticable jittering on models. You should move your world closer to the zero point of your scene.";
         private const string WorldDescriptorOff = "Scene Descriptor is {0} units far from the the zero point in Unity. It's usually good practice to try to keep it as close as possible to the absolute zero point to avoid floating point errors.";
         private const string NoSpawnPointSet = "There are no spawn points set in your Scene Descriptor. Spawning into a world with no spawn point will cause you to get thrown back to your home world.";
@@ -1182,7 +1196,8 @@ namespace VRWorldToolkit.WorldDebugger
                 }
                 else if (pipelines.Length > 1)
                 {
-                    _general.AddMessageGroup(new MessageGroup(TooManyPipelineManagers, MessageType.Error).AddSingleMessage(new SingleMessage(Array.ConvertAll(pipelines.ToArray(), s => s.gameObject))));
+                    var pipelineGameObjects = Array.ConvertAll(pipelines, s => s.gameObject);
+                    _general.AddMessageGroup(new MessageGroup(TooManyPipelineManagers, MessageType.Error).AddSingleMessage(new SingleMessage(pipelineGameObjects).SetAutoFix(RemoveBadPipelineManagers(pipelineGameObjects))));
                 }
 
                 //Check how far the descriptor is from zero point for floating point errors
