@@ -6,13 +6,12 @@ using VRC.SDKBase;
 #endif
 #if VRC_SDK_VRCSDK2
 using VRCSDK2;
-using UnityEditor;
-using UnityEngine.UI;
-using System.Linq;
 #endif
 #if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
 using VRC.Core;
 #endif
+using UnityEditor;
+using System.Linq;
 
 namespace VRWorldToolkit
 {
