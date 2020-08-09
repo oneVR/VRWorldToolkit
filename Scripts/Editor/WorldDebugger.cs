@@ -357,7 +357,7 @@ namespace VRWorldToolkit
                     MessageCategory item = _messageCategory[i];
 
                     var button = "miniButtonMid";
-                    
+
                     if (_messageCategory.First() == item)
                     {
                         button = "miniButtonLeft";
@@ -366,9 +366,9 @@ namespace VRWorldToolkit
                     {
                         button = "miniButtonRight";
                     }
-                    
+
                     var currentState = item.Enabled;
-                    
+
                     item.Enabled = GUILayout.Toggle(item.Enabled, item.ListName, button);
                 }
 
@@ -2018,7 +2018,7 @@ namespace VRWorldToolkit
                 for (int i = 0; i < modelsCount; i++)
                 {
                     var modelImporter = importers[i];
-                    
+
                     noUVGroup.AddSingleMessage(new SingleMessage(Path.GetFileName(AssetDatabase.GetAssetPath(modelImporter))).SetAutoFix(SetGenerateLightmapUV(modelImporter)).SetAssetPath(modelImporter.assetPath));
                 }
                 _lighting.AddMessageGroup(noUVGroup.SetGroupAutoFix(SetGenerateLightmapUV(importers)).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/LightingGiUvs-GeneratingLightmappingUVs.html"));
