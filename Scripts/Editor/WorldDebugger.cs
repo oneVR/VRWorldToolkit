@@ -26,7 +26,7 @@ using UnityEngine.SceneManagement;
 using System.Text.RegularExpressions;
 
 #if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
-namespace VRWorldToolkit.WorldDebugger
+namespace VRWorldToolkit
 {
     public class WorldDebugger : EditorWindow
     {
