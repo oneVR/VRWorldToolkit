@@ -712,16 +712,16 @@ namespace VRWorldToolkit.WorldDebugger
             };
         }
 
-        public static System.Action RemoveBadPipelineManagers(GameObject[] gameObjects)
+        public static System.Action RemoveBadPipelineManagers(PipelineManager[] pipelineManagers)
         {
             return () =>
             {
-                foreach (var gameObject in gameObjects)
+                foreach (var pipelineManager in pipelineManagers)
                 {
-                    if (gameObject.GetComponent<VRC_SceneDescriptor>())
+                    if (pipelineManager.gameObject.GetComponent<VRC_SceneDescriptor>())
                         continue;
 
-                    DestroyImmediate(gameObject.GetComponent<PipelineManager>());
+                    DestroyImmediate(pipelineManager.gameObject.GetComponent<PipelineManager>());
                 }
             };
         }
@@ -1196,8 +1196,7 @@ namespace VRWorldToolkit.WorldDebugger
                 }
                 else if (pipelines.Length > 1)
                 {
-                    var pipelineGameObjects = Array.ConvertAll(pipelines, s => s.gameObject);
-                    _general.AddMessageGroup(new MessageGroup(TooManyPipelineManagers, MessageType.Error).AddSingleMessage(new SingleMessage(pipelineGameObjects).SetAutoFix(RemoveBadPipelineManagers(pipelineGameObjects))));
+                    _general.AddMessageGroup(new MessageGroup(TooManyPipelineManagers, MessageType.Error).AddSingleMessage(new SingleMessage(Array.ConvertAll(pipelines, s => s.gameObject)).SetAutoFix(RemoveBadPipelineManagers(pipelines))));
                 }
 
                 //Check how far the descriptor is from zero point for floating point errors
