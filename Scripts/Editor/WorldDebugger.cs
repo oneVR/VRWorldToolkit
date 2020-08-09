@@ -1132,7 +1132,7 @@ namespace VRWorldToolkit.WorldDebugger
         private const string CollisionMatrixNotSetup = "Project collision matrix not setup for VRChat yet.";
         private const string GrabPassShaders = "A material ({0}) in the scene is using a GrabPass due to shader \"{1}\".";
         private const string GrabPassShadersCombined = "Found {0} materials in the scene using a GrabPass.";
-        private const string GrabPassShadersInfoPC = "When a shader uses a GrabPass, it will halt the rendering process to copy the contents of the screen into a texture it can read. This has a notable effect on performance.";
+        private const string GrabPassShadersInfoPC = "A GrabPass will halt the rendering to copy the contents of the screen into a texture for it can read. This has a notable effect on performance.";
         private const string GrabPassShadersInfoQuest = "Please change the shader for this material. When a shader uses a GrabPass on Quest, it will cause painful visual artifacts to occur, as they are not supported.";
         #endregion
 
