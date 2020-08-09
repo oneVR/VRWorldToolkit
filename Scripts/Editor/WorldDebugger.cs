@@ -1134,6 +1134,9 @@ namespace VRWorldToolkit.WorldDebugger
         private const string GrabPassShadersCombined = "Found {0} materials in the scene using a GrabPass.";
         private const string GrabPassShadersInfoPC = "A GrabPass will halt the rendering to copy the contents of the screen into a texture for it can read. This has a notable effect on performance.";
         private const string GrabPassShadersInfoQuest = "Please change the shader for this material. When a shader uses a GrabPass on Quest, it will cause painful visual artifacts to occur, as they are not supported.";
+        private const string DisabledPortalsWarning = "Portal \"{0}\" disabled by default.";
+        private const string DisabledPortalsWarningCombined = "Found {0} portals disabled by default.";
+        private const string DisabledPortalsWarningInfo = "Having a portal disabled by default will cause players entering to end up in different instances.";
         #endregion
 
         private static long _occlusionCacheFiles = 0;
@@ -1840,6 +1843,7 @@ namespace VRWorldToolkit.WorldDebugger
             var mirrorsDefaultLayers = _optimization.AddMessageGroup(new MessageGroup(MirrorWithDefaultLayers, CombinedMirrorWithDefaultLayers, MirrorWithDefaultLayersInfo, MessageType.Tips));
             var legacyBlendShapeIssues = _general.AddMessageGroup(new MessageGroup(LegacyBlendShapeIssues, LegacyBlendShapeIssuesCombined, LegacyBlendShapeIssuesInfo, MessageType.Warning));
             var grabPassShaders = _general.AddMessageGroup(new MessageGroup(GrabPassShaders, GrabPassShadersCombined, Helper.BuildPlatform() == RuntimePlatform.WindowsPlayer ? GrabPassShadersInfoPC : GrabPassShadersInfoQuest, Helper.BuildPlatform() == RuntimePlatform.Android ? MessageType.Error : MessageType.Info));
+            var disabledPortals = _general.AddMessageGroup(new MessageGroup(DisabledPortalsWarning, DisabledPortalsWarningCombined, DisabledPortalsWarningInfo, MessageType.Warning));
 
             UnityEngine.Object[] allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
             for (int i = 0; i < allGameObjects.Length; i++)
@@ -1975,6 +1979,14 @@ namespace VRWorldToolkit.WorldDebugger
                                 }
                             }
                         }
+                    }
+                }
+
+                if (gameObject.activeInHierarchy == false)
+                {
+                    if (gameObject.GetComponent<VRC_PortalMarker>())
+                    {
+                        disabledPortals.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject));
                     }
                 }
             }
