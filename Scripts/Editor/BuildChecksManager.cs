@@ -44,23 +44,26 @@ namespace VRWorldToolkit
 
                 var descriptors = FindObjectsOfType(typeof(VRC_SceneDescriptor)) as VRC_SceneDescriptor[];
 
-                var spawns = descriptors[0].spawns.Where(s => s != null).ToArray();
-                var spawnsLength = descriptors[0].spawns.Length;
-
-                if (spawnsLength != spawns.Length)
+                if (descriptors.Length > 0)
                 {
-                    int selection = EditorUtility.DisplayDialogComplex("VRWorld Toolkit: Null spawn points!", "Null spawn points set in Scene Descriptor.\r\n\r\nSpawning into a null spawn point will cause you get thrown back into your home world.\r\n\r\nSelect Cancel Build if you want to fix the problem yourself or press Bypass to ignore the problem and continue.", "Fix And Continue", "Cancel Build", "Bypass");
+                    var spawns = descriptors[0].spawns.Where(s => s != null).ToArray();
+                    var spawnsLength = descriptors[0].spawns.Length;
 
-                    switch (selection)
+                    if (spawnsLength != spawns.Length)
                     {
-                        case 0:
-                            WorldDebugger.FixSpawns(descriptors[0]).Invoke();
-                            break;
-                        case 1:
-                            return false;
-                        case 2:
-                        default:
-                            break;
+                        int selection = EditorUtility.DisplayDialogComplex("VRWorld Toolkit: Null spawn points!", "Null spawn points set in Scene Descriptor.\r\n\r\nSpawning into a null spawn point will cause you get thrown back into your home world.\r\n\r\nSelect Cancel Build if you want to fix the problem yourself or press Bypass to ignore the problem and continue.", "Fix And Continue", "Cancel Build", "Bypass");
+
+                        switch (selection)
+                        {
+                            case 0:
+                                WorldDebugger.FixSpawns(descriptors[0]).Invoke();
+                                break;
+                            case 1:
+                                return false;
+                            case 2:
+                            default:
+                                break;
+                        }
                     }
                 }
 
