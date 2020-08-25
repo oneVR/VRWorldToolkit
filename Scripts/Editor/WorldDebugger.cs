@@ -1137,6 +1137,7 @@ namespace VRWorldToolkit
         private const string DisabledPortalsWarning = "Portal \"{0}\" disabled by default.";
         private const string DisabledPortalsWarningCombined = "Found {0} portals disabled by default.";
         private const string DisabledPortalsWarningInfo = "Having a portal disabled by default will cause players entering to end up in different instances.";
+        private const string SHDirectionalModeBakeryError = "SH directional detected in Bakery. Using SH directional mode isn't supported in VRChat by default and requires usage of VRC Bakery Adapter by Merlin to make it work.";
         #endregion
 
         private static long _occlusionCacheFiles = 0;
@@ -1447,6 +1448,18 @@ namespace VRWorldToolkit
             //bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryDirectLight)) as BakeryDirectLight[], s => s.gameObject));
             bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryPointLight)) as BakeryPointLight[], s => s.gameObject));
             bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakerySkyLight)) as BakerySkyLight[], s => s.gameObject));
+
+            var bakerySettings = ftRenderLightmap.FindRenderSettingsStorage();
+
+            if ((ftRenderLightmap.RenderDirMode)bakerySettings.renderSettingsRenderDirMode == ftRenderLightmap.RenderDirMode.SH)
+            {
+                string className = "Merlin.VRCBakeryAdapter";
+
+                if (Helper.GetTypeFromName(className) is null)
+                {
+                    _lighting.AddMessageGroup(new MessageGroup(SHDirectionalModeBakeryError, MessageType.Error).SetDocumentation("https://github.com/Merlin-san/VRC-Bakery-Adapter"));
+                }
+            }
 
             if (bakeryLights.Count > 0)
             {

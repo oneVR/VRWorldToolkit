@@ -102,5 +102,20 @@ namespace VRWorldToolkit
             return RuntimePlatform.WindowsPlayer;
 #endif
         }
+
+        public static Type GetTypeFromName(string typeName)
+        {
+            var type = Type.GetType(typeName);
+            if (type != null) return type; foreach (var a in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                type = a.GetType(typeName);
+                if (type != null)
+                {
+                    Debug.Log(a);
+                    return type;
+                }
+            }
+            return null;
+        }
     }
 }
