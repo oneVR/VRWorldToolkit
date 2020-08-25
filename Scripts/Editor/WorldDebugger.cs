@@ -1137,7 +1137,7 @@ namespace VRWorldToolkit
         private const string DisabledPortalsWarning = "Portal \"{0}\" disabled by default.";
         private const string DisabledPortalsWarningCombined = "Found {0} portals disabled by default.";
         private const string DisabledPortalsWarningInfo = "Having a portal disabled by default will cause players entering to end up in different instances.";
-        private const string SHDirectionalModeBakeryError = "SH directional detected in Bakery. Using SH directional mode isn't supported in VRChat by default and requires usage of VRC Bakery Adapter by Merlin to make it work.";
+        private const string SHDirectionalModeBakeryError = "SH directional mode detected in Bakery. Using SH directional mode isn't supported in VRChat by default and requires usage of VRC Bakery Adapter by Merlin for it to function in game.";
         #endregion
 
         private static long _occlusionCacheFiles = 0;
