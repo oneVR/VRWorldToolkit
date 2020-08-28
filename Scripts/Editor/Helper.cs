@@ -69,7 +69,24 @@ namespace VRWorldToolkit
 
         public static string FormatTime(System.TimeSpan t)
         {
-            return t.Days.ToString() + " days " + t.Hours.ToString() + " hours " + t.Minutes.ToString() + " minutes " + t.Seconds.ToString() + " seconds ago";
+            string formattedTime = "";
+            if (t.TotalDays > 1)
+            {
+                formattedTime = String.Concat(formattedTime, t.Days + " days ");
+            }
+            if (t.TotalHours > 1)
+            {
+                formattedTime = String.Concat(formattedTime, t.Hours + " days ");
+            }
+            if (t.TotalMinutes > 1)
+            {
+                formattedTime = String.Concat(formattedTime, t.Minutes + " minutes ");
+            } else
+            {
+                formattedTime = String.Concat(formattedTime, t.Seconds + " seconds");
+            }
+            
+            return formattedTime;
         }
 
         public static string FormatSize(ulong size)
