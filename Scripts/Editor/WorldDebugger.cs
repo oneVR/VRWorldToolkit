@@ -2141,9 +2141,9 @@ namespace VRWorldToolkit
 
             GUILayout.EndVertical();
 
-            _masterList.DrawTabSelector();
-
             EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+
+            _masterList.DrawTabSelector();
 
             EditorGUILayout.BeginHorizontal();
             _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
