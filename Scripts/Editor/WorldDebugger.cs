@@ -2066,11 +2066,14 @@ namespace VRWorldToolkit
 
         private const string BuildReportDir = "Assets/_LastBuild/";
 
-        private const string AssetPath = "Assets/_LastBuild/LastBuild.buildreport";
+        private const string LastBuildReportPath = "Assets/_LastBuild/LastBuild.buildreport";
+        private const string WindowsBuildReportPath = "Assets/_LastBuild/LastWindowsBuild.buildreport";
+        private const string QuestBuildReportPath = "Assets/_LastBuild/LastQuestBuild.buildreport";
 
         private static DateTime _timeNow;
 
-        private static BuildReport _buildReport;
+        private static BuildReport BuildReportWindows;
+        private static BuildReport BuildReportQuest;
 
         private static void RefreshBuild()
         {
@@ -2081,19 +2084,64 @@ namespace VRWorldToolkit
 
             if (File.Exists(LastBuild))
             {
-                if (!File.Exists(AssetPath) || File.GetLastWriteTime(LastBuild) > File.GetLastWriteTime(AssetPath))
+                if (!File.Exists(LastBuildReportPath) || File.GetLastWriteTime(LastBuild) > File.GetLastWriteTime(LastBuildReportPath))
                 {
-                    File.Copy(LastBuild, AssetPath, true);
-                    AssetDatabase.ImportAsset(AssetPath);
-                }
+                    File.Copy(LastBuild, LastBuildReportPath, true);
+                    AssetDatabase.ImportAsset(LastBuildReportPath);
 
-                _buildReport = AssetDatabase.LoadAssetAtPath<BuildReport>(AssetPath);
+                    switch (AssetDatabase.LoadAssetAtPath<BuildReport>(LastBuildReportPath).summary.platform)
+                    {
+                        case BuildTarget.StandaloneWindows64:
+                            File.Copy(LastBuild, WindowsBuildReportPath, true);
+                            AssetDatabase.ImportAsset(WindowsBuildReportPath);
+                            break;
+                        case BuildTarget.Android:
+                            File.Copy(LastBuild, QuestBuildReportPath, true);
+                            AssetDatabase.ImportAsset(QuestBuildReportPath);
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
+
+            if (AssetDatabase.LoadAssetAtPath<BuildReport>(WindowsBuildReportPath))
+            {
+                BuildReportWindows = AssetDatabase.LoadAssetAtPath<BuildReport>(WindowsBuildReportPath);
+            }
+
+            if (AssetDatabase.LoadAssetAtPath<BuildReport>(QuestBuildReportPath))
+            {
+                BuildReportQuest = AssetDatabase.LoadAssetAtPath<BuildReport>(QuestBuildReportPath);
+            }
+        }
+
+        private void DrawBuildSummary(BuildReport report)
+        {
+            GUIStyle RichText = new GUIStyle()
+            {
+                richText = true
+            };
+
+            GUILayout.BeginVertical(EditorStyles.helpBox);
+
+            if (report != null)
+            {
+                GUILayout.Label("<b>Build size:</b> " + Helper.FormatSize(report.summary.totalSize), RichText);
+
+                GUILayout.Label("<b>Build done:</b> " + report.summary.buildEndedAt, RichText);
+
+                GUILayout.Label("<b>Errors during build:</b> " + report.summary.totalErrors.ToString(), RichText);
+
+                GUILayout.Label("<b>Warnings during build:</b> " + report.summary.totalWarnings.ToString(), RichText);
+            }
+
+            GUILayout.EndVertical();
         }
 
         private void OnGUI()
         {
-            var style = new GUIStyle(GUI.skin.label)
+            GUIStyle RichText = new GUIStyle()
             {
                 richText = true
             };
@@ -2122,24 +2170,30 @@ namespace VRWorldToolkit
 #endif
             }
 
-            GUILayout.BeginVertical(EditorStyles.helpBox);
+            GUILayout.BeginHorizontal();
 
-            if (_buildReport != null)
+            if (BuildReportWindows)
             {
-                GUILayout.Label("<b>Last build size:</b> " + Helper.FormatSize(_buildReport.summary.totalSize), style);
+                GUILayout.BeginVertical();
+                GUILayout.Label("Last found Windows build:", EditorStyles.boldLabel);
 
-                GUILayout.Label("<b>Last build was done:</b> " + Helper.FormatTime(_timeNow.Subtract(_buildReport.summary.buildEndedAt)), style);
+                DrawBuildSummary(BuildReportWindows);
 
-                GUILayout.Label("<b>Errors last build:</b> " + _buildReport.summary.totalErrors.ToString(), style);
-
-                GUILayout.Label("<b>Warnings last build:</b> " + _buildReport.summary.totalWarnings.ToString(), style);
-            }
-            else
-            {
-                GUILayout.Label("No build found");
+                GUILayout.EndVertical();
             }
 
-            GUILayout.EndVertical();
+            if (BuildReportQuest)
+            {
+                GUILayout.BeginVertical();
+                GUILayout.Label("Last found Quest build:", EditorStyles.boldLabel);
+
+                DrawBuildSummary(BuildReportQuest);
+
+                GUILayout.EndVertical();
+
+            }
+
+            GUILayout.EndHorizontal();
 
             EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
 
