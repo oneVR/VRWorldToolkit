@@ -385,12 +385,12 @@ namespace VRWorldToolkit
                 return _messageCategory.All(m => !m.Enabled);
             }
 
-            private static readonly GUIStyle BoxStyle = new GUIStyle("HelpBox")
+            private static readonly GUIStyle HelpBoxRichText = new GUIStyle("HelpBox")
             {
                 richText = true
             };
 
-            private static readonly GUIStyle BoxStylePadded = new GUIStyle("HelpBox")
+            private static readonly GUIStyle HelpBoxPadded = new GUIStyle("HelpBox")
             {
                 margin = new RectOffset(18, 4, 4, 4),
                 alignment = TextAnchor.MiddleLeft,
@@ -439,7 +439,7 @@ namespace VRWorldToolkit
                                     if (hasButtons)
                                     {
                                         var box = new GUIContent(finalMessage, GetDebuggerIcon(messageGroup.MessageType));
-                                        GUILayout.Box(box, BoxStyle, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
+                                        GUILayout.Box(box, HelpBoxRichText, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
 
                                         EditorGUILayout.BeginVertical();
 
@@ -508,7 +508,7 @@ namespace VRWorldToolkit
                                             if (hasButtons)
                                             {
                                                 var box = new GUIContent(finalSingleMessage);
-                                                GUILayout.Box(box, BoxStylePadded, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 121));
+                                                GUILayout.Box(box, HelpBoxPadded, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 121));
 
                                                 EditorGUILayout.BeginVertical();
 
@@ -568,7 +568,7 @@ namespace VRWorldToolkit
                                         if (hasButtons)
                                         {
                                             GUIContent Box = new GUIContent(finalMessage, GetDebuggerIcon(messageGroup.MessageType));
-                                            GUILayout.Box(Box, BoxStyle, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
+                                            GUILayout.Box(Box, HelpBoxRichText, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
 
                                             EditorGUILayout.BeginVertical();
 
@@ -619,7 +619,7 @@ namespace VRWorldToolkit
                                     EditorGUILayout.BeginHorizontal();
 
                                     GUIContent box = new GUIContent(messageGroup.Message, GetDebuggerIcon(messageGroup.MessageType));
-                                    GUILayout.Box(box, BoxStyle, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
+                                    GUILayout.Box(box, HelpBoxRichText, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
 
                                     EditorGUILayout.BeginVertical();
 
@@ -665,7 +665,7 @@ namespace VRWorldToolkit
             private static void DrawMessage(string messageText, MessageType type)
             {
                 var Box = new GUIContent(messageText, GetDebuggerIcon(type));
-                GUILayout.Box(Box, BoxStyle, GUILayout.MinHeight(42), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 18));
+                GUILayout.Box(Box, HelpBoxRichText, GUILayout.MinHeight(42), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 18));
             }
         }
 
