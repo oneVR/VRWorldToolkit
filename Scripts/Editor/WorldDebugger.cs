@@ -298,12 +298,12 @@ namespace VRWorldToolkit
             private readonly Dictionary<int, bool> _expandedGroups = new Dictionary<int, bool>();
 
             public readonly string ListName;
-            public bool Enabled;
+            public bool Disabled;
 
             public MessageCategory(string listName)
             {
                 this.ListName = listName;
-                Enabled = false;
+                Disabled = false;
             }
 
             public MessageGroup AddMessageGroup(MessageGroup debuggerMessage)
@@ -367,9 +367,9 @@ namespace VRWorldToolkit
                         button = "miniButtonRight";
                     }
 
-                    var currentState = item.Enabled;
+                    var currentState = item.Disabled;
 
-                    item.Enabled = GUILayout.Toggle(item.Enabled, item.ListName, button);
+                    item.Disabled = GUILayout.Toggle(item.Disabled, item.ListName, button);
                 }
 
                 EditorGUILayout.EndHorizontal();
@@ -378,11 +378,6 @@ namespace VRWorldToolkit
             public void ClearCategories()
             {
                 _messageCategory.ForEach(m => m.ClearMessages());
-            }
-
-            private bool AllDisabled()
-            {
-                return _messageCategory.All(m => !m.Enabled);
             }
 
             private static readonly GUIStyle HelpBoxRichText = new GUIStyle("HelpBox")
@@ -404,7 +399,7 @@ namespace VRWorldToolkit
                 for (int i = 0; i < drawList.Count; i++)
                 {
                     MessageCategory group = drawList[i];
-                    if (group.Enabled || AllDisabled())
+                    if (!group.Disabled)
                     {
                         GUILayout.Label(group.ListName, EditorStyles.boldLabel);
 
