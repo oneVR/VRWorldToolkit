@@ -1158,7 +1158,7 @@ namespace VRWorldToolkit
         private static MessageCategory _lighting;
         private static MessageCategory _postProcessing;
 
-        private static void CheckScene()
+        private void CheckScene()
         {
             _masterList.ClearCategories();
 
@@ -2049,17 +2049,11 @@ namespace VRWorldToolkit
             }
         }
 
-        private static MessageCategoryList _masterList;
-
-        private void Awake()
-        {
-            RefreshBuild();
-        }
+        private MessageCategoryList _masterList;
 
         private void OnFocus()
         {
             _recheck = true;
-            RefreshBuild();
         }
 
         private const string LastBuild = "Library/LastBuild.buildreport";
@@ -2070,47 +2064,47 @@ namespace VRWorldToolkit
         private const string WindowsBuildReportPath = "Assets/_LastBuild/LastWindowsBuild.buildreport";
         private const string QuestBuildReportPath = "Assets/_LastBuild/LastQuestBuild.buildreport";
 
-        private static DateTime _timeNow;
-
         private static BuildReport BuildReportWindows;
         private static BuildReport BuildReportQuest;
 
         private static void RefreshBuild()
         {
-            _timeNow = DateTime.Now.ToUniversalTime();
-
             if (!Directory.Exists(BuildReportDir))
                 Directory.CreateDirectory(BuildReportDir);
 
-            if (File.Exists(LastBuild))
+            if (File.Exists(LastBuild) && (!File.Exists(LastBuildReportPath) || File.GetLastWriteTime(LastBuild) > File.GetLastWriteTime(LastBuildReportPath)))
             {
-                if (!File.Exists(LastBuildReportPath) || File.GetLastWriteTime(LastBuild) > File.GetLastWriteTime(LastBuildReportPath))
-                {
-                    File.Copy(LastBuild, LastBuildReportPath, true);
-                    AssetDatabase.ImportAsset(LastBuildReportPath);
+                File.Copy(LastBuild, LastBuildReportPath, true);
+                AssetDatabase.ImportAsset(LastBuildReportPath);
 
-                    switch (AssetDatabase.LoadAssetAtPath<BuildReport>(LastBuildReportPath).summary.platform)
-                    {
-                        case BuildTarget.StandaloneWindows64:
-                            File.Copy(LastBuild, WindowsBuildReportPath, true);
-                            AssetDatabase.ImportAsset(WindowsBuildReportPath);
-                            break;
-                        case BuildTarget.Android:
-                            File.Copy(LastBuild, QuestBuildReportPath, true);
-                            AssetDatabase.ImportAsset(QuestBuildReportPath);
-                            break;
-                        default:
-                            break;
-                    }
+                switch (AssetDatabase.LoadAssetAtPath<BuildReport>(LastBuildReportPath).summary.platform)
+                {
+                    case BuildTarget.StandaloneWindows:
+                    case BuildTarget.StandaloneWindows64:
+                        if (File.GetLastWriteTime(LastBuildReportPath) > File.GetLastWriteTime(WindowsBuildReportPath))
+                        {
+                            AssetDatabase.CopyAsset(LastBuildReportPath, WindowsBuildReportPath);
+                            BuildReportWindows = AssetDatabase.LoadAssetAtPath<BuildReport>(WindowsBuildReportPath);
+                        }
+                        break;
+                    case BuildTarget.Android:
+                        if (File.GetLastWriteTime(LastBuildReportPath) > File.GetLastWriteTime(QuestBuildReportPath))
+                        {
+                            AssetDatabase.CopyAsset(LastBuildReportPath, QuestBuildReportPath);
+                            BuildReportQuest = AssetDatabase.LoadAssetAtPath<BuildReport>(QuestBuildReportPath);
+                        }
+                        break;
+                    default:
+                        break;
                 }
             }
 
-            if (AssetDatabase.LoadAssetAtPath<BuildReport>(WindowsBuildReportPath))
+            if (BuildReportWindows is null && File.Exists(WindowsBuildReportPath))
             {
                 BuildReportWindows = AssetDatabase.LoadAssetAtPath<BuildReport>(WindowsBuildReportPath);
             }
 
-            if (AssetDatabase.LoadAssetAtPath<BuildReport>(QuestBuildReportPath))
+            if (BuildReportQuest is null && File.Exists(QuestBuildReportPath))
             {
                 BuildReportQuest = AssetDatabase.LoadAssetAtPath<BuildReport>(QuestBuildReportPath);
             }
@@ -2129,7 +2123,7 @@ namespace VRWorldToolkit
             {
                 GUILayout.Label("<b>Build size:</b> " + Helper.FormatSize(report.summary.totalSize), RichText);
 
-                GUILayout.Label("<b>Build done:</b> " + report.summary.buildEndedAt, RichText);
+                GUILayout.Label("<b>Build done:</b> " + report.summary.buildEndedAt.ToLocalTime(), RichText);
 
                 GUILayout.Label("<b>Errors during build:</b> " + report.summary.totalErrors.ToString(), RichText);
 
@@ -2164,6 +2158,7 @@ namespace VRWorldToolkit
 
                 _recheck = false;
                 CheckScene();
+                RefreshBuild();
 #if VRWT_BENCHMARK
                 watch.Stop();
                 Debug.Log("Scene checked in: " + watch.ElapsedMilliseconds + " ms.");
