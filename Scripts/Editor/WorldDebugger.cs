@@ -1017,13 +1017,11 @@ namespace VRWorldToolkit
             };
         }
 
-        public static System.Action SetPostProcessingInSceneView(bool isActive)
+        public static System.Action SetPostProcessingInScene(SceneView.SceneViewState sceneViewState, bool isActive)
         {
             return () =>
             {
-                var sceneView = UnityEditor.EditorWindow.GetWindow<SceneView>();
-
-                sceneView.sceneViewState.showImageEffects = isActive;
+                sceneViewState.showImageEffects = isActive;
             };
         }
 #endif
@@ -1700,11 +1698,11 @@ namespace VRWorldToolkit
             }
             else
             {
-                var sceneView = UnityEditor.EditorWindow.GetWindow<SceneView>();
+                var sceneViewState = SceneView.lastActiveSceneView.sceneViewState;
 
-                if (!sceneView.sceneViewState.showImageEffects)
+                if (!sceneViewState.showImageEffects)
                 {
-                    _postProcessing.AddMessageGroup(new MessageGroup(PostProcessingDisabledInSceneView, MessageType.Info).SetGroupAutoFix(SetPostProcessingInSceneView(true)));
+                    _postProcessing.AddMessageGroup(new MessageGroup(PostProcessingDisabledInSceneView, MessageType.Info).SetGroupAutoFix(SetPostProcessingInScene(sceneViewState, true)));
                 }
 
                 //Start by checking if reference camera has been set in the Scene Descriptor
