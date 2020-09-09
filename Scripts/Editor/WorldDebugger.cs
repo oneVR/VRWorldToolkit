@@ -2110,6 +2110,11 @@ namespace VRWorldToolkit
                 richText = true
             };
 
+            if (EditorGUIUtility.isProSkin)
+            {
+                RichText.normal.textColor = Color.white;
+            }
+
             GUILayout.BeginVertical(EditorStyles.helpBox);
 
             if (report != null)
