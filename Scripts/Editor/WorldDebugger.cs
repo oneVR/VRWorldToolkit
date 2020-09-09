@@ -1913,7 +1913,7 @@ namespace VRWorldToolkit
 
                             if (mesh.blendShapeCount > 0 && (importer.importBlendShapeNormals == ModelImporterNormals.Calculate && !ModelImporterUtil.GetLegacyBlendShapeNormals(importer)))
                             {
-                                legacyBlendShapeIssues.AddSingleMessage(new SingleMessage(Path.GetFileName(AssetDatabase.GetAssetPath(mesh)), Helper.FormatSize(Profiler.GetRuntimeMemorySizeLong(mesh))).SetAssetPath(importer.assetPath).SetAutoFix(SetLegacyBlendShapeNormals(importer)));
+                                legacyBlendShapeIssues.AddSingleMessage(new SingleMessage(Path.GetFileName(AssetDatabase.GetAssetPath(mesh)), EditorUtility.FormatBytes(Profiler.GetRuntimeMemorySizeLong(mesh))).SetAssetPath(importer.assetPath).SetAutoFix(SetLegacyBlendShapeNormals(importer)));
                             }
                         }
                     }
@@ -2114,7 +2114,7 @@ namespace VRWorldToolkit
 
             if (report != null)
             {
-                GUILayout.Label("<b>Build size:</b> " + Helper.FormatSize(report.summary.totalSize), RichText);
+                GUILayout.Label("<b>Build size:</b> " + EditorUtility.FormatBytes((long)report.summary.totalSize), RichText);
 
                 GUILayout.Label("<b>Build done:</b> " + report.summary.buildEndedAt.ToLocalTime(), RichText);
 
