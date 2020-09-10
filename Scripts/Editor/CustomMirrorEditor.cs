@@ -8,6 +8,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using VRWorldToolkit.DataStructures;
 
 #if (VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3) && !VRWT_DISABLE_EDITORS
 namespace VRWorldToolkit
@@ -57,15 +58,9 @@ namespace VRWorldToolkit
 
             if (showExplanations)
             {
-                var style = new GUIStyle(GUI.skin.label)
-                {
-                    richText = true,
-                    wordWrap = true
-                };
-
-                GUILayout.Label("<b>Player:</b>\nThis layer is used for other players than yourself", style);
-                GUILayout.Label("<b>PlayerLocal:</b>\nThis layer is only used for first-person view and should not be enabled in mirrors", style);
-                GUILayout.Label("<b>MirrorReflection:</b>\nThis layer is used for your own mirror version", style);
+                GUILayout.Label("<b>Player:</b>\nThis layer is used for other players than yourself", Styles.RichTextWrap);
+                GUILayout.Label("<b>PlayerLocal:</b>\nThis layer is only used for first-person view and should not be enabled in mirrors", Styles.RichTextWrap);
+                GUILayout.Label("<b>MirrorReflection:</b>\nThis layer is used for your own mirror version", Styles.RichTextWrap);
             }
         }
 

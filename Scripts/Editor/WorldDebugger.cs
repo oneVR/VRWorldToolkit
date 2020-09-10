@@ -24,6 +24,8 @@ using UnityEditor.SceneManagement;
 using UnityEngine.Profiling;
 using UnityEngine.SceneManagement;
 using System.Text.RegularExpressions;
+using UnityEditor.IMGUI.Controls;
+using VRWorldToolkit.DataStructures;
 
 #if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
 namespace VRWorldToolkit
@@ -434,7 +436,7 @@ namespace VRWorldToolkit
                                     if (hasButtons)
                                     {
                                         var box = new GUIContent(finalMessage, GetDebuggerIcon(messageGroup.MessageType));
-                                        GUILayout.Box(box, HelpBoxRichText, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
+                                        GUILayout.Box(box, Styles.HelpBoxRichText, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
 
                                         EditorGUILayout.BeginVertical();
 
@@ -503,7 +505,7 @@ namespace VRWorldToolkit
                                             if (hasButtons)
                                             {
                                                 var box = new GUIContent(finalSingleMessage);
-                                                GUILayout.Box(box, HelpBoxPadded, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 121));
+                                                GUILayout.Box(box, Styles.HelpBoxPadded, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 121));
 
                                                 EditorGUILayout.BeginVertical();
 
@@ -563,7 +565,7 @@ namespace VRWorldToolkit
                                         if (hasButtons)
                                         {
                                             GUIContent Box = new GUIContent(finalMessage, GetDebuggerIcon(messageGroup.MessageType));
-                                            GUILayout.Box(Box, HelpBoxRichText, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
+                                            GUILayout.Box(Box, Styles.HelpBoxRichText, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
 
                                             EditorGUILayout.BeginVertical();
 
@@ -614,7 +616,7 @@ namespace VRWorldToolkit
                                     EditorGUILayout.BeginHorizontal();
 
                                     GUIContent box = new GUIContent(messageGroup.Message, GetDebuggerIcon(messageGroup.MessageType));
-                                    GUILayout.Box(box, HelpBoxRichText, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
+                                    GUILayout.Box(box, Styles.HelpBoxRichText, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
 
                                     EditorGUILayout.BeginVertical();
 
@@ -660,7 +662,7 @@ namespace VRWorldToolkit
             private static void DrawMessage(string messageText, MessageType type)
             {
                 var Box = new GUIContent(messageText, GetDebuggerIcon(type));
-                GUILayout.Box(Box, HelpBoxRichText, GUILayout.MinHeight(42), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 18));
+                GUILayout.Box(Box, Styles.HelpBoxRichText, GUILayout.MinHeight(42), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 18));
             }
         }
 

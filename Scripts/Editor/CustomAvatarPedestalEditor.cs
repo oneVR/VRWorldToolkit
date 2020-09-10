@@ -11,6 +11,7 @@ using UnityEngine.SceneManagement;
 using UnityEditor.SceneManagement;
 using System.Text.RegularExpressions;
 using System;
+using VRWorldToolkit.DataStructures;
 
 #if (VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3) && !VRWT_DISABLE_EDITORS
 namespace VRWorldToolkit
@@ -52,14 +53,7 @@ namespace VRWorldToolkit
 
                     avatarIDs = Regex.Matches(avatarIDArea, AvatarIDRegex).Cast<Match>().Select(m => m.Value).ToArray();
 
-                    var textStyle = new GUIStyle();
-
-                    if (avatarIDs.Length > serializedObject.targetObjects.Length)
-                    {
-                        textStyle.normal.textColor = Color.red;
-                    }
-
-                    EditorGUILayout.LabelField("IDs found/Pedestals selected: ", avatarIDs.Length + "/" + serializedObject.targetObjects.Length, textStyle);
+                    EditorGUILayout.LabelField("IDs found/Pedestals selected: ", avatarIDs.Length + "/" + serializedObject.targetObjects.Length, avatarIDs.Length > serializedObject.targetObjects.Length ? Styles.RedText : GUIStyle.none);
 
                     if (GUILayout.Button("Set IDs"))
                     {
