@@ -1509,8 +1509,8 @@ namespace VRWorldToolkit
             //Go trough the lights to check if the scene contains lights set to be baked
             for (int i = 0; i < lights.Length; i++)
             {
-                if (lights[i].lightmapBakeType != LightmapBakeType.Baked &&
-                    lights[i].lightmapBakeType != LightmapBakeType.Mixed) continue;
+                //Skip checking realtime lights
+                if (lights[i].lightmapBakeType == LightmapBakeType.Realtime) continue;
 
                 bakedLighting = true;
 
