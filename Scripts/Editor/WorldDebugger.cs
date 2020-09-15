@@ -85,10 +85,11 @@ namespace VRWorldToolkit
             return _info;
         }
 
+        [Serializable]
         private class SingleMessage
         {
-            public readonly string Variable;
-            public readonly string Variable2;
+            public string Variable;
+            public string Variable2;
             public GameObject[] SelectObjects;
             public System.Action AutoFix;
             public string AssetPath;
@@ -146,11 +147,11 @@ namespace VRWorldToolkit
 
         private class MessageGroup : IEquatable<MessageGroup>
         {
-            public readonly string Message;
-            public readonly string CombinedMessage;
-            public readonly string AdditionalInfo;
+            public string Message;
+            public string CombinedMessage;
+            public string AdditionalInfo;
 
-            public readonly MessageType MessageType;
+            public MessageType MessageType;
 
             public string Documentation;
 
@@ -293,30 +294,47 @@ namespace VRWorldToolkit
             }
         }
 
+        [Serializable]
         private class MessageCategory
         {
-            public readonly List<MessageGroup> MessageGroups = new List<MessageGroup>();
+            [SerializeField] public List<MessageGroup> MessageGroups;
 
-            private readonly Dictionary<int, bool> _expandedGroups = new Dictionary<int, bool>();
+            [SerializeField] private Dictionary<int, bool> _expandedGroups;
 
-            public readonly string ListName;
-            public bool Disabled;
+            public string ListName;
+            public bool Disabled = false;
+
+            public MessageCategory()
+            {
+                MessageGroups = new List<MessageGroup>();
+                _expandedGroups = new Dictionary<int, bool>();
+            }
 
             public MessageCategory(string listName)
             {
+                MessageGroups = new List<MessageGroup>();
+                _expandedGroups = new Dictionary<int, bool>();
+
                 this.ListName = listName;
-                Disabled = false;
             }
 
             public MessageGroup AddMessageGroup(MessageGroup debuggerMessage)
             {
                 MessageGroups.Add(debuggerMessage);
+
                 return debuggerMessage;
             }
 
             public void ClearMessages()
             {
                 MessageGroups.Clear();
+            }
+
+            public bool HasMessages()
+            {
+                if (MessageGroups is null || MessageGroups.Count == 0) return false;
+
+                return true;
             }
 
             public bool IsExpanded(MessageGroup mg)
@@ -339,20 +357,25 @@ namespace VRWorldToolkit
             }
         }
 
+        [Serializable]
         private class MessageCategoryList
         {
-            private readonly List<MessageCategory> _messageCategory = new List<MessageCategory>();
+            public List<MessageCategory> _messageCategory = new List<MessageCategory>();
 
-            public MessageCategory AddMessageCategory(string name)
+            public MessageCategory AddOrGetCategory(string listName)
             {
-                var newMessageCategory = new MessageCategory(name);
-                _messageCategory.Add(newMessageCategory);
-                return newMessageCategory;
-            }
+                var newMessageCategory = new MessageCategory(listName);
 
-            public void AddMessageCategory(MessageCategory category)
-            {
-                _messageCategory.Add(category);
+                var oldMessageCategory = _messageCategory.Find(x => x.ListName == listName);
+
+                if (oldMessageCategory is null)
+                {
+                    _messageCategory.Add(newMessageCategory);
+
+                    return newMessageCategory;
+                }
+
+                return oldMessageCategory;
             }
 
             public void DrawTabSelector()
@@ -408,9 +431,11 @@ namespace VRWorldToolkit
                         var buttonWidth = 80;
                         var buttonHeight = 20;
 
-                        if (group.MessageGroups.Count == 0)
+                        if (!group.HasMessages())
                         {
                             DrawMessage("No messages found for " + group.ListName + ".", MessageType.Info);
+
+                            continue;
                         }
 
                         for (int l = 0; l < group.MessageGroups.Count; l++)
@@ -1811,7 +1836,7 @@ namespace VRWorldToolkit
                     }
                 }
 
-                if (_postProcessing.MessageGroups.Count == 0)
+                if (!_postProcessing.HasMessages())
                 {
                     _postProcessing.AddMessageGroup(new MessageGroup(NoProblemsFoundInPP, MessageType.Info));
                 }
@@ -2042,8 +2067,8 @@ namespace VRWorldToolkit
         private const string WindowsBuildReportPath = "Assets/_LastBuild/LastWindowsBuild.buildreport";
         private const string QuestBuildReportPath = "Assets/_LastBuild/LastQuestBuild.buildreport";
 
-        private static BuildReport BuildReportWindows;
-        private static BuildReport BuildReportQuest;
+        [SerializeField] private BuildReport BuildReportWindows;
+        [SerializeField] private BuildReport BuildReportQuest;
 
         [SerializeField] TreeViewState m_TreeViewState;
         [SerializeField] MultiColumnHeaderState m_MultiColumnHeaderState;
@@ -2137,7 +2162,7 @@ namespace VRWorldToolkit
 
         [NonSerialized] private bool initDone = false;
 
-        private MessageCategoryList _masterList;
+        [SerializeField] private MessageCategoryList _masterList;
 
         private MessageCategory _general;
         private MessageCategory _optimization;
@@ -2151,13 +2176,13 @@ namespace VRWorldToolkit
                 if (_masterList is null)
                     _masterList = new MessageCategoryList();
 
-                _general = _masterList.AddMessageCategory("General");
+                _general = _masterList.AddOrGetCategory("General");
 
-                _optimization = _masterList.AddMessageCategory("Optimization");
+                _optimization = _masterList.AddOrGetCategory("Optimization");
 
-                _lighting = _masterList.AddMessageCategory("Lighting");
+                _lighting = _masterList.AddOrGetCategory("Lighting");
 
-                _postProcessing = _masterList.AddMessageCategory("Post Processing");
+                _postProcessing = _masterList.AddOrGetCategory("Post Processing");
 
                 bool firstInit = m_MultiColumnHeaderState == null;
                 var headerState = BuildReportTreeView.CreateDefaultMultiColumnHeaderState(EditorGUIUtility.currentViewWidth - 121);
