@@ -33,7 +33,6 @@ namespace VRWorldToolkit
 
         private string[] avatarIDs;
 
-
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
@@ -99,17 +98,17 @@ namespace VRWorldToolkit
         {
             if (Vector3.Distance(pedestal.transform.position, Camera.current.transform.position) > 25f) return;
 
-            //Get transform from the pedestal placement value otherwise get transform of the pedestal itself
+            // Get transform from the pedestal placement value otherwise get transform of the pedestal itself
             var pedestalTransform = pedestal.Placement != null ? pedestal.Placement : pedestal.transform;
 
-            //Set gizmo matrix to match the pedestal for proper placement and rotation
+            // Set gizmo matrix to match the pedestal for proper placement and rotation
             Gizmos.matrix = pedestalTransform.localToWorldMatrix;
             Gizmos.color = Color.green;
 
-            //Draw the outer bound of the pedestal
+            // Draw the outer bound of the pedestal
             Gizmos.DrawWireCube(Vector3.up * 1.2f, new Vector3(1f * OuterBound, 1f * OuterBound));
 
-            //Change color to red if showing the front is active and active camera is behind the pedestal
+            // Change color to red if showing the front is active and active camera is behind the pedestal
             var cameraDirection = pedestalTransform.position - Camera.current.transform.position;
 
             var angle = Vector3.Angle(pedestalTransform.forward, cameraDirection);
@@ -119,7 +118,7 @@ namespace VRWorldToolkit
                 Gizmos.color = Color.red;
             }
 
-            //Draw the inner bound of the pedestal
+            // Draw the inner bound of the pedestal
             Gizmos.DrawWireCube(Vector3.up * 1.2f, new Vector3(1f * InnerBound, 1f * InnerBound));
         }
     }
