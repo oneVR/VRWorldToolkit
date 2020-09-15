@@ -350,6 +350,11 @@ namespace VRWorldToolkit
                 return newMessageCategory;
             }
 
+            public void AddMessageCategory(MessageCategory category)
+            {
+                _messageCategory.Add(category);
+            }
+
             public void DrawTabSelector()
             {
                 EditorGUILayout.BeginHorizontal();
@@ -377,22 +382,17 @@ namespace VRWorldToolkit
                 EditorGUILayout.EndHorizontal();
             }
 
+            public bool HasCategories()
+            {
+                if (_messageCategory.Count > 0) return true;
+
+                return false;
+            }
+
             public void ClearCategories()
             {
                 _messageCategory.ForEach(m => m.ClearMessages());
             }
-
-            private static readonly GUIStyle HelpBoxRichText = new GUIStyle("HelpBox")
-            {
-                richText = true
-            };
-
-            private static readonly GUIStyle HelpBoxPadded = new GUIStyle("HelpBox")
-            {
-                margin = new RectOffset(18, 4, 4, 4),
-                alignment = TextAnchor.MiddleLeft,
-                richText = true
-            };
 
             public void DrawMessages()
             {
@@ -667,6 +667,8 @@ namespace VRWorldToolkit
         }
 
         private Vector2 _scrollPos;
+
+        [SerializeField] private int tab;
 
         [MenuItem("VRWorld Toolkit/Open World Debugger", false, 0)]
         public static void ShowWindow()
@@ -1148,26 +1150,9 @@ namespace VRWorldToolkit
             }
         }
 
-        private static MessageCategory _general;
-        private static MessageCategory _optimization;
-        private static MessageCategory _lighting;
-        private static MessageCategory _postProcessing;
-
         private void CheckScene()
         {
             _masterList.ClearCategories();
-
-            if (_general == null)
-                _general = _masterList.AddMessageCategory("General");
-
-            if (_optimization == null)
-                _optimization = _masterList.AddMessageCategory("Optimization");
-
-            if (_lighting == null)
-                _lighting = _masterList.AddMessageCategory("Lighting");
-
-            if (_postProcessing == null)
-                _postProcessing = _masterList.AddMessageCategory("Post Processing");
 
             //General Checks
 
@@ -2044,8 +2029,6 @@ namespace VRWorldToolkit
             }
         }
 
-        private MessageCategoryList _masterList;
-
         private void OnFocus()
         {
             _recheck = true;
@@ -2062,7 +2045,13 @@ namespace VRWorldToolkit
         private static BuildReport BuildReportWindows;
         private static BuildReport BuildReportQuest;
 
-        private static void RefreshBuild()
+        [SerializeField] TreeViewState m_TreeViewState;
+        [SerializeField] MultiColumnHeaderState m_MultiColumnHeaderState;
+
+        private BuildReportTreeView m_TreeView;
+        private SearchField m_SearchField;
+
+        private void RefreshBuild()
         {
             if (!Directory.Exists(BuildReportDir))
                 Directory.CreateDirectory(BuildReportDir);
@@ -2072,26 +2061,12 @@ namespace VRWorldToolkit
                 File.Copy(LastBuild, LastBuildReportPath, true);
                 AssetDatabase.ImportAsset(LastBuildReportPath);
 
-                switch (AssetDatabase.LoadAssetAtPath<BuildReport>(LastBuildReportPath).summary.platform)
-                {
-                    case BuildTarget.StandaloneWindows:
-                    case BuildTarget.StandaloneWindows64:
-                        if (File.GetLastWriteTime(LastBuildReportPath) > File.GetLastWriteTime(WindowsBuildReportPath))
-                        {
-                            AssetDatabase.CopyAsset(LastBuildReportPath, WindowsBuildReportPath);
-                            BuildReportWindows = AssetDatabase.LoadAssetAtPath<BuildReport>(WindowsBuildReportPath);
-                        }
-                        break;
-                    case BuildTarget.Android:
-                        if (File.GetLastWriteTime(LastBuildReportPath) > File.GetLastWriteTime(QuestBuildReportPath))
-                        {
-                            AssetDatabase.CopyAsset(LastBuildReportPath, QuestBuildReportPath);
-                            BuildReportQuest = AssetDatabase.LoadAssetAtPath<BuildReport>(QuestBuildReportPath);
-                        }
-                        break;
-                    default:
-                        break;
-                }
+                CopyNewReport();
+            }
+
+            if (File.Exists(LastBuildReportPath) && !(File.Exists(WindowsBuildReportPath) || File.Exists(QuestBuildReportPath)))
+            {
+                CopyNewReport();
             }
 
             if (BuildReportWindows is null && File.Exists(WindowsBuildReportPath))
@@ -2103,67 +2078,148 @@ namespace VRWorldToolkit
             {
                 BuildReportQuest = AssetDatabase.LoadAssetAtPath<BuildReport>(QuestBuildReportPath);
             }
+
+            void CopyNewReport()
+            {
+                switch (AssetDatabase.LoadAssetAtPath<BuildReport>(LastBuildReportPath).summary.platform)
+                {
+                    case BuildTarget.StandaloneWindows:
+                    case BuildTarget.StandaloneWindows64:
+                        if (File.GetLastWriteTime(LastBuildReportPath) > File.GetLastWriteTime(WindowsBuildReportPath))
+                        {
+                            AssetDatabase.CopyAsset(LastBuildReportPath, WindowsBuildReportPath);
+                            BuildReportWindows = AssetDatabase.LoadAssetAtPath<BuildReport>(WindowsBuildReportPath);
+                            m_TreeView.SetReport(BuildReportWindows);
+                        }
+                        break;
+                    case BuildTarget.Android:
+                        if (File.GetLastWriteTime(LastBuildReportPath) > File.GetLastWriteTime(QuestBuildReportPath))
+                        {
+                            AssetDatabase.CopyAsset(LastBuildReportPath, QuestBuildReportPath);
+                            BuildReportQuest = AssetDatabase.LoadAssetAtPath<BuildReport>(QuestBuildReportPath);
+                            m_TreeView.SetReport(BuildReportQuest);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
+                if (m_TreeView.HasReport()) m_TreeView.Reload();
+            }
         }
 
         private void DrawBuildSummary(BuildReport report)
         {
-            GUIStyle RichText = new GUIStyle()
-            {
-                richText = true
-            };
+            var richText = Styles.RichText;
 
             if (EditorGUIUtility.isProSkin)
             {
-                RichText.normal.textColor = Color.white;
+                richText.normal.textColor = Color.white;
             }
 
             GUILayout.BeginVertical(EditorStyles.helpBox);
 
             if (report != null)
             {
-                GUILayout.Label("<b>Build size:</b> " + EditorUtility.FormatBytes((long)report.summary.totalSize), RichText);
+                GUILayout.Label("<b>Build size:</b> " + EditorUtility.FormatBytes((long)report.summary.totalSize), richText);
 
-                GUILayout.Label("<b>Build done:</b> " + report.summary.buildEndedAt.ToLocalTime(), RichText);
+                GUILayout.Label("<b>Build done:</b> " + report.summary.buildEndedAt.ToLocalTime(), richText);
 
-                GUILayout.Label("<b>Errors during build:</b> " + report.summary.totalErrors.ToString(), RichText);
+                GUILayout.Label("<b>Errors during build:</b> " + report.summary.totalErrors.ToString(), richText);
 
-                GUILayout.Label("<b>Warnings during build:</b> " + report.summary.totalWarnings.ToString(), RichText);
+                GUILayout.Label("<b>Warnings during build:</b> " + report.summary.totalWarnings.ToString(), richText);
+
+                GUILayout.Label("<b>Build result:</b> " + report.summary.result, richText);
             }
 
             GUILayout.EndVertical();
         }
 
-        private void OnGUI()
+        [NonSerialized] private bool initDone = false;
+
+        private MessageCategoryList _masterList;
+
+        private MessageCategory _general;
+        private MessageCategory _optimization;
+        private MessageCategory _lighting;
+        private MessageCategory _postProcessing;
+
+        private void InitWhenNeeded()
         {
-            GUIStyle RichText = new GUIStyle()
+            if (!initDone)
             {
-                richText = true
-            };
+                if (_masterList is null)
+                    _masterList = new MessageCategoryList();
 
-            if (_masterList == null)
-            {
-                _masterList = new MessageCategoryList();
+                _general = _masterList.AddMessageCategory("General");
+
+                _optimization = _masterList.AddMessageCategory("Optimization");
+
+                _lighting = _masterList.AddMessageCategory("Lighting");
+
+                _postProcessing = _masterList.AddMessageCategory("Post Processing");
+
+                bool firstInit = m_MultiColumnHeaderState == null;
+                var headerState = BuildReportTreeView.CreateDefaultMultiColumnHeaderState(EditorGUIUtility.currentViewWidth - 121);
+                if (MultiColumnHeaderState.CanOverwriteSerializedFields(m_MultiColumnHeaderState, headerState))
+                    MultiColumnHeaderState.OverwriteSerializedFields(m_MultiColumnHeaderState, headerState);
+                m_MultiColumnHeaderState = headerState;
+
+                var multiColumnHeader = new MultiColumnHeader(headerState);
+                if (firstInit)
+                    multiColumnHeader.ResizeToFit();
+
+                if (m_TreeViewState is null)
+                    m_TreeViewState = new TreeViewState();
+
+                var report = BuildReportWindows != null ? BuildReportWindows : BuildReportQuest;
+
+                m_TreeView = new BuildReportTreeView(m_TreeViewState, multiColumnHeader, report);
+                m_SearchField = new SearchField();
+                m_SearchField.downOrUpArrowKeyPressed += m_TreeView.SetFocusAndEnsureSelectedItem;
+
+                initDone = true;
             }
+        }
 
+        private void Refresh()
+        {
             if (_recheck)
             {
-#if VRWT_BENCHMARK
-                var watch = System.Diagnostics.Stopwatch.StartNew();
-#endif
                 //Check for bloat in occlusion cache
                 if (_occlusionCacheFiles == 0 && Directory.Exists("Library/Occlusion/"))
                 {
                     var task = Task.Run(CountOcclusionCacheFiles);
                 }
 
-                _recheck = false;
+#if VRWT_BENCHMARK
+                var watch = System.Diagnostics.Stopwatch.StartNew();
+#endif
                 CheckScene();
-                RefreshBuild();
 #if VRWT_BENCHMARK
                 watch.Stop();
                 Debug.Log("Scene checked in: " + watch.ElapsedMilliseconds + " ms.");
 #endif
+
+                _recheck = false;
             }
+        }
+
+        enum BuildReportType
+        {
+            Windows = 0,
+            Quest = 1
+        }
+        private string[] buildReportToolbar = { "Windows", "Quest" };
+
+        [SerializeField] int selectedBuildReport = 0;
+        [SerializeField] bool overallStatsFoldout = false;
+
+        private void OnGUI()
+        {
+            RefreshBuild();
+            InitWhenNeeded();
+            Refresh();
 
             GUILayout.BeginHorizontal();
 
@@ -2192,15 +2248,99 @@ namespace VRWorldToolkit
 
             EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
 
-            _masterList.DrawTabSelector();
+            tab = GUILayout.Toolbar(tab, new string[] { "Messages", "Build Report" });
 
-            EditorGUILayout.BeginHorizontal();
-            _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
+            switch (tab)
+            {
+                case 0:
+                    _masterList.DrawTabSelector();
 
-            _masterList.DrawMessages();
+                    EditorGUILayout.BeginVertical();
+                    _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
 
-            EditorGUILayout.EndScrollView();
-            EditorGUILayout.EndHorizontal();
+                    _masterList.DrawMessages();
+
+                    EditorGUILayout.EndScrollView();
+                    EditorGUILayout.EndVertical();
+                    break;
+                case 1:
+                    GUILayout.BeginVertical();
+
+                    GUILayout.BeginHorizontal(EditorStyles.toolbar);
+
+                    if (BuildReportWindows != null && BuildReportQuest != null)
+                    {
+                        EditorGUI.BeginChangeCheck();
+
+                        selectedBuildReport = GUILayout.Toolbar(selectedBuildReport, buildReportToolbar, EditorStyles.toolbarButton);
+
+                        if (EditorGUI.EndChangeCheck())
+                        {
+                            switch ((BuildReportType)selectedBuildReport)
+                            {
+                                case BuildReportType.Windows:
+                                    m_TreeView.SetReport(BuildReportWindows);
+                                    break;
+                                case BuildReportType.Quest:
+                                    m_TreeView.SetReport(BuildReportQuest);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+
+                        GUILayout.Space(10);
+                    }
+
+                    overallStatsFoldout = GUILayout.Toggle(overallStatsFoldout, "Stats", EditorStyles.toolbarButton);
+
+                    if (GUILayout.Button("Refresh", EditorStyles.toolbarButton))
+                    {
+                        if (m_TreeView.HasReport())
+                        {
+                            m_TreeView.Reload();
+                        }
+                        else
+                        {
+                            if (BuildReportWindows != null)
+                            {
+                                m_TreeView.SetReport(BuildReportWindows);
+                            }
+                            else if (BuildReportQuest != null)
+                            {
+                                m_TreeView.SetReport(BuildReportQuest);
+                            }
+                        }
+                    }
+
+                    GUILayout.Space(10);
+
+                    GUILayout.FlexibleSpace();
+
+                    m_TreeView.searchString = m_SearchField.OnToolbarGUI(m_TreeView.searchString);
+                    GUILayout.EndHorizontal();
+
+                    GUILayout.EndVertical();
+
+                    if (overallStatsFoldout)
+                    {
+                        m_TreeView.DrawOverallStats();
+                    }
+
+                    EditorGUILayout.BeginVertical();
+
+                    Rect rect = GUILayoutUtility.GetRect(0, 100000, 0, 100000);
+
+                    if (m_TreeView.HasReport())
+                    {
+                        m_TreeView.OnGUI(rect);
+                    }
+
+                    EditorGUILayout.EndVertical();
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void OnInspectorUpdate()
