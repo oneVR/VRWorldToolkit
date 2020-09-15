@@ -8,7 +8,8 @@ namespace VRWorldToolkit.DataStructures
         public static GUIStyle HelpBoxPadded { get; internal set; }
         public static GUIStyle RichText { get; internal set; }
         public static GUIStyle RichTextWrap { get; internal set; }
-        public static GUIStyle RedText { get; internal set; }
+        public static GUIStyle RedLabel { get; internal set; }
+        public static GUIStyle WhiteLabel { get; internal set; }
 
         static Styles()
         {
@@ -40,8 +41,8 @@ namespace VRWorldToolkit.DataStructures
                 wordWrap = true
             };
 
-            RedText = new GUIStyle { };
-            RedText.normal.textColor = Color.red;
+            RedLabel = new GUIStyle { };
+            RedLabel.normal.textColor = Color.red;
         }
     }
 }

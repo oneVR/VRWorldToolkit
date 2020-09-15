@@ -53,7 +53,7 @@ namespace VRWorldToolkit
 
                     avatarIDs = Regex.Matches(avatarIDArea, AvatarIDRegex).Cast<Match>().Select(m => m.Value).ToArray();
 
-                    EditorGUILayout.LabelField("IDs found/Pedestals selected: ", avatarIDs.Length + "/" + serializedObject.targetObjects.Length, avatarIDs.Length > serializedObject.targetObjects.Length ? Styles.RedText : GUIStyle.none);
+                    EditorGUILayout.LabelField("IDs found/Pedestals selected: ", avatarIDs.Length + "/" + serializedObject.targetObjects.Length, avatarIDs.Length > serializedObject.targetObjects.Length ? Styles.RedLabel : GUIStyle.none);
 
                     if (GUILayout.Button("Set IDs"))
                     {
