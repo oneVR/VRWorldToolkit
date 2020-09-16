@@ -165,7 +165,10 @@ namespace VRWorldToolkit
             this.report = report;
 
             // Reload the treeview
-            base.Reload();
+            if (HasReport())
+            {
+                base.Reload();
+            }
         }
 
         /// <summary>

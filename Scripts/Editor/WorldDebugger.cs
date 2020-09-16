@@ -2085,26 +2085,9 @@ namespace VRWorldToolkit
             {
                 File.Copy(LastBuild, LastBuildReportPath, true);
                 AssetDatabase.ImportAsset(LastBuildReportPath);
-
-                CopyNewReport();
             }
 
             if (File.Exists(LastBuildReportPath) && !(File.Exists(WindowsBuildReportPath) || File.Exists(QuestBuildReportPath)))
-            {
-                CopyNewReport();
-            }
-
-            if (BuildReportWindows is null && File.Exists(WindowsBuildReportPath))
-            {
-                BuildReportWindows = AssetDatabase.LoadAssetAtPath<BuildReport>(WindowsBuildReportPath);
-            }
-
-            if (BuildReportQuest is null && File.Exists(QuestBuildReportPath))
-            {
-                BuildReportQuest = AssetDatabase.LoadAssetAtPath<BuildReport>(QuestBuildReportPath);
-            }
-
-            void CopyNewReport()
             {
                 switch (AssetDatabase.LoadAssetAtPath<BuildReport>(LastBuildReportPath).summary.platform)
                 {
@@ -2113,23 +2096,39 @@ namespace VRWorldToolkit
                         if (File.GetLastWriteTime(LastBuildReportPath) > File.GetLastWriteTime(WindowsBuildReportPath))
                         {
                             AssetDatabase.CopyAsset(LastBuildReportPath, WindowsBuildReportPath);
-                            BuildReportWindows = AssetDatabase.LoadAssetAtPath<BuildReport>(WindowsBuildReportPath);
-                            m_TreeView.SetReport(BuildReportWindows);
                         }
                         break;
                     case BuildTarget.Android:
                         if (File.GetLastWriteTime(LastBuildReportPath) > File.GetLastWriteTime(QuestBuildReportPath))
                         {
                             AssetDatabase.CopyAsset(LastBuildReportPath, QuestBuildReportPath);
-                            BuildReportQuest = AssetDatabase.LoadAssetAtPath<BuildReport>(QuestBuildReportPath);
-                            m_TreeView.SetReport(BuildReportQuest);
                         }
                         break;
                     default:
                         break;
                 }
+            }
 
-                if (m_TreeView.HasReport()) m_TreeView.Reload();
+            if (BuildReportWindows is null && File.Exists(WindowsBuildReportPath))
+            {
+                BuildReportWindows = (BuildReport)AssetDatabase.LoadAssetAtPath(WindowsBuildReportPath, typeof(BuildReport));
+            }
+
+            if (BuildReportQuest is null && File.Exists(QuestBuildReportPath))
+            {
+                BuildReportQuest = (BuildReport)AssetDatabase.LoadAssetAtPath(QuestBuildReportPath, typeof(BuildReport));
+            }
+
+            if (!m_TreeView.HasReport())
+            {
+                if (BuildReportWindows != null)
+                {
+                    m_TreeView.SetReport(BuildReportWindows);
+                }
+                else if (BuildReportQuest != null)
+                {
+                    m_TreeView.SetReport(BuildReportWindows);
+                }
             }
         }
 
@@ -2195,7 +2194,9 @@ namespace VRWorldToolkit
                     multiColumnHeader.ResizeToFit();
 
                 if (m_TreeViewState is null)
+                {
                     m_TreeViewState = new TreeViewState();
+                }
 
                 var report = BuildReportWindows != null ? BuildReportWindows : BuildReportQuest;
 
@@ -2242,8 +2243,8 @@ namespace VRWorldToolkit
 
         private void OnGUI()
         {
-            RefreshBuild();
             InitWhenNeeded();
+            RefreshBuild();
             Refresh();
 
             GUILayout.BeginHorizontal();
