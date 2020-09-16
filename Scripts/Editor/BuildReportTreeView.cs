@@ -227,7 +227,7 @@ namespace VRWorldToolkit
                         case "Asset":
                         case "TrueTypeFont":
                         case "Plugin":
-                        case "Prefabs":
+                        case "Prefab":
                             name = item.name + "s";
                             break;
                         default:
