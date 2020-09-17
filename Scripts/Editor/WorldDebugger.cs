@@ -1159,7 +1159,7 @@ namespace VRWorldToolkit
         private const string DisabledPortalsWarning = "Portal \"{0}\" disabled by default.";
         private const string DisabledPortalsWarningCombined = "Found {0} portals disabled by default.";
         private const string DisabledPortalsWarningInfo = "Having a portal disabled by default will cause players entering to end up in different instances.";
-        private const string SHDirectionalModeBakeryError = "SH directional mode detected in Bakery. Using SH directional mode isn't supported in VRChat by default. It requires the usage of VRC Bakery Adapter by Merlin for it to function in-game.";
+        private const string SHRNMDirectionalModeBakeryError = "SH or RNM directional mode detected in Bakery. Using SH directional mode isn't supported in VRChat by default. It requires the usage of VRC Bakery Adapter by Merlin for it to function in-game.";
         #endregion
 
         private static long _occlusionCacheFiles = 0;
@@ -1456,14 +1456,19 @@ namespace VRWorldToolkit
 
             var bakerySettings = ftRenderLightmap.FindRenderSettingsStorage();
 
-            if ((ftRenderLightmap.RenderDirMode)bakerySettings.renderSettingsRenderDirMode == ftRenderLightmap.RenderDirMode.SH)
+            switch ((ftRenderLightmap.RenderDirMode)bakerySettings.renderSettingsRenderDirMode)
             {
-                string className = "Merlin.VRCBakeryAdapter";
+                case ftRenderLightmap.RenderDirMode.RNM:
+                case ftRenderLightmap.RenderDirMode.SH:
+                    string className = "Merlin.VRCBakeryAdapter";
 
-                if (Helper.GetTypeFromName(className) is null)
-                {
-                    _lighting.AddMessageGroup(new MessageGroup(SHDirectionalModeBakeryError, MessageType.Error).SetDocumentation("https://github.com/Merlin-san/VRC-Bakery-Adapter"));
-                }
+                    if (Helper.GetTypeFromName(className) is null)
+                    {
+                        _lighting.AddMessageGroup(new MessageGroup(SHRNMDirectionalModeBakeryError, MessageType.Error).SetDocumentation("https://github.com/Merlin-san/VRC-Bakery-Adapter"));
+                    }
+                    break;
+                default:
+                    break;
             }
 
             if (bakeryLights.Count > 0)
