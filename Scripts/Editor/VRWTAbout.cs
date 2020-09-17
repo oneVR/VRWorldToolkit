@@ -52,9 +52,9 @@ namespace VRWorldToolkit
             // Information Texts
             GUILayout.Label("Welcome to VRWorld Toolkit!", EditorStyles.boldLabel);
 
-            GUILayout.Label("VRWorld Toolkit is an project aimed at helping people get into world building faster without having to spent time on combing different documentations for all the smaller mistakes you can make while making your first world. Even for experienced world builders it helps make tedious steps like setting up post processing faster and helps you not forget the dozen little things you need to remember while building worlds.", Text);
+            GUILayout.Label("VRWorld Toolkit is a project aimed at helping people get into world building faster without spending time combing different documentations for all the smaller mistakes you can make while making your first world. Even for experienced world builders, it helps make tedious steps like setting up post-processing faster and allows you not to forget the dozen little things you need to remember while building worlds.", Text);
 
-            GUILayout.Label("If you have suggestions, found problems with the included tools or just want to check my social channels you can click on the buttons below. Feedback is always welcome so I know what to improve!", Text);
+            GUILayout.Label("If you have suggestions, found problems with the included tools, or want to check my social channels, you can click on the buttons below. Feedback is always welcome, so I know what to improve!", Text);
 
             GUILayout.FlexibleSpace();
 
