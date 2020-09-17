@@ -41,7 +41,7 @@ namespace VRWorldToolkit
             IconDiscord = Resources.Load("SplashTextures/IconDiscord") as Texture2D;
             IconGithub = Resources.Load("SplashTextures/IconGithub") as Texture2D;
             IconPatreon = Resources.Load("SplashTextures/IconPatreon") as Texture2D;
-            IconKofi = Resources.Load("SplashTextures/IconKoFi") as Texture2D;
+            IconKofi = Resources.Load("SplashTextures/IconKofi") as Texture2D;
         }
 
         private void OnGUI()
