@@ -3,12 +3,12 @@ using UnityEngine;
 
 namespace VRWorldToolkit
 {
-    public class VRWT_About : EditorWindow
+    public class VRWTAbout : EditorWindow
     {
         [MenuItem("VRWorld Toolkit/About VRWorld Toolkit", false, 100)]
         public static void ShowWindow()
         {
-            var window = (VRWT_About)GetWindow(typeof(VRWT_About), true, "VRWorld Toolkit");
+            var window = (VRWTAbout)GetWindow(typeof(VRWTAbout), true, "VRWorld Toolkit");
             window.minSize = new Vector2(600, 380);
             window.maxSize = new Vector2(600, 380);
             window.Show();
@@ -54,7 +54,7 @@ namespace VRWorldToolkit
 
             GUILayout.Label("VRWorld Toolkit is an project aimed at helping people get into world building faster without having to spent time on combing different documentations for all the smaller mistakes you can make while making your first world. Even for experienced world builders it helps make tedious steps like setting up post processing faster and helps you not forget the dozen little things you need to remember while building worlds.", Text);
 
-            GUILayout.Label("Once imported you can find all the different menus under <b>VRWorld Toolkit</b> from the menu bar. If you have suggestions, found problems with the included tools or just want to check my socials click on the buttons below.", Text);
+            GUILayout.Label("If you have suggestions, found problems with the included tools or just want to check my social channels you can click on the buttons below. Feedback is always welcome so I know what to improve!", Text);
 
             GUILayout.FlexibleSpace();
 
