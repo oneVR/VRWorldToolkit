@@ -3,13 +3,14 @@
 // https://github.com/CyanLaser/VRCSDKClientStub
 // Add this to your project to prevent sdk components throwing null references in playmode
 // https://feedback.vrchat.com/sdk-bug-reports/p/vrctrigger-emits-an-error-log-on-editor
+// Included in VRWorld Toolkit with permission from CyanLaser and slightly edited to avoid conflicts
 
 #if VRC_SDK_VRCSDK2
 using System;
 using UnityEngine;
 using VRC.SDKBase;
 
-namespace VRCPrefabs.ClientStub
+namespace VRWorldToolkit.ClientStub
 {
     public class VRCSDKClientStub
     {
