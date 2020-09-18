@@ -106,7 +106,6 @@ namespace VRWorldToolkit
                 type = a.GetType(typeName);
                 if (type != null)
                 {
-                    Debug.Log(a);
                     return type;
                 }
             }
