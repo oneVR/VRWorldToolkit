@@ -81,11 +81,12 @@ namespace VRWorldToolkit
             if (t.TotalMinutes > 1)
             {
                 formattedTime = String.Concat(formattedTime, t.Minutes + " minutes ");
-            } else
+            }
+            else
             {
                 formattedTime = String.Concat(formattedTime, t.Seconds + " seconds");
             }
-            
+
             return formattedTime;
         }
 
