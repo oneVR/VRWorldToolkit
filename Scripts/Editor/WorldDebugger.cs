@@ -26,6 +26,7 @@ using UnityEngine.SceneManagement;
 using System.Text.RegularExpressions;
 using UnityEditor.IMGUI.Controls;
 using VRWorldToolkit.DataStructures;
+using Microsoft.Win32;
 
 #if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
 namespace VRWorldToolkit
@@ -1016,6 +1017,26 @@ namespace VRWorldToolkit
             };
         }
 
+        public static System.Action SetVRCInstallPath()
+        {
+            return () =>
+            {
+                var clientPath = Helper.GetVRCExecutablePath();
+
+                SDKClientUtilities.GetSavedVRCInstallPath();
+
+                if (clientPath != null)
+                {
+                    SDKClientUtilities.SetVRCInstallPath(clientPath);
+                }
+                else
+                {
+                    EditorUtility.DisplayDialog("VRChat Executable Path Not Found", "Could not find the VRChat executable path automatically you can set it manually from the VRCSDK Settings page.", "Ok");
+                }
+
+            };
+        }
+
 #if UNITY_POST_PROCESSING_STACK_V2
         public enum RemovePPEffect
         {
@@ -1160,6 +1181,8 @@ namespace VRWorldToolkit
         private const string DisabledPortalsWarningCombined = "Found {0} portals disabled by default.";
         private const string DisabledPortalsWarningInfo = "Having a portal disabled by default will cause players entering to end up in different instances.";
         private const string SHRNMDirectionalModeBakeryError = "SH or RNM directional mode detected in Bakery. Using SH directional mode isn't supported in VRChat by default. It requires the usage of VRC Bakery Adapter by Merlin for it to function in-game.";
+        private const string BuildAndTestBrokenError = "VRChat link association has not been set up, and the VRChat client path has not been set in the VRCSDK settings. Which causes Build & Test not to function.";
+        private const string BuildAndTestForceNonVRError = "VRChat client path has not been set to point directly to the VRChat executable in the VRCSDK settings. This will cause Force Non-VR setting for Build & Test not to work.";
         #endregion
 
         private static long _occlusionCacheFiles = 0;
@@ -1241,6 +1264,19 @@ namespace VRWorldToolkit
             if (ConsoleFlagUtil.GetConsoleErrorPause())
             {
                 _general.AddMessageGroup(new MessageGroup(ErrorPauseWarning, MessageType.Error).AddSingleMessage(new SingleMessage(SetErrorPause(false))));
+            }
+
+            //Check for problems with Build & Test
+            if (SDKClientUtilities.GetSavedVRCInstallPath() == "\\VRChat.exe" || SDKClientUtilities.GetSavedVRCInstallPath() == "")
+            {
+                if (Registry.ClassesRoot.OpenSubKey(@"VRChat\shell\open\command") is null)
+                {
+                    _general.AddMessageGroup(new MessageGroup(BuildAndTestBrokenError, MessageType.Error).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
+                }
+                else
+                {
+                    _general.AddMessageGroup(new MessageGroup(BuildAndTestForceNonVRError, MessageType.Warning).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
+                }
             }
 
             //Get spawn points for any possible problems

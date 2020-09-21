@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace VRWorldToolkit
@@ -110,6 +113,48 @@ namespace VRWorldToolkit
                     return type;
                 }
             }
+            return null;
+        }
+
+        public static string GetVRCExecutablePath()
+        {
+            RegistryKey steamKey = Registry.LocalMachine.OpenSubKey("Software\\Valve\\Steam") ?? Registry.LocalMachine.OpenSubKey("Software\\Wow6432Node\\Valve\\Steam");
+
+            string commonPath = "\\SteamApps\\common";
+            string executablePath = "\\VRChat.exe";
+
+            var steamPath = (string)steamKey.GetValue("InstallPath");
+
+            var configFile = Path.Combine(steamPath, "config", "config.vdf");
+
+            Regex regex = new Regex("(?<=BaseInstallFolder.*\".+?\").+?(?=\")");
+
+            List<string> folders = new List<string>();
+
+            folders.Add(steamPath + commonPath);
+
+            string configText = File.ReadAllText(configFile);
+
+            folders.AddRange(Regex.Matches(configText, "(?<=BaseInstallFolder.*\".+?\").+?(?=\")").Cast<Match>().Select(x => x.Value + commonPath));
+
+            foreach (var folder in folders)
+            {
+                try
+                {
+                    var matches = Directory.GetDirectories(folder, "VRChat");
+                    if (matches.Length >= 1)
+                    {
+                        string finalPath = matches[0] + executablePath;
+
+                        if (File.Exists(finalPath)) return finalPath;
+                    }
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    continue;
+                }
+            }
+
             return null;
         }
     }
