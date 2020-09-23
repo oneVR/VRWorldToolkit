@@ -116,42 +116,45 @@ namespace VRWorldToolkit
             return null;
         }
 
-        public static string GetVRCExecutablePath()
+        public static string GetSteamVRCExecutablePath()
         {
             RegistryKey steamKey = Registry.LocalMachine.OpenSubKey("Software\\Valve\\Steam") ?? Registry.LocalMachine.OpenSubKey("Software\\Wow6432Node\\Valve\\Steam");
 
-            string commonPath = "\\SteamApps\\common";
-            string executablePath = "\\VRChat.exe";
-
-            var steamPath = (string)steamKey.GetValue("InstallPath");
-
-            var configFile = Path.Combine(steamPath, "config", "config.vdf");
-
-            Regex regex = new Regex("(?<=BaseInstallFolder.*\".+?\").+?(?=\")");
-
-            List<string> folders = new List<string>();
-
-            folders.Add(steamPath + commonPath);
-
-            string configText = File.ReadAllText(configFile);
-
-            folders.AddRange(Regex.Matches(configText, "(?<=BaseInstallFolder.*\".+?\").+?(?=\")").Cast<Match>().Select(x => x.Value + commonPath));
-
-            foreach (var folder in folders)
+            if (steamKey != null)
             {
-                try
-                {
-                    var matches = Directory.GetDirectories(folder, "VRChat");
-                    if (matches.Length >= 1)
-                    {
-                        string finalPath = matches[0] + executablePath;
+                string commonPath = "\\SteamApps\\common";
+                string executablePath = "\\VRChat.exe";
 
-                        if (File.Exists(finalPath)) return finalPath;
-                    }
-                }
-                catch (DirectoryNotFoundException)
+                var steamPath = (string)steamKey.GetValue("InstallPath");
+
+                var configFile = Path.Combine(steamPath, "config", "config.vdf");
+
+                Regex regex = new Regex("(?<=BaseInstallFolder.*\".+?\").+?(?=\")");
+
+                List<string> folders = new List<string>();
+
+                folders.Add(steamPath + commonPath);
+
+                string configText = File.ReadAllText(configFile);
+
+                folders.AddRange(Regex.Matches(configText, "(?<=BaseInstallFolder.*\".+?\").+?(?=\")").Cast<Match>().Select(x => x.Value + commonPath));
+
+                foreach (var folder in folders)
                 {
-                    continue;
+                    try
+                    {
+                        var matches = Directory.GetDirectories(folder, "VRChat");
+                        if (matches.Length >= 1)
+                        {
+                            string finalPath = matches[0] + executablePath;
+
+                            if (File.Exists(finalPath)) return finalPath;
+                        }
+                    }
+                    catch (DirectoryNotFoundException)
+                    {
+                        continue;
+                    }
                 }
             }
 

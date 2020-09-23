@@ -1021,7 +1021,7 @@ namespace VRWorldToolkit
         {
             return () =>
             {
-                var clientPath = Helper.GetVRCExecutablePath();
+                var clientPath = Helper.GetSteamVRCExecutablePath();
 
                 SDKClientUtilities.GetSavedVRCInstallPath();
 
@@ -1033,7 +1033,6 @@ namespace VRWorldToolkit
                 {
                     EditorUtility.DisplayDialog("VRChat Executable Path Not Found", "Could not find the VRChat executable path automatically you can set it manually from the VRCSDK Settings page.", "Ok");
                 }
-
             };
         }
 
