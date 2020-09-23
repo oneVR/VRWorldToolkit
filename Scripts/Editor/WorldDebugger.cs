@@ -2127,7 +2127,7 @@ namespace VRWorldToolkit
                 AssetDatabase.ImportAsset(LastBuildReportPath);
             }
 
-            if (File.Exists(LastBuildReportPath) && !(File.Exists(WindowsBuildReportPath) || File.Exists(QuestBuildReportPath)))
+            if (File.Exists(LastBuildReportPath) && (!File.Exists(WindowsBuildReportPath) || !File.Exists(QuestBuildReportPath)))
             {
                 switch (AssetDatabase.LoadAssetAtPath<BuildReport>(LastBuildReportPath).summary.platform)
                 {
@@ -2136,12 +2136,14 @@ namespace VRWorldToolkit
                         if (File.GetLastWriteTime(LastBuildReportPath) > File.GetLastWriteTime(WindowsBuildReportPath))
                         {
                             AssetDatabase.CopyAsset(LastBuildReportPath, WindowsBuildReportPath);
+                            BuildReportWindows = (BuildReport)AssetDatabase.LoadAssetAtPath(WindowsBuildReportPath, typeof(BuildReport));
                         }
                         break;
                     case BuildTarget.Android:
                         if (File.GetLastWriteTime(LastBuildReportPath) > File.GetLastWriteTime(QuestBuildReportPath))
                         {
                             AssetDatabase.CopyAsset(LastBuildReportPath, QuestBuildReportPath);
+                            BuildReportQuest = (BuildReport)AssetDatabase.LoadAssetAtPath(QuestBuildReportPath, typeof(BuildReport));
                         }
                         break;
                     default:
@@ -2238,6 +2240,16 @@ namespace VRWorldToolkit
                     m_TreeViewState = new TreeViewState();
                 }
 
+                if (BuildReportWindows is null && File.Exists(WindowsBuildReportPath))
+                {
+                    BuildReportWindows = (BuildReport)AssetDatabase.LoadAssetAtPath(WindowsBuildReportPath, typeof(BuildReport));
+                }
+
+                if (BuildReportQuest is null && File.Exists(QuestBuildReportPath))
+                {
+                    BuildReportQuest = (BuildReport)AssetDatabase.LoadAssetAtPath(QuestBuildReportPath, typeof(BuildReport));
+                }
+
                 var report = BuildReportWindows != null ? BuildReportWindows : BuildReportQuest;
 
                 m_TreeView = new BuildReportTreeView(m_TreeViewState, multiColumnHeader, report);
@@ -2252,6 +2264,8 @@ namespace VRWorldToolkit
         {
             if (_recheck)
             {
+                RefreshBuild();
+
                 //Check for bloat in occlusion cache
                 if (_occlusionCacheFiles == 0 && Directory.Exists("Library/Occlusion/"))
                 {
@@ -2284,7 +2298,6 @@ namespace VRWorldToolkit
         private void OnGUI()
         {
             InitWhenNeeded();
-            RefreshBuild();
             Refresh();
 
             GUILayout.BeginHorizontal();
