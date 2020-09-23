@@ -1107,7 +1107,7 @@ namespace VRWorldToolkit
         private const string DisabledOcclusionAreasCombined = "Occlusion Areas found with Is View Volume disabled.";
         private const string DisabledOcclusionAreasInfo = "Without this enabled, the Occlusion Area does not get used for the occlusion bake.";
         private const string NoOcclusionCulling = "The current scene does not have baked Occlusion Culling. Occlusion culling gives you a lot more performance in your world, especially in larger worlds with multiple rooms or areas.";
-        private const string OcclusionCullingCacheWarning = "Current projects occlusion culling cache has {0} files. When the occlusion culling cache grows too big, baking occlusion culling can take much longer than intended. It can be cleared with no negative effects.";
+        private const string OcclusionCullingCacheWarning = "The current project's occlusion culling cache has {0} files. When the occlusion culling cache grows too big, baking occlusion culling can take much longer than intended. It can be cleared with no adverse effects.";
         private const string ActiveCameraOutputtingToRenderTexture = "The current scene has an active camera \"{0}\" outputting to a render texture.";
         private const string CombinedActiveCamerasOutputtingToRenderTextures = "The current scene has {0} active cameras outputting to render textures.";
         private const string ActiveCamerasOutputtingToRenderTextureInfo = "This will affect performance negatively by causing more draw calls to happen. Ideally, you would only have them enabled when needed.";
@@ -1120,7 +1120,7 @@ namespace VRWorldToolkit
         private const string NoLightmapUV = "Model found in the scene \"{0}\" is set to be lightmapped but doesn't have Lightmap UVs.";
         private const string CombineNoLightmapUV = "The current scene has {0} models set to be lightmapped that don't have Lightmap UVs.";
         private const string NoLightmapUVInfo = "This causes issues when baking lighting. You can enable generating Lightmap UV's in the model's import settings.";
-        private const string LightsNotBaked = "Current scenes lighting is not baked. Consider baking your lights for improved performance.";
+        private const string LightsNotBaked = "The current scene is using real-time lighting. Consider baked lighting for improved performance.";
         private const string ConsiderLargerLightmaps = "Consider increasing your Lightmap Size from {0} to 4096. This allows for more stuff to fit on a single lightmap, leaving fewer textures that need to be sampled.";
         private const string ConsiderSmallerLightmaps = "Baking lightmaps at 4096 with Progressive GPU will silently fall back to CPU Progressive because it needs more than 12GB GPU Memory to be able to bake with GPU Progressive.";
         private const string NonBakedBakedLights = "The light {0} is set to be baked/mixed, but it hasn't been baked yet!";
@@ -1136,11 +1136,11 @@ namespace VRWorldToolkit
         private const string OverlappingLightProbesInfo = "These can cause a slowdown in the editor and will not get baked because Unity will skip any extra overlapping probes.";
         private const string NoReflectionProbes = "The current scene has no active reflection probes. Reflection probes are needed to have proper reflections on reflective materials.";
         private const string ReflectionProbesSomeUnbaked = "The reflection probe \"{0}\" is unbaked.";
-        private const string CombinedReflectionProbesSomeUnbaked = "Current scene has {0} unbaked reflection probes.";
-        private const string ReflectionProbeCountText = "Current scene has {0} unbaked reflection probes.";
+        private const string CombinedReflectionProbesSomeUnbaked = "The current scene has {0} unbaked reflection probes.";
+        private const string ReflectionProbeCountText = "The current scene has {0} baked reflection probes.";
         private const string PostProcessingImportedButNotSetup = "The current project has Post Processing imported, but you haven't set it up yet.";
         private const string PostProcessingDisabledInSceneView = "Post-processing is disabled in the scene view. You won't be able to preview any post-processing effects without enabling it first.";
-        private const string NoReferenceCameraSet = "Current scenes Scene Descriptor has no Reference Camera set. Without a Reference Camera set, you won't be able to see Post Processing in-game.";
+        private const string NoReferenceCameraSet = "The current scenes Scene Descriptor has no Reference Camera set. Without a Reference Camera set, you will not be able to see Post Processing in-game.";
         private const string NoPostProcessingVolumes = "No enabled Post Processing Volumes were found in the scene. A Post Processing Volume is needed to apply effects to the camera's Post Processing Layer.";
         private const string ReferenceCameraNoPostProcessingLayer = "Your Reference Camera doesn't have a Post Processing Layer on it. A Post Processing Layer is needed for the Post Processing Volume to affect the camera.";
         private const string VolumeBlendingLayerNotSet = "You don't have a Volume Blending Layer set in your Post Process Layer, so post-processing won't work. Using the Water or PostProcessing layer is recommended.";
