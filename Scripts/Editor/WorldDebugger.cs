@@ -1079,7 +1079,7 @@ namespace VRWorldToolkit
         #region Texts
         private const string NoSceneDescriptor = "The current scene has no Scene Descriptor. Please add one, or drag the VRCWorld prefab to the scene.";
 
-        private const string TooManySceneDescriptors = "Multiple Scene Descriptors were found. You can only have one Scene Descriptor in a single scene.";
+        private const string TooManySceneDescriptors = "Multiple Scene Descriptors were found. Only one scene descriptor can exist in a single scene.";
 
         private const string TooManyPipelineManagers = "The current scene has multiple Pipeline Managers in it. This can break the world upload process and cause you not to be able to load into the world.";
 
@@ -1095,22 +1095,22 @@ namespace VRWorldToolkit
 
         private const string NoColliderUnderSpawn = "Spawn point \"{0}\" does not have anything underneath it. Spawning into a world with nothing to stand on will cause the players to fall forever.";
 
-        private const string NoPlayerMods = "No Player Mods found in the scene. Player mods are needed for adding jumping and changing walking speed.";
+        private const string NoPlayerMods = "No Player Mods were found in the scene. Player mods are needed for adding jumping and changing walking speed.";
 
         private const string TriggerTriggerNoCollider = "You have an OnEnterTrigger or OnExitTrigger Trigger \"{0}\" that does not have a Collider on it.";
         private const string ColliderTriggerNoCollider = "You have an OnEnterCollider or OnExitCollider Trigger \"{0}\" that does not have a Collider on it.";
 
         private const string TriggerTriggerWrongLayer = "You have an OnEnterTrigger or OnExitTrigger Trigger \"{0}\" that is not on the MirrorReflection layer.";
         private const string TriggerTriggerWrongLayerCombined = "You have {0} OnEnterTrigger or OnExitTrigger Triggers that are not on the MirrorReflection layer.";
-        private const string TriggerTriggerWrongLayerInfo = "This can stop raycasts from working properly, which can make you unable to interact with objects and UI Buttons.";
+        private const string TriggerTriggerWrongLayerInfo = "This can stop raycasts from working correctly, making you unable to interact with objects and UI Buttons.";
 
         private const string MirrorOnByDefault = "The mirror \"{0}\" is on by default.";
         private const string MirrorOnByDefaultCombined = "The scene has {0} mirrors on by default.";
-        private const string MirrorOnByDefaultInfo = "This is an awful practice, and you should disable any mirrors in your world by default.";
+        private const string MirrorOnByDefaultInfo = "This is an awful practice. Any mirrors in worlds should be disabled by default.";
 
         private const string MirrorWithDefaultLayers = "The mirror \"{0}\" has the default Reflect Layers set.";
         private const string MirrorWithDefaultLayersCombined = "You have {0} mirrors that have the default Reflect Layers set.";
-        private const string MirrorWithDefaultLayersInfo = "Only having the layers you need to have enabled in mirrors can save a lot of frames, especially in populated instances.";
+        private const string MirrorWithDefaultLayersInfo = "Only having the layers needed to have enabled in mirrors can save a lot of frames, especially in populated instances.";
 
         private const string LegacyBlendShapeIssues = "Skinned mesh renderer found with model {0} ({1}) without Legacy Blend Shape Normals enabled.";
         private const string LegacyBlendShapeIssuesCombined = "Found {0} models without Legacy Blend Shape Normals enabled.";
@@ -1124,52 +1124,52 @@ namespace VRWorldToolkit
         private const string DisabledOcclusionAreaCombined = "Occlusion Areas found with Is View Volume disabled.";
         private const string DisabledOcclusionAreaInfo = "Without this enabled, the Occlusion Area does not get used for the occlusion bake.";
 
-        private const string NoOcclusionCulling = "The current scene does not have baked Occlusion Culling. Occlusion culling gives you a lot more performance in your world, especially in larger worlds with multiple rooms or areas.";
+        private const string NoOcclusionCulling = "The current scene does not have baked Occlusion Culling. Occlusion culling gives a lot more performance for the world, especially in more massive worlds with multiple rooms or areas.";
 
         private const string OcclusionCullingCacheWarning = "The current project's occlusion culling cache has {0} files. When the occlusion culling cache grows too big, baking occlusion culling can take much longer than intended. It can be cleared with no adverse effects.";
 
         private const string ActiveCameraOutputtingToRenderTexture = "The current scene has an active camera \"{0}\" outputting to a render texture.";
         private const string ActiveCameraOutputtingToRenderTextureCombined = "The current scene has {0} active cameras outputting to render textures.";
-        private const string ActiveCameraOutputtingToRenderTextureInfo = "This will affect performance negatively by causing more draw calls to happen. Ideally, you would only have them enabled when needed.";
+        private const string ActiveCameraOutputtingToRenderTextureInfo = "This will affect performance negatively by causing more draw calls to happen. They should only be enabled when needed.";
 
-        private const string NoToonShaders = "You shouldn't use toon shaders for world-building, as they are missing crucial things for making worlds. For world-building, the most recommended shader is Standard.";
+        private const string NoToonShaders = "Toon shaders should be avoided for world-building, as they are missing crucial things for making worlds. For world-building, the most recommended shader is Standard.";
 
-        private const string NonCrunchedTextures = "{0}% of the textures used in your scene have not been crunch compressed. Crunch compression can significantly reduce the size of your world download. It can be found from the texture's import settings.";
+        private const string NonCrunchedTextures = "{0}% of the textures used in the scene have not been crunch compressed. Crunch compression can significantly reduce the size of the world download. It can be found from the texture's import settings.";
 
-        private const string SwitchToProgressive = "The current scene is using the Enlighten lightmapper, which has been deprecated in newer versions of Unity. You should consider switching to Progressive for improved fidelity and performance.";
+        private const string SwitchToProgressive = "The current scene is using the Enlighten lightmapper, which has been deprecated in newer versions of Unity. It would be best to consider switching to Progressive for improved fidelity and performance.";
 
-        private const string SingleColorEnvironmentLighting = "Consider changing your Environment Lighting to Gradient from Flat.";
+        private const string SingleColorEnvironmentLighting = "Consider changing the Environment Lighting to Gradient from Flat.";
 
-        private const string DarkEnvironmentLighting = "Using dark colors for Environment Lighting can cause avatars to look weird. Only use dark Environment Lighting if your world has dark lighting.";
+        private const string DarkEnvironmentLighting = "Using dark colors for Environment Lighting can cause avatars to look weird. Only use dark Environment Lighting if the world has dark lighting.";
 
-        private const string CustomEnvironmentReflectionsNull = "Your Environment Reflections have been set to custom, but you haven't defined a custom cubemap!";
+        private const string CustomEnvironmentReflectionsNull = "The current scenes Environment Reflections have been set to custom, but a custom cubemap has not been defined.";
 
-        private const string NoLightmapUV = "Model found in the scene \"{0}\" is set to be lightmapped but doesn't have Lightmap UVs.";
-        private const string NoLightmapUVCombined = "The current scene has {0} models set to be lightmapped that don't have Lightmap UVs.";
-        private const string NoLightmapUVInfo = "This causes issues when baking lighting. You can enable generating Lightmap UV's in the model's import settings.";
+        private const string NoLightmapUV = "The model found in the scene \"{0}\" is set to be lightmapped but does not have Lightmap UVs.";
+        private const string NoLightmapUVCombined = "The current scene has {0} models set to be lightmapped that do not have Lightmap UVs.";
+        private const string NoLightmapUVInfo = "This can cause issues when baking lighting. You can enable generating Lightmap UV's in the model's import settings.";
 
-        private const string LightsNotBaked = "The current scene is using real-time lighting. Consider baked lighting for improved performance.";
+        private const string LightsNotBaked = "The current scene is using realtime lighting. Consider baked lighting for improved performance.";
 
-        private const string ConsiderLargerLightmaps = "Consider increasing your Lightmap Size from {0} to 4096. This allows for more stuff to fit on a single lightmap, leaving fewer textures that need to be sampled.";
+        private const string ConsiderLargerLightmaps = "Consider increasing Lightmap Size from {0} to 2048 or 4096. This allows for more stuff to fit on a single lightmap, leaving fewer textures that need to be sampled.";
 
-        private const string ConsiderSmallerLightmaps = "Baking lightmaps at 4096 with Progressive GPU will silently fall back to CPU Progressive because it needs more than 12GB GPU Memory to be able to bake with GPU Progressive.";
+        private const string ConsiderSmallerLightmaps = "Baking lightmaps at 4096 with Progressive GPU will silently fall back to CPU Progressive. More than 12GB GPU Memory is needed to bake 4k lightmaps with GPU Progressive.";
 
-        private const string NonBakedBakedLight = "The light {0} is set to be baked/mixed, but it hasn't been baked yet!";
-        private const string NonBakedBakedLightCombined = "The scene contains {0} baked/mixed lights that haven't been baked!";
-        private const string NonBakedBakedLightInfo = "Baked lights that haven't been baked yet function as realtime lights in-game.";
+        private const string NonBakedBakedLight = "The light {0} is set to be baked/mixed, but it has not been baked yet!";
+        private const string NonBakedBakedLightCombined = "The scene contains {0} baked/mixed lights that have not been baked!";
+        private const string NonBakedBakedLightInfo = "Baked lights that have not been baked yet function as realtime lights in-game.";
 
-        private const string LightingDataAssetInfo = "Your lighting data asset takes up {0} MB of your world's size. This contains your scene's light probe data and realtime GI data.";
+        private const string LightingDataAssetInfo = "The current scene's lighting data asset takes up {0} MB of the world's size. This contains the scene's light probe data and realtime GI data.";
 
-        private const string NoLightProbes = "No light probes found in the current scene, which means your baked lights won't affect dynamic objects such as players and pickups.";
+        private const string NoLightProbes = "No light probes found in the current scene. Without baked light probes baked lights are not able to affect dynamic objects such as players and pickups.";
 
-        private const string LightProbeCountNotBaked = "The current scene contains {0} light probes, but {1} of them haven't been baked yet.";
+        private const string LightProbeCountNotBaked = "The current scene contains {0} light probes, but {1} of them have not been baked yet.";
 
-        private const string LightProbesRemovedNotReBaked = "Some light probes have been removed after the last bake. Bake them again to update your scene's lighting data. The lighting data contains {0} baked light probes, and the current scene has {1} light probes.";
+        private const string LightProbesRemovedNotReBaked = "Some light probes have been removed after the last bake. Bake them again to update the scene's lighting data. The lighting data contains {0} baked light probes, and the current scene has {1} light probes.";
 
         private const string LightProbeCount = "The current scene contains {0} baked light probes.";
 
         private const string OverlappingLightProbes = "Light Probe Group \"{0}\" has {1} overlapping light probes.";
-        private const string OverlappingLightProbesCombined = "{0} Light Probe Groups with overlapping light probes found.";
+        private const string OverlappingLightProbesCombined = "Found {0} Light Probe Groups with overlapping light probes.";
         private const string OverlappingLightProbesInfo = "These can cause a slowdown in the editor and will not get baked because Unity will skip any extra overlapping probes.";
 
         private const string NoReflectionProbes = "The current scene has no active reflection probes. Reflection probes are needed to have proper reflections on reflective materials.";
@@ -1179,47 +1179,47 @@ namespace VRWorldToolkit
 
         private const string ReflectionProbeCountText = "The current scene has {0} baked reflection probes.";
 
-        private const string PostProcessingImportedButNotSetup = "The current project has Post Processing imported, but you haven't set it up yet.";
+        private const string PostProcessingImportedButNotSetup = "The current project has Post Processing imported, but you have not set it up yet.";
 
-        private const string PostProcessingDisabledInSceneView = "Post-processing is disabled in the scene view. You won't be able to preview any post-processing effects without enabling it first.";
+        private const string PostProcessingDisabledInSceneView = "Post-processing is disabled in the scene view. You will not be able to preview any post-processing effects without enabling it first.";
 
-        private const string NoReferenceCameraSet = "The current scenes Scene Descriptor has no Reference Camera set. Without a Reference Camera set, you will not be able to see Post Processing in-game.";
+        private const string NoReferenceCameraSet = "The current scenes Scene Descriptor has no Reference Camera set. Without a Reference Camera set Post Processing will not be visible in-game.";
 
-        private const string NoPostProcessingVolumes = "No enabled Post Processing Volumes were found in the scene. A Post Processing Volume is needed to apply effects to the camera's Post Processing Layer.";
+        private const string NoPostProcessingVolumes = "No enabled Post Processing Volumes found in the scene. A Post Processing Volume is needed to apply effects to the camera's Post Processing Layer.";
 
-        private const string ReferenceCameraNoPostProcessingLayer = "Your Reference Camera doesn't have a Post Processing Layer on it. A Post Processing Layer is needed for the Post Processing Volume to affect the camera.";
+        private const string ReferenceCameraNoPostProcessingLayer = "The current Reference Camera does not have a Post Processing Layer on it. A Post Processing Layer is needed for the Post Processing Volume to affect the camera.";
 
-        private const string VolumeBlendingLayerNotSet = "You don't have a Volume Blending Layer set in your Post Process Layer, so post-processing won't work. Using the Water or PostProcessing layer is recommended.";
+        private const string VolumeBlendingLayerNotSet = "You don't have a Volume Blending Layer set in the Post Process Layer, so post-processing will not work. Using the Water or PostProcessing layer is recommended.";
 
-        private const string PostProcessingVolumeNotGlobalNoCollider = "The Post Processing Volume \"{0}\" isn't marked as Global and doesn't have a collider. It won't affect the camera without one of these set on it.";
+        private const string PostProcessingVolumeNotGlobalNoCollider = "Post Processing Volume \"{0}\" is not marked as Global and does not have a collider. It will not affect the camera without one of these set on it.";
 
-        private const string NoProfileSet = "You don't have a profile set in the Post Processing Volume \"{0}\".";
+        private const string NoProfileSet = "Post Processing Volume \"{0}\" does not have a profile set.";
 
-        private const string VolumeOnWrongLayer = "Your Post Processing Volume \"{0}\" is not on one of the layers set in your cameras Post Processing Layer setting. (Currently: {1})";
+        private const string VolumeOnWrongLayer = "Post Processing Volume \"{0}\" is not on one of the layers set in the cameras Post Processing Layer setting. (Currently: {1})";
 
         private const string DontUseNoneForTonemapping = "Use either Neutral or ACES for Color Grading Tonemapping. Selecting None for Tonemapping is essentially the same as leaving Tonemapping unchecked.";
 
-        private const string TooHighBloomIntensity = "Don't raise the Bloom intensity too high! You should use a low Bloom intensity, between 0.01 to 0.3.";
+        private const string TooHighBloomIntensity = "Do not raise the Bloom intensity too high! It is best to use a low Bloom intensity, between 0.01 to 0.3.";
 
-        private const string TooHighBloomThreshold = "You should avoid having your Bloom threshold set high. It might cause unexpected problems with avatars. Ideally, you should keep it at 0, but always below 1.0.";
+        private const string TooHighBloomThreshold = "You should avoid having the Bloom Threshold set high. It might cause unexpected problems with avatars. Ideally, it should be kept at 0, but always below 1.0.";
 
         private const string NoBloomDirtInVr = "Avoid using Bloom Dirt. It looks terrible in VR!";
 
-        private const string NoAmbientOcclusion = "Don't use Ambient Occlusion in VRChat! VRchat is using Forward rendering, so it gets applied on top of everything else, which is bad! It also has a super high rendering cost in VR.";
+        private const string NoAmbientOcclusion = "Do not use Ambient Occlusion in VRChat! VRchat uses Forward rendering, so it gets applied on top of everything else, which is bad! It also has a super high rendering cost in VR.";
 
-        private const string DepthOfFieldWarning = "Depth of field has a high-performance cost and is very disorientating in VR. If you really want to use depth of field, have it be disabled by default.";
+        private const string DepthOfFieldWarning = "Depth of field has a high-performance cost and is very disorientating in VR. If you want to use depth of field, it should be disabled by default.";
 
-        private const string ScreenSpaceReflectionsWarning = "Screen Space Reflections only works when using deferred rendering. VRchat isn't using deferred rendering, so this will have no effect on the main camera.";
+        private const string ScreenSpaceReflectionsWarning = "Screen-space Reflections only works when using deferred rendering. Because VRchat is not using deferred rendering, so this should not be used.";
 
-        private const string VignetteWarning = "Only use vignette in very small amounts. A powerful vignette can cause sickness in VR.";
+        private const string VignetteWarning = "Only use Post Processing vignette in minimal amounts. A powerful vignette can cause sickness in VR.";
 
         private const string NoPostProcessingImported = "Post Processing package not found in the project.";
 
-        private const string QuestBakedLightingWarning = "You should avoid realtime lighting for Quest content and instead properly bake your lights.";
+        private const string QuestBakedLightingWarning = "Realtime lighting for Quest content should be avoided and instead have a properly baked lighting setup for performance.";
 
-        private const string AmbientModeSetToCustom = "Your Environment Lighting setting is broken. This will override all light probes in the scene with black ambient light. Please change it to something else.";
+        private const string AmbientModeSetToCustom = "The current scenes Environment Lighting setting is broken. This will override all light probes in the scene with black ambient light. Please change it to something else.";
 
-        private const string NoProblemsFoundInPP = "No problems were found in your post-processing setup. In some cases where post-processing is working in the editor but not in-game, it's possible some imported asset is causing it not to function correctly.";
+        private const string NoProblemsFoundInPP = "No problems were found in your post-processing setup. In some cases where post-processing is working in the editor but not in-game, some imported assets may be causing it not to function correctly.";
 
         private const string BakeryLightNotSetEditorOnly = "Your Bakery light named \"{0}\" is not set to be EditorOnly.";
         private const string BakeryLightNotSetEditorOnlyCombined = "You have {0} Bakery lights are not set to be EditorOnly.";
@@ -1229,19 +1229,17 @@ namespace VRWorldToolkit
         private const string BakeryLightUnityLightCombined = "You have {0} Bakery lights that have an active Unity Light component on it.";
         private const string BakeryLightUnityLightInfo = "These will not get baked with Bakery and will keep acting as realtime lights even if set to baked.";
 
-        private const string MissingShaderWarning = "The material \"{0}\" found in your scene has a missing or broken shader.";
-
-        private const string CombinedMissingShaderWarning = "You have {0} materials found in your scene that have missing or broken shaders.";
-
+        private const string MissingShaderWarning = "The material \"{0}\" found in the scene has a missing or broken shader.";
+        private const string MissingShaderWarningCombined = "Found {0} materials in the current scene that have missing or broken shaders.";
         private const string MissingShaderWarningInfo = "These will fallback to the pink error shader.";
 
         private const string ErrorPauseWarning = "You have Error Pause enabled in your console. This can cause your world upload to fail by interrupting the build process.";
 
-        private const string MultipleScenesLoaded = "Multiple scenes loaded, this is not supported by VRChat and can cause the world upload to fail. You should only use one scene at a time for world-making.";
+        private const string MultipleScenesLoaded = "Multiple scenes loaded, this is not supported by VRChat and can cause the world upload to fail. Only one scene should be used for world creation at a time.";
 
-        private const string LayersNotSetup = "Project layers not setup for VRChat yet.";
+        private const string LayersNotSetup = "Project layers are not set up for VRChat yet.";
 
-        private const string CollisionMatrixNotSetup = "Project collision matrix not setup for VRChat yet.";
+        private const string CollisionMatrixNotSetup = "The projects Collision Matrix is not set up for VRChat yet.";
 
         private const string MaterialWithGrabPassShader = "A material ({0}) in the scene is using a GrabPass due to shader \"{1}\".";
         private const string MaterialWithGrabPassShaderCombined = "Found {0} materials in the scene using a GrabPass.";
@@ -1250,11 +1248,11 @@ namespace VRWorldToolkit
 
         private const string DisabledPortalsWarning = "Portal \"{0}\" disabled by default.";
         private const string DisabledPortalsWarningCombined = "Found {0} portals disabled by default.";
-        private const string DisabledPortalsWarningInfo = "Having a portal disabled by default will cause players entering to end up in different instances.";
+        private const string DisabledPortalsWarningInfo = "Having a portal disabled by default will cause players that are entering to end up in different instances.";
 
-        private const string SHRNMDirectionalModeBakeryError = "SH or RNM directional mode detected in Bakery. Using SH directional mode isn't supported in VRChat by default. It requires the usage of VRC Bakery Adapter by Merlin for it to function in-game.";
+        private const string SHRNMDirectionalModeBakeryError = "SH or RNM directional mode detected in Bakery. Using SH directional mode is not supported in VRChat by default. It requires the usage of VRC Bakery Adapter by Merlin for it to function in-game.";
 
-        private const string BuildAndTestBrokenError = "VRChat link association has not been set up, and the VRChat client path has not been set in the VRCSDK settings. Which causes Build & Test not to function.";
+        private const string BuildAndTestBrokenError = "VRChat link association has not been set up, and the VRChat client path has not been set in the VRCSDK settings. Without one of these settings set Build & Test will not function.";
 
         private const string BuildAndTestForceNonVRError = "VRChat client path has not been set to point directly to the VRChat executable in the VRCSDK settings. This will cause Force Non-VR setting for Build & Test not to work.";
         #endregion
@@ -2160,7 +2158,7 @@ namespace VRWorldToolkit
             var missingShadersCount = missingShaders.Count;
             if (missingShadersCount > 0)
             {
-                var missingShadersGroup = new MessageGroup(MissingShaderWarning, CombinedMissingShaderWarning, MissingShaderWarningInfo, MessageType.Error);
+                var missingShadersGroup = new MessageGroup(MissingShaderWarning, MissingShaderWarningCombined, MissingShaderWarningInfo, MessageType.Error);
                 for (int i = 0; i < missingShaders.Count; i++)
                 {
                     missingShadersGroup.AddSingleMessage(new SingleMessage(missingShaders[i].name).SetAssetPath(AssetDatabase.GetAssetPath(missingShaders[i])).SetAutoFix(ChangeShader(missingShaders[i], "Standard")));
