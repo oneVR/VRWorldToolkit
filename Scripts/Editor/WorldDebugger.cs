@@ -1840,7 +1840,7 @@ namespace VRWorldToolkit
                         noReferenceCameraMessage.SetAutoFix(SetReferenceCamera(sceneDescriptor, Camera.main));
                     }
 
-                    _postProcessing.AddMessageGroup(new MessageGroup(NoReferenceCameraSet, MessageType.Info).AddSingleMessage(noReferenceCameraMessage));
+                    _postProcessing.AddMessageGroup(new MessageGroup(NoReferenceCameraSet, MessageType.Warning).AddSingleMessage(noReferenceCameraMessage));
                 }
                 else
                 {
