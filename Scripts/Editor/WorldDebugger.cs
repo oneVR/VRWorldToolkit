@@ -1177,7 +1177,7 @@ namespace VRWorldToolkit
         private const string ReflectionProbesSomeUnbaked = "The reflection probe \"{0}\" is unbaked.";
         private const string ReflectionProbesSomeUnbakedCombined = "The current scene has {0} unbaked reflection probes.";
 
-        private const string ReflectionProbeCountText = "The current scene has {0} baked reflection probes.";
+        private const string ReflectionProbeCountText = "The current scene has {0} reflection probes.";
 
         private const string PostProcessingImportedButNotSetup = "The current project has Post Processing imported, but you have not set it up yet.";
 
