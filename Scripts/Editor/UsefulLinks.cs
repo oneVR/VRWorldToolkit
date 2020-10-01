@@ -5,28 +5,6 @@ namespace VRWorldToolkit
 {
     public class UsefulLinks : MonoBehaviour
     {
-#if VRC_SDK_VRCSDK2 || !VRC_SDK_VRCSDK3
-        [MenuItem("VRWorld Toolkit/Useful Links/Download SDK2", false, 100)]
-        private static void SDK2Download()
-        {
-            Application.OpenURL("https://vrchat.com/download/sdk2");
-        }
-#endif
-
-#if VRC_SDK_VRCSDK3 || !VRC_SDK_VRCSDK2
-        [MenuItem("VRWorld Toolkit/Useful Links/Download SDK3 Worlds", false, 100)]
-        private static void SDK3WorldsDownload()
-        {
-            Application.OpenURL("https://vrchat.com/download/sdk3-worlds");
-        }
-
-        [MenuItem("VRWorld Toolkit/Useful Links/Download SDK3 Avatars", false, 100)]
-        private static void SDK3AvatarsDownload()
-        {
-            Application.OpenURL("https://vrchat.com/download/sdk3-avatars");
-        }
-#endif
-
         [MenuItem("VRWorld Toolkit/Useful Links/VRCPrefabs Database", false, 200)]
         private static void VRCPrefabsLink()
         {
