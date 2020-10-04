@@ -37,6 +37,10 @@ namespace VRWorldToolkit
                 richText = true
             };
 
+            // Set text to white on black theme for readability
+            if (EditorGUIUtility.isProSkin)
+                Text.normal.textColor = Color.white;
+
             IconTwitter = Resources.Load("SplashTextures/IconTwitter") as Texture2D;
             IconDiscord = Resources.Load("SplashTextures/IconDiscord") as Texture2D;
             IconGithub = Resources.Load("SplashTextures/IconGithub") as Texture2D;
