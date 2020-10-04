@@ -789,7 +789,7 @@ namespace VRWorldToolkit
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Change tag?", "This operation will change " + obj.name + " layer to " + layer + ".\n\nDo you want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Change tag?", "This operation will change the layer of " + obj.name + " to " + layer + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     obj.layer = LayerMask.NameToLayer(layer);
                 }
@@ -838,7 +838,7 @@ namespace VRWorldToolkit
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Change tag?", "This operation will change " + obj.name + " tag to " + tag + ".\n\nDo you want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Change tag?", "This operation will change the Tag of " + obj.name + " to " + tag + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     obj.tag = tag;
                 }
