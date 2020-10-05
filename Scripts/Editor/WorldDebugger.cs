@@ -2200,7 +2200,7 @@ namespace VRWorldToolkit
                 AssetDatabase.ImportAsset(LastBuildReportPath);
             }
 
-            if (File.Exists(LastBuildReportPath) && (!File.Exists(WindowsBuildReportPath) || !File.Exists(QuestBuildReportPath)))
+            if (File.Exists(LastBuildReportPath))
             {
                 switch (AssetDatabase.LoadAssetAtPath<BuildReport>(LastBuildReportPath).summary.platform)
                 {
