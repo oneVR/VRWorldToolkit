@@ -2479,14 +2479,14 @@ namespace VRWorldToolkit
                         m_TreeView.DrawOverallStats();
                     }
 
-                    EditorGUILayout.BeginVertical();
-
-                    Rect rect = GUILayoutUtility.GetRect(0, 100000, 0, 100000);
+                    Rect treeViewRect = EditorGUILayout.BeginVertical();
 
                     if (m_TreeView.HasReport())
                     {
-                        m_TreeView.OnGUI(rect);
+                        m_TreeView.OnGUI(treeViewRect);
                     }
+
+                    GUILayout.FlexibleSpace();
 
                     EditorGUILayout.EndVertical();
                     break;
