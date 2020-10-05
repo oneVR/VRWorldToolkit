@@ -4,11 +4,9 @@ using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
-using UnityEditor.Callbacks;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
-using UnityEngine.Assertions;
-using UnityEngine.EventSystems;
+using VRWorldToolkit.DataStructures;
 
 namespace VRWorldToolkit
 {
@@ -327,12 +325,10 @@ namespace VRWorldToolkit
                 var rect = args.GetCellRect(visibleColumnIndex);
                 var columnIndex = (TreeColumns)args.GetColumn(visibleColumnIndex);
 
-                // Set label style to white if cell is selected if selected
-                var labelStyle = args.selected ? EditorStyles.whiteLabel : EditorStyles.label;
-                labelStyle.alignment = TextAnchor.MiddleLeft;
-                labelStyle.wordWrap = false;
+                //Set label style to white if cell is selected otherwise to normal
+                var labelStyle = args.selected ? Styles.TreeViewLabelSelected : Styles.TreeViewLabel;
 
-                // Handle drawing of the columns
+                //Handle drawing of the columns
                 switch (columnIndex)
                 {
                     case TreeColumns.Type:

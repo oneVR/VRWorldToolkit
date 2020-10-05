@@ -2249,26 +2249,19 @@ namespace VRWorldToolkit
 
         private void DrawBuildSummary(BuildReport report)
         {
-            var richText = Styles.RichText;
-
-            if (EditorGUIUtility.isProSkin)
-            {
-                richText.normal.textColor = Color.white;
-            }
-
             GUILayout.BeginVertical(EditorStyles.helpBox);
 
             if (report != null)
             {
-                GUILayout.Label("<b>Build size:</b> " + EditorUtility.FormatBytes((long)report.summary.totalSize), richText);
+                GUILayout.Label("<b>Build size:</b> " + EditorUtility.FormatBytes((long)report.summary.totalSize), Styles.LabelRichText);
 
-                GUILayout.Label("<b>Build done:</b> " + report.summary.buildEndedAt.ToLocalTime(), richText);
+                GUILayout.Label("<b>Build done:</b> " + report.summary.buildEndedAt.ToLocalTime(), Styles.LabelRichText);
 
-                GUILayout.Label("<b>Errors during build:</b> " + report.summary.totalErrors.ToString(), richText);
+                GUILayout.Label("<b>Errors during build:</b> " + report.summary.totalErrors.ToString(), Styles.LabelRichText);
 
-                GUILayout.Label("<b>Warnings during build:</b> " + report.summary.totalWarnings.ToString(), richText);
+                GUILayout.Label("<b>Warnings during build:</b> " + report.summary.totalWarnings.ToString(), Styles.LabelRichText);
 
-                GUILayout.Label("<b>Build result:</b> " + report.summary.result, richText);
+                GUILayout.Label("<b>Build result:</b> " + report.summary.result, Styles.LabelRichText);
             }
 
             GUILayout.EndVertical();

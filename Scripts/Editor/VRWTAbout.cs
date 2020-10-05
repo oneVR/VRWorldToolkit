@@ -1,5 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using VRWorldToolkit.DataStructures;
 
 namespace VRWorldToolkit
 {
@@ -30,16 +31,11 @@ namespace VRWorldToolkit
                 fixedHeight = 140
             };
 
-            Text = new GUIStyle
+            Text = new GUIStyle("Label")
             {
-                padding = new RectOffset(5, 5, 5, 5),
                 wordWrap = true,
                 richText = true
             };
-
-            // Set text to white on black theme for readability
-            if (EditorGUIUtility.isProSkin)
-                Text.normal.textColor = Color.white;
 
             IconTwitter = Resources.Load("SplashTextures/IconTwitter") as Texture2D;
             IconDiscord = Resources.Load("SplashTextures/IconDiscord") as Texture2D;

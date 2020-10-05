@@ -6,10 +6,13 @@ namespace VRWorldToolkit.DataStructures
     {
         public static GUIStyle HelpBoxRichText { get; internal set; }
         public static GUIStyle HelpBoxPadded { get; internal set; }
+        public static GUIStyle LabelRichText { get; internal set; }
         public static GUIStyle RichText { get; internal set; }
         public static GUIStyle RichTextWrap { get; internal set; }
         public static GUIStyle RedLabel { get; internal set; }
         public static GUIStyle WhiteLabel { get; internal set; }
+        public static GUIStyle TreeViewLabel { get; internal set; }
+        public static GUIStyle TreeViewLabelSelected { get; internal set; }
 
         static Styles()
         {
@@ -30,6 +33,12 @@ namespace VRWorldToolkit.DataStructures
                 richText = true
             };
 
+            LabelRichText = new GUIStyle("Label")
+            {
+                richText = true,
+                margin = new RectOffset(5, 5, 0, 0),
+            };
+
             RichText = new GUIStyle
             {
                 richText = true
@@ -41,8 +50,25 @@ namespace VRWorldToolkit.DataStructures
                 wordWrap = true
             };
 
-            RedLabel = new GUIStyle { };
-            RedLabel.normal.textColor = Color.red;
+            RedLabel = new GUIStyle
+            {
+                normal =
+                {
+                    textColor = Color.red,
+                },
+            };
+
+            TreeViewLabel = new GUIStyle("Label")
+            {
+                alignment = TextAnchor.MiddleLeft,
+                wordWrap = false,
+            };
+
+            TreeViewLabelSelected = new GUIStyle("WhiteLabel")
+            {
+                alignment = TextAnchor.MiddleLeft,
+                wordWrap = false,
+            };
         }
     }
 }
