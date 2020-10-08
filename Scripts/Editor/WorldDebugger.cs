@@ -152,6 +152,8 @@ namespace VRWorldToolkit
             public string CombinedMessage;
             public string AdditionalInfo;
 
+            public bool disableCombinedSelection = false;
+
             public MessageType MessageType;
 
             public string Documentation;
@@ -228,6 +230,13 @@ namespace VRWorldToolkit
                 }
 
                 return count == 0 ? MessageList.Count : count;
+            }
+
+            public MessageGroup SetCombinedSelectionDisabled(bool enabled)
+            {
+                disableCombinedSelection = enabled;
+
+                return this;
             }
 
             public GameObject[] GetSelectObjects()
@@ -478,7 +487,7 @@ namespace VRWorldToolkit
                                         }
                                         else
                                         {
-                                            EditorGUI.BeginDisabledGroup(messageGroup.GetSelectObjects().Length == 0);
+                                            EditorGUI.BeginDisabledGroup(messageGroup.disableCombinedSelection || messageGroup.GetSelectObjects().Length == 0);
 
                                             if (GUILayout.Button("Select", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
                                             {
@@ -1255,6 +1264,10 @@ namespace VRWorldToolkit
         private const string BuildAndTestBrokenError = "VRChat link association has not been set up, and the VRChat client path has not been set in the VRCSDK settings. Without one of these settings set Build & Test will not function.";
 
         private const string BuildAndTestForceNonVRError = "VRChat client path has not been set to point directly to the VRChat executable in the VRCSDK settings. This will cause Force Non-VR setting for Build & Test not to work.";
+
+        private const string MaterialWithNonWhitelistedShader = "Material \"{0}\" is using an unsupported shader \"{1}\".";
+        private const string MaterialWithNonWhitelistedShaderCombined = "Found {0} materials with unsupported shaders.";
+        private const string MaterialWithNonWhitelistedShaderInfo = "Unsupported shaders can cause problems on the Quest platform unless appropriately used.";
         #endregion
 
         private static long _occlusionCacheFiles = 0;
@@ -1975,6 +1988,7 @@ namespace VRWorldToolkit
             var legacyBlendShapeIssues = _general.AddMessageGroup(new MessageGroup(LegacyBlendShapeIssues, LegacyBlendShapeIssuesCombined, LegacyBlendShapeIssuesInfo, MessageType.Warning));
             var grabPassShaders = _general.AddMessageGroup(new MessageGroup(MaterialWithGrabPassShader, MaterialWithGrabPassShaderCombined, Helper.BuildPlatform() == RuntimePlatform.WindowsPlayer ? MaterialWithGrabPassShaderInfoPC : MaterialWithGrabPassShaderInfoQuest, Helper.BuildPlatform() == RuntimePlatform.Android ? MessageType.Error : MessageType.Info));
             var disabledPortals = _general.AddMessageGroup(new MessageGroup(DisabledPortalsWarning, DisabledPortalsWarningCombined, DisabledPortalsWarningInfo, MessageType.Warning));
+            var materialWithNonWhitelistedShader = _general.AddMessageGroup(new MessageGroup(MaterialWithNonWhitelistedShader, MaterialWithNonWhitelistedShaderCombined, MaterialWithNonWhitelistedShaderInfo, MessageType.Warning).SetCombinedSelectionDisabled(true));
 
             var scene = SceneManager.GetActiveScene();
 
@@ -2058,6 +2072,22 @@ namespace VRWorldToolkit
                             checkedMaterials.Add(material);
 
                             var shader = material.shader;
+
+                            if (Helper.BuildPlatform() is RuntimePlatform.Android && !VRCSDK2.Validation.WorldValidation.ShaderWhiteList.Contains(shader.name))
+                            {
+                                var singleMessage = new SingleMessage(material.name, shader.name);
+
+                                if (AssetDatabase.GetAssetPath(material).EndsWith(".mat"))
+                                {
+                                    singleMessage.SetAssetPath(AssetDatabase.GetAssetPath(material));
+                                }
+                                else
+                                {
+                                    singleMessage.SetSelectObject(gameObject);
+                                }
+
+                                materialWithNonWhitelistedShader.AddSingleMessage(singleMessage);
+                            }
 
                             if (AssetDatabase.GetAssetPath(shader) != null)
                             {
