@@ -27,6 +27,7 @@ using System.Text.RegularExpressions;
 using UnityEditor.IMGUI.Controls;
 using VRWorldToolkit.DataStructures;
 using Microsoft.Win32;
+using System.Reflection;
 
 #if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
 namespace VRWorldToolkit
@@ -1082,6 +1083,14 @@ namespace VRWorldToolkit
                 sceneViewState.showImageEffects = isActive;
             };
         }
+
+        public static System.Action SetPPLayerResources(PostProcessLayer postProcessLayer, PostProcessResources resources)
+        {
+            return () =>
+            {
+                postProcessLayer.Init(resources);
+            };
+        }
 #endif
         #endregion
 
@@ -1811,6 +1820,7 @@ namespace VRWorldToolkit
 #if UNITY_POST_PROCESSING_STACK_V2
             var postProcessVolumes = FindObjectsOfType(typeof(PostProcessVolume)) as PostProcessVolume[];
             var postProcessLayerExists = false;
+            PostProcessLayer postProcessLayer = null;
 
             if (Camera.main == null)
             {
@@ -1818,6 +1828,8 @@ namespace VRWorldToolkit
                 {
                     if (sceneDescriptor.ReferenceCamera.gameObject.GetComponent(typeof(PostProcessLayer)))
                     {
+                        postProcessLayer = sceneDescriptor.ReferenceCamera.gameObject.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
+
                         postProcessLayerExists = true;
                     }
                 }
@@ -1826,7 +1838,27 @@ namespace VRWorldToolkit
             {
                 if (Camera.main.gameObject.GetComponent(typeof(PostProcessLayer)))
                 {
+                    postProcessLayer = Camera.main.gameObject.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
+
                     postProcessLayerExists = true;
+                }
+            }
+
+            if (postProcessLayer != null)
+            {
+                FieldInfo resourcesInfo = typeof(PostProcessLayer).GetField("m_Resources", BindingFlags.NonPublic | BindingFlags.Instance);
+
+                PostProcessResources postProcessResources = resourcesInfo.GetValue(postProcessLayer) as PostProcessResources;
+
+                if (postProcessResources is null)
+                {
+                    var singleMessage = new SingleMessage(postProcessLayer.gameObject.name).SetSelectObject(postProcessLayer.gameObject);
+
+                    _postProcessing.AddMessageGroup(new MessageGroup("The Post Process Layer on \"{0}\" does not have its resources field set properly. This causes post-processing to error out. This can be fixed by recreating the Post Processing Layer on the GameObject.", MessageType.Warning).AddSingleMessage(singleMessage));
+
+                    PostProcessResources resources = (PostProcessResources)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath("d82512f9c8e5d4a4d938b575d47f88d4"), typeof(PostProcessResources));
+
+                    if (resources != null) singleMessage.SetAutoFix(SetPPLayerResources(postProcessLayer, resources));
                 }
             }
 
