@@ -28,6 +28,7 @@ using UnityEditor.IMGUI.Controls;
 using VRWorldToolkit.DataStructures;
 using Microsoft.Win32;
 using System.Reflection;
+using Object = UnityEngine.Object;
 
 #if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
 namespace VRWorldToolkit
@@ -828,6 +829,47 @@ namespace VRWorldToolkit
             };
         }
 
+        public static System.Action SetLightmapOverrideForQuest(TextureImporter[] textureImporters)
+        {
+            return () =>
+            {
+                if (EditorUtility.DisplayDialog("Set lightmap compression override?", "This operation will set the platform-specific overrides for all lightmaps (" + textureImporters.Length + ") to ATCS 4x4 block format on Android.\n\nWarning this can take a while depending on lightmap size and how many there are.\n\nDo you want to continue?", "Yes", "Cancel"))
+                {
+                    foreach (var item in textureImporters)
+                    {
+                        var settings = item.GetPlatformTextureSettings("Android");
+
+                        settings.overridden = true;
+
+                        settings.format = TextureImporterFormat.ASTC_RGB_4x4;
+
+                        item.SetPlatformTextureSettings(settings);
+
+                        item.SaveAndReimport();
+                    }
+                }
+            };
+        }
+
+        public static System.Action SetLightmapOverrideForQuest(TextureImporter textureImporter, string lightmapName)
+        {
+            return () =>
+            {
+                if (EditorUtility.DisplayDialog("Set lightmap compression override?", "This operation will set the platform-specific overrides for \"" + lightmapName + "\" to ATCS 4x4 block format on Android.\n\nWarning this can take a while depending on lightmap size.\n\nDo you want to continue?", "Yes", "Cancel"))
+                {
+                    var settings = textureImporter.GetPlatformTextureSettings("Android");
+
+                    settings.overridden = true;
+
+                    settings.format = TextureImporterFormat.ASTC_RGB_4x4;
+
+                    textureImporter.SetPlatformTextureSettings(settings);
+
+                    textureImporter.SaveAndReimport();
+                }
+            };
+        }
+
         public static System.Action SetEnviromentReflections(DefaultReflectionMode reflections)
         {
             return () =>
@@ -1246,6 +1288,10 @@ namespace VRWorldToolkit
         private const string BakeryLightUnityLight = "Your Bakery light named \"{0}\" has an active Unity Light component on it.";
         private const string BakeryLightUnityLightCombined = "You have {0} Bakery lights that have an active Unity Light component on it.";
         private const string BakeryLightUnityLightInfo = "These will not get baked with Bakery and will keep acting as realtime lights even if set to baked.";
+
+        private const string QuestLightmapCompressionOverride = "Lightmap \"{0}\" does not have a platform-specific override set for Android.";
+        private const string QuestLightmapCompressionOverrideCombined = "No platform-specific override set on {0} lightmaps for Android.";
+        private const string QuestLightmapCompressionOverrideInfo = "Without setting proper compression override when building for Quest lightmaps can show noticeable banding. Suggested format \"ASTC 4x4 block\".";
 
         private const string MissingShaderWarning = "The material \"{0}\" found in the scene has a missing or broken shader.";
         private const string MissingShaderWarningCombined = "Found {0} materials in the current scene that have missing or broken shaders.";
@@ -1668,6 +1714,36 @@ namespace VRWorldToolkit
             if (LightmapSettings.lightmaps.Length > 0)
             {
                 bakedLighting = true;
+
+                if (Helper.BuildPlatform() == RuntimePlatform.Android)
+                {
+                    LightmapData[] lightmaps = LightmapSettings.lightmaps;
+
+                    var androidCompressionGroup = _lighting.AddMessageGroup(new MessageGroup(QuestLightmapCompressionOverride, QuestLightmapCompressionOverrideCombined, QuestLightmapCompressionOverrideInfo, MessageType.Tips));
+
+                    List<TextureImporter> lightmapTextureImporters = new List<TextureImporter>();
+
+                    for (int i = 0; i < lightmaps.Length; i++)
+                    {
+                        Object lightmap = lightmaps[i].lightmapColor;
+
+                        var textureImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(lightmaps[i].lightmapColor)) as TextureImporter;
+
+                        var platformSettings = textureImporter.GetPlatformTextureSettings("Android");
+
+                        if (!platformSettings.overridden)
+                        {
+                            lightmapTextureImporters.Add(textureImporter);
+
+                            androidCompressionGroup.AddSingleMessage(new SingleMessage(lightmap.name).SetAssetPath(textureImporter.assetPath).SetAutoFix(SetLightmapOverrideForQuest(textureImporter, lightmap.name)));
+                        }
+                    }
+
+                    if (androidCompressionGroup.GetTotalCount() > 0)
+                    {
+                        androidCompressionGroup.SetGroupAutoFix(SetLightmapOverrideForQuest(lightmapTextureImporters.ToArray()));
+                    }
+                }
             }
 
             var probes = LightmapSettings.lightProbes;
