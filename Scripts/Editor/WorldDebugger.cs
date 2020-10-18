@@ -29,6 +29,7 @@ using VRWorldToolkit.DataStructures;
 using Microsoft.Win32;
 using System.Reflection;
 using Object = UnityEngine.Object;
+using UnityEngine.UI;
 
 #if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
 namespace VRWorldToolkit
@@ -818,6 +819,39 @@ namespace VRWorldToolkit
             };
         }
 
+        public static System.Action SetSelectableNavigationMode(Selectable selectable, Navigation.Mode mode)
+        {
+            return () =>
+            {
+                if (EditorUtility.DisplayDialog("Change Navigation mode?", "This operation will change the Navigation mode on UI Element \"" + selectable.gameObject.name + "\" to " + mode.ToString() + ".\n\nDo you want to continue?", "Yes", "Cancel"))
+                {
+                    var navigation = selectable.navigation;
+
+                    navigation.mode = Navigation.Mode.None;
+
+                    selectable.navigation = navigation;
+                }
+            };
+        }
+
+        public static System.Action SetSelectableNavigationMode(Selectable[] selectables, Navigation.Mode mode)
+        {
+            return () =>
+            {
+                if (EditorUtility.DisplayDialog("Change Navigation mode?", "This operation will change " + selectables.Length + " UI Elements Navigation to " + mode.ToString() + ".\n\nDo you want to continue?", "Yes", "Cancel"))
+                {
+                    for (int i = 0; i < selectables.Length; i++)
+                    {
+                        var navigation = selectables[i].navigation;
+
+                        navigation.mode = Navigation.Mode.None;
+
+                        selectables[i].navigation = navigation;
+                    }
+                }
+            };
+        }
+
         public static System.Action SetLightmapSize(int newSize)
         {
             return () =>
@@ -1323,6 +1357,10 @@ namespace VRWorldToolkit
         private const string MaterialWithNonWhitelistedShader = "Material \"{0}\" is using an unsupported shader \"{1}\".";
         private const string MaterialWithNonWhitelistedShaderCombined = "Found {0} materials with unsupported shaders.";
         private const string MaterialWithNonWhitelistedShaderInfo = "Unsupported shaders can cause problems on the Quest platform unless appropriately used.";
+
+        private const string UIElementWithNavigationNotNone = "The UI Element \"{0}\" does not have its Navigation set to None.";
+        private const string UIElementWithNavigationNotNoneCombined = "Found {0} UI Elements with their Navigation not set to None.";
+        private const string UIElementWithNavigationNotNoneInfo = "Setting Navigation to None on UI Elements stops accidental interactions with them while just trying to walk around.";
         #endregion
 
         private static long _occlusionCacheFiles = 0;
@@ -2109,12 +2147,14 @@ namespace VRWorldToolkit
 
             var checkedMaterials = new List<Material>();
             var checkedShaders = new List<Shader>();
+            var selectablesNotNone = new List<Selectable>();
 
             var mirrorsDefaultLayers = _optimization.AddMessageGroup(new MessageGroup(MirrorWithDefaultLayers, MirrorWithDefaultLayersCombined, MirrorWithDefaultLayersInfo, MessageType.Tips));
             var legacyBlendShapeIssues = _general.AddMessageGroup(new MessageGroup(LegacyBlendShapeIssues, LegacyBlendShapeIssuesCombined, LegacyBlendShapeIssuesInfo, MessageType.Warning));
             var grabPassShaders = _general.AddMessageGroup(new MessageGroup(MaterialWithGrabPassShader, MaterialWithGrabPassShaderCombined, Helper.BuildPlatform() == RuntimePlatform.WindowsPlayer ? MaterialWithGrabPassShaderInfoPC : MaterialWithGrabPassShaderInfoQuest, Helper.BuildPlatform() == RuntimePlatform.Android ? MessageType.Error : MessageType.Info));
             var disabledPortals = _general.AddMessageGroup(new MessageGroup(DisabledPortalsWarning, DisabledPortalsWarningCombined, DisabledPortalsWarningInfo, MessageType.Warning));
             var materialWithNonWhitelistedShader = _general.AddMessageGroup(new MessageGroup(MaterialWithNonWhitelistedShader, MaterialWithNonWhitelistedShaderCombined, MaterialWithNonWhitelistedShaderInfo, MessageType.Warning).SetCombinedSelectionDisabled(true));
+            var uiElementNavigation = _general.AddMessageGroup(new MessageGroup(UIElementWithNavigationNotNone, UIElementWithNavigationNotNoneCombined, UIElementWithNavigationNotNoneInfo, MessageType.Tips));
 
             Object[] allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
             for (int i = 0; i < allGameObjects.Length; i++)
@@ -2269,6 +2309,18 @@ namespace VRWorldToolkit
                     }
                 }
 
+                if (gameObject.GetComponent<Selectable>())
+                {
+                    var selectable = gameObject.GetComponent<Selectable>();
+
+                    if (selectable.navigation.mode != Navigation.Mode.None)
+                    {
+                        uiElementNavigation.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject).SetAutoFix(SetSelectableNavigationMode(selectable, Navigation.Mode.None)));
+
+                        selectablesNotNone.Add(selectable);
+                    }
+                }
+
                 if (gameObject.activeInHierarchy == false)
                 {
                     if (gameObject.GetComponent<VRC_PortalMarker>())
@@ -2276,6 +2328,11 @@ namespace VRWorldToolkit
                         disabledPortals.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject));
                     }
                 }
+            }
+
+            if (selectablesNotNone.Count > 1)
+            {
+                uiElementNavigation.SetGroupAutoFix(SetSelectableNavigationMode(selectablesNotNone.ToArray(), Navigation.Mode.None));
             }
 
             //If more than 10% of shaders used in scene are toon shaders to leave room for people using them for avatar displays
