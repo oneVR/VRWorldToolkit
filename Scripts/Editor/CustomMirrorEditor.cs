@@ -45,13 +45,13 @@ namespace VRWorldToolkit
                 var currentMirror = (VRC_MirrorReflection)target;
 
                 if ((LightmapSettings.lightProbes != null && LightmapSettings.lightProbes.positions.Length == 0 && currentMirror.m_DisablePixelLights) || (LightmapSettings.lightProbes is null && currentMirror.m_DisablePixelLights))
-                    EditorGUILayout.HelpBox("No baked light probes found in lighting data. Dynamic objects objects such as players and pickups won't appear lit in mirrors without having baked light probes.", MessageType.Warning);
+                    EditorGUILayout.HelpBox("No baked light probes were found in lighting data. Dynamic objects such as players and pickups will not appear lit in mirrors without baked light probes.", MessageType.Warning);
 
                 if (currentMirror.m_ReflectLayers == -1025)
-                    EditorGUILayout.HelpBox("Avoid using default layers on mirrors to save on frames, you should disable all layers that aren't needed in this mirror.", MessageType.Info);
+                    EditorGUILayout.HelpBox("This mirror has default layers set. Unnecessary layers should be disabled to save on performance.", MessageType.Info);
 
                 if (Helper.LayerIncludedInMask(LayerMask.NameToLayer("UiMenu"), currentMirror.m_ReflectLayers))
-                    EditorGUILayout.HelpBox("Having UiMenu enabled on mirrors causes VRChat UI elements to render twice which can cause noticeable performance drop in populated instances", MessageType.Warning);
+                    EditorGUILayout.HelpBox("Having UiMenu enabled on mirrors causes VRChat UI elements to be rendered twice, causing a noticeable performance drop in populated instances.", MessageType.Warning);
             }
 
             showExplanations = EditorGUILayout.Foldout(showExplanations, "VRChat specific layer explanations");
