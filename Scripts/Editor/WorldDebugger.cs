@@ -1491,9 +1491,27 @@ namespace VRWorldToolkit
                                 _general.AddMessageGroup(new MessageGroup(ColliderTriggerNoCollider, MessageType.Error).AddSingleMessage(new SingleMessage(triggerScript.name).SetSelectObject(triggerScript.gameObject)));
                             }
                         }
+
                         if ((trigger.TriggerType.ToString() == "OnEnterTrigger" || trigger.TriggerType.ToString() == "OnExitTrigger") && triggerScript.gameObject.layer != LayerMask.NameToLayer("MirrorReflection"))
                         {
-                            triggerWrongLayer.Add(triggerScript.gameObject);
+                            var collides = true;
+
+                            int[] triggerLayers = Helper.GetAllLayerNumbersFromMask(trigger.Layers);
+                            for (int i = 0; i < triggerLayers.Length; i++)
+                            {
+                                int item = triggerLayers[i];
+
+                                if (Physics.GetIgnoreLayerCollision(LayerMask.NameToLayer("MirrorReflection"), item))
+                                {
+                                    collides = false; 
+                                    break;
+                                }
+                            }
+
+                            if (collides)
+                            {
+                                triggerWrongLayer.Add(triggerScript.gameObject);
+                            }
                         }
                     }
                 }

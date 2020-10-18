@@ -52,6 +52,19 @@ namespace VRWorldToolkit
             return text;
         }
 
+        public static int[] GetAllLayerNumbersFromMask(LayerMask layerMask)
+        {
+            List<int> layers = new List<int>();
+            for (int i = 0; i < 32; i++)
+            {
+                if (layerMask == (layerMask | (1 << i)))
+                {
+                    layers.Add(i);
+                }
+            }
+            return layers.ToArray();
+        }
+
         public static string GetAllLayersFromMask(LayerMask layerMask)
         {
             List<string> layers = new List<string>();
