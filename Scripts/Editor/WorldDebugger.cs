@@ -1503,7 +1503,7 @@ namespace VRWorldToolkit
 
                                 if (Physics.GetIgnoreLayerCollision(LayerMask.NameToLayer("MirrorReflection"), item))
                                 {
-                                    collides = false; 
+                                    collides = false;
                                     break;
                                 }
                             }
