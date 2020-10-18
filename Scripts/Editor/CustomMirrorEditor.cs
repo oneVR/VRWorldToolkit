@@ -52,6 +52,9 @@ namespace VRWorldToolkit
 
                 if (Helper.LayerIncludedInMask(LayerMask.NameToLayer("UiMenu"), currentMirror.m_ReflectLayers))
                     EditorGUILayout.HelpBox("Having UiMenu enabled on mirrors causes VRChat UI elements to be rendered twice, causing a noticeable performance drop in populated instances.", MessageType.Warning);
+
+                if (!Helper.LayerIncludedInMask(LayerMask.NameToLayer("MirrorReflection"), currentMirror.m_ReflectLayers))
+                    EditorGUILayout.HelpBox("Having the MirrorReflection layer disabled will stop the player from seeing themselves in the mirror.", MessageType.Warning);
             }
 
             showExplanations = EditorGUILayout.Foldout(showExplanations, "VRChat specific layer explanations");
