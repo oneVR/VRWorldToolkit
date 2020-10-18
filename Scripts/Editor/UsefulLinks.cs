@@ -23,11 +23,17 @@ namespace VRWorldToolkit
             Application.OpenURL("https://vrcworld.wiki.fc2.com/");
         }
 
+        [MenuItem("VRWorld Toolkit/Useful Links/CyanEmu", false, 200)]
+        private static void CyanEmu()
+        {
+            Application.OpenURL("https://github.com/CyanLaser/CyanEmu");
+        }
+
 #if UDON
         [MenuItem("VRWorld Toolkit/Useful Links/UdonSharp", false, 200)]
         private static void UdonSharpLink()
         {
-            Application.OpenURL("https://github.com/Merlin-san/UdonSharp/releases");
+            Application.OpenURL("https://github.com/Merlin-san/UdonSharp/");
         }
 #endif
 
