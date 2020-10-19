@@ -1444,6 +1444,7 @@ namespace VRWorldToolkit
                 _general.AddMessageGroup(new MessageGroup(ErrorPauseWarning, MessageType.Error).AddSingleMessage(new SingleMessage(SetErrorPause(false))));
             }
 
+#if UNITY_EDITOR_WIN
             //Check for problems with Build & Test
             if (SDKClientUtilities.GetSavedVRCInstallPath() == "\\VRChat.exe" || SDKClientUtilities.GetSavedVRCInstallPath() == "")
             {
@@ -1456,6 +1457,7 @@ namespace VRWorldToolkit
                     _general.AddMessageGroup(new MessageGroup(BuildAndTestForceNonVRError, MessageType.Warning).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
                 }
             }
+#endif
 
             //Get spawn points for any possible problems
             var spawns = sceneDescriptor.spawns.Where(s => s != null).ToArray();
