@@ -2168,6 +2168,8 @@ namespace VRWorldToolkit
 
                 if (gameObject.GetComponent<Renderer>())
                 {
+                    var renderer = gameObject.GetComponent<Renderer>();
+
                     // If baked lighting in the scene check for lightmap uvs
                     if (bakedLighting)
                     {
@@ -2190,7 +2192,9 @@ namespace VRWorldToolkit
                                 {
                                     if (modelImporter != null)
                                     {
-                                        if (!modelImporter.generateSecondaryUV && sharedMesh.uv2.Length == 0)
+                                        SerializedObject so = new SerializedObject(renderer);
+
+                                        if (!modelImporter.generateSecondaryUV && sharedMesh.uv2.Length == 0 && so.FindProperty("m_ScaleInLightmap").floatValue != 0)
                                         {
                                             importers.Add(modelImporter);
                                         }
@@ -2226,11 +2230,9 @@ namespace VRWorldToolkit
                     }
 
                     // Check materials for problems
-                    var meshRenderer = gameObject.GetComponent<Renderer>();
-
-                    for (int l = 0; l < meshRenderer.sharedMaterials.Length; l++)
+                    for (int l = 0; l < renderer.sharedMaterials.Length; l++)
                     {
-                        Material material = meshRenderer.sharedMaterials[l];
+                        Material material = renderer.sharedMaterials[l];
 
                         if (material == null || checkedMaterials.Contains(material))
                             continue;
