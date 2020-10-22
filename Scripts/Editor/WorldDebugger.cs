@@ -1264,6 +1264,8 @@ namespace VRWorldToolkit
 
         private const string REFERENCE_CAMERA_NO_POST_PROCESSING_LAYER = "The current Reference Camera does not have a Post Processing Layer on it. A Post Processing Layer is needed for the Post Processing Volume to affect the camera.";
 
+        private const string POST_PROCESS_LAYER_USING_RESERVED_LAYER = "Your current Post Process Layer uses one of the VRChat reserved layers. Using these will break post-processing while in-game.";
+
         private const string VOLUME_BLENDING_LAYER_NOT_SET = "You don't have a Volume Blending Layer set in the Post Process Layer, so post-processing will not work. Using the Water or PostProcessing layer is recommended.";
 
         private const string POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER = "Post Processing Volume \"{0}\" is not marked as Global and does not have a collider. It will not affect the camera without one of these set on it.";
@@ -2017,6 +2019,13 @@ namespace VRWorldToolkit
                         if (volumeLayer == 0)
                         {
                             postProcessing.AddMessageGroup(new MessageGroup(VOLUME_BLENDING_LAYER_NOT_SET, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.ReferenceCamera.gameObject)));
+                        }
+
+                        // Check for usage of reserved layers since they break post processing
+                        var numbersFromMask = Helper.GetAllLayerNumbersFromMask(volumeLayer);
+                        if (numbersFromMask.Contains(19) | numbersFromMask.Contains(20) | numbersFromMask.Contains(21))
+                        {
+                            postProcessing.AddMessageGroup(new MessageGroup(POST_PROCESS_LAYER_USING_RESERVED_LAYER, MessageType.Error).AddSingleMessage(new SingleMessage(postprocessLayer.gameObject.name).SetSelectObject(postprocessLayer.gameObject)));
                         }
 
                         foreach (var postProcessVolume in postProcessVolumes)
