@@ -1348,7 +1348,7 @@ namespace VRWorldToolkit
 
         private static long occlusionCacheFiles;
 
-        //TODO: Better check threading
+        // TODO: Better check threading
         private static void CountOcclusionCacheFiles()
         {
             occlusionCacheFiles = Directory.EnumerateFiles("Library/Occlusion/").Count();
@@ -1363,15 +1363,15 @@ namespace VRWorldToolkit
         {
             masterList.ClearCategories();
 
-            //General Checks
+            // General Checks
 
-            //Get Descriptors
+            // Get Descriptors
             var descriptors = FindObjectsOfType(typeof(VRC_SceneDescriptor)) as VRC_SceneDescriptor[];
             long descriptorCount = descriptors.Length;
             VRC_SceneDescriptor sceneDescriptor;
             var pipelines = FindObjectsOfType(typeof(PipelineManager)) as PipelineManager[];
 
-            //Check if a descriptor exists
+            // Check if a descriptor exists
             if (descriptorCount == 0)
             {
                 general.AddMessageGroup(new MessageGroup(NO_SCENE_DESCRIPTOR, MessageType.Error));
@@ -1381,19 +1381,21 @@ namespace VRWorldToolkit
             {
                 sceneDescriptor = descriptors[0];
 
-                //Make sure only one descriptor exists
+                // Make sure only one descriptor exists
                 if (descriptorCount > 1)
                 {
                     general.AddMessageGroup(new MessageGroup(TOO_MANY_SCENE_DESCRIPTORS, MessageType.Info).AddSingleMessage(new SingleMessage(Array.ConvertAll(descriptors, s => s.gameObject))));
                     return;
                 }
-                else if (pipelines.Length > 1)
+
+                // Check for multiple pipeline managers
+                if (pipelines.Length > 1)
                 {
                     general.AddMessageGroup(new MessageGroup(TOO_MANY_PIPELINE_MANAGERS, MessageType.Error).AddSingleMessage(new SingleMessage(Array.ConvertAll(pipelines, s => s.gameObject)).SetAutoFix(RemoveBadPipelineManagers(pipelines))));
                 }
 
-                //Check how far the descriptor is from zero point for floating point errors
-                int descriptorRemoteness = (int)Vector3.Distance(sceneDescriptor.transform.position, new Vector3(0.0f, 0.0f, 0.0f));
+                // Check how far the descriptor is from zero point for floating point errors
+                var descriptorRemoteness = (int)Vector3.Distance(sceneDescriptor.transform.position, new Vector3(0.0f, 0.0f, 0.0f));
 
                 if (descriptorRemoteness > 1000)
                 {
@@ -1415,20 +1417,20 @@ namespace VRWorldToolkit
                 general.AddMessageGroup(new MessageGroup(COLLISION_MATRIX_NOT_SETUP, MessageType.Warning).SetGroupAutoFix(SetVRChatCollisionMatrix()));
             }
 
-            //Check if multiple scenes loaded
+            // Check if multiple scenes loaded
             if (SceneManager.sceneCount > 1)
             {
                 general.AddMessageGroup(new MessageGroup(MULTIPLE_SCENES_LOADED, MessageType.Error));
             }
 
-            //Check if console has error pause on
+            // Check if console has error pause on
             if (ConsoleFlagUtil.GetConsoleErrorPause())
             {
                 general.AddMessageGroup(new MessageGroup(ERROR_PAUSE_WARNING, MessageType.Error).AddSingleMessage(new SingleMessage(SetErrorPause(false))));
             }
 
 #if UNITY_EDITOR_WIN
-            //Check for problems with Build & Test
+            // Check for problems with Build & Test
             if (SDKClientUtilities.GetSavedVRCInstallPath() == "\\VRChat.exe" || SDKClientUtilities.GetSavedVRCInstallPath() == "")
             {
                 if (Registry.ClassesRoot.OpenSubKey(@"VRChat\shell\open\command") is null)
@@ -1442,7 +1444,7 @@ namespace VRWorldToolkit
             }
 #endif
 
-            //Get spawn points for any possible problems
+            // Get spawn points for any possible problems
             var spawns = sceneDescriptor.spawns.Where(s => s != null).ToArray();
 
             var spawnsLength = sceneDescriptor.spawns.Length;
@@ -1484,19 +1486,19 @@ namespace VRWorldToolkit
             }
 
 #if VRC_SDK_VRCSDK2
-            //Check if the world has playermods defined
+            // Check if the world has playermods defined
             var playermods = FindObjectsOfType(typeof(VRC_PlayerMods)) as VRC_PlayerMods[];
             if (playermods.Length == 0)
             {
                 general.AddMessageGroup(new MessageGroup(NO_PLAYER_MODS, MessageType.Tips));
             }
 
-            //Get triggers in the world
+            // Get triggers in the world
             var triggerScripts = (VRC_Trigger[])VRC_Trigger.FindObjectsOfType(typeof(VRC_Trigger));
 
             var triggerWrongLayer = new List<GameObject>();
 
-            //Check for OnEnterTriggers to make sure they are on mirrorreflection layer
+            // Check for OnEnterTriggers to make sure they are on mirrorreflection layer
             foreach (var triggerScript in triggerScripts)
             {
                 foreach (var trigger in triggerScript.Triggers)
@@ -1551,9 +1553,9 @@ namespace VRWorldToolkit
             }
 #endif
 
-            //Optimization Checks
+            // Optimization Checks
 
-            //Check for occlusion culling
+            // Check for occlusion culling
             if (StaticOcclusionCulling.umbraDataSize > 0)
             {
                 optimization.AddMessageGroup(new MessageGroup(BAKED_OCCLUSION_CULLING, MessageType.GoodFPS));
@@ -1587,7 +1589,7 @@ namespace VRWorldToolkit
 
             if (occlusionCacheFiles > 0)
             {
-                //Set the message type depending on how many files found
+                // Set the message type depending on how many files found
                 var cacheWarningType = MessageType.Info;
                 if (occlusionCacheFiles > 50000)
                 {
@@ -1601,7 +1603,7 @@ namespace VRWorldToolkit
                 optimization.AddMessageGroup(new MessageGroup(OCCLUSION_CULLING_CACHE_WARNING, cacheWarningType).AddSingleMessage(new SingleMessage(occlusionCacheFiles.ToString()).SetAutoFix(ClearOcclusionCache(occlusionCacheFiles))));
             }
 
-            //Check if there's any active cameras outputting to render textures
+            // Check if there's any active cameras outputting to render textures
             var activeCameras = new List<GameObject>();
             var cameraCount = 0;
             var cameras = GameObject.FindObjectsOfType<Camera>();
@@ -1624,13 +1626,13 @@ namespace VRWorldToolkit
                 optimization.AddMessageGroup(activeCamerasMessages);
             }
 
-            //Get active mirrors in the world and complain about them
+            // Get active mirrors in the world and complain about them
             var mirrors = FindObjectsOfType(typeof(VRC_MirrorReflection)) as VRC_MirrorReflection[];
 
             if (mirrors.Length > 0)
             {
                 var activeCamerasMessage = new MessageGroup(MIRROR_ON_BY_DEFAULT, MIRROR_ON_BY_DEFAULT_COMBINED, MIRROR_ON_BY_DEFAULT_INFO, MessageType.BadFPS);
-                for (int i = 0; i < mirrors.Length; i++)
+                for (var i = 0; i < mirrors.Length; i++)
                 {
                     if (mirrors[i].enabled)
                     {
@@ -1640,7 +1642,7 @@ namespace VRWorldToolkit
                 optimization.AddMessageGroup(activeCamerasMessage);
             }
 
-            //Lighting Checks
+            // Lighting Checks
 
             switch (RenderSettings.ambientMode)
             {
@@ -1666,8 +1668,8 @@ namespace VRWorldToolkit
 
 #if BAKERY_INCLUDED
             var bakeryLights = new List<GameObject>();
-            //TODO: Investigate whether or not these should be included
-            //bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryDirectLight)) as BakeryDirectLight[], s => s.gameObject));
+            // TODO: Investigate whether or not these should be included
+            // bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryDirectLight)) as BakeryDirectLight[], s => s.gameObject));
             bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryPointLight)) as BakeryPointLight[], s => s.gameObject));
             bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakerySkyLight)) as BakerySkyLight[], s => s.gameObject));
 
@@ -1731,15 +1733,15 @@ namespace VRWorldToolkit
             }
 #endif
 
-            //Get lights in scene
+            // Get lights in scene
             var lights = FindObjectsOfType<Light>();
 
             var nonBakedLights = new List<GameObject>();
 
-            //Go trough the lights to check if the scene contains lights set to be baked
+            // Go trough the lights to check if the scene contains lights set to be baked
             for (var i = 0; i < lights.Length; i++)
             {
-                //Skip checking realtime lights
+                // Skip checking realtime lights
                 if (lights[i].lightmapBakeType == LightmapBakeType.Realtime) continue;
 
                 bakedLighting = true;
@@ -1787,10 +1789,10 @@ namespace VRWorldToolkit
 
             var probes = LightmapSettings.lightProbes;
 
-            //If the scene has baked lights complain about stuff important to baked lighting missing
+            // If the scene has baked lights complain about stuff important to baked lighting missing
             if (bakedLighting)
             {
-                //Count lightmaps and suggest to use bigger lightmaps if needed
+                // Count lightmaps and suggest to use bigger lightmaps if needed
                 var lightMapSize = LightmapEditorSettings.maxAtlasSize;
                 if (lightMapSize != 4096 && LightmapSettings.lightmaps.Length > 1 && !LightmapEditorSettings.lightmapper.Equals(LightmapEditorSettings.Lightmapper.ProgressiveGPU))
                 {
@@ -1808,7 +1810,7 @@ namespace VRWorldToolkit
                     lighting.AddMessageGroup(new MessageGroup(CONSIDER_SMALLER_LIGHTMAPS, MessageType.Warning).AddSingleMessage(new SingleMessage(lightMapSize.ToString()).SetAutoFix(SetLightmapSize(2048))));
                 }
 
-                //Count how many light probes the scene has
+                // Count how many light probes the scene has
                 long probeCounter = 0;
                 long bakedProbes = probes != null ? probes.count : 0;
 
@@ -1855,13 +1857,13 @@ namespace VRWorldToolkit
                     lighting.AddMessageGroup(overlappingLightProbesGroup);
                 }
 
-                //Since the scene has baked lights complain if there's no lightprobes
+                // Since the scene has baked lights complain if there's no lightprobes
                 else if (probes == null && probeCounter == 0)
                 {
                     lighting.AddMessageGroup(new MessageGroup(NO_LIGHT_PROBES, MessageType.Info).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/LightProbes.html"));
                 }
 
-                //Check lighting data asset size if it exists
+                // Check lighting data asset size if it exists
                 if (Lightmapping.lightingDataAsset != null)
                 {
                     var pathTo = AssetDatabase.GetAssetPath(Lightmapping.lightingDataAsset);
@@ -1895,7 +1897,7 @@ namespace VRWorldToolkit
 #endif
             }
 
-            //ReflectionProbes
+            // ReflectionProbes
             var reflectionprobes = FindObjectsOfType<ReflectionProbe>();
             var unbakedprobes = new List<GameObject>();
             var reflectionProbeCount = reflectionprobes.Count();
@@ -1928,70 +1930,65 @@ namespace VRWorldToolkit
                 }
             }
 
-            //Post Processing Checks
+            // Post Processing Checks
 
 #if UNITY_POST_PROCESSING_STACK_V2
             var postProcessVolumes = FindObjectsOfType(typeof(PostProcessVolume)) as PostProcessVolume[];
-            var postProcessLayerExists = false;
-            PostProcessLayer postProcessLayer = null;
+            PostProcessLayer mainPostProcessLayer = null;
 
-            if (Camera.main == null)
+            // Attempt to find the main post process layer
+            if (sceneDescriptor.ReferenceCamera.gameObject.GetComponent(typeof(PostProcessLayer)))
             {
-                if (sceneDescriptor.ReferenceCamera)
-                {
-                    if (sceneDescriptor.ReferenceCamera.gameObject.GetComponent(typeof(PostProcessLayer)))
-                    {
-                        postProcessLayer = sceneDescriptor.ReferenceCamera.gameObject.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
-
-                        postProcessLayerExists = true;
-                    }
-                }
+                mainPostProcessLayer = sceneDescriptor.ReferenceCamera.gameObject.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
             }
             else
             {
-                if (Camera.main.gameObject.GetComponent(typeof(PostProcessLayer)))
+                if (Camera.main != null)
                 {
-                    postProcessLayer = Camera.main.gameObject.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
-
-                    postProcessLayerExists = true;
+                    if (Camera.main.gameObject.GetComponent(typeof(PostProcessLayer)))
+                    {
+                        mainPostProcessLayer = Camera.main.gameObject.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
+                    }
                 }
             }
 
-            if (postProcessLayer != null)
+            // Check if the post processing layer has resources properly set
+            if (mainPostProcessLayer)
             {
                 var resourcesInfo = typeof(PostProcessLayer).GetField("m_Resources", BindingFlags.NonPublic | BindingFlags.Instance);
 
-                var postProcessResources = resourcesInfo.GetValue(postProcessLayer) as PostProcessResources;
+                var postProcessResources = resourcesInfo.GetValue(mainPostProcessLayer) as PostProcessResources;
 
                 if (postProcessResources is null)
                 {
-                    var singleMessage = new SingleMessage(postProcessLayer.gameObject.name).SetSelectObject(postProcessLayer.gameObject);
+                    var singleMessage = new SingleMessage(mainPostProcessLayer.gameObject.name).SetSelectObject(mainPostProcessLayer.gameObject);
 
                     postProcessing.AddMessageGroup(new MessageGroup("The Post Process Layer on \"{0}\" does not have its resources field set properly. This causes post-processing to error out. This can be fixed by recreating the Post Processing Layer on the GameObject.", MessageType.Warning).AddSingleMessage(singleMessage));
 
                     var resources = (PostProcessResources)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath("d82512f9c8e5d4a4d938b575d47f88d4"), typeof(PostProcessResources));
 
-                    if (resources != null) singleMessage.SetAutoFix(SetPostProcessingLayerResources(postProcessLayer, resources));
+                    if (resources != null) singleMessage.SetAutoFix(SetPostProcessingLayerResources(mainPostProcessLayer, resources));
                 }
             }
 
-            if (!sceneDescriptor.ReferenceCamera && postProcessVolumes.Length == 0 && !postProcessLayerExists)
+            // If post processing is imported but no setup isn't detected show a message
+            if (postProcessVolumes.Length == 0 && mainPostProcessLayer is null)
             {
                 postProcessing.AddMessageGroup(new MessageGroup(POST_PROCESSING_IMPORTED_BUT_NOT_SETUP, MessageType.Info));
             }
             else
             {
+                // Check the scene view for post processing effects being off
                 var sceneViewState = SceneView.lastActiveSceneView.sceneViewState;
-
                 if (!sceneViewState.showImageEffects)
                 {
                     postProcessing.AddMessageGroup(new MessageGroup(POST_PROCESSING_DISABLED_IN_SCENE_VIEW, MessageType.Info).SetGroupAutoFix(SetPostProcessingInScene(sceneViewState, true)));
                 }
 
-                //Start by checking if reference camera has been set in the Scene Descriptor
+                // Start by checking if reference camera has been set in the Scene Descriptor
                 if (!sceneDescriptor.ReferenceCamera)
                 {
-                    SingleMessage noReferenceCameraMessage = new SingleMessage(sceneDescriptor.gameObject);
+                    var noReferenceCameraMessage = new SingleMessage(sceneDescriptor.gameObject);
 
                     if (Camera.main && Camera.main.GetComponent<PostProcessLayer>())
                     {
@@ -2002,14 +1999,14 @@ namespace VRWorldToolkit
                 }
                 else
                 {
-                    //Check for post process volumes in the scene
+                    // Check for post process volumes in the scene
                     if (postProcessVolumes.Length == 0)
                     {
                         postProcessing.AddMessageGroup(new MessageGroup(NO_POST_PROCESSING_VOLUMES, MessageType.Info));
                     }
                     else
                     {
-                        PostProcessLayer postprocessLayer = sceneDescriptor.ReferenceCamera.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
+                        var postprocessLayer = sceneDescriptor.ReferenceCamera.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
                         if (postprocessLayer == null)
                         {
                             postProcessing.AddMessageGroup(new MessageGroup(REFERENCE_CAMERA_NO_POST_PROCESSING_LAYER, MessageType.Error).AddSingleMessage(new SingleMessage(postprocessLayer.gameObject)));
@@ -2030,27 +2027,27 @@ namespace VRWorldToolkit
 
                         foreach (var postProcessVolume in postProcessVolumes)
                         {
-                            //Check if the layer matches the cameras post processing layer
+                            // Check if the layer matches the cameras post processing layer
                             if (volumeLayer != 0 && (postprocessLayer.volumeLayer != (postprocessLayer.volumeLayer | (1 << postProcessVolume.gameObject.layer))))
                             {
                                 postProcessing.AddMessageGroup(new MessageGroup(VOLUME_ON_WRONG_LAYER, MessageType.Error).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject.name, Helper.GetAllLayersFromMask(postprocessLayer.volumeLayer)).SetSelectObject(postProcessVolume.gameObject)));
                             }
 
-                            //Check if the volume has a profile set
+                            // Check if the volume has a profile set
                             if (!postProcessVolume.profile && !postProcessVolume.sharedProfile)
                             {
                                 postProcessing.AddMessageGroup(new MessageGroup(NO_PROFILE_SET, MessageType.Error).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject.name)));
                                 continue;
                             }
 
-                            //Check if the collider is either global or has a collider on it
+                            // Check if the collider is either global or has a collider on it
                             if (!postProcessVolume.isGlobal && !postProcessVolume.GetComponent<Collider>())
                             {
                                 postProcessing.AddMessageGroup(new MessageGroup(POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER, MessageType.Error).AddSingleMessage(new SingleMessage(postProcessVolume.name).SetSelectObject(postProcessVolume.gameObject)));
                             }
                             else
                             {
-                                //Go trough the profile settings and see if any bad one's are used
+                                // Go trough the profile settings and see if any bad one's are used
                                 PostProcessProfile postProcessProfile;
 
                                 if (postProcessVolume.profile)
@@ -2123,7 +2120,7 @@ namespace VRWorldToolkit
             postProcessing.AddMessageGroup(new MessageGroup(NO_POST_PROCESSING_IMPORTED, MessageType.Info));
 #endif
 
-            //Gameobject checks
+            // GameObject checks
 
             var importers = new List<ModelImporter>();
 
@@ -2144,10 +2141,10 @@ namespace VRWorldToolkit
             var materialWithNonWhitelistedShader = general.AddMessageGroup(new MessageGroup(MATERIAL_WITH_NON_WHITELISTED_SHADER, MATERIAL_WITH_NON_WHITELISTED_SHADER_COMBINED, MATERIAL_WITH_NON_WHITELISTED_SHADER_INFO, MessageType.Warning).SetCombinedSelectionDisabled(true));
             var uiElementNavigation = general.AddMessageGroup(new MessageGroup(UI_ELEMENT_WITH_NAVIGATION_NOT_NONE, UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_COMBINED, UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_INFO, MessageType.Tips));
 
-            Object[] allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
-            for (int i = 0; i < allGameObjects.Length; i++)
+            var allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
+            for (var i = 0; i < allGameObjects.Length; i++)
             {
-                GameObject gameObject = allGameObjects[i] as GameObject;
+                var gameObject = allGameObjects[i] as GameObject;
 
                 if (gameObject.hideFlags != HideFlags.None || EditorUtility.IsPersistent(gameObject.transform.root.gameObject))
                     continue;
@@ -2206,7 +2203,7 @@ namespace VRWorldToolkit
 
                         if (AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(mesh)) != null)
                         {
-                            ModelImporter importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(mesh)) as ModelImporter;
+                            var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(mesh)) as ModelImporter;
 
                             if (mesh.blendShapeCount > 0 && importer.importBlendShapeNormals == ModelImporterNormals.Calculate && !ModelImporterUtil.GetLegacyBlendShapeNormals(importer))
                             {
@@ -2216,9 +2213,9 @@ namespace VRWorldToolkit
                     }
 
                     // Check materials for problems
-                    for (int l = 0; l < renderer.sharedMaterials.Length; l++)
+                    for (var l = 0; l < renderer.sharedMaterials.Length; l++)
                     {
-                        Material material = renderer.sharedMaterials[l];
+                        var material = renderer.sharedMaterials[l];
 
                         if (material == null || checkedMaterials.Contains(material))
                             continue;
@@ -2249,13 +2246,13 @@ namespace VRWorldToolkit
 
                             if (File.Exists(assetPath))
                             {
-                                //Read shader file to string
+                                // Read shader file to string
                                 var word = File.ReadAllText(assetPath);
 
-                                //Strip comments
+                                // Strip comments
                                 word = Regex.Replace(word, "(\\/\\/.*)|(\\/\\*)(.*)(\\*\\/)", "");
 
-                                //Match for GrabPass
+                                // Match for GrabPass
                                 if (Regex.IsMatch(word, "GrabPass\\s*{"))
                                 {
                                     grabPassShaders.AddSingleMessage(new SingleMessage(material.name, shader.name).SetAssetPath(AssetDatabase.GetAssetPath(material)));
@@ -2325,7 +2322,7 @@ namespace VRWorldToolkit
                 uiElementNavigation.SetGroupAutoFix(SetSelectableNavigationMode(selectablesNotNone.ToArray(), Navigation.Mode.None));
             }
 
-            //If more than 10% of shaders used in scene are toon shaders to leave room for people using them for avatar displays
+            // If more than 10% of shaders used in scene are toon shaders to leave room for people using them for avatar displays
             if (checkedMaterials.Count > 0)
             {
                 if (badShaders / checkedMaterials.Count * 100 > 10)
@@ -2334,7 +2331,7 @@ namespace VRWorldToolkit
                 }
             }
 
-            //Suggest to crunch textures if there are any uncrunched textures found
+            // Suggest to crunch textures if there are any uncrunched textures found
             if (textureCount > 0)
             {
                 var percent = (int)((float)unCrunchedTextures.Count / (float)textureCount * 100f);
@@ -2533,7 +2530,7 @@ namespace VRWorldToolkit
             {
                 RefreshBuild();
 
-                //Check for bloat in occlusion cache
+                // Check for bloat in occlusion cache
                 if (occlusionCacheFiles == 0 && Directory.Exists("Library/Occlusion/"))
                 {
                     Task.Run(CountOcclusionCacheFiles);
