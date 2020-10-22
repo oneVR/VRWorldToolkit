@@ -67,6 +67,37 @@ namespace VRWorldToolkit
             return layers.ToArray();
         }
 
+        public static GameObject CreateMainCamera()
+        {
+            var camera = new GameObject("Main Camera");
+            camera.AddComponent<Camera>();
+            camera.AddComponent<AudioListener>();
+            camera.tag = "MainCamera";
+
+            return camera;
+        }
+
+        private static AddRequest packageManagerRequest;
+
+        public static void ImportPackage(string package)
+        {
+            packageManagerRequest = Client.Add(package);
+            EditorApplication.update += PackageImportProgress;
+        }
+
+        private static void PackageImportProgress()
+        {
+            if (packageManagerRequest.IsCompleted)
+            {
+                if (packageManagerRequest.Status == StatusCode.Success)
+                    Debug.Log("Installed: " + packageManagerRequest.Result.packageId);
+                else if (packageManagerRequest.Status >= StatusCode.Failure)
+                    Debug.Log(packageManagerRequest.Error.message);
+
+                EditorApplication.update -= PackageImportProgress;
+            }
+        }
+
         public static string GetAllLayersFromMask(LayerMask layerMask)
         {
             List<string> layers = new List<string>();
