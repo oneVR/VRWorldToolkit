@@ -4,33 +4,35 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using UnityEditor;
+using UnityEditor.PackageManager;
+using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 
 namespace VRWorldToolkit
 {
-    public class Helper
+    public static class Helper
     {
         public static string ReturnPlural(int counter)
         {
             return counter > 1 ? "s" : "";
         }
 
-        public static bool CheckNameSpace(string namespace_name)
+        public static bool CheckNameSpace(string namespaceName)
         {
-            bool namespaceFound = (from assembly in AppDomain.CurrentDomain.GetAssemblies()
+            return (from assembly in AppDomain.CurrentDomain.GetAssemblies()
                                    from type in assembly.GetTypes()
-                                   where type.Namespace == namespace_name
+                                   where type.Namespace == namespaceName
                                    select type).Any();
-            return namespaceFound;
         }
 
         public static float GetBrightness(Color color)
         {
-            float num = ((float)color.r);
-            float num2 = ((float)color.g);
-            float num3 = ((float)color.b);
-            float num4 = num;
-            float num5 = num;
+            var num = ((float)color.r);
+            var num2 = ((float)color.g);
+            var num3 = ((float)color.b);
+            var num4 = num;
+            var num5 = num;
             if (num2 > num4)
                 num4 = num2;
             if (num3 > num4)
@@ -68,7 +70,7 @@ namespace VRWorldToolkit
         public static string GetAllLayersFromMask(LayerMask layerMask)
         {
             List<string> layers = new List<string>();
-            for (int i = 0; i < 32; i++)
+            for (var i = 0; i < 32; i++)
             {
                 if (layerMask == (layerMask | (1 << i)))
                 {
@@ -83,24 +85,24 @@ namespace VRWorldToolkit
             return layermask == (layermask | (1 << layer));
         }
 
-        public static string FormatTime(System.TimeSpan t)
+        public static string FormatTime(TimeSpan t)
         {
-            string formattedTime = "";
+            var formattedTime = "";
             if (t.TotalDays > 1)
             {
-                formattedTime = String.Concat(formattedTime, t.Days + " days ");
+                formattedTime = string.Concat(formattedTime, t.Days + " days ");
             }
             if (t.TotalHours > 1)
             {
-                formattedTime = String.Concat(formattedTime, t.Hours + " days ");
+                formattedTime = string.Concat(formattedTime, t.Hours + " days ");
             }
             if (t.TotalMinutes > 1)
             {
-                formattedTime = String.Concat(formattedTime, t.Minutes + " minutes ");
+                formattedTime = string.Concat(formattedTime, t.Minutes + " minutes ");
             }
             else
             {
-                formattedTime = String.Concat(formattedTime, t.Seconds + " seconds");
+                formattedTime = string.Concat(formattedTime, t.Seconds + " seconds");
             }
 
             return formattedTime;
@@ -129,26 +131,22 @@ namespace VRWorldToolkit
             return null;
         }
 
-        public static string GetSteamVRCExecutablePath()
+        public static string GetSteamVrcExecutablePath()
         {
-            RegistryKey steamKey = Registry.LocalMachine.OpenSubKey("Software\\Valve\\Steam") ?? Registry.LocalMachine.OpenSubKey("Software\\Wow6432Node\\Valve\\Steam");
+            var steamKey = Registry.LocalMachine.OpenSubKey("Software\\Valve\\Steam") ?? Registry.LocalMachine.OpenSubKey("Software\\Wow6432Node\\Valve\\Steam");
 
             if (steamKey != null)
             {
-                string commonPath = "\\SteamApps\\common";
-                string executablePath = "\\VRChat.exe";
+                const string commonPath = "\\SteamApps\\common";
+                const string executablePath = "\\VRChat.exe";
 
                 var steamPath = (string)steamKey.GetValue("InstallPath");
 
                 var configFile = Path.Combine(steamPath, "config", "config.vdf");
 
-                Regex regex = new Regex("(?<=BaseInstallFolder.*\".+?\").+?(?=\")");
+                var folders = new List<string> {steamPath + commonPath};
 
-                List<string> folders = new List<string>();
-
-                folders.Add(steamPath + commonPath);
-
-                string configText = File.ReadAllText(configFile);
+                var configText = File.ReadAllText(configFile);
 
                 folders.AddRange(Regex.Matches(configText, "(?<=BaseInstallFolder.*\".+?\").+?(?=\")").Cast<Match>().Select(x => x.Value + commonPath));
 
@@ -159,14 +157,14 @@ namespace VRWorldToolkit
                         var matches = Directory.GetDirectories(folder, "VRChat");
                         if (matches.Length >= 1)
                         {
-                            string finalPath = matches[0] + executablePath;
+                            var finalPath = matches[0] + executablePath;
 
                             if (File.Exists(finalPath)) return finalPath;
                         }
                     }
                     catch (DirectoryNotFoundException)
                     {
-                        continue;
+                        //continue
                     }
                 }
             }

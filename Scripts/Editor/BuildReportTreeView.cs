@@ -14,7 +14,7 @@ namespace VRWorldToolkit
     {
         private BuildReport report;
 
-        enum TreeColumns
+        private enum TreeColumns
         {
             Type,
             Size,
@@ -180,10 +180,10 @@ namespace VRWorldToolkit
             return false;
         }
 
-        struct CategoryStats
+        private struct CategoryStats
         {
-            public string name;
-            public int size;
+            public string Name;
+            public int Size;
         }
 
         /// <summary>
@@ -193,28 +193,28 @@ namespace VRWorldToolkit
         {
             if (HasReport())
             {
-                List<BuildReportItem> stats = base.GetRows().Cast<BuildReportItem>().ToList();
+                var stats = base.GetRows().Cast<BuildReportItem>().ToList();
 
-                int totalSize = stats.Sum(x => x.size);
+                var totalSize = stats.Sum(x => x.size);
 
                 var grouped = stats
                     .GroupBy(x => x.assetType)
                     .Select(cx => new CategoryStats()
                     {
-                        name = cx.First().assetType,
-                        size = cx.Sum(x => x.size),
-                    }).OrderByDescending(x => x.size)
+                        Name = cx.First().assetType,
+                        Size = cx.Sum(x => x.size),
+                    }).OrderByDescending(x => x.Size)
                     .ToArray();
 
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
 
-                for (int i = 0; i < grouped.Length; i++)
+                for (var i = 0; i < grouped.Length; i++)
                 {
                     var item = grouped[i];
 
-                    string name = "";
+                    string name;
 
-                    switch (item.name)
+                    switch (item.Name)
                     {
                         case "Mono":
                             name = "Scripts";
@@ -226,16 +226,16 @@ namespace VRWorldToolkit
                         case "TrueTypeFont":
                         case "Plugin":
                         case "Prefab":
-                            name = item.name + "s";
+                            name = item.Name + "s";
                             break;
                         default:
-                            name = item.name;
+                            name = item.Name;
                             break;
                     }
 
-                    if (GUILayout.Button(name + " " + EditorUtility.FormatBytes(item.size) + " " + ((double)item.size / totalSize).ToString("P"), EditorStyles.label))
+                    if (GUILayout.Button(name + " " + EditorUtility.FormatBytes(item.Size) + " " + ((double)item.Size / totalSize).ToString("P"), EditorStyles.label))
                     {
-                        base.searchString = item.name;
+                        searchString = item.Name;
                     }
                 }
 
@@ -368,7 +368,7 @@ namespace VRWorldToolkit
             base.DoubleClickedItem(id);
 
             // Get the clicked item
-            var clickedItem = (BuildReportItem)base.FindItem(id, base.rootItem);
+            var clickedItem = (BuildReportItem)FindItem(id, rootItem);
 
             //Ping clicked asset in project window
             EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(clickedItem.path));
@@ -383,7 +383,7 @@ namespace VRWorldToolkit
             base.ContextClickedItem(id);
 
             // Get the clicked item
-            var clickedItem = (BuildReportItem)base.FindItem(id, base.rootItem);
+            var clickedItem = (BuildReportItem)FindItem(id, rootItem);
 
             //base.SetSelection(new IList<int>());
 
@@ -392,7 +392,7 @@ namespace VRWorldToolkit
 
             // Create the menu items
             menu.AddItem(new GUIContent("Copy Name"), false, ReplaceClipboard, clickedItem.name + clickedItem.extension);
-            menu.AddItem(new GUIContent("Copy Path"), false, ReplaceClipboard, (string)clickedItem.path);
+            menu.AddItem(new GUIContent("Copy Path"), false, ReplaceClipboard, clickedItem.path);
 
             // Show the menu
             menu.ShowAsContext();
@@ -445,8 +445,6 @@ namespace VRWorldToolkit
                     break;
                 case 4:
                     items = items.OrderBy(x => x.extension);
-                    break;
-                default:
                     break;
             }
 

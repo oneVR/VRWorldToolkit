@@ -23,12 +23,12 @@ namespace VRWorldToolkit
     [CanEditMultipleObjects]
     public class CustomAvatarPedestalEditor : Editor
     {
-        private const float InnerBound = 1.5f;
-        private const float OuterBound = 2f;
+        private const float INNER_BOUND = 1.5f;
+        private const float OUTER_BOUND = 2f;
 
-        private const string AvatarIDRegex = "avtr_[A-Za-z0-9]{8}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{12}";
+        private const string AVATAR_ID_REGEX = "avtr_[A-Za-z0-9]{8}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{12}";
 
-        private bool setIDsFoldout = false;
+        private bool setIDsFoldout;
         private string avatarIDArea = "";
 
         private string[] avatarIDs;
@@ -50,7 +50,7 @@ namespace VRWorldToolkit
                 {
                     avatarIDArea = EditorGUILayout.TextArea(avatarIDArea, GUILayout.ExpandWidth(true));
 
-                    avatarIDs = Regex.Matches(avatarIDArea, AvatarIDRegex).Cast<Match>().Select(m => m.Value).ToArray();
+                    avatarIDs = Regex.Matches(avatarIDArea, AVATAR_ID_REGEX).Cast<Match>().Select(m => m.Value).ToArray();
 
                     EditorGUILayout.LabelField("IDs found/Pedestals selected: ", avatarIDs.Length + "/" + serializedObject.targetObjects.Length, avatarIDs.Length > serializedObject.targetObjects.Length ? Styles.RedLabel : GUIStyle.none);
 
@@ -106,7 +106,7 @@ namespace VRWorldToolkit
             Gizmos.color = Color.green;
 
             // Draw the outer bound of the pedestal
-            Gizmos.DrawWireCube(Vector3.up * 1.2f, new Vector3(1f * OuterBound, 1f * OuterBound));
+            Gizmos.DrawWireCube(Vector3.up * 1.2f, new Vector3(1f * OUTER_BOUND, 1f * OUTER_BOUND));
 
             // Change color to red if showing the front is active and active camera is behind the pedestal
             var cameraDirection = pedestalTransform.position - Camera.current.transform.position;
@@ -119,7 +119,7 @@ namespace VRWorldToolkit
             }
 
             // Draw the inner bound of the pedestal
-            Gizmos.DrawWireCube(Vector3.up * 1.2f, new Vector3(1f * InnerBound, 1f * InnerBound));
+            Gizmos.DrawWireCube(Vector3.up * 1.2f, new Vector3(1f * INNER_BOUND, 1f * INNER_BOUND));
         }
     }
 }

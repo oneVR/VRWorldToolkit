@@ -36,7 +36,6 @@ namespace VRWorldToolkit
                             break;
                         case 1:
                             return false;
-                        case 2:
                         default:
                             break;
                     }
@@ -60,9 +59,6 @@ namespace VRWorldToolkit
                                 break;
                             case 1:
                                 return false;
-                            case 2:
-                            default:
-                                break;
                         }
                     }
                 }

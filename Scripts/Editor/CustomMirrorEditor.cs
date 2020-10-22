@@ -20,7 +20,7 @@ namespace VRWorldToolkit
     [CanEditMultipleObjects]
     public class CustomMirrorEditor : Editor
     {
-        bool showExplanations;
+        private bool showExplanations;
 
         public override void OnInspectorGUI()
         {
