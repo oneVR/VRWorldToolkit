@@ -2022,7 +2022,7 @@ namespace VRWorldToolkit
                         foreach (var postProcessVolume in postProcessVolumes)
                         {
                             //Check if the layer matches the cameras post processing layer
-                            if (postprocessLayer.volumeLayer != (postprocessLayer.volumeLayer | (1 << postProcessVolume.gameObject.layer)))
+                            if (volumeLayer != 0 && (postprocessLayer.volumeLayer != (postprocessLayer.volumeLayer | (1 << postProcessVolume.gameObject.layer))))
                             {
                                 postProcessing.AddMessageGroup(new MessageGroup(VOLUME_ON_WRONG_LAYER, MessageType.Error).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject.name, Helper.GetAllLayersFromMask(postprocessLayer.volumeLayer)).SetSelectObject(postProcessVolume.gameObject)));
                             }
