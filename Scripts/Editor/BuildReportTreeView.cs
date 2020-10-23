@@ -258,25 +258,32 @@ namespace VRWorldToolkit
                 {
                     var step = steps[i];
 
-                    for (var j = 0; j < step.messages.Length; j++)
+                    if (step.messages.Length > 0)
                     {
-                        var message = step.messages[j];
+                        GUILayout.Label(step.name, EditorStyles.boldLabel);
 
-                        var messageType = MessageType.Info;
-
-                        switch (message.type)
+                        for (var j = 0; j < step.messages.Length; j++)
                         {
-                            case LogType.Error:
-                                messageType = MessageType.Error;
-                                break;
-                            case LogType.Exception:
-                            case LogType.Assert:
-                            case LogType.Warning:
-                                messageType = MessageType.Warning;
-                                break;
+                            var message = step.messages[j];
+
+                            var messageType = MessageType.Info;
+
+                            switch (message.type)
+                            {
+                                case LogType.Error:
+                                    messageType = MessageType.Error;
+                                    break;
+                                case LogType.Exception:
+                                case LogType.Assert:
+                                case LogType.Warning:
+                                    messageType = MessageType.Warning;
+                                    break;
+                            }
+
+                            EditorGUILayout.HelpBox(message.content, messageType);
                         }
 
-                        EditorGUILayout.HelpBox(message.content, messageType);
+                        EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
                     }
                 }
             }
