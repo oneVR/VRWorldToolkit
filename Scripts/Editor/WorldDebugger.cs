@@ -2632,6 +2632,10 @@ namespace VRWorldToolkit
 
                     overallStatsFoldout = GUILayout.Toggle(overallStatsFoldout, "Stats", EditorStyles.toolbarButton);
 
+                    buildReportMessagesFoldout = GUILayout.Toggle(buildReportMessagesFoldout, "Messages", EditorStyles.toolbarButton);
+
+                    GUILayout.Space(10);
+
                     if (GUILayout.Button("Refresh", EditorStyles.toolbarButton))
                     {
                         if (m_TreeView.HasReport())
@@ -2650,12 +2654,6 @@ namespace VRWorldToolkit
                             }
                         }
                     }
-
-                    GUILayout.Space(10);
-
-                    buildReportMessagesFoldout = GUILayout.Toggle(buildReportMessagesFoldout, "Messages", EditorStyles.toolbarButton);
-
-                    GUILayout.Space(10);
 
                     GUILayout.FlexibleSpace();
 
