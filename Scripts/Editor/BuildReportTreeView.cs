@@ -178,6 +178,11 @@ namespace VRWorldToolkit
             return report != null && report.summary.result == BuildResult.Succeeded;
         }
 
+        public bool HasMessages()
+        {
+            return HasReport() && (report.summary.totalErrors > 0 || report.summary.totalWarnings > 0);
+        }
+
         private struct CategoryStats
         {
             public string Name;
@@ -243,7 +248,7 @@ namespace VRWorldToolkit
 
         public void DrawMessages()
         {
-            if (HasReport())
+            if (HasMessages())
             {
                 var steps = report.steps;
 
@@ -272,6 +277,10 @@ namespace VRWorldToolkit
                         EditorGUILayout.HelpBox(message.content, messageType);
                     }
                 }
+            }
+            else
+            {
+                EditorGUILayout.HelpBox("No messages to show.", MessageType.Info);
             }
         }
 
