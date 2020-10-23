@@ -2558,6 +2558,7 @@ namespace VRWorldToolkit
 
         [SerializeField] private int selectedBuildReport;
         [SerializeField] private bool overallStatsFoldout;
+        [SerializeField] private bool buildReportMessagesFoldout;
 
         private void OnGUI()
         {
@@ -2656,6 +2657,10 @@ namespace VRWorldToolkit
 
                     GUILayout.Space(10);
 
+                    buildReportMessagesFoldout = GUILayout.Toggle(buildReportMessagesFoldout, "Messages", EditorStyles.toolbarButton);
+
+                    GUILayout.Space(10);
+
                     GUILayout.FlexibleSpace();
 
                     m_TreeView.searchString = m_SearchField.OnToolbarGUI(m_TreeView.searchString);
@@ -2666,6 +2671,11 @@ namespace VRWorldToolkit
                     if (overallStatsFoldout)
                     {
                         m_TreeView.DrawOverallStats();
+                    }
+
+                    if (buildReportMessagesFoldout)
+                    {
+                        m_TreeView.DrawMessages();
                     }
 
                     var treeViewRect = EditorGUILayout.BeginVertical();

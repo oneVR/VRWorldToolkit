@@ -243,6 +243,40 @@ namespace VRWorldToolkit
             }
         }
 
+        public void DrawMessages()
+        {
+            if (HasReport())
+            {
+                var steps = report.steps;
+
+                for (var i = 0; i < steps.Length; i++)
+                {
+                    var step = steps[i];
+
+                    for (var j = 0; j < step.messages.Length; j++)
+                    {
+                        var message = step.messages[j];
+
+                        var messageType = MessageType.Info;
+
+                        switch (message.type)
+                        {
+                            case LogType.Error:
+                                messageType = MessageType.Error;
+                                break;
+                            case LogType.Exception:
+                            case LogType.Assert:
+                            case LogType.Warning:
+                                messageType = MessageType.Warning;
+                                break;
+                        }
+
+                        EditorGUILayout.HelpBox(message.content, messageType);
+                    }
+                }
+            }
+        }
+
         public static MultiColumnHeaderState CreateDefaultMultiColumnHeaderState(float treeViewWidth)
         {
             var columns = new[]
