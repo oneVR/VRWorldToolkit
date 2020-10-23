@@ -44,7 +44,9 @@ namespace VRWorldToolkit
             public int size { get; set; }
             public double percentage { get; set; }
 
-            public BuildListAsset() { }
+            public BuildListAsset()
+            {
+            }
 
             public BuildListAsset(string assetType, string fullPath, int size)
             {
@@ -78,7 +80,7 @@ namespace VRWorldToolkit
 
         protected override TreeViewItem BuildRoot()
         {
-            var root = new TreeViewItem { id = -1, depth = -1 };
+            var root = new TreeViewItem {id = -1, depth = -1};
 
             var serializedReport = new SerializedObject(report);
 
@@ -140,7 +142,7 @@ namespace VRWorldToolkit
 
             for (int i = 0; i < results.Count; i++)
             {
-                results[i].percentage = (double)results[i].size / totalSize;
+                results[i].percentage = (double) results[i].size / totalSize;
             }
 
             for (int i = 0; i < results.Count; i++)
@@ -236,7 +238,7 @@ namespace VRWorldToolkit
                             break;
                     }
 
-                    if (GUILayout.Button(name + " " + EditorUtility.FormatBytes(item.Size) + " " + ((double)item.Size / totalSize).ToString("P"), EditorStyles.label))
+                    if (GUILayout.Button(name + " " + EditorUtility.FormatBytes(item.Size) + " " + ((double) item.Size / totalSize).ToString("P"), EditorStyles.label))
                     {
                         searchString = item.Name;
                     }
@@ -358,13 +360,13 @@ namespace VRWorldToolkit
 
         protected override void RowGUI(RowGUIArgs args)
         {
-            var buildReportItem = (BuildReportItem)args.item;
+            var buildReportItem = (BuildReportItem) args.item;
 
             for (var visibleColumnIndex = 0; visibleColumnIndex < args.GetNumVisibleColumns(); visibleColumnIndex++)
             {
                 // Get the current cell rect and index
                 var rect = args.GetCellRect(visibleColumnIndex);
-                var columnIndex = (TreeColumns)args.GetColumn(visibleColumnIndex);
+                var columnIndex = (TreeColumns) args.GetColumn(visibleColumnIndex);
 
                 //Set label style to white if cell is selected otherwise to normal
                 var labelStyle = args.selected ? Styles.TreeViewLabelSelected : Styles.TreeViewLabel;
@@ -384,6 +386,7 @@ namespace VRWorldToolkit
                         {
                             EditorGUI.LabelField(rect, buildReportItem.name, labelStyle);
                         }
+
                         break;
                     case TreeColumns.Size:
                         EditorGUI.LabelField(rect, EditorUtility.FormatBytes(buildReportItem.size), labelStyle);
@@ -409,7 +412,7 @@ namespace VRWorldToolkit
             base.DoubleClickedItem(id);
 
             // Get the clicked item
-            var clickedItem = (BuildReportItem)FindItem(id, rootItem);
+            var clickedItem = (BuildReportItem) FindItem(id, rootItem);
 
             //Ping clicked asset in project window
             EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(clickedItem.path));
@@ -424,7 +427,7 @@ namespace VRWorldToolkit
             base.ContextClickedItem(id);
 
             // Get the clicked item
-            var clickedItem = (BuildReportItem)FindItem(id, rootItem);
+            var clickedItem = (BuildReportItem) FindItem(id, rootItem);
 
             //base.SetSelection(new IList<int>());
 
@@ -441,7 +444,7 @@ namespace VRWorldToolkit
             // Function to replace clipboard contents
             void ReplaceClipboard(object input)
             {
-                EditorGUIUtility.systemCopyBuffer = (string)input;
+                EditorGUIUtility.systemCopyBuffer = (string) input;
             }
         }
 
@@ -454,7 +457,7 @@ namespace VRWorldToolkit
         protected override bool DoesItemMatchSearch(TreeViewItem item, string search)
         {
             // Cast match item for parameter acess
-            var textureTreeViewItem = (BuildReportItem)item;
+            var textureTreeViewItem = (BuildReportItem) item;
 
             // Try to match the search string to item name or asset type and return true if it does
             if (textureTreeViewItem.name.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0 ||

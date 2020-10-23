@@ -9,10 +9,10 @@ namespace VRWorldToolkit
             UnityEngine.Object[] asset = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset");
             if ((asset != null) && (asset.Length > 0))
             {
-                SerializedObject so = new SerializedObject(asset[0]);
-                SerializedProperty tags = so.FindProperty("tags");
+                var so = new SerializedObject(asset[0]);
+                var tags = so.FindProperty("tags");
 
-                for (int i = 0; i < tags.arraySize; ++i)
+                for (var i = 0; i < tags.arraySize; ++i)
                 {
                     if (tags.GetArrayElementAtIndex(i).stringValue == tag)
                     {
@@ -32,10 +32,10 @@ namespace VRWorldToolkit
             UnityEngine.Object[] asset = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset");
             if ((asset != null) && (asset.Length > 0))
             {
-                SerializedObject so = new SerializedObject(asset[0]);
-                SerializedProperty tags = so.FindProperty("tags");
+                var so = new SerializedObject(asset[0]);
+                var tags = so.FindProperty("tags");
 
-                for (int i = 0; i < tags.arraySize; ++i)
+                for (var i = 0; i < tags.arraySize; ++i)
                 {
                     if (tags.GetArrayElementAtIndex(i).stringValue == tag)
                     {

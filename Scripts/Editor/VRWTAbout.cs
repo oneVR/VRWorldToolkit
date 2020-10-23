@@ -8,7 +8,7 @@ namespace VRWorldToolkit
         [MenuItem("VRWorld Toolkit/About VRWorld Toolkit", false, 201)]
         public static void ShowWindow()
         {
-            var window = (VRWTAbout)GetWindow(typeof(VRWTAbout), true, "VRWorld Toolkit");
+            var window = (VRWTAbout) GetWindow(typeof(VRWTAbout), true, "VRWorld Toolkit");
             window.minSize = new Vector2(600, 380);
             window.maxSize = new Vector2(600, 380);
             window.Show();

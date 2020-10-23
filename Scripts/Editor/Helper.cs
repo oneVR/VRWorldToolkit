@@ -21,16 +21,16 @@ namespace VRWorldToolkit
         public static bool CheckNameSpace(string namespaceName)
         {
             return (from assembly in AppDomain.CurrentDomain.GetAssemblies()
-                                   from type in assembly.GetTypes()
-                                   where type.Namespace == namespaceName
-                                   select type).Any();
+                from type in assembly.GetTypes()
+                where type.Namespace == namespaceName
+                select type).Any();
         }
 
         public static float GetBrightness(Color color)
         {
-            var num = ((float)color.r);
-            var num2 = ((float)color.g);
-            var num3 = ((float)color.b);
+            var num = ((float) color.r);
+            var num2 = ((float) color.g);
+            var num3 = ((float) color.b);
             var num4 = num;
             var num5 = num;
             if (num2 > num4)
@@ -51,6 +51,7 @@ namespace VRWorldToolkit
                 text = text.Substring(0, length);
                 text += "...";
             }
+
             return text;
         }
 
@@ -64,6 +65,7 @@ namespace VRWorldToolkit
                     layers.Add(i);
                 }
             }
+
             return layers.ToArray();
         }
 
@@ -108,6 +110,7 @@ namespace VRWorldToolkit
                     layers.Add(LayerMask.LayerToName(i));
                 }
             }
+
             return String.Join(", ", layers.ToArray());
         }
 
@@ -123,10 +126,12 @@ namespace VRWorldToolkit
             {
                 formattedTime = string.Concat(formattedTime, t.Days + " days ");
             }
+
             if (t.TotalHours > 1)
             {
                 formattedTime = string.Concat(formattedTime, t.Hours + " days ");
             }
+
             if (t.TotalMinutes > 1)
             {
                 formattedTime = string.Concat(formattedTime, t.Minutes + " minutes ");
@@ -151,7 +156,8 @@ namespace VRWorldToolkit
         public static Type GetTypeFromName(string typeName)
         {
             var type = Type.GetType(typeName);
-            if (type != null) return type; foreach (var a in AppDomain.CurrentDomain.GetAssemblies())
+            if (type != null) return type;
+            foreach (var a in AppDomain.CurrentDomain.GetAssemblies())
             {
                 type = a.GetType(typeName);
                 if (type != null)
@@ -159,6 +165,7 @@ namespace VRWorldToolkit
                     return type;
                 }
             }
+
             return null;
         }
 
@@ -171,7 +178,7 @@ namespace VRWorldToolkit
                 const string commonPath = "\\SteamApps\\common";
                 const string executablePath = "\\VRChat.exe";
 
-                var steamPath = (string)steamKey.GetValue("InstallPath");
+                var steamPath = (string) steamKey.GetValue("InstallPath");
 
                 var configFile = Path.Combine(steamPath, "config", "config.vdf");
 

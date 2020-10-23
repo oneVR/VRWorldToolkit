@@ -27,7 +27,7 @@ namespace VRWorldToolkit
 
                 if (pipelines.Length > 1)
                 {
-                    int selection = EditorUtility.DisplayDialogComplex("VRWorld Toolkit: Multiple Pipeline managers!", "Multiple Pipeline Manager components found in scene.\r\n\r\nThis can break the upload process and cause you to not be able to load into the world.\r\n\r\nSelect Cancel Build if you want to fix the problem yourself or press Bypass to ignore the problem and continue.", "Fix And Continue", "Cancel Build", "Bypass");
+                    var selection = EditorUtility.DisplayDialogComplex("VRWorld Toolkit: Multiple Pipeline managers!", "Multiple Pipeline Manager components found in scene.\r\n\r\nThis can break the upload process and cause you to not be able to load into the world.\r\n\r\nSelect Cancel Build if you want to fix the problem yourself or press Bypass to ignore the problem and continue.", "Fix And Continue", "Cancel Build", "Bypass");
 
                     switch (selection)
                     {
@@ -36,8 +36,6 @@ namespace VRWorldToolkit
                             break;
                         case 1:
                             return false;
-                        default:
-                            break;
                     }
                 }
 
@@ -50,7 +48,7 @@ namespace VRWorldToolkit
 
                     if (spawnsLength != spawns.Length)
                     {
-                        int selection = EditorUtility.DisplayDialogComplex("VRWorld Toolkit: Null spawn points!", "Null spawn points set in Scene Descriptor.\r\n\r\nSpawning into a null spawn point will cause you get thrown back into your home world.\r\n\r\nSelect Cancel Build if you want to fix the problem yourself or press Bypass to ignore the problem and continue.", "Fix And Continue", "Cancel Build", "Bypass");
+                        var selection = EditorUtility.DisplayDialogComplex("VRWorld Toolkit: Null spawn points!", "Null spawn points set in Scene Descriptor.\r\n\r\nSpawning into a null spawn point will cause you get thrown back into your home world.\r\n\r\nSelect Cancel Build if you want to fix the problem yourself or press Bypass to ignore the problem and continue.", "Fix And Continue", "Cancel Build", "Bypass");
 
                         switch (selection)
                         {

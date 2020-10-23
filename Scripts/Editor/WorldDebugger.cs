@@ -116,7 +116,7 @@ namespace VRWorldToolkit
 
             public SingleMessage(GameObject obj)
             {
-                selectObjects = new[] { obj };
+                selectObjects = new[] {obj};
             }
 
             public SingleMessage(Action autoFix)
@@ -132,7 +132,7 @@ namespace VRWorldToolkit
 
             public SingleMessage SetSelectObject(GameObject obj)
             {
-                selectObjects = new[] { obj };
+                selectObjects = new[] {obj};
                 return this;
             }
 
@@ -243,6 +243,7 @@ namespace VRWorldToolkit
                 {
                     objs.AddRange(item.selectObjects);
                 }
+
                 return objs.ToArray();
             }
 
@@ -571,9 +572,9 @@ namespace VRWorldToolkit
                                 }
                                 else
                                 {
-                                    for (int j = 0; j < messageGroup.MessageList.Count; j++)
+                                    for (var j = 0; j < messageGroup.MessageList.Count; j++)
                                     {
-                                        SingleMessage message = messageGroup.MessageList[j];
+                                        var message = messageGroup.MessageList[j];
                                         EditorGUILayout.BeginHorizontal();
 
                                         var finalMessage = string.Format(messageGroup.Message, message.variable, message.variable2);
@@ -701,12 +702,10 @@ namespace VRWorldToolkit
         }
 
         #region Actions
+
         public static Action SelectAsset(GameObject obj)
         {
-            return () =>
-            {
-                Selection.activeObject = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(obj));
-            };
+            return () => { Selection.activeObject = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(obj)); };
         }
 
         public static Action SetGenerateLightmapUV(ModelImporter importer)
@@ -727,7 +726,11 @@ namespace VRWorldToolkit
             {
                 if (EditorUtility.DisplayDialog("Enable lightmap UV generation?", "This operation will enable the lightmap UV generation on " + importers.Count + " meshes.\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
-                    importers.ForEach(i => { i.generateSecondaryUV = true; i.SaveAndReimport(); });
+                    importers.ForEach(i =>
+                    {
+                        i.generateSecondaryUV = true;
+                        i.SaveAndReimport();
+                    });
                 }
             };
         }
@@ -889,18 +892,12 @@ namespace VRWorldToolkit
 
         public static Action SetEnviromentReflections(DefaultReflectionMode reflections)
         {
-            return () =>
-            {
-                RenderSettings.defaultReflectionMode = reflections;
-            };
+            return () => { RenderSettings.defaultReflectionMode = reflections; };
         }
 
         public static Action SetAmbientMode(AmbientMode ambientMode)
         {
-            return () =>
-            {
-                RenderSettings.ambientMode = ambientMode;
-            };
+            return () => { RenderSettings.ambientMode = ambientMode; };
         }
 
         public static Action SetGameObjectTag(GameObject obj, string tag)
@@ -1011,7 +1008,7 @@ namespace VRWorldToolkit
                     var deleteFiles = new Progress<string>(fileName =>
                     {
                         deleteCount++;
-                        if (EditorUtility.DisplayCancelableProgressBar("Clearing Occlusion Cache", fileName, (float)deleteCount / fileCount))
+                        if (EditorUtility.DisplayCancelableProgressBar("Clearing Occlusion Cache", fileName, (float) deleteCount / fileCount))
                         {
                             tokenSource.Cancel();
                         }
@@ -1049,41 +1046,29 @@ namespace VRWorldToolkit
                 descriptor.spawns = descriptor.spawns.Where(c => c != null).ToArray();
                 if (descriptor.spawns.Length == 0)
                 {
-                    descriptor.spawns = new[] { descriptor.gameObject.transform };
+                    descriptor.spawns = new[] {descriptor.gameObject.transform};
                 }
             };
         }
 
         public static Action SetErrorPause(bool enabled)
         {
-            return () =>
-            {
-                ConsoleFlagUtil.SetConsoleErrorPause(enabled);
-            };
+            return () => { ConsoleFlagUtil.SetConsoleErrorPause(enabled); };
         }
 
         public static Action SetVRChatLayers()
         {
-            return () =>
-            {
-                UpdateLayers.SetupEditorLayers();
-            };
+            return () => { UpdateLayers.SetupEditorLayers(); };
         }
 
         public static Action SetVRChatCollisionMatrix()
         {
-            return () =>
-            {
-                UpdateLayers.SetupCollisionLayerMatrix();
-            };
+            return () => { UpdateLayers.SetupCollisionLayerMatrix(); };
         }
 
         public static Action SetReferenceCamera(VRC_SceneDescriptor descriptor, Camera camera)
         {
-            return () =>
-            {
-                descriptor.ReferenceCamera = camera.gameObject;
-            };
+            return () => { descriptor.ReferenceCamera = camera.gameObject; };
         }
 
         public static Action SetVRCInstallPath()
@@ -1135,23 +1120,19 @@ namespace VRWorldToolkit
 
         public static Action SetPostProcessingInScene(SceneView.SceneViewState sceneViewState, bool isActive)
         {
-            return () =>
-            {
-                sceneViewState.showImageEffects = isActive;
-            };
+            return () => { sceneViewState.showImageEffects = isActive; };
         }
 
         public static Action SetPostProcessingLayerResources(PostProcessLayer postProcessLayer, PostProcessResources resources)
         {
-            return () =>
-            {
-                postProcessLayer.Init(resources);
-            };
+            return () => { postProcessLayer.Init(resources); };
         }
 #endif
+
         #endregion
 
         #region Texts
+
         private const string NO_SCENE_DESCRIPTOR = "The current scene has no Scene Descriptor. Please add one, or drag the VRCWorld prefab to the scene.";
 
         private const string TOO_MANY_SCENE_DESCRIPTORS = "Multiple Scene Descriptors were found. Only one scene descriptor can exist in a single scene.";
@@ -1344,6 +1325,7 @@ namespace VRWorldToolkit
         private const string UI_ELEMENT_WITH_NAVIGATION_NOT_NONE = "The UI Element \"{0}\" does not have its Navigation set to None.";
         private const string UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_COMBINED = "Found {0} UI Elements with their Navigation not set to None.";
         private const string UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_INFO = "Setting Navigation to None on UI Elements stops accidental interactions with them while just trying to walk around.";
+
         #endregion
 
         private static long occlusionCacheFiles;
@@ -1395,7 +1377,7 @@ namespace VRWorldToolkit
                 }
 
                 // Check how far the descriptor is from zero point for floating point errors
-                var descriptorRemoteness = (int)Vector3.Distance(sceneDescriptor.transform.position, new Vector3(0.0f, 0.0f, 0.0f));
+                var descriptorRemoteness = (int) Vector3.Distance(sceneDescriptor.transform.position, new Vector3(0.0f, 0.0f, 0.0f));
 
                 if (descriptorRemoteness > 1000)
                 {
@@ -1494,7 +1476,7 @@ namespace VRWorldToolkit
             }
 
             // Get triggers in the world
-            var triggerScripts = (VRC_Trigger[])VRC_Trigger.FindObjectsOfType(typeof(VRC_Trigger));
+            var triggerScripts = (VRC_Trigger[]) VRC_Trigger.FindObjectsOfType(typeof(VRC_Trigger));
 
             var triggerWrongLayer = new List<GameObject>();
 
@@ -1549,6 +1531,7 @@ namespace VRWorldToolkit
                 {
                     triggerWrongLayerGroup.AddSingleMessage(new SingleMessage(triggerWrongLayer[i].name).SetSelectObject(triggerWrongLayer[i].gameObject).SetAutoFix(SetObjectLayer(triggerWrongLayer[i].gameObject, "MirrorReflection")));
                 }
+
                 general.AddMessageGroup(triggerWrongLayerGroup.SetGroupAutoFix(SetObjectLayer(triggerWrongLayerGroup.GetSelectObjects(), "MirrorReflection")));
             }
 #endif
@@ -1623,6 +1606,7 @@ namespace VRWorldToolkit
                 {
                     activeCamerasMessages.AddSingleMessage(new SingleMessage(activeCameras[i].name).SetSelectObject(activeCameras[i].gameObject));
                 }
+
                 optimization.AddMessageGroup(activeCamerasMessages);
             }
 
@@ -1639,6 +1623,7 @@ namespace VRWorldToolkit
                         activeCamerasMessage.AddSingleMessage(new SingleMessage(mirrors[i].name).SetSelectObject(mirrors[i].gameObject));
                     }
                 }
+
                 optimization.AddMessageGroup(activeCamerasMessage);
             }
 
@@ -1654,7 +1639,10 @@ namespace VRWorldToolkit
                     break;
             }
 
-            if ((Helper.GetBrightness(RenderSettings.ambientLight) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Flat)) || (Helper.GetBrightness(RenderSettings.ambientSkyColor) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Trilight)) || (Helper.GetBrightness(RenderSettings.ambientEquatorColor) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Trilight)) || (Helper.GetBrightness(RenderSettings.ambientGroundColor) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Trilight)))
+            if (Helper.GetBrightness(RenderSettings.ambientLight) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Flat) ||
+                Helper.GetBrightness(RenderSettings.ambientSkyColor) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Trilight) ||
+                Helper.GetBrightness(RenderSettings.ambientEquatorColor) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Trilight) ||
+                Helper.GetBrightness(RenderSettings.ambientGroundColor) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Trilight))
             {
                 lighting.AddMessageGroup(new MessageGroup(DARK_ENVIRONMENT_LIGHTING, MessageType.Tips));
             }
@@ -1675,7 +1663,7 @@ namespace VRWorldToolkit
 
             var bakerySettings = ftRenderLightmap.FindRenderSettingsStorage();
 
-            switch ((ftRenderLightmap.RenderDirMode)bakerySettings.renderSettingsRenderDirMode)
+            switch ((ftRenderLightmap.RenderDirMode) bakerySettings.renderSettingsRenderDirMode)
             {
                 case ftRenderLightmap.RenderDirMode.RNM:
                 case ftRenderLightmap.RenderDirMode.SH:
@@ -1685,6 +1673,7 @@ namespace VRWorldToolkit
                     {
                         lighting.AddMessageGroup(new MessageGroup(SHRNM_DIRECTIONAL_MODE_BAKERY_ERROR, MessageType.Error).SetDocumentation("https://github.com/Merlin-san/VRC-Bakery-Adapter"));
                     }
+
                     break;
             }
 
@@ -1718,6 +1707,7 @@ namespace VRWorldToolkit
                     {
                         notEditorOnlyGroup.AddSingleMessage(new SingleMessage(item.name).SetAutoFix(SetGameObjectTag(item, "EditorOnly")).SetSelectObject(item));
                     }
+
                     lighting.AddMessageGroup(notEditorOnlyGroup.SetGroupAutoFix(SetGameObjectTag(notEditorOnly.ToArray(), "EditorOnly")));
                 }
 
@@ -1728,6 +1718,7 @@ namespace VRWorldToolkit
                     {
                         unityLightGroup.AddSingleMessage(new SingleMessage(item.name).SetAutoFix(DisableComponent(item.GetComponent<Light>())).SetSelectObject(item));
                     }
+
                     lighting.AddMessageGroup(unityLightGroup.SetGroupAutoFix(DisableComponent(Array.ConvertAll(unityLightOnBakeryLight.ToArray(), s => s.GetComponent<Light>()))));
                 }
             }
@@ -1885,6 +1876,7 @@ namespace VRWorldToolkit
                     {
                         nonBakedLightsGroup.AddSingleMessage(new SingleMessage(nonBakedLights[i].name).SetSelectObject(nonBakedLights[i].gameObject));
                     }
+
                     lighting.AddMessageGroup(nonBakedLightsGroup);
                 }
             }
@@ -1965,7 +1957,7 @@ namespace VRWorldToolkit
 
                     postProcessing.AddMessageGroup(new MessageGroup("The Post Process Layer on \"{0}\" does not have its resources field set properly. This causes post-processing to error out. This can be fixed by recreating the Post Processing Layer on the GameObject.", MessageType.Warning).AddSingleMessage(singleMessage));
 
-                    var resources = (PostProcessResources)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath("d82512f9c8e5d4a4d938b575d47f88d4"), typeof(PostProcessResources));
+                    var resources = (PostProcessResources) AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath("d82512f9c8e5d4a4d938b575d47f88d4"), typeof(PostProcessResources));
 
                     if (resources != null) singleMessage.SetAutoFix(SetPostProcessingLayerResources(mainPostProcessLayer, resources));
                 }
@@ -2334,7 +2326,7 @@ namespace VRWorldToolkit
             // Suggest to crunch textures if there are any uncrunched textures found
             if (textureCount > 0)
             {
-                var percent = (int)((float)unCrunchedTextures.Count / (float)textureCount * 100f);
+                var percent = (int) ((float) unCrunchedTextures.Count / (float) textureCount * 100f);
                 if (percent > 20)
                 {
                     optimization.AddMessageGroup(new MessageGroup(NON_CRUNCHED_TEXTURES, MessageType.Tips).AddSingleMessage(new SingleMessage(percent.ToString())));
@@ -2352,6 +2344,7 @@ namespace VRWorldToolkit
 
                     noUVGroup.AddSingleMessage(new SingleMessage(Path.GetFileName(AssetDatabase.GetAssetPath(modelImporter))).SetAutoFix(SetGenerateLightmapUV(modelImporter)).SetAssetPath(modelImporter.assetPath));
                 }
+
                 lighting.AddMessageGroup(noUVGroup.SetGroupAutoFix(SetGenerateLightmapUV(importers)).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/LightingGiUvs-GeneratingLightmappingUVs.html"));
             }
 
@@ -2363,6 +2356,7 @@ namespace VRWorldToolkit
                 {
                     missingShadersGroup.AddSingleMessage(new SingleMessage(missingShaders[i].name).SetAssetPath(AssetDatabase.GetAssetPath(missingShaders[i])).SetAutoFix(ChangeShader(missingShaders[i], "Standard")));
                 }
+
                 general.AddMessageGroup(missingShadersGroup.SetGroupAutoFix(ChangeShader(missingShaders.ToArray(), "Standard")));
             }
         }
@@ -2409,27 +2403,29 @@ namespace VRWorldToolkit
                         if (File.GetLastWriteTime(LAST_BUILD_REPORT_PATH) > File.GetLastWriteTime(WINDOWS_BUILD_REPORT_PATH))
                         {
                             AssetDatabase.CopyAsset(LAST_BUILD_REPORT_PATH, WINDOWS_BUILD_REPORT_PATH);
-                            buildReportWindows = (BuildReport)AssetDatabase.LoadAssetAtPath(WINDOWS_BUILD_REPORT_PATH, typeof(BuildReport));
+                            buildReportWindows = (BuildReport) AssetDatabase.LoadAssetAtPath(WINDOWS_BUILD_REPORT_PATH, typeof(BuildReport));
                         }
+
                         break;
                     case BuildTarget.Android:
                         if (File.GetLastWriteTime(LAST_BUILD_REPORT_PATH) > File.GetLastWriteTime(QUEST_BUILD_REPORT_PATH))
                         {
                             AssetDatabase.CopyAsset(LAST_BUILD_REPORT_PATH, QUEST_BUILD_REPORT_PATH);
-                            buildReportQuest = (BuildReport)AssetDatabase.LoadAssetAtPath(QUEST_BUILD_REPORT_PATH, typeof(BuildReport));
+                            buildReportQuest = (BuildReport) AssetDatabase.LoadAssetAtPath(QUEST_BUILD_REPORT_PATH, typeof(BuildReport));
                         }
+
                         break;
                 }
             }
 
             if (buildReportWindows is null && File.Exists(WINDOWS_BUILD_REPORT_PATH))
             {
-                buildReportWindows = (BuildReport)AssetDatabase.LoadAssetAtPath(WINDOWS_BUILD_REPORT_PATH, typeof(BuildReport));
+                buildReportWindows = (BuildReport) AssetDatabase.LoadAssetAtPath(WINDOWS_BUILD_REPORT_PATH, typeof(BuildReport));
             }
 
             if (buildReportQuest is null && File.Exists(QUEST_BUILD_REPORT_PATH))
             {
-                buildReportQuest = (BuildReport)AssetDatabase.LoadAssetAtPath(QUEST_BUILD_REPORT_PATH, typeof(BuildReport));
+                buildReportQuest = (BuildReport) AssetDatabase.LoadAssetAtPath(QUEST_BUILD_REPORT_PATH, typeof(BuildReport));
             }
 
             if (!m_TreeView.HasReport())
@@ -2451,7 +2447,7 @@ namespace VRWorldToolkit
 
             if (report != null)
             {
-                GUILayout.Label("<b>Build size:</b> " + EditorUtility.FormatBytes((long)report.summary.totalSize), Styles.LabelRichText);
+                GUILayout.Label("<b>Build size:</b> " + EditorUtility.FormatBytes((long) report.summary.totalSize), Styles.LabelRichText);
 
                 GUILayout.Label("<b>Build done:</b> " + report.summary.buildEndedAt.ToLocalTime(), Styles.LabelRichText);
 
@@ -2506,12 +2502,12 @@ namespace VRWorldToolkit
 
                 if (buildReportWindows is null && File.Exists(WINDOWS_BUILD_REPORT_PATH))
                 {
-                    buildReportWindows = (BuildReport)AssetDatabase.LoadAssetAtPath(WINDOWS_BUILD_REPORT_PATH, typeof(BuildReport));
+                    buildReportWindows = (BuildReport) AssetDatabase.LoadAssetAtPath(WINDOWS_BUILD_REPORT_PATH, typeof(BuildReport));
                 }
 
                 if (buildReportQuest is null && File.Exists(QUEST_BUILD_REPORT_PATH))
                 {
-                    buildReportQuest = (BuildReport)AssetDatabase.LoadAssetAtPath(QUEST_BUILD_REPORT_PATH, typeof(BuildReport));
+                    buildReportQuest = (BuildReport) AssetDatabase.LoadAssetAtPath(QUEST_BUILD_REPORT_PATH, typeof(BuildReport));
                 }
 
                 var report = buildReportWindows != null ? buildReportWindows : buildReportQuest;
@@ -2554,7 +2550,8 @@ namespace VRWorldToolkit
             Windows = 0,
             Quest = 1
         }
-        private readonly string[] buildReportToolbar = { "Windows", "Quest" };
+
+        private readonly string[] buildReportToolbar = {"Windows", "Quest"};
 
         [SerializeField] private int selectedBuildReport;
         [SerializeField] private bool overallStatsFoldout;
@@ -2585,14 +2582,13 @@ namespace VRWorldToolkit
                 DrawBuildSummary(buildReportQuest);
 
                 GUILayout.EndVertical();
-
             }
 
             GUILayout.EndHorizontal();
 
             EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
 
-            tab = GUILayout.Toolbar(tab, new[] { "Messages", "Build Report" });
+            tab = GUILayout.Toolbar(tab, new[] {"Messages", "Build Report"});
 
             switch (tab)
             {
@@ -2620,7 +2616,7 @@ namespace VRWorldToolkit
 
                         if (EditorGUI.EndChangeCheck())
                         {
-                            switch ((BuildReportType)selectedBuildReport)
+                            switch ((BuildReportType) selectedBuildReport)
                             {
                                 case BuildReportType.Windows:
                                     m_TreeView.SetReport(buildReportWindows);
