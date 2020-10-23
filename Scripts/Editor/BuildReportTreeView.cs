@@ -175,9 +175,7 @@ namespace VRWorldToolkit
         /// <returns>If build is set and the build succeeded</returns>
         public bool HasReport()
         {
-            if (report != null && report.summary.result == BuildResult.Succeeded) return true;
-
-            return false;
+            return report != null && report.summary.result == BuildResult.Succeeded;
         }
 
         private struct CategoryStats
@@ -421,7 +419,7 @@ namespace VRWorldToolkit
 
             //base.SetSelection(new IList<int>());
 
-            // Create new 
+            // Create new
             GenericMenu menu = new GenericMenu();
 
             // Create the menu items
