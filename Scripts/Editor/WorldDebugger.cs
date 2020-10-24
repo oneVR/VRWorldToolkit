@@ -2454,9 +2454,9 @@ namespace VRWorldToolkit
 
                 GUILayout.Label("<b>Build done:</b> " + report.summary.buildEndedAt.ToLocalTime(), Styles.LabelRichText);
 
-                GUILayout.Label("<b>Errors during build:</b> " + report.summary.totalErrors.ToString(), Styles.LabelRichText);
+                GUILayout.Label("<b>Errors during build:</b> " + report.summary.totalErrors, Styles.LabelRichText);
 
-                GUILayout.Label("<b>Warnings during build:</b> " + report.summary.totalWarnings.ToString(), Styles.LabelRichText);
+                GUILayout.Label("<b>Warnings during build:</b> " + report.summary.totalWarnings, Styles.LabelRichText);
 
                 GUILayout.Label("<b>Build result:</b> " + report.summary.result, Styles.LabelRichText);
             }
