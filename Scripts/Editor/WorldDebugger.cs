@@ -30,6 +30,8 @@ using Microsoft.Win32;
 using System.Reflection;
 using Object = UnityEngine.Object;
 using UnityEngine.UI;
+using Debug = UnityEngine.Debug;
+using System.Diagnostics;
 
 #if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
 namespace VRWorldToolkit
@@ -44,6 +46,7 @@ namespace VRWorldToolkit
         private static Texture warning;
 
         private static bool recheck = true;
+        private static bool autoRecheck = true;
 
         private enum MessageType
         {
@@ -2520,9 +2523,11 @@ namespace VRWorldToolkit
             }
         }
 
+        private static readonly Stopwatch CheckTime = new Stopwatch();
+
         private void Refresh()
         {
-            if (recheck)
+            if (recheck && autoRecheck)
             {
                 RefreshBuild();
 
@@ -2532,13 +2537,17 @@ namespace VRWorldToolkit
                     Task.Run(CountOcclusionCacheFiles);
                 }
 
-#if VRWT_BENCHMARK
-                var watch = System.Diagnostics.Stopwatch.StartNew();
-#endif
+                CheckTime.Restart();
                 CheckScene();
+                CheckTime.Stop();
+
+                if (CheckTime.ElapsedMilliseconds > 2000)
+                {
+                    autoRecheck = false;
+                }
+
 #if VRWT_BENCHMARK
-                watch.Stop();
-                Debug.Log("Scene checked in: " + watch.ElapsedMilliseconds + " ms.");
+                Debug.Log("Scene checked in: " + CheckTime.ElapsedMilliseconds + " ms.");
 #endif
 
                 recheck = false;
@@ -2593,6 +2602,12 @@ namespace VRWorldToolkit
             switch (tab)
             {
                 case 0:
+                    if (!autoRecheck && GUILayout.Button("Refresh"))
+                    {
+                        recheck = true;
+                        autoRecheck = true;
+                    }
+
                     masterList.DrawTabSelector();
 
                     EditorGUILayout.BeginVertical();
