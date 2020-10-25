@@ -1242,6 +1242,8 @@ namespace VRWorldToolkit
 
         private const string POST_PROCESSING_DISABLED_IN_SCENE_VIEW = "Post-processing is disabled in the scene view. You will not be able to preview any post-processing effects without enabling it first.";
 
+        private const string POST_PROCESSING_NO_RESOURCES_SET = "The Post Process Layer on \"{0}\" does not have its resources field set properly. This causes post-processing to error out. This can be fixed by recreating the Post Processing Layer on the GameObject.";
+
         private const string NO_REFERENCE_CAMERA_SET = "The current scenes Scene Descriptor has no Reference Camera set. Without a Reference Camera set Post Processing will not be visible in-game.";
 
         private const string NO_POST_PROCESSING_VOLUMES = "No enabled Post Processing Volumes found in the scene. A Post Processing Volume is needed to apply effects to the camera's Post Processing Layer.";
@@ -1958,7 +1960,7 @@ namespace VRWorldToolkit
                 {
                     var singleMessage = new SingleMessage(mainPostProcessLayer.gameObject.name).SetSelectObject(mainPostProcessLayer.gameObject);
 
-                    postProcessing.AddMessageGroup(new MessageGroup("The Post Process Layer on \"{0}\" does not have its resources field set properly. This causes post-processing to error out. This can be fixed by recreating the Post Processing Layer on the GameObject.", MessageType.Warning).AddSingleMessage(singleMessage));
+                    postProcessing.AddMessageGroup(new MessageGroup(POST_PROCESSING_NO_RESOURCES_SET, MessageType.Error).AddSingleMessage(singleMessage));
 
                     var resources = (PostProcessResources) AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath("d82512f9c8e5d4a4d938b575d47f88d4"), typeof(PostProcessResources));
 
