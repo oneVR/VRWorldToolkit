@@ -2682,14 +2682,14 @@ namespace VRWorldToolkit
 
                     GUILayout.EndVertical();
 
-                    if (buildReportMessagesFoldout)
-                    {
-                        m_TreeView.DrawMessages();
-                    }
-
                     if (overallStatsFoldout)
                     {
                         m_TreeView.DrawOverallStats();
+                    }
+
+                    if (buildReportMessagesFoldout)
+                    {
+                        m_TreeView.DrawMessages();
                     }
 
                     var treeViewRect = EditorGUILayout.BeginVertical();
