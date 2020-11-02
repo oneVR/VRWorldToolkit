@@ -2378,6 +2378,7 @@ namespace VRWorldToolkit
             {
                 general.AddMessageGroup(new MessageGroup(HEY_YOU_FOUND_A_BUG, MessageType.Error)).AddSingleMessage(new SingleMessage(exception.Message, Regex.Matches(exception.StackTrace, "(?<=\\.cs:).*")[0].ToString()));
                 Debug.LogError(exception);
+                autoRecheck = false;
             }
         }
 
