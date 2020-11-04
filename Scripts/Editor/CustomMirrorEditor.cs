@@ -42,7 +42,7 @@ namespace VRWorldToolkit
 
             if (Selection.gameObjects.Length == 1)
             {
-                var currentMirror = (VRC_MirrorReflection)target;
+                var currentMirror = (VRC_MirrorReflection) target;
 
                 if ((LightmapSettings.lightProbes != null && LightmapSettings.lightProbes.positions.Length == 0 && currentMirror.m_DisablePixelLights) || (LightmapSettings.lightProbes is null && currentMirror.m_DisablePixelLights))
                     EditorGUILayout.HelpBox("No baked light probes were found in lighting data. Dynamic objects such as players and pickups will not appear lit in mirrors without baked light probes.", MessageType.Warning);
@@ -73,9 +73,9 @@ namespace VRWorldToolkit
         /// <param name="layerMask">New LayerMask value to set for Reflect Layers</param>
         private static void MirrorLayerChange(int layerMask)
         {
-            for (var index = 0; index < Selection.objects.Length; index++)
+            for (var i = 0; i < Selection.objects.Length; i++)
             {
-                var gameObject = Selection.objects[index] as GameObject;
+                var gameObject = Selection.objects[i] as GameObject;
 
                 if (gameObject == null) continue;
 
