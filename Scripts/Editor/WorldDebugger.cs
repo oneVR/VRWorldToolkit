@@ -966,7 +966,7 @@ namespace VRWorldToolkit
             {
                 if (EditorUtility.DisplayDialog("Change shader?", "This operation will change the shader of the material " + material.name + " to " + shader + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
-                    Shader standard = Shader.Find(shader);
+                    var standard = Shader.Find(shader);
 
                     material.shader = standard;
                 }
@@ -979,7 +979,7 @@ namespace VRWorldToolkit
             {
                 if (EditorUtility.DisplayDialog("Change shader?", "This operation will change the shader of " + materials.Length + " materials to " + shader + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
-                    Shader newShader = Shader.Find(shader);
+                    var newShader = Shader.Find(shader);
 
                     materials.ToList().ForEach(m => m.shader = newShader);
                 }
@@ -1054,7 +1054,7 @@ namespace VRWorldToolkit
 
                     var token = tokenSource.Token;
 
-                    await Task.Run(() => DeleteFiles(deleteFiles, token));
+                    await Task.Run(() => DeleteFiles(deleteFiles, token), token);
                     EditorUtility.ClearProgressBar();
 
                     occlusionCacheFiles = 0;
@@ -2226,7 +2226,7 @@ namespace VRWorldToolkit
                                     {
                                         if (modelImporter != null)
                                         {
-                                            SerializedObject so = new SerializedObject(renderer);
+                                            var so = new SerializedObject(renderer);
 
                                             if (!modelImporter.generateSecondaryUV && sharedMesh.uv2.Length == 0 && so.FindProperty("m_ScaleInLightmap").floatValue != 0)
                                             {
