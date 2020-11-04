@@ -1069,6 +1069,11 @@ namespace VRWorldToolkit
             return () => { UpdateLayers.SetupCollisionLayerMatrix(); };
         }
 
+        public static Action SetFutureProofPublish(bool state)
+        {
+            return () => { EditorPrefs.SetBool("futureProofPublish", state); };
+        }
+
         public static Action SetReferenceCamera(VRC_SceneDescriptor descriptor, Camera camera)
         {
             return () => { descriptor.ReferenceCamera = camera.gameObject; };
@@ -1329,9 +1334,11 @@ namespace VRWorldToolkit
 
         private const string UI_ELEMENT_WITH_NAVIGATION_NOT_NONE = "The UI Element \"{0}\" does not have its Navigation set to None.";
         private const string UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_COMBINED = "Found {0} UI Elements with their Navigation not set to None.";
-        private const string UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_INFO = "Setting Navigation to None on UI Elements stops accidental interactions with them while just trying to walk around.";
+        private const string UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_INFO = "Setting Navigation to None on UI Elements can stop accidental interactions with them while trying to walk around.";
 
         private const string HEY_YOU_FOUND_A_BUG = "Hey, you found a bug! Please send it my way so I can fix it! Check About VRWorld Toolkit to find all the ways to contact me. \"{0}\" on line {1}.";
+
+        private const string FUTURE_PROOF_PUBLISH_ENABLED = "Future Proof Publish is currently enabled. This is a legacy feature that has no planned functions as of right now. Having it enabled will increase upload times and sometimes cause uploading to fail.";
 
         #endregion
 
@@ -1412,6 +1419,11 @@ namespace VRWorldToolkit
                 if (SceneManager.sceneCount > 1)
                 {
                     general.AddMessageGroup(new MessageGroup(MULTIPLE_SCENES_LOADED, MessageType.Error));
+                }
+
+                if (EditorPrefs.GetBool("futureProofPublish", true))
+                {
+                    general.AddMessageGroup(new MessageGroup(FUTURE_PROOF_PUBLISH_ENABLED, MessageType.Error).SetGroupAutoFix(SetFutureProofPublish(false)));
                 }
 
                 // Check if console has error pause on
