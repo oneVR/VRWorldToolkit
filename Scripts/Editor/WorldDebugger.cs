@@ -993,7 +993,7 @@ namespace VRWorldToolkit
                 }
                 else
                 {
-                    EditorUtility.DisplayDialog("Baked lightprobes not found!", "Bake your lighting first before attempting to remove redundant light probes.", "Ok");
+                    EditorUtility.DisplayDialog("Baked light probes not found!", "Bake your lighting first before attempting to remove redundant light probes.", "Ok");
                 }
             };
         }
