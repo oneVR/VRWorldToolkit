@@ -770,7 +770,9 @@ namespace VRWorldToolkit
             {
                 if (EditorUtility.DisplayDialog("Disable component?", "This operation will disable the " + behaviour.GetType() + " on the GameObject \"" + behaviour.gameObject.name + "\".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
+                    Undo.RegisterCompleteObjectUndo(behaviour, "Disable Component");
                     behaviour.enabled = false;
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(behaviour);
                 }
             };
         }
@@ -781,7 +783,14 @@ namespace VRWorldToolkit
             {
                 if (EditorUtility.DisplayDialog("Disable component?", "This operation will disable the " + behaviours[0].GetType() + " component on " + behaviours.Count().ToString() + " GameObjects.\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
-                    behaviours.ToList().ForEach(b => b.enabled = false);
+                    Undo.RegisterCompleteObjectUndo(behaviours.ToArray<Object>(), "Mass Disable Components");
+
+                    for (var i = 0; i < behaviours.Length; i++)
+                    {
+                        var b = behaviours.ToList()[i];
+                        b.enabled = false;
+                        PrefabUtility.RecordPrefabInstancePropertyModifications(b);
+                    }
                 }
             };
         }
@@ -792,7 +801,9 @@ namespace VRWorldToolkit
             {
                 if (EditorUtility.DisplayDialog("Change tag?", "This operation will change the layer of " + obj.name + " to " + layer + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
+                    Undo.RegisterCompleteObjectUndo(obj, "Layer Change");
                     obj.layer = LayerMask.NameToLayer(layer);
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(obj);
                 }
             };
         }
@@ -803,7 +814,14 @@ namespace VRWorldToolkit
             {
                 if (EditorUtility.DisplayDialog("Change layer?", "This operation will change " + objs.Length + " GameObjects layer to " + layer + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
-                    objs.ToList().ForEach(o => o.layer = LayerMask.NameToLayer(layer));
+                    Undo.RegisterCompleteObjectUndo(objs.ToArray<Object>(), "Mass Layer Change");
+
+                    for (var index = 0; index < objs.ToList().Count; index++)
+                    {
+                        var o = objs.ToList()[index];
+                        o.layer = LayerMask.NameToLayer(layer);
+                        PrefabUtility.RecordPrefabInstancePropertyModifications(o);
+                    }
                 }
             };
         }
@@ -814,11 +832,15 @@ namespace VRWorldToolkit
             {
                 if (EditorUtility.DisplayDialog("Change Navigation mode?", "This operation will change the Navigation mode on UI Element \"" + selectable.gameObject.name + "\" to " + mode.ToString() + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
+                    Undo.RegisterCompleteObjectUndo(selectable, "Navigation Mode Change");
+
                     var navigation = selectable.navigation;
 
                     navigation.mode = Navigation.Mode.None;
 
                     selectable.navigation = navigation;
+
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(selectable);
                 }
             };
         }
@@ -829,6 +851,8 @@ namespace VRWorldToolkit
             {
                 if (EditorUtility.DisplayDialog("Change Navigation mode?", "This operation will change " + selectables.Length + " UI Elements Navigation to " + mode.ToString() + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
+                    Undo.RegisterCompleteObjectUndo(selectables.ToArray<Object>(), "Mass Navigation Mode Change");
+
                     for (var i = 0; i < selectables.Length; i++)
                     {
                         var navigation = selectables[i].navigation;
@@ -836,6 +860,8 @@ namespace VRWorldToolkit
                         navigation.mode = Navigation.Mode.None;
 
                         selectables[i].navigation = navigation;
+
+                        PrefabUtility.RecordPrefabInstancePropertyModifications(selectables[i]);
                     }
                 }
             };
@@ -909,7 +935,9 @@ namespace VRWorldToolkit
             {
                 if (EditorUtility.DisplayDialog("Change tag?", "This operation will change the Tag of " + obj.name + " to " + tag + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
+                    Undo.RegisterCompleteObjectUndo(obj, "Change Tag");
                     obj.tag = tag;
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(obj);
                 }
             };
         }
@@ -920,7 +948,14 @@ namespace VRWorldToolkit
             {
                 if (EditorUtility.DisplayDialog("Change tag?", "This operation will change " + objs.Length + " GameObjects tag to " + tag + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
-                    objs.ToList().ForEach(o => o.tag = tag);
+                    Undo.RegisterCompleteObjectUndo(objs.ToArray<Object>(), "Mass Change Tag");
+
+                    for (var i = 0; i < objs.ToList().Count; i++)
+                    {
+                        var o = objs.ToList()[i];
+                        o.tag = tag;
+                        PrefabUtility.RecordPrefabInstancePropertyModifications(o);
+                    }
                 }
             };
         }
