@@ -1976,7 +1976,7 @@ namespace VRWorldToolkit
                 PostProcessLayer mainPostProcessLayer = null;
 
                 // Attempt to find the main post process layer
-                if (sceneDescriptor.ReferenceCamera.gameObject.GetComponent(typeof(PostProcessLayer)))
+                if (sceneDescriptor.ReferenceCamera != null && sceneDescriptor.ReferenceCamera.gameObject.GetComponent(typeof(PostProcessLayer)))
                 {
                     mainPostProcessLayer = sceneDescriptor.ReferenceCamera.gameObject.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
                 }
