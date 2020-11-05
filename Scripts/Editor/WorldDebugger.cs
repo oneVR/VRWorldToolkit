@@ -1334,7 +1334,7 @@ namespace VRWorldToolkit
 
         private const string QUEST_LIGHTMAP_COMPRESSION_OVERRIDE = "Lightmap \"{0}\" does not have a platform-specific override set for Android.";
         private const string QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_COMBINED = "No platform-specific override set on {0} lightmaps for Android.";
-        private const string QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_INFO = "Without setting proper compression override when building for Quest lightmaps can show noticeable banding. Suggested format \"ASTC 4x4 block\".";
+        private const string QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_INFO = "Without setting proper format override when building for Quest lightmaps can show noticeable banding. Suggested format \"ASTC 4x4 block\".";
 
         private const string MISSING_SHADER_WARNING = "The material \"{0}\" found in the scene has a missing or broken shader.";
         private const string MISSING_SHADER_WARNING_COMBINED = "Found {0} materials in the current scene that have missing or broken shaders.";
@@ -1803,13 +1803,11 @@ namespace VRWorldToolkit
                 {
                     bakedLighting = true;
 
-                    if (Helper.BuildPlatform() == RuntimePlatform.Android)
+                    if (Helper.BuildPlatform() == RuntimePlatform.Android && EditorUserBuildSettings.androidBuildSubtarget is MobileTextureSubtarget.Generic)
                     {
                         var lightmaps = LightmapSettings.lightmaps;
 
                         var androidCompressionGroup = lighting.AddMessageGroup(new MessageGroup(QUEST_LIGHTMAP_COMPRESSION_OVERRIDE, QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_COMBINED, QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_INFO, MessageType.Tips));
-
-                        var lightmapTextureImporters = new List<TextureImporter>();
 
                         for (var i = 0; i < lightmaps.Length; i++)
                         {
@@ -1821,15 +1819,8 @@ namespace VRWorldToolkit
 
                             if (!platformSettings.overridden)
                             {
-                                lightmapTextureImporters.Add(textureImporter);
-
-                                androidCompressionGroup.AddSingleMessage(new SingleMessage(lightmap.name).SetAssetPath(textureImporter.assetPath).SetAutoFix(SetLightmapOverrideForQuest(textureImporter, lightmap.name)));
+                                androidCompressionGroup.AddSingleMessage(new SingleMessage(lightmap.name).SetAssetPath(textureImporter.assetPath));
                             }
-                        }
-
-                        if (androidCompressionGroup.GetTotalCount() > 0)
-                        {
-                            androidCompressionGroup.SetGroupAutoFix(SetLightmapOverrideForQuest(lightmapTextureImporters.ToArray()));
                         }
                     }
                 }
