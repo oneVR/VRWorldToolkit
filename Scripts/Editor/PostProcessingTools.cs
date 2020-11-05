@@ -7,7 +7,6 @@ using UnityEngine.Rendering.PostProcessing;
 #endif
 #if VRC_SDK_VRCSDK3
 using VRC.SDKBase;
-using System.Reflection;
 #endif
 #if VRC_SDK_VRCSDK2
 using VRCSDK2;
@@ -66,7 +65,7 @@ namespace VRWorldToolkit
         [MenuItem("VRWorld Toolkit/Post Processing/Import Post Processing", false, -101)]
         private static void PostProcessingInstall()
         {
-            Helper.ImportPackage("com.unity.postprocessing");
+            Helper.ImportPackage("com.unity.postprocessing@2.3.0");
         }
 
         [MenuItem("VRWorld Toolkit/Post Processing/Import Post Processing", true)]
