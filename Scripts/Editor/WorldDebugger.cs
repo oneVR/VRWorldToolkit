@@ -2414,7 +2414,7 @@ namespace VRWorldToolkit
             }
             catch (Exception exception)
             {
-                general.AddMessageGroup(new MessageGroup(HEY_YOU_FOUND_A_BUG, MessageType.Error)).AddSingleMessage(new SingleMessage(exception.Message, Regex.Matches(exception.StackTrace, "(?<=\\.cs:).*(?<=\\S)")[0].ToString()));
+                general.AddMessageGroup(new MessageGroup(HEY_YOU_FOUND_A_BUG, MessageType.Error)).AddSingleMessage(new SingleMessage(exception.Message.Replace("\n", " ").Replace("\r", ""), Regex.Matches(exception.StackTrace, "(?<=\\.cs:).*(?<=\\S)")[0].ToString()));
                 Debug.LogError(exception);
                 autoRecheck = false;
             }
