@@ -983,7 +983,7 @@ namespace VRWorldToolkit
                 if (EditorUtility.DisplayDialog("Change shader?", "This operation will change the shader of the material " + material.name + " to " + shader + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     var standard = Shader.Find(shader);
-
+                    Undo.RegisterCompleteObjectUndo(material, "Changed Shader");
                     material.shader = standard;
                 }
             };
@@ -996,7 +996,7 @@ namespace VRWorldToolkit
                 if (EditorUtility.DisplayDialog("Change shader?", "This operation will change the shader of " + materials.Length + " materials to " + shader + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     var newShader = Shader.Find(shader);
-
+                    Undo.RegisterCompleteObjectUndo(materials.ToArray<Object>(), "Changed Shaders");
                     materials.ToList().ForEach(m => m.shader = newShader);
                 }
             };
@@ -1006,9 +1006,11 @@ namespace VRWorldToolkit
         {
             return () =>
             {
+                Undo.RegisterCompleteObjectUndo(lpg, "Removed Overlapping Light Probes");
                 if (EditorUtility.DisplayDialog("Remove overlapping light probes?", "This operation will remove any overlapping light probes in the group \"" + lpg.gameObject.name + "\".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     lpg.probePositions = lpg.probePositions.Distinct().ToArray();
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(lpg);
                 }
             };
         }
@@ -1017,11 +1019,13 @@ namespace VRWorldToolkit
         {
             return () =>
             {
+                Undo.RegisterCompleteObjectUndo(lpgs, "Removed Overlapping Light Probes");
                 if (EditorUtility.DisplayDialog("Remove overlapping light probes?", "This operation will remove any overlapping light probes found in the current scene.\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     foreach (var lpg in lpgs)
                     {
                         lpg.probePositions = lpg.probePositions.Distinct().ToArray();
+                        PrefabUtility.RecordPrefabInstancePropertyModifications(lpg);
                     }
                 }
             };
@@ -1097,11 +1101,13 @@ namespace VRWorldToolkit
         {
             return () =>
             {
+                Undo.RegisterCompleteObjectUndo(descriptor, "Spawn Points Fixed");
                 descriptor.spawns = descriptor.spawns.Where(c => c != null).ToArray();
                 if (descriptor.spawns.Length == 0)
                 {
                     descriptor.spawns = new[] {descriptor.gameObject.transform};
                 }
+                PrefabUtility.RecordPrefabInstancePropertyModifications(descriptor);
             };
         }
 
@@ -1127,7 +1133,12 @@ namespace VRWorldToolkit
 
         public static Action SetReferenceCamera(VRC_SceneDescriptor descriptor, Camera camera)
         {
-            return () => { descriptor.ReferenceCamera = camera.gameObject; };
+            return () =>
+            {
+                Undo.RegisterCompleteObjectUndo(descriptor, "Reference Camera Set");
+                descriptor.ReferenceCamera = camera.gameObject;
+                PrefabUtility.RecordPrefabInstancePropertyModifications(descriptor);
+            };
         }
 
         public static Action SetVRCInstallPath()

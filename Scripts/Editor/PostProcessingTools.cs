@@ -135,6 +135,9 @@ namespace VRWorldToolkit
 
                 if (camera != null)
                 {
+                    descriptors[0].ReferenceCamera = camera;
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(descriptors[0]);
+
                     SetupPostProcessingGenerics(camera);
                 }
             }
