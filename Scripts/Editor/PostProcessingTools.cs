@@ -56,7 +56,7 @@ namespace VRWorldToolkit
         private static bool PostProcessingSetupValidation()
         {
 #if UNITY_POST_PROCESSING_STACK_V2
-            return true;
+            return !(Helper.BuildPlatform() is RuntimePlatform.Android);
 #else
             return false;
 #endif
