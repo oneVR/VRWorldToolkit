@@ -1353,7 +1353,7 @@ namespace VRWorldToolkit
 
         private const string QUEST_LIGHTMAP_COMPRESSION_OVERRIDE = "Lightmap \"{0}\" does not have a platform-specific override set for Android.";
         private const string QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_COMBINED = "No platform-specific override set on {0} lightmaps for Android.";
-        private const string QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_INFO = "Without setting proper format override when building for Quest lightmaps can show noticeable banding. Suggested format \"ASTC 4x4 block\".";
+        private const string QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_INFO = "Without setting proper platform-specific override when building for Android, lightmaps can show noticeable banding. Suggested format \"ASTC 4x4 block\".";
 
         private const string MISSING_SHADER_WARNING = "The material \"{0}\" found in the scene has a missing or broken shader.";
         private const string MISSING_SHADER_WARNING_COMBINED = "Found {0} materials in the current scene that have missing or broken shaders.";
@@ -1826,7 +1826,7 @@ namespace VRWorldToolkit
                     {
                         var lightmaps = LightmapSettings.lightmaps;
 
-                        var androidCompressionGroup = lighting.AddMessageGroup(new MessageGroup(QUEST_LIGHTMAP_COMPRESSION_OVERRIDE, QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_COMBINED, QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_INFO, MessageType.Tips));
+                        var androidCompressionGroup = lighting.AddMessageGroup(new MessageGroup(QUEST_LIGHTMAP_COMPRESSION_OVERRIDE, QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_COMBINED, QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_INFO, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/class-TextureImporter.html"));
 
                         for (var i = 0; i < lightmaps.Length; i++)
                         {
