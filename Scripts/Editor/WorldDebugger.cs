@@ -338,7 +338,23 @@ namespace VRWorldToolkit
 
             public bool HasMessages()
             {
-                return !(MessageGroups is null) && MessageGroups.Count != 0;
+                var count = 0;
+
+                for (var i = 0; i < MessageGroups.Count; i++)
+                {
+                    var group = MessageGroups[i];
+
+                    if (group.CombinedMessage != null && group.GetTotalCount() > 0)
+                    {
+                        count++;
+                    }
+                    else if (group.CombinedMessage is null)
+                    {
+                        count++;
+                    }
+                }
+
+                return count > 0;
             }
 
             public bool IsExpanded(MessageGroup mg)
@@ -443,7 +459,7 @@ namespace VRWorldToolkit
                             var messageGroup = group.MessageGroups[l];
                             var hasButtons = messageGroup.Buttons();
 
-                            if (messageGroup.AdditionalInfo != null && messageGroup.GetTotalCount() == 0) continue;
+                            if (messageGroup.CombinedMessage != null && messageGroup.GetTotalCount() == 0) continue;
 
                             if (messageGroup.MessageList.Count > 0)
                             {
@@ -1294,11 +1310,14 @@ namespace VRWorldToolkit
 
         private const string VOLUME_BLENDING_LAYER_NOT_SET = "You don't have a Volume Blending Layer set in the Post Process Layer, so post-processing will not work. Using the Water or PostProcessing layer is recommended.";
 
-        private const string POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER = "Post Processing Volume \"{0}\" is not marked as Global and does not have a collider. It will not affect the camera without one of these set on it.";
+        private const string POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER = "Post Processing Volume \"{0}\" is not marked as Global and does not have a collider.";
+        private const string POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER_COMBINED = "Found {0} Post Processing Volumes that are not marked as global and do not have a collider.";
+        private const string POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER_INFO = "The volume will not affect the camera without one of these set on it.";
 
         private const string NO_PROFILE_SET = "Post Processing Volume \"{0}\" does not have a profile set.";
+        private const string NO_PROFILE_SET_COMBINED = "Found {0} Post Processing Volumes with no profile set.";
 
-        private const string VOLUME_ON_WRONG_LAYER = "Post Processing Volume \"{0}\" is not on one of the layers set in the cameras Post Processing Layer setting. (Currently: {1})";
+        private const string NO_MATCHING_LAYERS_FOUND = "No enabled Post Processing Volumes found with matching layers to the main Post Processing Layer. Layers currently set to: {0}";
 
         private const string DONT_USE_NONE_FOR_TONEMAPPING = "Use either Neutral or ACES for Color Grading Tonemapping. Selecting None for Tonemapping is essentially the same as leaving Tonemapping unchecked.";
 
@@ -2066,87 +2085,88 @@ namespace VRWorldToolkit
                                     postProcessing.AddMessageGroup(new MessageGroup(POST_PROCESS_LAYER_USING_RESERVED_LAYER, MessageType.Error).AddSingleMessage(new SingleMessage(postprocessLayer.gameObject.name).SetSelectObject(postprocessLayer.gameObject)));
                                 }
 
+                                var noProfileSet = postProcessing.AddMessageGroup(new MessageGroup(NO_PROFILE_SET, NO_PROFILE_SET_COMBINED, MessageType.Error));
+                                var volumeNoGlobalNoCollider = postProcessing.AddMessageGroup(new MessageGroup(POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER, POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER_COMBINED, POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER_INFO, MessageType.Error));
+                                var matchingVolumes = new List<PostProcessVolume>();
                                 foreach (var postProcessVolume in postProcessVolumes)
                                 {
                                     // Check if the layer matches the cameras post processing layer
-                                    if (volumeLayer != 0 && (postprocessLayer.volumeLayer != (postprocessLayer.volumeLayer | (1 << postProcessVolume.gameObject.layer))))
+                                    if (volumeLayer != 0 && (postprocessLayer.volumeLayer == (postprocessLayer.volumeLayer | (1 << postProcessVolume.gameObject.layer))))
                                     {
-                                        postProcessing.AddMessageGroup(new MessageGroup(VOLUME_ON_WRONG_LAYER, MessageType.Error).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject.name, Helper.GetAllLayersFromMask(postprocessLayer.volumeLayer)).SetSelectObject(postProcessVolume.gameObject)));
+                                        matchingVolumes.Add(postProcessVolume);
                                     }
 
                                     // Check if the volume has a profile set
-                                    if (!postProcessVolume.profile && !postProcessVolume.sharedProfile)
+                                    if (postProcessVolume.profile is null && postProcessVolume.sharedProfile is null)
                                     {
-                                        postProcessing.AddMessageGroup(new MessageGroup(NO_PROFILE_SET, MessageType.Error).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject.name)));
-                                        continue;
+                                        noProfileSet.AddSingleMessage(new SingleMessage(postProcessVolume.gameObject.name).SetSelectObject(postProcessVolume.gameObject));
                                     }
 
                                     // Check if the collider is either global or has a collider on it
                                     if (!postProcessVolume.isGlobal && !postProcessVolume.GetComponent<Collider>())
                                     {
-                                        postProcessing.AddMessageGroup(new MessageGroup(POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER, MessageType.Error).AddSingleMessage(new SingleMessage(postProcessVolume.name).SetSelectObject(postProcessVolume.gameObject)));
+                                        volumeNoGlobalNoCollider.AddSingleMessage(new SingleMessage(postProcessVolume.name).SetSelectObject(postProcessVolume.gameObject));
                                     }
-                                    else
+                                }
+
+                                if (matchingVolumes.Count == 0)
+                                {
+                                    postProcessing.AddMessageGroup(new MessageGroup(NO_MATCHING_LAYERS_FOUND, MessageType.Warning).AddSingleMessage(new SingleMessage(Helper.GetAllLayersFromMask(postprocessLayer.volumeLayer)).SetSelectObject(postprocessLayer.gameObject)));
+                                }
+
+                                // Go trough the profile settings and see if any bad one's are used
+                                foreach (var postProcessVolume in matchingVolumes)
+                                {
+                                    var postProcessProfile = postProcessVolume.profile ? postProcessVolume.profile : postProcessVolume.sharedProfile;
+
+                                    if (postProcessProfile is null) continue;
+
+                                    if (postProcessProfile.GetSetting<ColorGrading>() && postProcessProfile.GetSetting<ColorGrading>().enabled && postProcessProfile.GetSetting<ColorGrading>().active)
                                     {
-                                        // Go trough the profile settings and see if any bad one's are used
-                                        PostProcessProfile postProcessProfile;
-
-                                        if (postProcessVolume.profile)
+                                        if (postProcessProfile.GetSetting<ColorGrading>().tonemapper.value == Tonemapper.None)
                                         {
-                                            postProcessProfile = postProcessVolume.profile;
+                                            postProcessing.AddMessageGroup(new MessageGroup(DONT_USE_NONE_FOR_TONEMAPPING, MessageType.Error).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
                                         }
-                                        else
-                                        {
-                                            postProcessProfile = postProcessVolume.sharedProfile;
-                                        }
+                                    }
 
-                                        if (postProcessProfile.GetSetting<ColorGrading>() && postProcessProfile.GetSetting<ColorGrading>().enabled && postProcessProfile.GetSetting<ColorGrading>().active)
+                                    if (postProcessProfile.GetSetting<Bloom>() && postProcessProfile.GetSetting<Bloom>().enabled && postProcessProfile.GetSetting<Bloom>().active)
+                                    {
+                                        var bloom = postProcessProfile.GetSetting<Bloom>();
+
+                                        if (bloom.intensity.overrideState && bloom.intensity.value > 0.3f)
                                         {
-                                            if (postProcessProfile.GetSetting<ColorGrading>().tonemapper.value == Tonemapper.None)
-                                            {
-                                                postProcessing.AddMessageGroup(new MessageGroup(DONT_USE_NONE_FOR_TONEMAPPING, MessageType.Error).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
-                                            }
+                                            postProcessing.AddMessageGroup(new MessageGroup(TOO_HIGH_BLOOM_INTENSITY, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
                                         }
 
-                                        if (postProcessProfile.GetSetting<Bloom>() && postProcessProfile.GetSetting<Bloom>().enabled && postProcessProfile.GetSetting<Bloom>().active)
+                                        if (bloom.threshold.overrideState && bloom.threshold.value > 1f)
                                         {
-                                            var bloom = postProcessProfile.GetSetting<Bloom>();
-
-                                            if (bloom.intensity.overrideState && bloom.intensity.value > 0.3f)
-                                            {
-                                                postProcessing.AddMessageGroup(new MessageGroup(TOO_HIGH_BLOOM_INTENSITY, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
-                                            }
-
-                                            if (bloom.threshold.overrideState && bloom.threshold.value > 1f)
-                                            {
-                                                postProcessing.AddMessageGroup(new MessageGroup(TOO_HIGH_BLOOM_THRESHOLD, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
-                                            }
-
-                                            if (bloom.dirtTexture.overrideState && bloom.dirtTexture.value || bloom.dirtIntensity.overrideState && bloom.dirtIntensity.value > 0)
-                                            {
-                                                postProcessing.AddMessageGroup(new MessageGroup(NO_BLOOM_DIRT_IN_VR, MessageType.Error).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.BloomDirt)).SetSelectObject(postProcessVolume.gameObject)));
-                                            }
+                                            postProcessing.AddMessageGroup(new MessageGroup(TOO_HIGH_BLOOM_THRESHOLD, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
                                         }
 
-                                        if (postProcessProfile.GetSetting<AmbientOcclusion>() && postProcessProfile.GetSetting<AmbientOcclusion>().enabled && postProcessProfile.GetSetting<AmbientOcclusion>().active)
+                                        if (bloom.dirtTexture.overrideState && bloom.dirtTexture.value || bloom.dirtIntensity.overrideState && bloom.dirtIntensity.value > 0)
                                         {
-                                            postProcessing.AddMessageGroup(new MessageGroup(NO_AMBIENT_OCCLUSION, MessageType.Error).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.AmbientOcclusion)).SetSelectObject(postProcessVolume.gameObject)));
+                                            postProcessing.AddMessageGroup(new MessageGroup(NO_BLOOM_DIRT_IN_VR, MessageType.Error).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.BloomDirt)).SetSelectObject(postProcessVolume.gameObject)));
                                         }
+                                    }
 
-                                        if (postProcessVolume.isGlobal && postProcessProfile.GetSetting<DepthOfField>() && postProcessProfile.GetSetting<DepthOfField>().enabled && postProcessProfile.GetSetting<DepthOfField>().active)
-                                        {
-                                            postProcessing.AddMessageGroup(new MessageGroup(DEPTH_OF_FIELD_WARNING, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
-                                        }
+                                    if (postProcessProfile.GetSetting<AmbientOcclusion>() && postProcessProfile.GetSetting<AmbientOcclusion>().enabled && postProcessProfile.GetSetting<AmbientOcclusion>().active)
+                                    {
+                                        postProcessing.AddMessageGroup(new MessageGroup(NO_AMBIENT_OCCLUSION, MessageType.Error).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.AmbientOcclusion)).SetSelectObject(postProcessVolume.gameObject)));
+                                    }
 
-                                        if (postProcessProfile.GetSetting<ScreenSpaceReflections>() && postProcessProfile.GetSetting<ScreenSpaceReflections>().enabled && postProcessProfile.GetSetting<ScreenSpaceReflections>().active)
-                                        {
-                                            postProcessing.AddMessageGroup(new MessageGroup(SCREEN_SPACE_REFLECTIONS_WARNING, MessageType.Warning).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.ScreenSpaceReflections)).SetSelectObject(postProcessVolume.gameObject)));
-                                        }
+                                    if (postProcessVolume.isGlobal && postProcessProfile.GetSetting<DepthOfField>() && postProcessProfile.GetSetting<DepthOfField>().enabled && postProcessProfile.GetSetting<DepthOfField>().active)
+                                    {
+                                        postProcessing.AddMessageGroup(new MessageGroup(DEPTH_OF_FIELD_WARNING, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
+                                    }
 
-                                        if (postProcessProfile.GetSetting<Vignette>() && postProcessProfile.GetSetting<Vignette>().enabled && postProcessProfile.GetSetting<Vignette>().active)
-                                        {
-                                            postProcessing.AddMessageGroup(new MessageGroup(VIGNETTE_WARNING, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
-                                        }
+                                    if (postProcessProfile.GetSetting<ScreenSpaceReflections>() && postProcessProfile.GetSetting<ScreenSpaceReflections>().enabled && postProcessProfile.GetSetting<ScreenSpaceReflections>().active)
+                                    {
+                                        postProcessing.AddMessageGroup(new MessageGroup(SCREEN_SPACE_REFLECTIONS_WARNING, MessageType.Warning).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.ScreenSpaceReflections)).SetSelectObject(postProcessVolume.gameObject)));
+                                    }
+
+                                    if (postProcessProfile.GetSetting<Vignette>() && postProcessProfile.GetSetting<Vignette>().enabled && postProcessProfile.GetSetting<Vignette>().active)
+                                    {
+                                        postProcessing.AddMessageGroup(new MessageGroup(VIGNETTE_WARNING, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
                                     }
                                 }
                             }
