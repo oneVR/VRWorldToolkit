@@ -1262,8 +1262,6 @@ namespace VRWorldToolkit
 
         private const string NON_CRUNCHED_TEXTURES = "{0}% of the textures used in the scene have not been crunch compressed. Crunch compression can significantly reduce the size of the world download. It can be found from the texture's import settings.";
 
-        private const string SWITCH_TO_PROGRESSIVE = "The current scene is using the Enlighten lightmapper, which has been deprecated in newer versions of Unity. It would be best to consider switching to Progressive for improved fidelity and performance.";
-
         private const string SINGLE_COLOR_ENVIRONMENT_LIGHTING = "Consider changing the Environment Lighting to Gradient from Flat.";
 
         private const string DARK_ENVIRONMENT_LIGHTING = "Using dark colors for Environment Lighting can cause avatars to look weird. Only use dark Environment Lighting if the world has dark lighting.";
@@ -1938,13 +1936,6 @@ namespace VRWorldToolkit
                         var length = new FileInfo(pathTo).Length;
                         lighting.AddMessageGroup(new MessageGroup(LIGHTING_DATA_ASSET_INFO, MessageType.Info).AddSingleMessage(new SingleMessage((length / 1024.0f / 1024.0f).ToString("F2"))));
                     }
-
-#if !BAKERY_INCLUDED
-                if (LightmapEditorSettings.lightmapper.Equals(LightmapEditorSettings.Lightmapper.Enlighten))
-                {
-                    lighting.AddMessageGroup(new MessageGroup(SWITCH_TO_PROGRESSIVE, MessageType.Tips));
-                }
-#endif
 
                     if (nonBakedLights.Count != 0)
                     {
