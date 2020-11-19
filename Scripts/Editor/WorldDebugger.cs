@@ -1864,7 +1864,9 @@ namespace VRWorldToolkit
                     {
                         if (LightmapSettings.lightmaps[0] != null)
                         {
-                            if (LightmapSettings.lightmaps[0].lightmapColor.height != 4096)
+                            var lightmap = LightmapSettings.lightmaps[0];
+
+                            if (lightmap.lightmapColor != null && lightmap.lightmapColor.height != 4096)
                             {
                                 lighting.AddMessageGroup(new MessageGroup(CONSIDER_LARGER_LIGHTMAPS, MessageType.Tips).AddSingleMessage(new SingleMessage(lightMapSize.ToString()).SetAutoFix(SetLightmapSize(4096))));
                             }
