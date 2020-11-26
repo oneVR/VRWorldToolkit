@@ -32,6 +32,7 @@ using Object = UnityEngine.Object;
 using UnityEngine.UI;
 using Debug = UnityEngine.Debug;
 using System.Diagnostics;
+using System.Globalization;
 
 #if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
 namespace VRWorldToolkit
@@ -1217,9 +1218,17 @@ namespace VRWorldToolkit
 
         private const string NULL_SPAWN_POINT = "Null spawn point set Scene Descriptor. Spawning into a null spawn point will cause you to get thrown back to your homeworld.";
 
-        private const string COLLIDER_UNDER_SPAWN_IS_TRIGGER = "The collider \"{0}\" under your spawn point {1} has been set as Is Trigger! Spawning into a world with nothing to stand on will cause the players to fall forever.";
+        private const string COLLIDER_UNDER_SPAWN_IS_TRIGGER = "The collider \"{0}\" under your spawn point {1} has been set as Is Trigger.";
+        private const string COLLIDER_UNDER_SPAWN_IS_TRIGGER_COMBINED = "Found \"{0}\" spawn points which have a collider set as Is Trigger underneath.";
+        private const string COLLIDER_UNDER_SPAWN_IS_TRIGGER_INFO = "Spawning into a world with nothing to stand on will cause the players to fall forever.";
 
-        private const string NO_COLLIDER_UNDER_SPAWN = "Spawn point \"{0}\" does not have anything underneath it. Spawning into a world with nothing to stand on will cause the players to fall forever.";
+        private const string SPAWN_UNDER_RESPAWN_HEIGHT = "Spawn point \"{0}\" is placed {1} units under the Respawn Height set in Scene Descriptor.";
+        private const string SPAWN_UNDER_RESPAWN_HEIGHT_COMBINED = "Found {0} spawn points under Respawn Height set in Scene Descriptor.";
+        private const string SPAWN_UNDER_RESPAWN_HEIGHT_INFO = "Spawning under the Respawn Height causes you to get stuck while respawning infinitely.";
+
+        private const string NO_COLLIDER_UNDER_SPAWN = "Spawn point \"{0}\" does not have a collider under it.";
+        private const string NO_COLLIDER_UNDER_SPAWN_COMBINED = "Found {0} spawn points with no collider under them.";
+        private const string NO_COLLIDER_UNDER_SPAWN_INFO = "Spawning into a world with nothing to stand on will cause the players to fall forever.";
 
         private const string NO_PLAYER_MODS = "No Player Mods were found in the scene. Player mods are needed for adding jumping and changing walking speed.";
 
@@ -1527,25 +1536,33 @@ namespace VRWorldToolkit
                         general.AddMessageGroup(new MessageGroup(NULL_SPAWN_POINT, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject).SetAutoFix(FixSpawns(sceneDescriptor))));
                     }
 
+                    var spawnUnderRespawnHeight = general.AddMessageGroup(new MessageGroup(SPAWN_UNDER_RESPAWN_HEIGHT, SPAWN_UNDER_RESPAWN_HEIGHT_COMBINED, SPAWN_UNDER_RESPAWN_HEIGHT_INFO, MessageType.Error));
+                    var noColliderUnderSpawn = general.AddMessageGroup(new MessageGroup(NO_COLLIDER_UNDER_SPAWN, NO_COLLIDER_UNDER_SPAWN_COMBINED, NO_COLLIDER_UNDER_SPAWN_INFO, MessageType.Error));
+                    var colliderUnderSpawnTrigger = general.AddMessageGroup(new MessageGroup(COLLIDER_UNDER_SPAWN_IS_TRIGGER, COLLIDER_UNDER_SPAWN_IS_TRIGGER_COMBINED, COLLIDER_UNDER_SPAWN_IS_TRIGGER_INFO, MessageType.Error));
+
                     for (int i = 0; i < sceneDescriptor.spawns.Length; i++)
                     {
-                        if (sceneDescriptor.spawns[i] == null)
+                        if (sceneDescriptor.spawns[i] == null) continue;
+
+                        var spawn = sceneDescriptor.spawns[i];
+
+                        if (spawn.position.y < sceneDescriptor.RespawnHeightY)
                         {
-                            continue;
+                            spawnUnderRespawnHeight.AddSingleMessage(new SingleMessage(spawn.gameObject.name, Math.Abs(spawn.position.y - sceneDescriptor.RespawnHeightY).ToString(CultureInfo.InvariantCulture)).SetSelectObject(spawn.gameObject));
                         }
 
-                        if (!Physics.Raycast(sceneDescriptor.spawns[i].position + new Vector3(0, 0.01f, 0), Vector3.down, out RaycastHit hit, Mathf.Infinity, 0, QueryTriggerInteraction.Ignore))
+                        if (!Physics.Raycast(spawn.position + new Vector3(0, 0.01f, 0), Vector3.down, out RaycastHit hit, Mathf.Infinity, ~0, QueryTriggerInteraction.Ignore))
                         {
-                            if (Physics.Raycast(sceneDescriptor.spawns[i].position + new Vector3(0, 0.01f, 0), Vector3.down, out hit, Mathf.Infinity))
+                            if (Physics.Raycast(spawn.position + new Vector3(0, 0.01f, 0), Vector3.down, out hit, Mathf.Infinity))
                             {
                                 if (hit.collider.isTrigger)
                                 {
-                                    general.AddMessageGroup(new MessageGroup(COLLIDER_UNDER_SPAWN_IS_TRIGGER, MessageType.Error).AddSingleMessage(new SingleMessage(hit.collider.name, sceneDescriptor.spawns[i].gameObject.name).SetSelectObject(sceneDescriptor.spawns[i].gameObject)));
+                                    colliderUnderSpawnTrigger.AddSingleMessage(new SingleMessage(hit.collider.name, spawn.gameObject.name).SetSelectObject(spawn.gameObject));
                                 }
                             }
                             else
                             {
-                                general.AddMessageGroup(new MessageGroup(NO_COLLIDER_UNDER_SPAWN, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.spawns[i].gameObject.name).SetSelectObject(sceneDescriptor.spawns[i].gameObject)));
+                                noColliderUnderSpawn.AddSingleMessage(new SingleMessage(spawn.gameObject.name).SetSelectObject(spawn.gameObject));
                             }
                         }
                     }
