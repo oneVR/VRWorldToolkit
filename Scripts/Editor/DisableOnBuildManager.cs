@@ -45,8 +45,10 @@ namespace VRWorldToolkit
         [MenuItem("VRWorld Toolkit/Disable On Build/Setup", false, -101)]
         private static void DisableOnUploadSetup()
         {
-            //Add the tag
-            TagHelper.AddTag("DisableOnBuild");
+            if (EditorUtility.DisplayDialog("Setup Disable On Build", "This setup will add a new tag DisableOnBuild. Assigning this tag to a GameObject will disable it before a build happens.", "Setup", "Cancel"))
+            {
+                TagHelper.AddTag("DisableOnBuild");
+            }
         }
 
         [MenuItem("VRWorld Toolkit/Disable On Build/Setup", true)]
