@@ -1754,6 +1754,7 @@ namespace VRWorldToolkit
                 }
 
                 var bakedLighting = false;
+                var xatlasUnwrapper = false;
 
 #if BAKERY_INCLUDED
                 var bakeryLights = new List<GameObject>();
@@ -1776,6 +1777,11 @@ namespace VRWorldToolkit
                         }
 
                         break;
+                }
+
+                if (bakerySettings.renderSettingsUnwrapper == 1)
+                {
+                    xatlasUnwrapper = true;
                 }
 
                 if (bakeryLights.Count > 0)
@@ -2237,7 +2243,7 @@ namespace VRWorldToolkit
                         var renderer = gameObject.GetComponent<Renderer>();
 
                         // If baked lighting in the scene check for lightmap uvs
-                        if (bakedLighting)
+                        if (bakedLighting && !xatlasUnwrapper)
                         {
                             if (GameObjectUtility.AreStaticEditorFlagsSet(gameObject, StaticEditorFlags.LightmapStatic) && gameObject.GetComponent<MeshRenderer>())
                             {
