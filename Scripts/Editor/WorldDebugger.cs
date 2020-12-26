@@ -712,7 +712,7 @@ namespace VRWorldToolkit
 
         [SerializeField] private int tab;
 
-        [MenuItem("VRWorld Toolkit/World Debugger", false, 0)]
+        [MenuItem("VRWorld Toolkit/World Debugger", false, 20)]
         public static void ShowWindow()
         {
             var window = GetWindow(typeof(WorldDebugger));

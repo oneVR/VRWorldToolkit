@@ -6,7 +6,7 @@ namespace VRWorldToolkit
 {
     public class CustomEditorManager : MonoBehaviour
     {
-        [MenuItem("VRWorld Toolkit/Custom Editors/Enable", false, -100)]
+        [MenuItem("VRWorld Toolkit/Custom Editors/Enable", false, 3)]
         private static void EnableCustomEditors()
         {
             ScriptingDefineManager.RemoveScriptingDefine("VRWT_DISABLE_EDITORS");
@@ -22,7 +22,7 @@ namespace VRWorldToolkit
 #endif
         }
 
-        [MenuItem("VRWorld Toolkit/Custom Editors/Disable", false, -100)]
+        [MenuItem("VRWorld Toolkit/Custom Editors/Disable", false, 4)]
         private static void DisableCustomEditors()
         {
             ScriptingDefineManager.AddScriptingDefine("VRWT_DISABLE_EDITORS");

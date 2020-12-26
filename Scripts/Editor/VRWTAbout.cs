@@ -5,7 +5,7 @@ namespace VRWorldToolkit
 {
     public class VRWTAbout : EditorWindow
     {
-        [MenuItem("VRWorld Toolkit/About VRWorld Toolkit", false, 201)]
+        [MenuItem("VRWorld Toolkit/About VRWorld Toolkit", false, 41)]
         public static void ShowWindow()
         {
             var window = (VRWTAbout) GetWindow(typeof(VRWTAbout), true, "VRWorld Toolkit");
