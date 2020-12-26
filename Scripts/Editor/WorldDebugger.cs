@@ -1263,9 +1263,13 @@ namespace VRWorldToolkit
 
         private const string OCCLUSION_CULLING_CACHE_WARNING = "The current project's occlusion culling cache has {0} files. When the occlusion culling cache grows too big, baking occlusion culling can take much longer than intended. It can be cleared with no adverse effects.";
 
-        private const string ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE = "The current scene has an active camera \"{0}\" outputting to a render texture.";
+        private const string ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE = "Active camera \"{0}\" outputting to a render texture.";
         private const string ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE_COMBINED = "The current scene has {0} active cameras outputting to render textures.";
         private const string ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE_INFO = "This will affect performance negatively by causing more draw calls to happen. They should only be enabled when needed.";
+
+        private const string ACTIVE_CAMERA_WITH_OVER_ZERO_DEPTH = "Active camera \"{0}\" targeting display 1 with render depth over 0.";
+        private const string ACTIVE_CAMERA_WITH_OVER_ZERO_DEPTH_COMBINED = "The current scene has {0} active cameras targeting display 1 with render depth over 0.";
+        private const string ACTIVE_CAMERA_WITH_OVER_ZERO_DEPTH_INFO = "This will cause it to render over the upload screen, not allowing you to upload.";
 
         private const string NO_TOON_SHADERS = "Toon shaders should be avoided for world-building, as they are missing crucial things for making worlds. For world-building, the most recommended shader is Standard.";
 
@@ -1687,28 +1691,29 @@ namespace VRWorldToolkit
                     optimization.AddMessageGroup(new MessageGroup(OCCLUSION_CULLING_CACHE_WARNING, cacheWarningType).AddSingleMessage(new SingleMessage(occlusionCacheFiles.ToString()).SetAutoFix(ClearOcclusionCache(occlusionCacheFiles))));
                 }
 
-                // Check if there's any active cameras outputting to render textures
-                var activeCameras = new List<GameObject>();
-                var cameraCount = 0;
-                var cameras = GameObject.FindObjectsOfType<Camera>();
+                // Check for possible camera problems
+                var cameras = FindObjectsOfType<Camera>();
 
-                for (var i = 0; i < cameras.Length; i++)
+                if (cameras.Length > 0)
                 {
-                    if (!cameras[i].enabled || (!cameras[i].targetTexture || cameras[i].name == "VRCCam")) continue;
+                    var activeCamerasMessages = optimization.AddMessageGroup(new MessageGroup(ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE, ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE_COMBINED, ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE_INFO, MessageType.BadFPS));
+                    var cameraDepthWarning = general.AddMessageGroup(new MessageGroup(ACTIVE_CAMERA_WITH_OVER_ZERO_DEPTH, ACTIVE_CAMERA_WITH_OVER_ZERO_DEPTH_COMBINED, ACTIVE_CAMERA_WITH_OVER_ZERO_DEPTH_INFO, MessageType.Error));
 
-                    cameraCount++;
-                    activeCameras.Add(cameras[i].gameObject);
-                }
-
-                if (cameraCount > 0)
-                {
-                    var activeCamerasMessages = new MessageGroup(ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE, ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE_COMBINED, ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE_INFO, MessageType.BadFPS);
-                    for (var i = 0; i < activeCameras.Count; i++)
+                    for (var i = 0; i < cameras.Length; i++)
                     {
-                        activeCamerasMessages.AddSingleMessage(new SingleMessage(activeCameras[i].name).SetSelectObject(activeCameras[i].gameObject));
-                    }
+                        var camera = cameras[i];
 
-                    optimization.AddMessageGroup(activeCamerasMessages);
+                        if (!camera.enabled || camera.name == "VRCCam") continue;
+
+                        if (camera.targetTexture)
+                        {
+                            activeCamerasMessages.AddSingleMessage(new SingleMessage(camera.name).SetSelectObject(camera.gameObject));
+                        }
+                        else if (camera.depth > 0 && camera.targetDisplay == 0)
+                        {
+                            cameraDepthWarning.AddSingleMessage(new SingleMessage(camera.name).SetSelectObject(camera.gameObject));
+                        }
+                    }
                 }
 
                 // Get active mirrors in the world and complain about them
