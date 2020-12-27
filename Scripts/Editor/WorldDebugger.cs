@@ -1218,6 +1218,14 @@ namespace VRWorldToolkit
 
         private const string NULL_SPAWN_POINT = "Null spawn point set Scene Descriptor. Spawning into a null spawn point will cause you to get thrown back to your homeworld.";
 
+        private const string REFERENCE_CAMERA_CLEAR_FLAGS_NOT_SKYBOX = "Current reference cameras clear flags is not set to Skybox this can cause rendering problems in game.";
+
+        private const string REFERENCE_CAMERA_CLIPPING_PLANE_RATIO = "Too high of a ratio between reference cameras near ({0}) and far ({1}) clip values can cause rendering issues in-game.";
+
+        private const string REFERENCE_CAMERA_NEAR_CLIP_PLANE_OVER = "The current reference camera near clip value is {0} this value gets clamped to be between 0.01 and 0.05.";
+
+        private const string NO_REFERENCE_CAMERA_SET_GENERAL = "No reference camera set in the Scene Descriptor. Using a reference camera allows the world's rendering distance to be changed by changing the camera's near and far clipping planes.";
+
         private const string COLLIDER_UNDER_SPAWN_IS_TRIGGER = "The collider \"{0}\" under your spawn point {1} has been set as Is Trigger.";
         private const string COLLIDER_UNDER_SPAWN_IS_TRIGGER_COMBINED = "Found \"{0}\" spawn points which have a collider set as Is Trigger underneath.";
         private const string COLLIDER_UNDER_SPAWN_IS_TRIGGER_INFO = "Spawning into a world with nothing to stand on will cause the players to fall forever.";
@@ -1322,7 +1330,7 @@ namespace VRWorldToolkit
 
         private const string POST_PROCESSING_NO_RESOURCES_SET = "The Post Process Layer on \"{0}\" does not have its resources field set properly. This causes post-processing to error out. This can be fixed by recreating the Post Processing Layer on the GameObject.";
 
-        private const string NO_REFERENCE_CAMERA_SET = "The current scenes Scene Descriptor has no Reference Camera set. Without a Reference Camera set Post Processing will not be visible in-game.";
+        private const string NO_REFERENCE_CAMERA_SET_PP = "The current scenes Scene Descriptor has no Reference Camera set. Without a Reference Camera set Post Processing will not be visible in-game.";
 
         private const string NO_POST_PROCESSING_VOLUMES = "No enabled Post Processing Volumes found in the scene. A Post Processing Volume is needed to apply effects to the camera's Post Processing Layer.";
 
@@ -1506,6 +1514,32 @@ namespace VRWorldToolkit
                 if (ConsoleFlagUtil.GetConsoleErrorPause())
                 {
                     general.AddMessageGroup(new MessageGroup(ERROR_PAUSE_WARNING, MessageType.Error).AddSingleMessage(new SingleMessage(SetErrorPause(false))));
+                }
+
+                // Check reference camera for possible problems
+                if (sceneDescriptor.ReferenceCamera && sceneDescriptor.ReferenceCamera.GetComponent<Camera>())
+                {
+                    var camera = sceneDescriptor.ReferenceCamera.GetComponent<Camera>();
+
+                    if (camera.clearFlags != CameraClearFlags.Skybox)
+                    {
+                        general.AddMessageGroup(new MessageGroup(REFERENCE_CAMERA_CLEAR_FLAGS_NOT_SKYBOX, MessageType.Warning).AddSingleMessage(new SingleMessage(sceneDescriptor.ReferenceCamera)));
+                    }
+
+                    // TODO: Investigate better sanity value
+                    if (camera.farClipPlane / camera.nearClipPlane > 200000f)
+                    {
+                        general.AddMessageGroup(new MessageGroup(REFERENCE_CAMERA_CLIPPING_PLANE_RATIO, MessageType.Warning).AddSingleMessage(new SingleMessage(camera.nearClipPlane.ToString(CultureInfo.InvariantCulture), camera.farClipPlane.ToString(CultureInfo.InvariantCulture)).SetSelectObject(camera.gameObject)));
+                    }
+
+                    if (camera.nearClipPlane > 0.05f)
+                    {
+                        general.AddMessageGroup(new MessageGroup(REFERENCE_CAMERA_NEAR_CLIP_PLANE_OVER, MessageType.Tips).AddSingleMessage(new SingleMessage(camera.nearClipPlane.ToString(CultureInfo.InvariantCulture)).SetSelectObject(camera.gameObject)));
+                    }
+                }
+                else
+                {
+                    general.AddMessageGroup(new MessageGroup(NO_REFERENCE_CAMERA_SET_GENERAL, MessageType.Tips).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject)));
                 }
 
 #if UNITY_EDITOR_WIN
