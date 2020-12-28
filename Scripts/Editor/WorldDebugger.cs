@@ -2118,7 +2118,7 @@ namespace VRWorldToolkit
                             noReferenceCameraMessage.SetAutoFix(SetReferenceCamera(sceneDescriptor, Camera.main));
                         }
 
-                        postProcessing.AddMessageGroup(new MessageGroup(NO_REFERENCE_CAMERA_SET, MessageType.Warning).AddSingleMessage(noReferenceCameraMessage));
+                        postProcessing.AddMessageGroup(new MessageGroup(NO_REFERENCE_CAMERA_SET_PP, MessageType.Warning).AddSingleMessage(noReferenceCameraMessage));
                     }
                     else
                     {
