@@ -2687,7 +2687,7 @@ namespace VRWorldToolkit
                 CheckScene();
                 CheckTime.Stop();
 
-                if (CheckTime.ElapsedMilliseconds > 2000)
+                if (CheckTime.ElapsedMilliseconds >= 1000)
                 {
                     autoRecheck = false;
                 }
