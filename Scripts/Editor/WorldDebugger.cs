@@ -1705,7 +1705,7 @@ namespace VRWorldToolkit
                 }
                 else
                 {
-                    optimization.AddMessageGroup(new MessageGroup(NO_OCCLUSION_CULLING, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/occlusion-culling-getting-started.html"));
+                    optimization.AddMessageGroup(new MessageGroup(NO_OCCLUSION_CULLING, MessageType.Tips).SetDocumentation("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Occlusion-Culling"));
                 }
 
                 if (occlusionCacheFiles > 0)
@@ -2034,7 +2034,7 @@ namespace VRWorldToolkit
 
                 if (reflectionProbeCount == 0)
                 {
-                    lighting.AddMessageGroup(new MessageGroup(NO_REFLECTION_PROBES, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/class-ReflectionProbe.html"));
+                    lighting.AddMessageGroup(new MessageGroup(NO_REFLECTION_PROBES, MessageType.Tips).SetDocumentation("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Reflection-Probes"));
                 }
                 else if (reflectionProbeCount > 0)
                 {
