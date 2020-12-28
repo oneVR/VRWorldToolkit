@@ -1411,6 +1411,8 @@ namespace VRWorldToolkit
 
         private const string BUILD_AND_TEST_FORCE_NON_VR_ERROR = "VRChat client path has not been set to point directly to the VRChat executable in the VRCSDK settings. This will cause Force Non-VR setting for Build & Test not to work.";
 
+        private const string BUILD_AND_TEST_NO_EXECUTABLE_FOUND = "Current client path set in the VRCSDK settings does not contain the VRChat executable this will cause problems with Build & Test functionality.";
+
         private const string MATERIAL_WITH_NON_WHITELISTED_SHADER = "Material \"{0}\" is using an unsupported shader \"{1}\".";
         private const string MATERIAL_WITH_NON_WHITELISTED_SHADER_COMBINED = "Found {0} materials with unsupported shaders.";
         private const string MATERIAL_WITH_NON_WHITELISTED_SHADER_INFO = "Unsupported shaders can cause problems on the Quest platform if not appropriately used.";
@@ -1543,15 +1545,23 @@ namespace VRWorldToolkit
 
 #if UNITY_EDITOR_WIN
                 // Check for problems with Build & Test
-                if (SDKClientUtilities.GetSavedVRCInstallPath() == "\\VRChat.exe" || SDKClientUtilities.GetSavedVRCInstallPath() == "")
+                var commandPath = Registry.ClassesRoot.OpenSubKey(@"VRChat\shell\open\command");
+                if (SDKClientUtilities.GetSavedVRCInstallPath() == "\\VRChat.exe" || SDKClientUtilities.GetSavedVRCInstallPath() == "" || commandPath != null && !File.Exists(commandPath.ToString()))
                 {
-                    if (Registry.ClassesRoot.OpenSubKey(@"VRChat\shell\open\command") is null)
+                    if (commandPath is null)
                     {
                         general.AddMessageGroup(new MessageGroup(BUILD_AND_TEST_BROKEN_ERROR, MessageType.Error).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
                     }
                     else
                     {
-                        general.AddMessageGroup(new MessageGroup(BUILD_AND_TEST_FORCE_NON_VR_ERROR, MessageType.Warning).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
+                        if (File.Exists(commandPath.ToString()))
+                        {
+                            general.AddMessageGroup(new MessageGroup(BUILD_AND_TEST_FORCE_NON_VR_ERROR, MessageType.Warning).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
+                        }
+                        else
+                        {
+                            general.AddMessageGroup(new MessageGroup(BUILD_AND_TEST_NO_EXECUTABLE_FOUND, MessageType.Error).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
+                        }
                     }
                 }
 #endif
