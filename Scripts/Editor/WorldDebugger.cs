@@ -1546,23 +1546,18 @@ namespace VRWorldToolkit
 #if UNITY_EDITOR_WIN
                 // Check for problems with Build & Test
                 var commandPath = Registry.ClassesRoot.OpenSubKey(@"VRChat\shell\open\command");
-                if (SDKClientUtilities.GetSavedVRCInstallPath() == "\\VRChat.exe" || SDKClientUtilities.GetSavedVRCInstallPath() == "" || commandPath != null && !File.Exists(commandPath.ToString()))
+                var savedVRCInstallPath = SDKClientUtilities.GetSavedVRCInstallPath();
+                if (commandPath is null && savedVRCInstallPath == "\\VRChat.exe")
                 {
-                    if (commandPath is null)
-                    {
-                        general.AddMessageGroup(new MessageGroup(BUILD_AND_TEST_BROKEN_ERROR, MessageType.Error).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
-                    }
-                    else
-                    {
-                        if (File.Exists(commandPath.ToString()))
-                        {
-                            general.AddMessageGroup(new MessageGroup(BUILD_AND_TEST_FORCE_NON_VR_ERROR, MessageType.Warning).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
-                        }
-                        else
-                        {
-                            general.AddMessageGroup(new MessageGroup(BUILD_AND_TEST_NO_EXECUTABLE_FOUND, MessageType.Error).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
-                        }
-                    }
+                    general.AddMessageGroup(new MessageGroup(BUILD_AND_TEST_BROKEN_ERROR, MessageType.Error).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
+                }
+                else if (savedVRCInstallPath == "\\VRChat.exe")
+                {
+                    general.AddMessageGroup(new MessageGroup(BUILD_AND_TEST_FORCE_NON_VR_ERROR, MessageType.Warning).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
+                }
+                else if (!File.Exists(savedVRCInstallPath))
+                {
+                    general.AddMessageGroup(new MessageGroup(BUILD_AND_TEST_NO_EXECUTABLE_FOUND, MessageType.Error).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
                 }
 #endif
 
