@@ -1148,15 +1148,14 @@ namespace VRWorldToolkit
             {
                 var clientPath = Helper.GetSteamVrcExecutablePath();
 
-                SDKClientUtilities.GetSavedVRCInstallPath();
-
                 if (clientPath != null)
                 {
                     SDKClientUtilities.SetVRCInstallPath(clientPath);
                 }
-                else
+                else if (EditorUtility.DisplayDialog("VRChat Executable Path Not Found", "Could not find the VRChat executable path automatically.\n\nPress Ok to locate it manually.", "Ok", "Cancel"))
                 {
-                    EditorUtility.DisplayDialog("VRChat Executable Path Not Found", "Could not find the VRChat executable path automatically you can set it manually from the VRCSDK Settings page.", "Ok");
+                    var newPath = EditorUtility.OpenFilePanel("Locate VRChat.exe", Application.dataPath, "exe");
+                    SDKClientUtilities.SetVRCInstallPath(newPath);
                 }
             };
         }
