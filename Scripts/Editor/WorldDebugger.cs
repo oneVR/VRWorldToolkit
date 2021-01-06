@@ -1403,7 +1403,7 @@ namespace VRWorldToolkit
 
         private const string DISABLED_PORTALS_WARNING = "Portal \"{0}\" disabled by default.";
         private const string DISABLED_PORTALS_WARNING_COMBINED = "Found {0} portals disabled by default.";
-        private const string DISABLED_PORTALS_WARNING_INFO = "Having a portal disabled by default will cause players that are entering to end up in different instances.";
+        private const string DISABLED_PORTALS_WARNING_INFO = "Having a portal disabled by default may cause players that are entering to end up in different instances.";
 
         private const string SHRNM_DIRECTIONAL_MODE_BAKERY_ERROR = "SH or RNM directional mode detected in Bakery. Using SH directional mode is not supported in VRChat by default. It requires the usage of VRC Bakery Adapter by Merlin for it to function in-game.";
 
