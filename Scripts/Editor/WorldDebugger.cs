@@ -2249,7 +2249,7 @@ namespace VRWorldToolkit
                     }
                 }
 #else
-            postProcessing.AddMessageGroup(new MessageGroup(NO_POST_PROCESSING_IMPORTED, MessageType.Info));
+                postProcessing.AddMessageGroup(new MessageGroup(NO_POST_PROCESSING_IMPORTED, MessageType.Info));
 #endif
 
                 // GameObject checks
