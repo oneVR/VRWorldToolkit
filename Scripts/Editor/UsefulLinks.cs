@@ -29,8 +29,14 @@ namespace VRWorldToolkit
             Application.OpenURL("https://github.com/CyanLaser/CyanEmu");
         }
 
+        [MenuItem("VRWorld Toolkit/Useful Links/EasyQuestSwitch", false, 44)]
+        private static void EasyQuestSwitch()
+        {
+            Application.OpenURL("https://github.com/JordoVR/EasyQuestSwitch");
+        }
+
 #if UDON
-        [MenuItem("VRWorld Toolkit/Useful Links/UdonSharp", false, 44)]
+        [MenuItem("VRWorld Toolkit/Useful Links/UdonSharp", false, 45)]
         private static void UdonSharpLink()
         {
             Application.OpenURL("https://github.com/Merlin-san/UdonSharp/");
@@ -38,7 +44,7 @@ namespace VRWorldToolkit
 #endif
 
 #if BAKERY_INCLUDED
-        [MenuItem("VRWorld Toolkit/Useful Links/Bakery Documentation", false, 45)]
+        [MenuItem("VRWorld Toolkit/Useful Links/Bakery Documentation", false, 46)]
         private static void BakeryDocumentationLink()
         {
             Application.OpenURL("https://geom.io/bakery/");
