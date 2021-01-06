@@ -1290,7 +1290,7 @@ namespace VRWorldToolkit
 
         private const string NO_LIGHTMAP_UV = "The model found in the scene \"{0}\" is set to be lightmapped but does not have Lightmap UVs.";
         private const string NO_LIGHTMAP_UV_COMBINED = "The current scene has {0} models set to be lightmapped that do not have Lightmap UVs.";
-        private const string NO_LIGHTMAP_UV_INFO = "This can cause issues when baking lighting. You can enable generating Lightmap UV's in the model's import settings.";
+        private const string NO_LIGHTMAP_UV_INFO = "This can cause issues when baking lighting if the main UV is not suitable for lightmapping. You can enable generating Lightmap UV's in the model's import settings.";
 
         private const string LIGHTS_NOT_BAKED = "The current scene is using realtime lighting. Consider baked lighting for improved performance.";
 
