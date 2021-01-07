@@ -133,7 +133,7 @@ namespace VRWorldToolkit
                 .OrderByDescending(x => x.size)
                 .ToList();
 
-            var totalSize = results.Sum(x => x.size);
+            var totalSize = results.Sum(x => (long) x.size);
 
             for (var i = 0; i < results.Count; i++)
             {
