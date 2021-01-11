@@ -2476,6 +2476,8 @@ namespace VRWorldToolkit
                             {
                                 var assetPath = AssetDatabase.GetAssetPath(shader);
 
+                                var addChecked = true;
+
                                 if (File.Exists(assetPath))
                                 {
                                     // Read shader file to string
@@ -2484,14 +2486,35 @@ namespace VRWorldToolkit
                                     // Strip comments
                                     word = Regex.Replace(word, "(\\/\\/.*)|(\\/\\*)(.*)(\\*\\/)", "");
 
-                                    // Match for GrabPass
-                                    if (Regex.IsMatch(word, "GrabPass\\s*{"))
+                                    // Match for GrabPass and check if it's active
+                                    var grabPassMatch = Regex.Match(word, "GrabPass\\s*{[\\s\\S]*?}");
+                                    if (grabPassMatch.Success)
                                     {
-                                        grabPassShaders.AddSingleMessage(new SingleMessage(material.name, shader.name).SetAssetPath(AssetDatabase.GetAssetPath(material)));
+                                        var grabPassActive = false;
+                                        var lightModeTags = Regex.Matches(grabPassMatch.Value, "[\"|']LightMode[\"|']\\s*=\\s*[\"|'](\\w*)[\"|']");
+
+                                        if (lightModeTags.Count > 0)
+                                        {
+                                            addChecked = false;
+                                            for (var j = 0; j < lightModeTags.Count; j++)
+                                            {
+                                                if (material.GetShaderPassEnabled(lightModeTags[j].Groups[1].Value))
+                                                {
+                                                    grabPassActive = true;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            grabPassActive = true;
+                                        }
+
+                                        if (grabPassActive) grabPassShaders.AddSingleMessage(new SingleMessage(material.name, shader.name).SetAssetPath(AssetDatabase.GetAssetPath(material)));
                                     }
                                 }
 
-                                checkedShaders.Add(shader);
+                                if (addChecked) checkedShaders.Add(shader);
                             }
 
                             if (shader.name == "Hidden/InternalErrorShader" && !missingShaders.Contains(material))
