@@ -1507,6 +1507,12 @@ namespace VRWorldToolkit
             }
         }
 
+        private class CheckedShaderProperties
+        {
+            public bool IncludesGrabPass = false;
+            public List<string> GrabPassLightModeTags = new List<string>();
+        }
+
         private void CheckScene()
         {
             masterList.ClearCategories();
@@ -2358,10 +2364,10 @@ namespace VRWorldToolkit
                 var textureCount = 0;
 
                 var missingShaders = new List<Material>();
+                var selectablesNotNone = new List<Selectable>();
 
                 var checkedMaterials = new List<Material>();
-                var checkedShaders = new List<Shader>();
-                var selectablesNotNone = new List<Selectable>();
+                var checkedShaders = new Dictionary<Shader, CheckedShaderProperties>();
 
                 var mirrorsDefaultLayers = optimization.AddMessageGroup(new MessageGroup(MIRROR_WITH_DEFAULT_LAYERS, MIRROR_WITH_DEFAULT_LAYERS_COMBINED, MIRROR_WITH_DEFAULT_LAYERS_INFO, MessageType.Tips));
                 var legacyBlendShapeIssues = general.AddMessageGroup(new MessageGroup(LEGACY_BLEND_SHAPE_ISSUES, LEGACY_BLEND_SHAPE_ISSUES_COMBINED, LEGACY_BLEND_SHAPE_ISSUES_INFO, MessageType.Warning));
@@ -2472,14 +2478,14 @@ namespace VRWorldToolkit
                                 materialWithNonWhitelistedShader.AddSingleMessage(singleMessage);
                             }
 
-                            if (!checkedShaders.Contains(shader) && AssetDatabase.GetAssetPath(shader) != null)
+                            if (!checkedShaders.ContainsKey(shader) && AssetDatabase.GetAssetPath(shader) != null)
                             {
                                 var assetPath = AssetDatabase.GetAssetPath(shader);
 
-                                var addChecked = true;
-
                                 if (File.Exists(assetPath))
                                 {
+                                    var checkedShaderProperties = new CheckedShaderProperties();
+
                                     // Read shader file to string
                                     var word = File.ReadAllText(assetPath);
 
@@ -2490,31 +2496,42 @@ namespace VRWorldToolkit
                                     var grabPassMatch = Regex.Match(word, "GrabPass\\s*{[\\s\\S]*?}");
                                     if (grabPassMatch.Success)
                                     {
-                                        var grabPassActive = false;
+                                        checkedShaderProperties.IncludesGrabPass = true;
                                         var lightModeTags = Regex.Matches(grabPassMatch.Value, "[\"|']LightMode[\"|']\\s*=\\s*[\"|'](\\w*)[\"|']");
 
                                         if (lightModeTags.Count > 0)
                                         {
-                                            addChecked = false;
                                             for (var j = 0; j < lightModeTags.Count; j++)
                                             {
-                                                if (material.GetShaderPassEnabled(lightModeTags[j].Groups[1].Value))
-                                                {
-                                                    grabPassActive = true;
-                                                    break;
-                                                }
+                                                checkedShaderProperties.GrabPassLightModeTags.Add(lightModeTags[j].Groups[1].Value);
                                             }
                                         }
-                                        else
-                                        {
-                                            grabPassActive = true;
-                                        }
-
-                                        if (grabPassActive) grabPassShaders.AddSingleMessage(new SingleMessage(material.name, shader.name).SetAssetPath(AssetDatabase.GetAssetPath(material)));
                                     }
-                                }
 
-                                if (addChecked) checkedShaders.Add(shader);
+                                    checkedShaders.Add(shader, checkedShaderProperties);
+                                }
+                            }
+
+                            if (checkedShaders.ContainsKey(shader))
+                            {
+                                var checkedShader = checkedShaders[shader];
+                                if (checkedShader.IncludesGrabPass)
+                                {
+                                    var grabPassActive = false;
+                                    if (checkedShader.GrabPassLightModeTags.Count > 0)
+                                    {
+                                        for (var j = 0; j < checkedShader.GrabPassLightModeTags.Count; j++)
+                                        {
+                                            if (material.GetShaderPassEnabled(checkedShader.GrabPassLightModeTags[j])) grabPassActive = true;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        grabPassActive = true;
+                                    }
+
+                                    if (grabPassActive) grabPassShaders.AddSingleMessage(new SingleMessage(material.name, shader.name).SetAssetPath(AssetDatabase.GetAssetPath(material)));
+                                }
                             }
 
                             if (shader.name == "Hidden/InternalErrorShader" && !missingShaders.Contains(material))
