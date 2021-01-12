@@ -2961,26 +2961,29 @@ namespace VRWorldToolkit
 
                     GUILayout.EndVertical();
 
-                    if (overallStatsFoldout)
-                    {
-                        m_TreeView.DrawOverallStats();
-                    }
-
                     if (buildReportMessagesFoldout)
                     {
                         m_TreeView.DrawMessages();
                     }
-
-                    var treeViewRect = EditorGUILayout.BeginVertical();
-
-                    if (m_TreeView.HasReport())
+                    else
                     {
-                        m_TreeView.OnGUI(treeViewRect);
+                        if (overallStatsFoldout)
+                        {
+                            m_TreeView.DrawOverallStats();
+                        }
+
+                        var treeViewRect = EditorGUILayout.BeginVertical();
+
+                        if (m_TreeView.HasReport())
+                        {
+                            m_TreeView.OnGUI(treeViewRect);
+                        }
+
+                        GUILayout.FlexibleSpace();
+
+                        EditorGUILayout.EndVertical();
                     }
 
-                    GUILayout.FlexibleSpace();
-
-                    EditorGUILayout.EndVertical();
                     break;
             }
         }

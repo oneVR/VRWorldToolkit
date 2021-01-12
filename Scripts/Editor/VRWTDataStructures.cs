@@ -9,6 +9,7 @@ namespace VRWorldToolkit.DataStructures
         public static GUIStyle LabelRichText { get; internal set; }
         public static GUIStyle RichText { get; internal set; }
         public static GUIStyle RichTextWrap { get; internal set; }
+        public static GUIStyle BoldWrap { get; internal set; }
         public static GUIStyle RedLabel { get; internal set; }
         public static GUIStyle WhiteLabel { get; internal set; }
         public static GUIStyle TreeViewLabel { get; internal set; }
@@ -47,6 +48,11 @@ namespace VRWorldToolkit.DataStructures
             RichTextWrap = new GUIStyle
             {
                 richText = true,
+                wordWrap = true
+            };
+
+            BoldWrap = new GUIStyle("boldLabel")
+            {
                 wordWrap = true
             };
 

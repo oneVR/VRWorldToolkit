@@ -243,10 +243,15 @@ namespace VRWorldToolkit
             }
         }
 
+        private Vector2 scrollPosMessages;
+
         public void DrawMessages()
         {
             if (HasMessages())
             {
+                EditorGUILayout.BeginVertical();
+                scrollPosMessages = EditorGUILayout.BeginScrollView(scrollPosMessages);
+
                 var steps = report.steps;
 
                 for (var i = 0; i < steps.Length; i++)
@@ -255,7 +260,7 @@ namespace VRWorldToolkit
 
                     if (step.messages.Length > 0)
                     {
-                        GUILayout.Label(step.name, EditorStyles.boldLabel);
+                        GUILayout.Label(step.name, Styles.BoldWrap);
 
                         for (var j = 0; j < step.messages.Length; j++)
                         {
@@ -281,6 +286,9 @@ namespace VRWorldToolkit
                         EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
                     }
                 }
+
+                EditorGUILayout.EndScrollView();
+                EditorGUILayout.EndVertical();
             }
             else
             {
