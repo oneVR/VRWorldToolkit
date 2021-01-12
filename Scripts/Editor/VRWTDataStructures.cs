@@ -77,4 +77,23 @@ namespace VRWorldToolkit.DataStructures
             };
         }
     }
+
+    public static class Validation
+    {
+        public static readonly string[] WorldShaderWhiteList = new string[]
+        {
+            "VRChat/Mobile/Standard Lite",
+            "VRChat/Mobile/Diffuse",
+            "VRChat/Mobile/Bumped Diffuse",
+            "VRChat/Mobile/Bumped Mapped Specular",
+            "VRChat/Mobile/Toon Lit",
+            "VRChat/Mobile/MatCap Lit",
+            "VRChat/Mobile/Lightmapped",
+            "VRChat/Mobile/Skybox",
+            "VRChat/Mobile/Particles/Additive",
+            "VRChat/Mobile/Particles/Multiply",
+            "FX/MirrorReflection",
+            "UI/Default",
+        };
+    }
 }
