@@ -1278,8 +1278,6 @@ namespace VRWorldToolkit
 
         private const string LAST_BUILD_FAILED = "Last build failed check the Console for compile errors to find the cause. If the error script is in the SDK try reimporting otherwise remove or update the problem asset.";
 
-        private const string RUNTIME_WORLD_CREATION_FOUND = "A script used in the world upload process found in the scene. This will break things.";
-
         private const string NO_SPAWN_POINT_SET = "There are no spawn points set in your Scene Descriptor. Spawning into a world with no spawn point will cause you to get thrown back to your homeworld.";
 
         private const string NULL_SPAWN_POINT = "Null spawn point set Scene Descriptor. Spawning into a null spawn point will cause you to get thrown back to your homeworld.";
@@ -1591,16 +1589,6 @@ namespace VRWorldToolkit
                 if (buildReportWindows != null && buildReportWindows.summary.result == BuildResult.Failed || buildReportQuest != null && buildReportQuest.summary.result == BuildResult.Failed)
                 {
                     general.AddMessageGroup(new MessageGroup(LAST_BUILD_FAILED, MessageType.Error));
-                }
-
-                if (!Application.isPlaying)
-                {
-                    var runtimeWorldCreations = FindObjectsOfType(typeof(RuntimeWorldCreation)) as RuntimeWorldCreation[];
-
-                    if (runtimeWorldCreations.Length > 0)
-                    {
-                        general.AddMessageGroup(new MessageGroup(RUNTIME_WORLD_CREATION_FOUND, MessageType.Error).AddSingleMessage(new SingleMessage(Array.ConvertAll(runtimeWorldCreations, s => s.gameObject))));
-                    }
                 }
 
                 // Check if multiple scenes loaded
