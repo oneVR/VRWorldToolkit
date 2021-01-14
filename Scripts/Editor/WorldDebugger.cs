@@ -1486,6 +1486,10 @@ namespace VRWorldToolkit
         private const string UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_COMBINED = "Found {0} UI Elements with their Navigation not set to None.";
         private const string UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_INFO = "Setting Navigation to None on UI Elements can stop accidental interactions with them while trying to walk around.";
 
+        private const string NULL_TRIGGER_RECEIVER = "Null receiver found on trigger {0}.";
+        private const string NULL_TRIGGER_RECEIVER_COMBINED = "Found {0} null receivers in scene triggers.";
+        private const string NULL_TRIGGER_RECEIVER_INFO = "This causes the trigger to target itself, which is sometimes wanted.";
+
         private const string HEY_YOU_FOUND_A_BUG = "Hey, you found a bug! Please send it my way so I can fix it! Check About VRWorld Toolkit to find all the ways to contact me. \"{0}\" on line {1}.";
 
         private const string FUTURE_PROOF_PUBLISH_ENABLED = "Future Proof Publish is currently enabled. This is a legacy feature that has no planned functions as of right now. Having it enabled will increase upload times and sometimes cause uploading to fail.";
@@ -2363,6 +2367,7 @@ namespace VRWorldToolkit
                 var disabledPortals = general.AddMessageGroup(new MessageGroup(DISABLED_PORTALS_WARNING, DISABLED_PORTALS_WARNING_COMBINED, DISABLED_PORTALS_WARNING_INFO, MessageType.Warning));
                 var materialWithNonWhitelistedShader = general.AddMessageGroup(new MessageGroup(MATERIAL_WITH_NON_WHITELISTED_SHADER, MATERIAL_WITH_NON_WHITELISTED_SHADER_COMBINED, MATERIAL_WITH_NON_WHITELISTED_SHADER_INFO, MessageType.Warning).SetCombinedSelectionDisabled(true).SetDocumentation("https://docs.vrchat.com/docs/quest-content-limitations#shaders"));
                 var uiElementNavigation = general.AddMessageGroup(new MessageGroup(UI_ELEMENT_WITH_NAVIGATION_NOT_NONE, UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_COMBINED, UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_INFO, MessageType.Tips));
+                var nullTriggerReceivers = general.AddMessageGroup(new MessageGroup(NULL_TRIGGER_RECEIVER, NULL_TRIGGER_RECEIVER_COMBINED, NULL_TRIGGER_RECEIVER_INFO, MessageType.Info));
 
                 var allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
                 for (var i = 0; i < allGameObjects.Length; i++)
@@ -2575,6 +2580,43 @@ namespace VRWorldToolkit
                             disabledPortals.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject));
                         }
                     }
+
+#if VRC_SDK_VRCSDK2
+                    if (gameObject.GetComponent<VRC_Trigger>())
+                    {
+                        var trigger = gameObject.GetComponent<VRC_Trigger>();
+                        var missingFound = false;
+                        for (var j = 0; j < trigger.Triggers.Count; j++)
+                        {
+                            var triggerScript = trigger.Triggers[j];
+                            for (var k = 0; k < triggerScript.Events.Count; k++)
+                            {
+                                var parameterObjects = triggerScript.Events[k].ParameterObjects;
+
+                                if (parameterObjects.Length == 0)
+                                {
+                                    nullTriggerReceivers.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject));
+                                    missingFound = true;
+                                    break;
+                                }
+                                else
+                                {
+                                    for (var l = 0; l < parameterObjects.Length; l++)
+                                    {
+                                        if (parameterObjects[l].gameObject == null)
+                                        {
+                                            nullTriggerReceivers.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject));
+                                            missingFound = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (missingFound) break;
+                        }
+                    }
+#endif
                 }
 
                 if (selectablesNotNone.Count > 1)
