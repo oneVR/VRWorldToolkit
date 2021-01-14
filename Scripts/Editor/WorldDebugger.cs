@@ -1988,7 +1988,7 @@ namespace VRWorldToolkit
                 {
                     bakedLighting = true;
 
-                    if (Helper.BuildPlatform() == RuntimePlatform.Android && EditorUserBuildSettings.androidBuildSubtarget is MobileTextureSubtarget.Generic)
+                    if (Helper.BuildPlatform() == RuntimePlatform.Android && EditorUserBuildSettings.androidBuildSubtarget == MobileTextureSubtarget.Generic)
                     {
                         var lightmaps = LightmapSettings.lightmaps;
 
@@ -2450,7 +2450,7 @@ namespace VRWorldToolkit
 
                             var shader = material.shader;
 
-                            if (Helper.BuildPlatform() is RuntimePlatform.Android && Validation.WorldShaderWhiteList.Contains(shader.name))
+                            if (Helper.BuildPlatform() == RuntimePlatform.Android && Validation.WorldShaderWhiteList.Contains(shader.name))
                             {
                                 var singleMessage = new SingleMessage(material.name, shader.name);
 
