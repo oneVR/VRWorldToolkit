@@ -1286,7 +1286,7 @@ namespace VRWorldToolkit
 
         private const string REFERENCE_CAMERA_CLIPPING_PLANE_RATIO = "Too high of a ratio between reference cameras near ({0}) and far ({1}) clip values can cause rendering issues in-game.";
 
-        private const string REFERENCE_CAMERA_NEAR_CLIP_PLANE_OVER = "The current reference camera near clip value is {0} this value gets clamped to be between 0.01 and 0.05.";
+        private const string REFERENCE_CAMERA_NEAR_CLIP_PLANE_OVER = "The current reference camera near clip value is {0}. This value gets clamped to be between 0.01 and 0.05.";
 
         private const string NO_REFERENCE_CAMERA_SET_GENERAL = "No reference camera set in the Scene Descriptor. Using a reference camera allows the world's rendering distance to be changed by changing the camera's near and far clipping planes.";
 
