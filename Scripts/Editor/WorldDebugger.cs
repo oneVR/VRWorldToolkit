@@ -1276,7 +1276,7 @@ namespace VRWorldToolkit
 
         private const string VRC_PROJECT_SETTINGS_MISSING = "VRCProjectSettings not found. The SDK needs it, and missing it will cause the SDK to error out. To fix the problem, reimport the SDK.";
 
-        private const string LAST_BUILD_FAILED = "Last build failed check the Console for compile errors to find the cause. If the error script is in the SDK try reimporting otherwise remove or update the problem asset.";
+        private const string LAST_BUILD_FAILED = "Last build failed! Check the Console for compile errors to find the cause. If the error script is in the SDK try reimporting otherwise remove or update the problem asset.";
 
         private const string NO_SPAWN_POINT_SET = "There are no spawn points set in your Scene Descriptor. Spawning into a world with no spawn point will cause you to get thrown back to your homeworld.";
 
