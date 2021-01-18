@@ -1838,7 +1838,7 @@ namespace VRWorldToolkit
                     {
                         var camera = cameras[i];
 
-                        if (!camera.enabled || camera.name == "VRCCam") continue;
+                        if (!camera.enabled) continue;
 
                         if (camera.targetTexture)
                         {
@@ -2681,7 +2681,11 @@ namespace VRWorldToolkit
 
         private void OnFocus()
         {
-            recheck = true;
+            if (!EditorApplication.isPlaying)
+            {
+                recheck = true;
+            }
+
             RefreshBuild();
         }
 
@@ -2946,21 +2950,34 @@ namespace VRWorldToolkit
             switch (tab)
             {
                 case 0:
-                    if (!autoRecheck && GUILayout.Button("Refresh"))
+                    if (EditorApplication.isPlaying)
                     {
-                        recheck = true;
-                        autoRecheck = true;
+                        GUILayout.FlexibleSpace();
+
+                        EditorGUILayout.LabelField("The editor is currently in play mode.", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
+                        EditorGUILayout.LabelField("Stop it to see the messages.", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
+
+                        GUILayout.FlexibleSpace();
+                    }
+                    else
+                    {
+                        if (!autoRecheck && GUILayout.Button("Refresh"))
+                        {
+                            recheck = true;
+                            autoRecheck = true;
+                        }
+
+                        masterList.DrawTabSelector();
+
+                        EditorGUILayout.BeginVertical();
+                        scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+
+                        masterList.DrawMessages();
+
+                        EditorGUILayout.EndScrollView();
+                        EditorGUILayout.EndVertical();
                     }
 
-                    masterList.DrawTabSelector();
-
-                    EditorGUILayout.BeginVertical();
-                    scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
-
-                    masterList.DrawMessages();
-
-                    EditorGUILayout.EndScrollView();
-                    EditorGUILayout.EndVertical();
                     break;
                 case 1:
                     if (buildReportInitDone)

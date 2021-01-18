@@ -14,6 +14,7 @@ namespace VRWorldToolkit.DataStructures
         public static GUIStyle WhiteLabel { get; internal set; }
         public static GUIStyle TreeViewLabel { get; internal set; }
         public static GUIStyle TreeViewLabelSelected { get; internal set; }
+        public static GUIStyle CenteredLabel { get; internal set; }
 
         static Styles()
         {
@@ -74,6 +75,17 @@ namespace VRWorldToolkit.DataStructures
             {
                 alignment = TextAnchor.MiddleLeft,
                 wordWrap = false,
+            };
+
+            CenteredLabel = new GUIStyle("Label")
+            {
+                alignment = TextAnchor.LowerCenter,
+                fontSize = 17,
+                fontStyle = FontStyle.BoldAndItalic,
+                normal =
+                {
+                    textColor = new Color(0.33f, 0.33f, 0.33f),
+                }
             };
         }
     }
