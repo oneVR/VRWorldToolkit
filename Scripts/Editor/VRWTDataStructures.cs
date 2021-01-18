@@ -9,10 +9,12 @@ namespace VRWorldToolkit.DataStructures
         public static GUIStyle LabelRichText { get; internal set; }
         public static GUIStyle RichText { get; internal set; }
         public static GUIStyle RichTextWrap { get; internal set; }
+        public static GUIStyle BoldWrap { get; internal set; }
         public static GUIStyle RedLabel { get; internal set; }
         public static GUIStyle WhiteLabel { get; internal set; }
         public static GUIStyle TreeViewLabel { get; internal set; }
         public static GUIStyle TreeViewLabelSelected { get; internal set; }
+        public static GUIStyle CenteredLabel { get; internal set; }
 
         static Styles()
         {
@@ -50,6 +52,11 @@ namespace VRWorldToolkit.DataStructures
                 wordWrap = true
             };
 
+            BoldWrap = new GUIStyle("boldLabel")
+            {
+                wordWrap = true
+            };
+
             RedLabel = new GUIStyle
             {
                 normal =
@@ -69,6 +76,36 @@ namespace VRWorldToolkit.DataStructures
                 alignment = TextAnchor.MiddleLeft,
                 wordWrap = false,
             };
+
+            CenteredLabel = new GUIStyle("Label")
+            {
+                alignment = TextAnchor.LowerCenter,
+                fontSize = 17,
+                fontStyle = FontStyle.BoldAndItalic,
+                normal =
+                {
+                    textColor = new Color(0.33f, 0.33f, 0.33f),
+                }
+            };
         }
+    }
+
+    public static class Validation
+    {
+        public static readonly string[] WorldShaderWhiteList = new string[]
+        {
+            "VRChat/Mobile/Standard Lite",
+            "VRChat/Mobile/Diffuse",
+            "VRChat/Mobile/Bumped Diffuse",
+            "VRChat/Mobile/Bumped Mapped Specular",
+            "VRChat/Mobile/Toon Lit",
+            "VRChat/Mobile/MatCap Lit",
+            "VRChat/Mobile/Lightmapped",
+            "VRChat/Mobile/Skybox",
+            "VRChat/Mobile/Particles/Additive",
+            "VRChat/Mobile/Particles/Multiply",
+            "FX/MirrorReflection",
+            "UI/Default",
+        };
     }
 }

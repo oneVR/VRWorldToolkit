@@ -12,6 +12,7 @@ using UnityEditor.SceneManagement;
 using System.Text.RegularExpressions;
 using System;
 using VRWorldToolkit.DataStructures;
+using Object = UnityEngine.Object;
 
 #if (VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3) && !VRWT_DISABLE_EDITORS
 namespace VRWorldToolkit
@@ -56,7 +57,11 @@ namespace VRWorldToolkit
 
                     if (GUILayout.Button("Set IDs"))
                     {
-                        for (int i = 0; i < Math.Min(serializedObject.targetObjects.Length, avatarIDs.Length); i++)
+                        var count = Math.Min(serializedObject.targetObjects.Length, avatarIDs.Length);
+
+                        Undo.RegisterCompleteObjectUndo(pedestals.ToArray<Object>(), "Avatar ID Change");
+
+                        for (var i = 0; i < count; i++)
                         {
                             pedestals[i].blueprintId = avatarIDs[i];
                             PrefabUtility.RecordPrefabInstancePropertyModifications(pedestals[i]);

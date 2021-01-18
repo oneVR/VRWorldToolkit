@@ -42,11 +42,13 @@ namespace VRWorldToolkit
 
     public class DisableOnBuildManager : Editor
     {
-        [MenuItem("VRWorld Toolkit/Disable On Build/Setup", false, -101)]
+        [MenuItem("VRWorld Toolkit/Disable On Build/Setup", false, 2)]
         private static void DisableOnUploadSetup()
         {
-            //Add the tag
-            TagHelper.AddTag("DisableOnBuild");
+            if (EditorUtility.DisplayDialog("Setup Disable On Build", "This setup will add a new tag DisableOnBuild. Assigning this tag to a GameObject will disable it before a build happens.", "Setup", "Cancel"))
+            {
+                TagHelper.AddTag("DisableOnBuild");
+            }
         }
 
         [MenuItem("VRWorld Toolkit/Disable On Build/Setup", true)]
@@ -55,7 +57,7 @@ namespace VRWorldToolkit
             return !TagHelper.TagExists("DisableOnBuild");
         }
 
-        [MenuItem("VRWorld Toolkit/Disable On Build/Disable Objects", false, -10)]
+        [MenuItem("VRWorld Toolkit/Disable On Build/Disable Objects", false, 13)]
         private static void DisableObjectsLoop()
         {
             //Loop trough the objects with the tag disabling them
@@ -74,7 +76,7 @@ namespace VRWorldToolkit
             return TagHelper.TagExists("DisableOnBuild");
         }
 
-        [MenuItem("VRWorld Toolkit/Disable On Build/Enable Objects", false, -11)]
+        [MenuItem("VRWorld Toolkit/Disable On Build/Enable Objects", false, 14)]
         private static void EnableObjectsLoop()
         {
             //Loop trough every game object in the scene since you can't find them with tag when disabled

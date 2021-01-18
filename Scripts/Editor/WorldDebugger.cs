@@ -32,6 +32,8 @@ using Object = UnityEngine.Object;
 using UnityEngine.UI;
 using Debug = UnityEngine.Debug;
 using System.Diagnostics;
+using System.Globalization;
+using UnityEngine.Assertions;
 
 #if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
 namespace VRWorldToolkit
@@ -338,7 +340,23 @@ namespace VRWorldToolkit
 
             public bool HasMessages()
             {
-                return !(MessageGroups is null) && MessageGroups.Count != 0;
+                var count = 0;
+
+                for (var i = 0; i < MessageGroups.Count; i++)
+                {
+                    var group = MessageGroups[i];
+
+                    if (group.CombinedMessage != null && group.GetTotalCount() > 0)
+                    {
+                        count++;
+                    }
+                    else if (group.CombinedMessage is null)
+                    {
+                        count++;
+                    }
+                }
+
+                return count > 0;
             }
 
             public bool IsExpanded(MessageGroup mg)
@@ -443,7 +461,7 @@ namespace VRWorldToolkit
                             var messageGroup = group.MessageGroups[l];
                             var hasButtons = messageGroup.Buttons();
 
-                            if (messageGroup.AdditionalInfo != null && messageGroup.GetTotalCount() == 0) continue;
+                            if (messageGroup.CombinedMessage != null && messageGroup.GetTotalCount() == 0) continue;
 
                             if (messageGroup.MessageList.Count > 0)
                             {
@@ -695,7 +713,7 @@ namespace VRWorldToolkit
 
         [SerializeField] private int tab;
 
-        [MenuItem("VRWorld Toolkit/World Debugger", false, 0)]
+        [MenuItem("VRWorld Toolkit/World Debugger", false, 20)]
         public static void ShowWindow()
         {
             var window = GetWindow(typeof(WorldDebugger));
@@ -770,7 +788,9 @@ namespace VRWorldToolkit
             {
                 if (EditorUtility.DisplayDialog("Disable component?", "This operation will disable the " + behaviour.GetType() + " on the GameObject \"" + behaviour.gameObject.name + "\".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
+                    Undo.RegisterCompleteObjectUndo(behaviour, "Disable Component");
                     behaviour.enabled = false;
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(behaviour);
                 }
             };
         }
@@ -781,7 +801,14 @@ namespace VRWorldToolkit
             {
                 if (EditorUtility.DisplayDialog("Disable component?", "This operation will disable the " + behaviours[0].GetType() + " component on " + behaviours.Count().ToString() + " GameObjects.\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
-                    behaviours.ToList().ForEach(b => b.enabled = false);
+                    Undo.RegisterCompleteObjectUndo(behaviours.ToArray<Object>(), "Mass Disable Components");
+
+                    for (var i = 0; i < behaviours.Length; i++)
+                    {
+                        var b = behaviours.ToList()[i];
+                        b.enabled = false;
+                        PrefabUtility.RecordPrefabInstancePropertyModifications(b);
+                    }
                 }
             };
         }
@@ -792,7 +819,9 @@ namespace VRWorldToolkit
             {
                 if (EditorUtility.DisplayDialog("Change tag?", "This operation will change the layer of " + obj.name + " to " + layer + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
+                    Undo.RegisterCompleteObjectUndo(obj, "Layer Change");
                     obj.layer = LayerMask.NameToLayer(layer);
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(obj);
                 }
             };
         }
@@ -803,7 +832,14 @@ namespace VRWorldToolkit
             {
                 if (EditorUtility.DisplayDialog("Change layer?", "This operation will change " + objs.Length + " GameObjects layer to " + layer + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
-                    objs.ToList().ForEach(o => o.layer = LayerMask.NameToLayer(layer));
+                    Undo.RegisterCompleteObjectUndo(objs.ToArray<Object>(), "Mass Layer Change");
+
+                    for (var index = 0; index < objs.ToList().Count; index++)
+                    {
+                        var o = objs.ToList()[index];
+                        o.layer = LayerMask.NameToLayer(layer);
+                        PrefabUtility.RecordPrefabInstancePropertyModifications(o);
+                    }
                 }
             };
         }
@@ -814,11 +850,15 @@ namespace VRWorldToolkit
             {
                 if (EditorUtility.DisplayDialog("Change Navigation mode?", "This operation will change the Navigation mode on UI Element \"" + selectable.gameObject.name + "\" to " + mode.ToString() + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
+                    Undo.RegisterCompleteObjectUndo(selectable, "Navigation Mode Change");
+
                     var navigation = selectable.navigation;
 
                     navigation.mode = Navigation.Mode.None;
 
                     selectable.navigation = navigation;
+
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(selectable);
                 }
             };
         }
@@ -829,6 +869,8 @@ namespace VRWorldToolkit
             {
                 if (EditorUtility.DisplayDialog("Change Navigation mode?", "This operation will change " + selectables.Length + " UI Elements Navigation to " + mode.ToString() + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
+                    Undo.RegisterCompleteObjectUndo(selectables.ToArray<Object>(), "Mass Navigation Mode Change");
+
                     for (var i = 0; i < selectables.Length; i++)
                     {
                         var navigation = selectables[i].navigation;
@@ -836,6 +878,8 @@ namespace VRWorldToolkit
                         navigation.mode = Navigation.Mode.None;
 
                         selectables[i].navigation = navigation;
+
+                        PrefabUtility.RecordPrefabInstancePropertyModifications(selectables[i]);
                     }
                 }
             };
@@ -909,7 +953,9 @@ namespace VRWorldToolkit
             {
                 if (EditorUtility.DisplayDialog("Change tag?", "This operation will change the Tag of " + obj.name + " to " + tag + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
+                    Undo.RegisterCompleteObjectUndo(obj, "Change Tag");
                     obj.tag = tag;
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(obj);
                 }
             };
         }
@@ -920,7 +966,14 @@ namespace VRWorldToolkit
             {
                 if (EditorUtility.DisplayDialog("Change tag?", "This operation will change " + objs.Length + " GameObjects tag to " + tag + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
-                    objs.ToList().ForEach(o => o.tag = tag);
+                    Undo.RegisterCompleteObjectUndo(objs.ToArray<Object>(), "Mass Change Tag");
+
+                    for (var i = 0; i < objs.ToList().Count; i++)
+                    {
+                        var o = objs.ToList()[i];
+                        o.tag = tag;
+                        PrefabUtility.RecordPrefabInstancePropertyModifications(o);
+                    }
                 }
             };
         }
@@ -931,8 +984,8 @@ namespace VRWorldToolkit
             {
                 if (EditorUtility.DisplayDialog("Change shader?", "This operation will change the shader of the material " + material.name + " to " + shader + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
-                    Shader standard = Shader.Find(shader);
-
+                    var standard = Shader.Find(shader);
+                    Undo.RegisterCompleteObjectUndo(material, "Changed Shader");
                     material.shader = standard;
                 }
             };
@@ -944,8 +997,8 @@ namespace VRWorldToolkit
             {
                 if (EditorUtility.DisplayDialog("Change shader?", "This operation will change the shader of " + materials.Length + " materials to " + shader + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
-                    Shader newShader = Shader.Find(shader);
-
+                    var newShader = Shader.Find(shader);
+                    Undo.RegisterCompleteObjectUndo(materials.ToArray<Object>(), "Changed Shaders");
                     materials.ToList().ForEach(m => m.shader = newShader);
                 }
             };
@@ -955,9 +1008,11 @@ namespace VRWorldToolkit
         {
             return () =>
             {
+                Undo.RegisterCompleteObjectUndo(lpg, "Removed Overlapping Light Probes");
                 if (EditorUtility.DisplayDialog("Remove overlapping light probes?", "This operation will remove any overlapping light probes in the group \"" + lpg.gameObject.name + "\".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     lpg.probePositions = lpg.probePositions.Distinct().ToArray();
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(lpg);
                 }
             };
         }
@@ -966,11 +1021,13 @@ namespace VRWorldToolkit
         {
             return () =>
             {
+                Undo.RegisterCompleteObjectUndo(lpgs, "Removed Overlapping Light Probes");
                 if (EditorUtility.DisplayDialog("Remove overlapping light probes?", "This operation will remove any overlapping light probes found in the current scene.\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     foreach (var lpg in lpgs)
                     {
                         lpg.probePositions = lpg.probePositions.Distinct().ToArray();
+                        PrefabUtility.RecordPrefabInstancePropertyModifications(lpg);
                     }
                 }
             };
@@ -993,7 +1050,7 @@ namespace VRWorldToolkit
                 }
                 else
                 {
-                    EditorUtility.DisplayDialog("Baked lightprobes not found!", "Bake your lighting first before attempting to remove redundant light probes.", "Ok");
+                    EditorUtility.DisplayDialog("Baked light probes not found!", "Bake your lighting first before attempting to remove redundant light probes.", "Ok");
                 }
             };
         }
@@ -1019,7 +1076,7 @@ namespace VRWorldToolkit
 
                     var token = tokenSource.Token;
 
-                    await Task.Run(() => DeleteFiles(deleteFiles, token));
+                    await Task.Run(() => DeleteFiles(deleteFiles, token), token);
                     EditorUtility.ClearProgressBar();
 
                     occlusionCacheFiles = 0;
@@ -1046,11 +1103,71 @@ namespace VRWorldToolkit
         {
             return () =>
             {
+                Undo.RegisterCompleteObjectUndo(descriptor, "Spawn Points Fixed");
                 descriptor.spawns = descriptor.spawns.Where(c => c != null).ToArray();
                 if (descriptor.spawns.Length == 0)
                 {
                     descriptor.spawns = new[] {descriptor.gameObject.transform};
                 }
+
+                PrefabUtility.RecordPrefabInstancePropertyModifications(descriptor);
+            };
+        }
+
+        public static Action FixVRCProjectSettings(VRCProjectSettings settings)
+        {
+            return () =>
+            {
+                // TODO: Cleaner solution to storing these
+                var newLayers = new[] {"Default", "TransparentFX", "Ignore Raycast", "", "Water", "UI", "", "", "Interactive", "Player", "PlayerLocal", "Environment", "UiMenu", "Pickup", "PickupNoEnvironment", "StereoLeft", "StereoRight", "Walkthrough", "MirrorReflection", "reserved2", "reserved3", "reserved4"};
+
+                var newCollisionArr = new[]
+                {
+                    true, true, true, true, true, false, true, true, true, true, true, true, false, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
+                    true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
+                    true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false, false, true, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+                    false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
+                    true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, false, false, true, false, false, false, false, false, false, true,
+                    true, true, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, false, false, true, false, false, false, false, false, false, true, true, true, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, false, true,
+                    true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false, false, true, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, false, true, true, true, false,
+                    false, true, false, true, true, true, true, true, false, false, false, false, true, true, true, true, true, true, true, true, true, true, false, false, false, true, false, false, true, true, false, false, false, false, false, true, false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
+                    false, true, true, true, false, false, true, false, true, false, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, false, true, true, true, false, false, true, false, true, false, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false,
+                    false, true, true, true, true, true, false, true, true, true, false, false, true, false, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true,
+                    true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, true, true, true, true,
+                    true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, false, false, true, false, true, true, false, false, true, true, true, true, true, false,
+                    true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false, true, true, true, true,
+                    true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false, true, true,
+                    true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false,
+                    true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true,
+                    false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true
+                };
+
+                var so = new SerializedObject(settings);
+
+                var layersSerializedProperty = so.FindProperty("layers");
+
+                layersSerializedProperty.arraySize = newLayers.Length;
+                for (var i = 0; i < newLayers.Length; i++)
+                {
+                    layersSerializedProperty.GetArrayElementAtIndex(i).stringValue = newLayers[i];
+                }
+
+                so.FindProperty("numLayers").intValue = 22;
+
+                var collisionArr = so.FindProperty("layerCollisionArr");
+
+                collisionArr.arraySize = newCollisionArr.Length;
+                for (var i = 0; i < newCollisionArr.Length; i++)
+                {
+                    collisionArr.GetArrayElementAtIndex(i).boolValue = newCollisionArr[i];
+                }
+
+                so.ApplyModifiedProperties();
+
+                var systemType = Assembly.Load("VRCCore-Editor").GetType("UpdateLayers");
+                var setupLayersToSet = systemType.GetMethod("SetupLayersToSet", BindingFlags.Static | BindingFlags.NonPublic);
+                Assert.IsNotNull(setupLayersToSet);
+                setupLayersToSet.Invoke(null, null);
             };
         }
 
@@ -1061,17 +1178,27 @@ namespace VRWorldToolkit
 
         public static Action SetVRChatLayers()
         {
-            return () => { UpdateLayers.SetupEditorLayers(); };
+            return UpdateLayers.SetupEditorLayers;
         }
 
         public static Action SetVRChatCollisionMatrix()
         {
-            return () => { UpdateLayers.SetupCollisionLayerMatrix(); };
+            return UpdateLayers.SetupCollisionLayerMatrix;
+        }
+
+        public static Action SetFutureProofPublish(bool state)
+        {
+            return () => { EditorPrefs.SetBool("futureProofPublish", state); };
         }
 
         public static Action SetReferenceCamera(VRC_SceneDescriptor descriptor, Camera camera)
         {
-            return () => { descriptor.ReferenceCamera = camera.gameObject; };
+            return () =>
+            {
+                Undo.RegisterCompleteObjectUndo(descriptor, "Reference Camera Set");
+                descriptor.ReferenceCamera = camera.gameObject;
+                PrefabUtility.RecordPrefabInstancePropertyModifications(descriptor);
+            };
         }
 
         public static Action SetVRCInstallPath()
@@ -1080,15 +1207,14 @@ namespace VRWorldToolkit
             {
                 var clientPath = Helper.GetSteamVrcExecutablePath();
 
-                SDKClientUtilities.GetSavedVRCInstallPath();
-
                 if (clientPath != null)
                 {
                     SDKClientUtilities.SetVRCInstallPath(clientPath);
                 }
-                else
+                else if (EditorUtility.DisplayDialog("VRChat Executable Path Not Found", "Could not find the VRChat executable path automatically.\n\nPress Ok to locate it manually.", "Ok", "Cancel"))
                 {
-                    EditorUtility.DisplayDialog("VRChat Executable Path Not Found", "Could not find the VRChat executable path automatically you can set it manually from the VRCSDK Settings page.", "Ok");
+                    var newPath = EditorUtility.OpenFilePanel("Locate VRChat.exe", Application.dataPath, "exe");
+                    SDKClientUtilities.SetVRCInstallPath(newPath);
                 }
             };
         }
@@ -1146,13 +1272,35 @@ namespace VRWorldToolkit
 
         private const string WORLD_DESCRIPTOR_OFF = "Scene Descriptor is {0} units far from the zero point in Unity. It is usually good practice to keep it as close as possible to the absolute zero point to avoid floating-point errors.";
 
+        private const string IMPROPERLY_SETUP_VRC_PROJECT_SETTINGS = "Improperly setup VRCProjectSettings detected, this will cause the Control Panel Builder tab to appear empty.";
+
+        private const string VRC_PROJECT_SETTINGS_MISSING = "VRCProjectSettings not found. The SDK needs it, and missing it will cause the SDK to error out. To fix the problem, reimport the SDK.";
+
+        private const string LAST_BUILD_FAILED = "Last build failed! Check the Console for compile errors to find the cause. If the error script is in the SDK, try reimporting it. Otherwise, remove or update the problem asset.";
+
         private const string NO_SPAWN_POINT_SET = "There are no spawn points set in your Scene Descriptor. Spawning into a world with no spawn point will cause you to get thrown back to your homeworld.";
 
         private const string NULL_SPAWN_POINT = "Null spawn point set Scene Descriptor. Spawning into a null spawn point will cause you to get thrown back to your homeworld.";
 
-        private const string COLLIDER_UNDER_SPAWN_IS_TRIGGER = "The collider \"{0}\" under your spawn point {1} has been set as Is Trigger! Spawning into a world with nothing to stand on will cause the players to fall forever.";
+        private const string REFERENCE_CAMERA_CLEAR_FLAGS_NOT_SKYBOX = "Current reference cameras clear flags is not set to Skybox this can cause rendering problems in game.";
 
-        private const string NO_COLLIDER_UNDER_SPAWN = "Spawn point \"{0}\" does not have anything underneath it. Spawning into a world with nothing to stand on will cause the players to fall forever.";
+        private const string REFERENCE_CAMERA_CLIPPING_PLANE_RATIO = "Too high of a ratio between reference cameras near ({0}) and far ({1}) clip values can cause rendering issues in-game.";
+
+        private const string REFERENCE_CAMERA_NEAR_CLIP_PLANE_OVER = "The current reference camera near clip value is {0}. This value gets clamped to be between 0.01 and 0.05.";
+
+        private const string NO_REFERENCE_CAMERA_SET_GENERAL = "No reference camera set in the Scene Descriptor. Using a reference camera allows the world's rendering distance to be changed by changing the camera's near and far clipping planes.";
+
+        private const string COLLIDER_UNDER_SPAWN_IS_TRIGGER = "The collider \"{0}\" under your spawn point {1} has been set as Is Trigger.";
+        private const string COLLIDER_UNDER_SPAWN_IS_TRIGGER_COMBINED = "Found \"{0}\" spawn points which have a collider set as Is Trigger underneath.";
+        private const string COLLIDER_UNDER_SPAWN_IS_TRIGGER_INFO = "Spawning into a world with nothing to stand on will cause the players to fall forever.";
+
+        private const string SPAWN_UNDER_RESPAWN_HEIGHT = "Spawn point \"{0}\" is placed {1} units under the Respawn Height set in Scene Descriptor.";
+        private const string SPAWN_UNDER_RESPAWN_HEIGHT_COMBINED = "Found {0} spawn points under Respawn Height set in Scene Descriptor.";
+        private const string SPAWN_UNDER_RESPAWN_HEIGHT_INFO = "Spawning under the Respawn Height causes you to get stuck while respawning infinitely.";
+
+        private const string NO_COLLIDER_UNDER_SPAWN = "Spawn point \"{0}\" does not have a collider under it.";
+        private const string NO_COLLIDER_UNDER_SPAWN_COMBINED = "Found {0} spawn points with no collider under them.";
+        private const string NO_COLLIDER_UNDER_SPAWN_INFO = "Spawning into a world with nothing to stand on will cause the players to fall forever.";
 
         private const string NO_PLAYER_MODS = "No Player Mods were found in the scene. Player mods are needed for adding jumping and changing walking speed.";
 
@@ -1187,17 +1335,19 @@ namespace VRWorldToolkit
 
         private const string OCCLUSION_CULLING_CACHE_WARNING = "The current project's occlusion culling cache has {0} files. When the occlusion culling cache grows too big, baking occlusion culling can take much longer than intended. It can be cleared with no adverse effects.";
 
-        private const string ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE = "The current scene has an active camera \"{0}\" outputting to a render texture.";
+        private const string ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE = "Active camera \"{0}\" outputting to a render texture.";
         private const string ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE_COMBINED = "The current scene has {0} active cameras outputting to render textures.";
         private const string ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE_INFO = "This will affect performance negatively by causing more draw calls to happen. They should only be enabled when needed.";
+
+        private const string ACTIVE_CAMERA_WITH_OVER_ZERO_DEPTH = "Active camera \"{0}\" targeting display 1 with render depth over 0.";
+        private const string ACTIVE_CAMERA_WITH_OVER_ZERO_DEPTH_COMBINED = "The current scene has {0} active cameras targeting display 1 with render depth over 0.";
+        private const string ACTIVE_CAMERA_WITH_OVER_ZERO_DEPTH_INFO = "This will cause it to render over the upload screen, not allowing you to upload.";
 
         private const string NO_TOON_SHADERS = "Toon shaders should be avoided for world-building, as they are missing crucial things for making worlds. For world-building, the most recommended shader is Standard.";
 
         private const string NON_CRUNCHED_TEXTURES = "{0}% of the textures used in the scene have not been crunch compressed. Crunch compression can significantly reduce the size of the world download. It can be found from the texture's import settings.";
 
-        private const string SWITCH_TO_PROGRESSIVE = "The current scene is using the Enlighten lightmapper, which has been deprecated in newer versions of Unity. It would be best to consider switching to Progressive for improved fidelity and performance.";
-
-        private const string SINGLE_COLOR_ENVIRONMENT_LIGHTING = "Consider changing the Environment Lighting to Gradient from Flat.";
+        private const string SINGLE_COLOR_ENVIRONMENT_LIGHTING = "Consider changing the Environment Lighting Source from Color to Gradient for better ambient lighting.";
 
         private const string DARK_ENVIRONMENT_LIGHTING = "Using dark colors for Environment Lighting can cause avatars to look weird. Only use dark Environment Lighting if the world has dark lighting.";
 
@@ -1205,7 +1355,7 @@ namespace VRWorldToolkit
 
         private const string NO_LIGHTMAP_UV = "The model found in the scene \"{0}\" is set to be lightmapped but does not have Lightmap UVs.";
         private const string NO_LIGHTMAP_UV_COMBINED = "The current scene has {0} models set to be lightmapped that do not have Lightmap UVs.";
-        private const string NO_LIGHTMAP_UV_INFO = "This can cause issues when baking lighting. You can enable generating Lightmap UV's in the model's import settings.";
+        private const string NO_LIGHTMAP_UV_INFO = "This can cause issues when baking lighting if the main UV is not suitable for lightmapping. You can enable generating Lightmap UV's in the model's import settings.";
 
         private const string LIGHTS_NOT_BAKED = "The current scene is using realtime lighting. Consider baked lighting for improved performance.";
 
@@ -1244,21 +1394,24 @@ namespace VRWorldToolkit
 
         private const string POST_PROCESSING_NO_RESOURCES_SET = "The Post Process Layer on \"{0}\" does not have its resources field set properly. This causes post-processing to error out. This can be fixed by recreating the Post Processing Layer on the GameObject.";
 
-        private const string NO_REFERENCE_CAMERA_SET = "The current scenes Scene Descriptor has no Reference Camera set. Without a Reference Camera set Post Processing will not be visible in-game.";
+        private const string NO_REFERENCE_CAMERA_SET_PP = "The current scenes Scene Descriptor has no Reference Camera set. Without a Reference Camera set Post Processing will not be visible in-game.";
 
         private const string NO_POST_PROCESSING_VOLUMES = "No enabled Post Processing Volumes found in the scene. A Post Processing Volume is needed to apply effects to the camera's Post Processing Layer.";
 
-        private const string REFERENCE_CAMERA_NO_POST_PROCESSING_LAYER = "The current Reference Camera does not have a Post Processing Layer on it. A Post Processing Layer is needed for the Post Processing Volume to affect the camera.";
+        private const string REFERENCE_CAMERA_NO_POST_PROCESSING_LAYER = "The current Reference Camera does not have a Post Processing Layer on it. Post Processing Layer is needed for the Post Processing Volume to affect the camera.";
 
         private const string POST_PROCESS_LAYER_USING_RESERVED_LAYER = "Your current Post Process Layer uses one of the VRChat reserved layers. Using these will break post-processing while in-game.";
 
         private const string VOLUME_BLENDING_LAYER_NOT_SET = "You don't have a Volume Blending Layer set in the Post Process Layer, so post-processing will not work. Using the Water or PostProcessing layer is recommended.";
 
-        private const string POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER = "Post Processing Volume \"{0}\" is not marked as Global and does not have a collider. It will not affect the camera without one of these set on it.";
+        private const string POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER = "Post Processing Volume \"{0}\" is not marked as Global and does not have a collider.";
+        private const string POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER_COMBINED = "Found {0} Post Processing Volumes that are not marked as global and do not have a collider.";
+        private const string POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER_INFO = "The volume will not affect the camera without one of these set on it.";
 
         private const string NO_PROFILE_SET = "Post Processing Volume \"{0}\" does not have a profile set.";
+        private const string NO_PROFILE_SET_COMBINED = "Found {0} Post Processing Volumes with no profile set.";
 
-        private const string VOLUME_ON_WRONG_LAYER = "Post Processing Volume \"{0}\" is not on one of the layers set in the cameras Post Processing Layer setting. (Currently: {1})";
+        private const string NO_MATCHING_LAYERS_FOUND = "No enabled Post Processing Volumes found with matching layers to the main Post Processing Layer. Layers currently set to: {0}";
 
         private const string DONT_USE_NONE_FOR_TONEMAPPING = "Use either Neutral or ACES for Color Grading Tonemapping. Selecting None for Tonemapping is essentially the same as leaving Tonemapping unchecked.";
 
@@ -1294,7 +1447,7 @@ namespace VRWorldToolkit
 
         private const string QUEST_LIGHTMAP_COMPRESSION_OVERRIDE = "Lightmap \"{0}\" does not have a platform-specific override set for Android.";
         private const string QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_COMBINED = "No platform-specific override set on {0} lightmaps for Android.";
-        private const string QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_INFO = "Without setting proper compression override when building for Quest lightmaps can show noticeable banding. Suggested format \"ASTC 4x4 block\".";
+        private const string QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_INFO = "Without setting proper platform-specific override when building for Android, lightmaps can show noticeable banding. Suggested format \"ASTC 4x4 block\".";
 
         private const string MISSING_SHADER_WARNING = "The material \"{0}\" found in the scene has a missing or broken shader.";
         private const string MISSING_SHADER_WARNING_COMBINED = "Found {0} materials in the current scene that have missing or broken shaders.";
@@ -1315,7 +1468,7 @@ namespace VRWorldToolkit
 
         private const string DISABLED_PORTALS_WARNING = "Portal \"{0}\" disabled by default.";
         private const string DISABLED_PORTALS_WARNING_COMBINED = "Found {0} portals disabled by default.";
-        private const string DISABLED_PORTALS_WARNING_INFO = "Having a portal disabled by default will cause players that are entering to end up in different instances.";
+        private const string DISABLED_PORTALS_WARNING_INFO = "Having a portal disabled by default may cause players that are entering to end up in different instances.";
 
         private const string SHRNM_DIRECTIONAL_MODE_BAKERY_ERROR = "SH or RNM directional mode detected in Bakery. Using SH directional mode is not supported in VRChat by default. It requires the usage of VRC Bakery Adapter by Merlin for it to function in-game.";
 
@@ -1323,13 +1476,23 @@ namespace VRWorldToolkit
 
         private const string BUILD_AND_TEST_FORCE_NON_VR_ERROR = "VRChat client path has not been set to point directly to the VRChat executable in the VRCSDK settings. This will cause Force Non-VR setting for Build & Test not to work.";
 
+        private const string BUILD_AND_TEST_NO_EXECUTABLE_FOUND = "Current client path set in the VRCSDK settings does not contain the VRChat executable this will cause problems with Build & Test functionality.";
+
         private const string MATERIAL_WITH_NON_WHITELISTED_SHADER = "Material \"{0}\" is using an unsupported shader \"{1}\".";
         private const string MATERIAL_WITH_NON_WHITELISTED_SHADER_COMBINED = "Found {0} materials with unsupported shaders.";
-        private const string MATERIAL_WITH_NON_WHITELISTED_SHADER_INFO = "Unsupported shaders can cause problems on the Quest platform unless appropriately used.";
+        private const string MATERIAL_WITH_NON_WHITELISTED_SHADER_INFO = "Unsupported shaders can cause problems on the Quest platform if not appropriately used.";
 
         private const string UI_ELEMENT_WITH_NAVIGATION_NOT_NONE = "The UI Element \"{0}\" does not have its Navigation set to None.";
         private const string UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_COMBINED = "Found {0} UI Elements with their Navigation not set to None.";
-        private const string UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_INFO = "Setting Navigation to None on UI Elements stops accidental interactions with them while just trying to walk around.";
+        private const string UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_INFO = "Setting Navigation to None on UI Elements can stop accidental interactions with them while trying to walk around.";
+
+        private const string NULL_TRIGGER_RECEIVER = "Null receiver found on trigger {0}.";
+        private const string NULL_TRIGGER_RECEIVER_COMBINED = "Found {0} null receivers in scene triggers.";
+        private const string NULL_TRIGGER_RECEIVER_INFO = "This causes the trigger to target itself, which is sometimes wanted.";
+
+        private const string HEY_YOU_FOUND_A_BUG = "Hey, you found a bug! Please send it my way so I can fix it! Check About VRWorld Toolkit to find all the ways to contact me. \"{0}\" on line {1}.";
+
+        private const string FUTURE_PROOF_PUBLISH_ENABLED = "Future Proof Publish is currently enabled. This is a legacy feature that has no planned functions as of right now. Having it enabled will increase upload times and sometimes cause uploading to fail.";
 
         #endregion
 
@@ -1340,241 +1503,11 @@ namespace VRWorldToolkit
         {
             occlusionCacheFiles = Directory.EnumerateFiles("Library/Occlusion/").Count();
 
-            if (occlusionCacheFiles > 0)
-            {
-                recheck = true;
-            }
+            OcclusionMessageCheck();
         }
 
-        private void CheckScene()
+        private static void OcclusionMessageCheck()
         {
-            masterList.ClearCategories();
-
-            // General Checks
-
-            // Get Descriptors
-            var descriptors = FindObjectsOfType(typeof(VRC_SceneDescriptor)) as VRC_SceneDescriptor[];
-            long descriptorCount = descriptors.Length;
-            VRC_SceneDescriptor sceneDescriptor;
-            var pipelines = FindObjectsOfType(typeof(PipelineManager)) as PipelineManager[];
-
-            // Check if a descriptor exists
-            if (descriptorCount == 0)
-            {
-                general.AddMessageGroup(new MessageGroup(NO_SCENE_DESCRIPTOR, MessageType.Error));
-                return;
-            }
-            else
-            {
-                sceneDescriptor = descriptors[0];
-
-                // Make sure only one descriptor exists
-                if (descriptorCount > 1)
-                {
-                    general.AddMessageGroup(new MessageGroup(TOO_MANY_SCENE_DESCRIPTORS, MessageType.Info).AddSingleMessage(new SingleMessage(Array.ConvertAll(descriptors, s => s.gameObject))));
-                    return;
-                }
-
-                // Check for multiple pipeline managers
-                if (pipelines.Length > 1)
-                {
-                    general.AddMessageGroup(new MessageGroup(TOO_MANY_PIPELINE_MANAGERS, MessageType.Error).AddSingleMessage(new SingleMessage(Array.ConvertAll(pipelines, s => s.gameObject)).SetAutoFix(RemoveBadPipelineManagers(pipelines))));
-                }
-
-                // Check how far the descriptor is from zero point for floating point errors
-                var descriptorRemoteness = (int) Vector3.Distance(sceneDescriptor.transform.position, new Vector3(0.0f, 0.0f, 0.0f));
-
-                if (descriptorRemoteness > 1000)
-                {
-                    general.AddMessageGroup(new MessageGroup(WORLD_DESCRIPTOR_FAR, MessageType.Error).AddSingleMessage(new SingleMessage(descriptorRemoteness.ToString()).SetSelectObject(Array.ConvertAll(descriptors, s => s.gameObject))));
-                }
-                else if (descriptorRemoteness > 250)
-                {
-                    general.AddMessageGroup(new MessageGroup(WORLD_DESCRIPTOR_OFF, MessageType.Error).AddSingleMessage(new SingleMessage(descriptorRemoteness.ToString()).SetSelectObject(Array.ConvertAll(descriptors, s => s.gameObject))));
-                }
-            }
-
-            if (!UpdateLayers.AreLayersSetup())
-            {
-                general.AddMessageGroup(new MessageGroup(LAYERS_NOT_SETUP, MessageType.Warning).SetGroupAutoFix(SetVRChatLayers()));
-            }
-
-            if (!UpdateLayers.IsCollisionLayerMatrixSetup())
-            {
-                general.AddMessageGroup(new MessageGroup(COLLISION_MATRIX_NOT_SETUP, MessageType.Warning).SetGroupAutoFix(SetVRChatCollisionMatrix()));
-            }
-
-            // Check if multiple scenes loaded
-            if (SceneManager.sceneCount > 1)
-            {
-                general.AddMessageGroup(new MessageGroup(MULTIPLE_SCENES_LOADED, MessageType.Error));
-            }
-
-            // Check if console has error pause on
-            if (ConsoleFlagUtil.GetConsoleErrorPause())
-            {
-                general.AddMessageGroup(new MessageGroup(ERROR_PAUSE_WARNING, MessageType.Error).AddSingleMessage(new SingleMessage(SetErrorPause(false))));
-            }
-
-#if UNITY_EDITOR_WIN
-            // Check for problems with Build & Test
-            if (SDKClientUtilities.GetSavedVRCInstallPath() == "\\VRChat.exe" || SDKClientUtilities.GetSavedVRCInstallPath() == "")
-            {
-                if (Registry.ClassesRoot.OpenSubKey(@"VRChat\shell\open\command") is null)
-                {
-                    general.AddMessageGroup(new MessageGroup(BUILD_AND_TEST_BROKEN_ERROR, MessageType.Error).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
-                }
-                else
-                {
-                    general.AddMessageGroup(new MessageGroup(BUILD_AND_TEST_FORCE_NON_VR_ERROR, MessageType.Warning).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
-                }
-            }
-#endif
-
-            // Get spawn points for any possible problems
-            var spawns = sceneDescriptor.spawns.Where(s => s != null).ToArray();
-
-            var spawnsLength = sceneDescriptor.spawns.Length;
-            var emptySpawns = spawnsLength != spawns.Length;
-
-            if (spawns.Length == 0)
-            {
-                general.AddMessageGroup(new MessageGroup(NO_SPAWN_POINT_SET, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject).SetAutoFix(FixSpawns(sceneDescriptor))));
-            }
-            else
-            {
-                if (emptySpawns)
-                {
-                    general.AddMessageGroup(new MessageGroup(NULL_SPAWN_POINT, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject).SetAutoFix(FixSpawns(sceneDescriptor))));
-                }
-
-                for (int i = 0; i < sceneDescriptor.spawns.Length; i++)
-                {
-                    if (sceneDescriptor.spawns[i] == null)
-                    {
-                        continue;
-                    }
-
-                    if (!Physics.Raycast(sceneDescriptor.spawns[i].position + new Vector3(0, 0.01f, 0), Vector3.down, out RaycastHit hit, Mathf.Infinity, 0, QueryTriggerInteraction.Ignore))
-                    {
-                        if (Physics.Raycast(sceneDescriptor.spawns[i].position + new Vector3(0, 0.01f, 0), Vector3.down, out hit, Mathf.Infinity))
-                        {
-                            if (hit.collider.isTrigger)
-                            {
-                                general.AddMessageGroup(new MessageGroup(COLLIDER_UNDER_SPAWN_IS_TRIGGER, MessageType.Error).AddSingleMessage(new SingleMessage(hit.collider.name, sceneDescriptor.spawns[i].gameObject.name).SetSelectObject(sceneDescriptor.spawns[i].gameObject)));
-                            }
-                        }
-                        else
-                        {
-                            general.AddMessageGroup(new MessageGroup(NO_COLLIDER_UNDER_SPAWN, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.spawns[i].gameObject.name).SetSelectObject(sceneDescriptor.spawns[i].gameObject)));
-                        }
-                    }
-                }
-            }
-
-#if VRC_SDK_VRCSDK2
-            // Check if the world has playermods defined
-            var playermods = FindObjectsOfType(typeof(VRC_PlayerMods)) as VRC_PlayerMods[];
-            if (playermods.Length == 0)
-            {
-                general.AddMessageGroup(new MessageGroup(NO_PLAYER_MODS, MessageType.Tips));
-            }
-
-            // Get triggers in the world
-            var triggerScripts = (VRC_Trigger[]) VRC_Trigger.FindObjectsOfType(typeof(VRC_Trigger));
-
-            var triggerWrongLayer = new List<GameObject>();
-
-            // Check for OnEnterTriggers to make sure they are on mirrorreflection layer
-            foreach (var triggerScript in triggerScripts)
-            {
-                foreach (var trigger in triggerScript.Triggers)
-                {
-                    if (trigger.TriggerType == VRC.SDKBase.VRC_Trigger.TriggerType.OnEnterTrigger || trigger.TriggerType == VRC.SDKBase.VRC_Trigger.TriggerType.OnExitTrigger || trigger.TriggerType == VRC.SDKBase.VRC_Trigger.TriggerType.OnEnterCollider || trigger.TriggerType == VRC.SDKBase.VRC_Trigger.TriggerType.OnExitCollider)
-                    {
-                        if (!triggerScript.gameObject.GetComponent<Collider>())
-                        {
-                            if (trigger.TriggerType == VRC.SDKBase.VRC_Trigger.TriggerType.OnEnterTrigger || trigger.TriggerType == VRC.SDKBase.VRC_Trigger.TriggerType.OnExitTrigger)
-                            {
-                                general.AddMessageGroup(new MessageGroup(TRIGGER_TRIGGER_NO_COLLIDER, MessageType.Error).AddSingleMessage(new SingleMessage(triggerScript.name).SetSelectObject(triggerScript.gameObject)));
-                            }
-                            else if (trigger.TriggerType == VRC.SDKBase.VRC_Trigger.TriggerType.OnEnterCollider || trigger.TriggerType == VRC.SDKBase.VRC_Trigger.TriggerType.OnExitCollider)
-                            {
-                                general.AddMessageGroup(new MessageGroup(COLLIDER_TRIGGER_NO_COLLIDER, MessageType.Error).AddSingleMessage(new SingleMessage(triggerScript.name).SetSelectObject(triggerScript.gameObject)));
-                            }
-                        }
-
-                        if ((trigger.TriggerType.ToString() == "OnEnterTrigger" || trigger.TriggerType.ToString() == "OnExitTrigger") && triggerScript.gameObject.layer != LayerMask.NameToLayer("MirrorReflection"))
-                        {
-                            var collides = true;
-
-                            var triggerLayers = Helper.GetAllLayerNumbersFromMask(trigger.Layers);
-                            for (var i = 0; i < triggerLayers.Length; i++)
-                            {
-                                var item = triggerLayers[i];
-
-                                if (Physics.GetIgnoreLayerCollision(LayerMask.NameToLayer("MirrorReflection"), item))
-                                {
-                                    collides = false;
-                                    break;
-                                }
-                            }
-
-                            if (collides)
-                            {
-                                triggerWrongLayer.Add(triggerScript.gameObject);
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (triggerWrongLayer.Count > 0)
-            {
-                var triggerWrongLayerGroup = new MessageGroup(TRIGGER_TRIGGER_WRONG_LAYER, TRIGGER_TRIGGER_WRONG_LAYER_COMBINED, TRIGGER_TRIGGER_WRONG_LAYER_INFO, MessageType.Warning);
-                for (var i = 0; i < triggerWrongLayer.Count; i++)
-                {
-                    triggerWrongLayerGroup.AddSingleMessage(new SingleMessage(triggerWrongLayer[i].name).SetSelectObject(triggerWrongLayer[i].gameObject).SetAutoFix(SetObjectLayer(triggerWrongLayer[i].gameObject, "MirrorReflection")));
-                }
-
-                general.AddMessageGroup(triggerWrongLayerGroup.SetGroupAutoFix(SetObjectLayer(triggerWrongLayerGroup.GetSelectObjects(), "MirrorReflection")));
-            }
-#endif
-
-            // Optimization Checks
-
-            // Check for occlusion culling
-            if (StaticOcclusionCulling.umbraDataSize > 0)
-            {
-                optimization.AddMessageGroup(new MessageGroup(BAKED_OCCLUSION_CULLING, MessageType.GoodFPS));
-
-                var occlusionAreas = GameObject.FindObjectsOfType<OcclusionArea>();
-
-                if (occlusionAreas.Length == 0)
-                {
-                    optimization.AddMessageGroup(new MessageGroup(NO_OCCLUSION_AREAS, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/class-OcclusionArea.html"));
-                }
-                else
-                {
-                    var disabledOcclusionAreasGroup = optimization.AddMessageGroup(new MessageGroup(DISABLED_OCCLUSION_AREA, DISABLED_OCCLUSION_AREA_COMBINED, DISABLED_OCCLUSION_AREA_INFO, MessageType.Warning));
-
-                    foreach (var occlusionArea in occlusionAreas)
-                    {
-                        var so = new SerializedObject(occlusionArea);
-                        var sp = so.FindProperty("m_IsViewVolume");
-
-                        if (!sp.boolValue)
-                        {
-                            disabledOcclusionAreasGroup.AddSingleMessage(new SingleMessage(occlusionArea.name).SetSelectObject(occlusionArea.gameObject));
-                        }
-                    }
-                }
-            }
-            else
-            {
-                optimization.AddMessageGroup(new MessageGroup(NO_OCCLUSION_CULLING, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/occlusion-culling-getting-started.html"));
-            }
-
             if (occlusionCacheFiles > 0)
             {
                 // Set the message type depending on how many files found
@@ -1590,788 +1523,1170 @@ namespace VRWorldToolkit
 
                 optimization.AddMessageGroup(new MessageGroup(OCCLUSION_CULLING_CACHE_WARNING, cacheWarningType).AddSingleMessage(new SingleMessage(occlusionCacheFiles.ToString()).SetAutoFix(ClearOcclusionCache(occlusionCacheFiles))));
             }
+        }
 
-            // Check if there's any active cameras outputting to render textures
-            var activeCameras = new List<GameObject>();
-            var cameraCount = 0;
-            var cameras = GameObject.FindObjectsOfType<Camera>();
+        private class CheckedShaderProperties
+        {
+            public bool IncludesGrabPass = false;
+            public List<string> GrabPassLightModeTags = new List<string>();
+        }
 
-            for (var i = 0; i < cameras.Length; i++)
+        private void CheckScene()
+        {
+            masterList.ClearCategories();
+
+            try
             {
-                if (!cameras[i].enabled || (!cameras[i].targetTexture || cameras[i].name == "VRCCam")) continue;
+                // General Checks
 
-                cameraCount++;
-                activeCameras.Add(cameras[i].gameObject);
-            }
+                // Get Descriptors
+                var descriptors = FindObjectsOfType(typeof(VRC_SceneDescriptor)) as VRC_SceneDescriptor[];
+                long descriptorCount = descriptors.Length;
+                VRC_SceneDescriptor sceneDescriptor;
+                var pipelines = FindObjectsOfType(typeof(PipelineManager)) as PipelineManager[];
 
-            if (cameraCount > 0)
-            {
-                var activeCamerasMessages = new MessageGroup(ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE, ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE_COMBINED, ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE_INFO, MessageType.BadFPS);
-                for (var i = 0; i < activeCameras.Count; i++)
+                // Check if a descriptor exists
+                if (descriptorCount == 0)
                 {
-                    activeCamerasMessages.AddSingleMessage(new SingleMessage(activeCameras[i].name).SetSelectObject(activeCameras[i].gameObject));
-                }
-
-                optimization.AddMessageGroup(activeCamerasMessages);
-            }
-
-            // Get active mirrors in the world and complain about them
-            var mirrors = FindObjectsOfType(typeof(VRC_MirrorReflection)) as VRC_MirrorReflection[];
-
-            if (mirrors.Length > 0)
-            {
-                var activeCamerasMessage = new MessageGroup(MIRROR_ON_BY_DEFAULT, MIRROR_ON_BY_DEFAULT_COMBINED, MIRROR_ON_BY_DEFAULT_INFO, MessageType.BadFPS);
-                for (var i = 0; i < mirrors.Length; i++)
-                {
-                    if (mirrors[i].enabled)
-                    {
-                        activeCamerasMessage.AddSingleMessage(new SingleMessage(mirrors[i].name).SetSelectObject(mirrors[i].gameObject));
-                    }
-                }
-
-                optimization.AddMessageGroup(activeCamerasMessage);
-            }
-
-            // Lighting Checks
-
-            switch (RenderSettings.ambientMode)
-            {
-                case AmbientMode.Custom:
-                    lighting.AddMessageGroup(new MessageGroup(AMBIENT_MODE_SET_TO_CUSTOM, MessageType.Error).AddSingleMessage(new SingleMessage(SetAmbientMode(AmbientMode.Skybox))));
-                    break;
-                case AmbientMode.Flat:
-                    lighting.AddMessageGroup(new MessageGroup(SINGLE_COLOR_ENVIRONMENT_LIGHTING, MessageType.Tips));
-                    break;
-            }
-
-            if (Helper.GetBrightness(RenderSettings.ambientLight) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Flat) ||
-                Helper.GetBrightness(RenderSettings.ambientSkyColor) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Trilight) ||
-                Helper.GetBrightness(RenderSettings.ambientEquatorColor) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Trilight) ||
-                Helper.GetBrightness(RenderSettings.ambientGroundColor) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Trilight))
-            {
-                lighting.AddMessageGroup(new MessageGroup(DARK_ENVIRONMENT_LIGHTING, MessageType.Tips));
-            }
-
-            if (RenderSettings.defaultReflectionMode.Equals(DefaultReflectionMode.Custom) && !RenderSettings.customReflection)
-            {
-                lighting.AddMessageGroup(new MessageGroup(CUSTOM_ENVIRONMENT_REFLECTIONS_NULL, MessageType.Error).AddSingleMessage(new SingleMessage(SetEnviromentReflections(DefaultReflectionMode.Skybox))));
-            }
-
-            var bakedLighting = false;
-
-#if BAKERY_INCLUDED
-            var bakeryLights = new List<GameObject>();
-            // TODO: Investigate whether or not these should be included
-            // bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryDirectLight)) as BakeryDirectLight[], s => s.gameObject));
-            bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryPointLight)) as BakeryPointLight[], s => s.gameObject));
-            bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakerySkyLight)) as BakerySkyLight[], s => s.gameObject));
-
-            var bakerySettings = ftRenderLightmap.FindRenderSettingsStorage();
-
-            switch ((ftRenderLightmap.RenderDirMode) bakerySettings.renderSettingsRenderDirMode)
-            {
-                case ftRenderLightmap.RenderDirMode.RNM:
-                case ftRenderLightmap.RenderDirMode.SH:
-                    const string className = "Merlin.VRCBakeryAdapter";
-
-                    if (Helper.GetTypeFromName(className) is null)
-                    {
-                        lighting.AddMessageGroup(new MessageGroup(SHRNM_DIRECTIONAL_MODE_BAKERY_ERROR, MessageType.Error).SetDocumentation("https://github.com/Merlin-san/VRC-Bakery-Adapter"));
-                    }
-
-                    break;
-            }
-
-            if (bakeryLights.Count > 0)
-            {
-                var notEditorOnly = new List<GameObject>();
-                var unityLightOnBakeryLight = new List<GameObject>();
-
-                bakedLighting = true;
-
-                for (var i = 0; i < bakeryLights.Count; i++)
-                {
-                    if (!bakeryLights[i].CompareTag("EditorOnly"))
-                    {
-                        notEditorOnly.Add(bakeryLights[i]);
-                    }
-
-                    if (!bakeryLights[i].GetComponent<Light>()) continue;
-
-                    var light = bakeryLights[i].GetComponent<Light>();
-                    if (!light.bakingOutput.isBaked && light.enabled)
-                    {
-                        unityLightOnBakeryLight.Add(bakeryLights[i]);
-                    }
-                }
-
-                if (notEditorOnly.Count > 0)
-                {
-                    var notEditorOnlyGroup = new MessageGroup(BAKERY_LIGHT_NOT_SET_EDITOR_ONLY, BAKERY_LIGHT_NOT_SET_EDITOR_ONLY_COMBINED, BAKERY_LIGHT_NOT_SET_EDITOR_ONLY_INFO, MessageType.Warning);
-                    foreach (var item in notEditorOnly)
-                    {
-                        notEditorOnlyGroup.AddSingleMessage(new SingleMessage(item.name).SetAutoFix(SetGameObjectTag(item, "EditorOnly")).SetSelectObject(item));
-                    }
-
-                    lighting.AddMessageGroup(notEditorOnlyGroup.SetGroupAutoFix(SetGameObjectTag(notEditorOnly.ToArray(), "EditorOnly")));
-                }
-
-                if (unityLightOnBakeryLight.Count > 0)
-                {
-                    var unityLightGroup = new MessageGroup(BAKERY_LIGHT_UNITY_LIGHT, BAKERY_LIGHT_UNITY_LIGHT_COMBINED, BAKERY_LIGHT_UNITY_LIGHT_INFO, MessageType.Warning);
-                    foreach (var item in unityLightOnBakeryLight)
-                    {
-                        unityLightGroup.AddSingleMessage(new SingleMessage(item.name).SetAutoFix(DisableComponent(item.GetComponent<Light>())).SetSelectObject(item));
-                    }
-
-                    lighting.AddMessageGroup(unityLightGroup.SetGroupAutoFix(DisableComponent(Array.ConvertAll(unityLightOnBakeryLight.ToArray(), s => s.GetComponent<Light>()))));
-                }
-            }
-#endif
-
-            // Get lights in scene
-            var lights = FindObjectsOfType<Light>();
-
-            var nonBakedLights = new List<GameObject>();
-
-            // Go trough the lights to check if the scene contains lights set to be baked
-            for (var i = 0; i < lights.Length; i++)
-            {
-                // Skip checking realtime lights
-                if (lights[i].lightmapBakeType == LightmapBakeType.Realtime) continue;
-
-                bakedLighting = true;
-
-                if (!lights[i].bakingOutput.isBaked && lights[i].GetComponent<Light>().enabled)
-                {
-                    nonBakedLights.Add(lights[i].gameObject);
-                }
-            }
-
-            if (LightmapSettings.lightmaps.Length > 0)
-            {
-                bakedLighting = true;
-
-                if (Helper.BuildPlatform() == RuntimePlatform.Android)
-                {
-                    var lightmaps = LightmapSettings.lightmaps;
-
-                    var androidCompressionGroup = lighting.AddMessageGroup(new MessageGroup(QUEST_LIGHTMAP_COMPRESSION_OVERRIDE, QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_COMBINED, QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_INFO, MessageType.Tips));
-
-                    var lightmapTextureImporters = new List<TextureImporter>();
-
-                    for (var i = 0; i < lightmaps.Length; i++)
-                    {
-                        Object lightmap = lightmaps[i].lightmapColor;
-
-                        var textureImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(lightmaps[i].lightmapColor)) as TextureImporter;
-
-                        var platformSettings = textureImporter.GetPlatformTextureSettings("Android");
-
-                        if (!platformSettings.overridden)
-                        {
-                            lightmapTextureImporters.Add(textureImporter);
-
-                            androidCompressionGroup.AddSingleMessage(new SingleMessage(lightmap.name).SetAssetPath(textureImporter.assetPath).SetAutoFix(SetLightmapOverrideForQuest(textureImporter, lightmap.name)));
-                        }
-                    }
-
-                    if (androidCompressionGroup.GetTotalCount() > 0)
-                    {
-                        androidCompressionGroup.SetGroupAutoFix(SetLightmapOverrideForQuest(lightmapTextureImporters.ToArray()));
-                    }
-                }
-            }
-
-            var probes = LightmapSettings.lightProbes;
-
-            // If the scene has baked lights complain about stuff important to baked lighting missing
-            if (bakedLighting)
-            {
-                // Count lightmaps and suggest to use bigger lightmaps if needed
-                var lightMapSize = LightmapEditorSettings.maxAtlasSize;
-                if (lightMapSize != 4096 && LightmapSettings.lightmaps.Length > 1 && !LightmapEditorSettings.lightmapper.Equals(LightmapEditorSettings.Lightmapper.ProgressiveGPU))
-                {
-                    if (LightmapSettings.lightmaps[0] != null)
-                    {
-                        if (LightmapSettings.lightmaps[0].lightmapColor.height != 4096)
-                        {
-                            lighting.AddMessageGroup(new MessageGroup(CONSIDER_LARGER_LIGHTMAPS, MessageType.Tips).AddSingleMessage(new SingleMessage(lightMapSize.ToString()).SetAutoFix(SetLightmapSize(4096))));
-                        }
-                    }
-                }
-
-                if (LightmapEditorSettings.lightmapper.Equals(LightmapEditorSettings.Lightmapper.ProgressiveGPU) && lightMapSize == 4096 && SystemInfo.graphicsMemorySize < 12000)
-                {
-                    lighting.AddMessageGroup(new MessageGroup(CONSIDER_SMALLER_LIGHTMAPS, MessageType.Warning).AddSingleMessage(new SingleMessage(lightMapSize.ToString()).SetAutoFix(SetLightmapSize(2048))));
-                }
-
-                // Count how many light probes the scene has
-                long probeCounter = 0;
-                long bakedProbes = probes != null ? probes.count : 0;
-
-                var lightprobegroups = GameObject.FindObjectsOfType<LightProbeGroup>();
-
-                var overlappingLightProbesGroup = new MessageGroup(OVERLAPPING_LIGHT_PROBES, OVERLAPPING_LIGHT_PROBES_COMBINED, OVERLAPPING_LIGHT_PROBES_INFO, MessageType.Info);
-
-                for (var i = 0; i < lightprobegroups.Length; i++)
-                {
-                    if (lightprobegroups[i].probePositions.GroupBy(p => p).Any(g => g.Count() > 1))
-                    {
-                        overlappingLightProbesGroup.AddSingleMessage(new SingleMessage(lightprobegroups[i].name, (lightprobegroups[i].probePositions.Length - lightprobegroups[i].probePositions.Distinct().ToArray().Length).ToString()).SetSelectObject(lightprobegroups[i].gameObject).SetAutoFix(RemoveOverlappingLightprobes(lightprobegroups[i])));
-                    }
-
-                    probeCounter += lightprobegroups[i].probePositions.Length;
-                }
-
-                if (probeCounter > 0)
-                {
-                    if (probeCounter - bakedProbes < 0)
-                    {
-                        lighting.AddMessageGroup(new MessageGroup(LIGHT_PROBES_REMOVED_NOT_RE_BAKED, MessageType.Warning).AddSingleMessage(new SingleMessage(bakedProbes.ToString(), probeCounter.ToString())));
-                    }
-                    else
-                    {
-                        if (bakedProbes - (0.9 * probeCounter) < 0)
-                        {
-                            lighting.AddMessageGroup(new MessageGroup(LIGHT_PROBE_COUNT_NOT_BAKED, MessageType.Info).AddSingleMessage(new SingleMessage(probeCounter.ToString("n0"), (probeCounter - bakedProbes).ToString("n0"))));
-                        }
-                        else
-                        {
-                            lighting.AddMessageGroup(new MessageGroup(LIGHT_PROBE_COUNT, MessageType.Info).AddSingleMessage(new SingleMessage(probeCounter.ToString("n0"))));
-                        }
-                    }
-                }
-
-                if (overlappingLightProbesGroup.GetTotalCount() > 0)
-                {
-                    if (overlappingLightProbesGroup.GetTotalCount() > 1)
-                    {
-                        overlappingLightProbesGroup.SetGroupAutoFix(RemoveOverlappingLightprobes(lightprobegroups));
-                    }
-
-                    lighting.AddMessageGroup(overlappingLightProbesGroup);
-                }
-
-                // Since the scene has baked lights complain if there's no lightprobes
-                else if (probes == null && probeCounter == 0)
-                {
-                    lighting.AddMessageGroup(new MessageGroup(NO_LIGHT_PROBES, MessageType.Info).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/LightProbes.html"));
-                }
-
-                // Check lighting data asset size if it exists
-                if (Lightmapping.lightingDataAsset != null)
-                {
-                    var pathTo = AssetDatabase.GetAssetPath(Lightmapping.lightingDataAsset);
-                    var length = new FileInfo(pathTo).Length;
-                    lighting.AddMessageGroup(new MessageGroup(LIGHTING_DATA_ASSET_INFO, MessageType.Info).AddSingleMessage(new SingleMessage((length / 1024.0f / 1024.0f).ToString("F2"))));
-                }
-
-#if !BAKERY_INCLUDED
-                if (LightmapEditorSettings.lightmapper.Equals(LightmapEditorSettings.Lightmapper.Enlighten))
-                {
-                    lighting.AddMessageGroup(new MessageGroup(SWITCH_TO_PROGRESSIVE, MessageType.Tips));
-                }
-#endif
-
-                if (nonBakedLights.Count != 0)
-                {
-                    var nonBakedLightsGroup = new MessageGroup(NON_BAKED_BAKED_LIGHT, NON_BAKED_BAKED_LIGHT_COMBINED, NON_BAKED_BAKED_LIGHT_INFO, MessageType.Warning);
-                    for (var i = 0; i < nonBakedLights.Count; i++)
-                    {
-                        nonBakedLightsGroup.AddSingleMessage(new SingleMessage(nonBakedLights[i].name).SetSelectObject(nonBakedLights[i].gameObject));
-                    }
-
-                    lighting.AddMessageGroup(nonBakedLightsGroup);
-                }
-            }
-            else
-            {
-#if UNITY_ANDROID
-                lighting.AddMessageGroup(new MessageGroup(QUEST_BAKED_LIGHTING_WARNING, MessageType.BadFPS).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/Lightmapping.html"));
-#else
-                lighting.AddMessageGroup(new MessageGroup(LIGHTS_NOT_BAKED, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/Lightmapping.html"));
-#endif
-            }
-
-            // ReflectionProbes
-            var reflectionprobes = FindObjectsOfType<ReflectionProbe>();
-            var unbakedprobes = new List<GameObject>();
-            var reflectionProbeCount = reflectionprobes.Count();
-            for (var i = 0; i < reflectionprobes.Length; i++)
-            {
-                if (!reflectionprobes[i].bakedTexture && reflectionprobes[i].mode == ReflectionProbeMode.Baked)
-                {
-                    unbakedprobes.Add(reflectionprobes[i].gameObject);
-                }
-            }
-
-            if (reflectionProbeCount == 0)
-            {
-                lighting.AddMessageGroup(new MessageGroup(NO_REFLECTION_PROBES, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/class-ReflectionProbe.html"));
-            }
-            else if (reflectionProbeCount > 0)
-            {
-                lighting.AddMessageGroup(new MessageGroup(REFLECTION_PROBE_COUNT_TEXT, MessageType.Info).AddSingleMessage(new SingleMessage(reflectionProbeCount.ToString())));
-
-                if (unbakedprobes.Count > 0)
-                {
-                    var probesUnbakedGroup = new MessageGroup(REFLECTION_PROBES_SOME_UNBAKED, REFLECTION_PROBES_SOME_UNBAKED_COMBINED, MessageType.Warning);
-
-                    foreach (var item in unbakedprobes)
-                    {
-                        probesUnbakedGroup.AddSingleMessage(new SingleMessage(item.name).SetSelectObject(item));
-                    }
-
-                    lighting.AddMessageGroup(probesUnbakedGroup);
-                }
-            }
-
-            // Post Processing Checks
-
-#if UNITY_POST_PROCESSING_STACK_V2
-            var postProcessVolumes = FindObjectsOfType(typeof(PostProcessVolume)) as PostProcessVolume[];
-            PostProcessLayer mainPostProcessLayer = null;
-
-            // Attempt to find the main post process layer
-            if (sceneDescriptor.ReferenceCamera.gameObject.GetComponent(typeof(PostProcessLayer)))
-            {
-                mainPostProcessLayer = sceneDescriptor.ReferenceCamera.gameObject.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
-            }
-            else
-            {
-                if (Camera.main != null)
-                {
-                    if (Camera.main.gameObject.GetComponent(typeof(PostProcessLayer)))
-                    {
-                        mainPostProcessLayer = Camera.main.gameObject.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
-                    }
-                }
-            }
-
-            // Check if the post processing layer has resources properly set
-            if (mainPostProcessLayer)
-            {
-                var resourcesInfo = typeof(PostProcessLayer).GetField("m_Resources", BindingFlags.NonPublic | BindingFlags.Instance);
-
-                var postProcessResources = resourcesInfo.GetValue(mainPostProcessLayer) as PostProcessResources;
-
-                if (postProcessResources is null)
-                {
-                    var singleMessage = new SingleMessage(mainPostProcessLayer.gameObject.name).SetSelectObject(mainPostProcessLayer.gameObject);
-
-                    postProcessing.AddMessageGroup(new MessageGroup(POST_PROCESSING_NO_RESOURCES_SET, MessageType.Error).AddSingleMessage(singleMessage));
-
-                    var resources = (PostProcessResources) AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath("d82512f9c8e5d4a4d938b575d47f88d4"), typeof(PostProcessResources));
-
-                    if (resources != null) singleMessage.SetAutoFix(SetPostProcessingLayerResources(mainPostProcessLayer, resources));
-                }
-            }
-
-            // If post processing is imported but no setup isn't detected show a message
-            if (postProcessVolumes.Length == 0 && mainPostProcessLayer is null)
-            {
-                postProcessing.AddMessageGroup(new MessageGroup(POST_PROCESSING_IMPORTED_BUT_NOT_SETUP, MessageType.Info));
-            }
-            else
-            {
-                // Check the scene view for post processing effects being off
-                var sceneViewState = SceneView.lastActiveSceneView.sceneViewState;
-                if (!sceneViewState.showImageEffects)
-                {
-                    postProcessing.AddMessageGroup(new MessageGroup(POST_PROCESSING_DISABLED_IN_SCENE_VIEW, MessageType.Info).SetGroupAutoFix(SetPostProcessingInScene(sceneViewState, true)));
-                }
-
-                // Start by checking if reference camera has been set in the Scene Descriptor
-                if (!sceneDescriptor.ReferenceCamera)
-                {
-                    var noReferenceCameraMessage = new SingleMessage(sceneDescriptor.gameObject);
-
-                    if (Camera.main && Camera.main.GetComponent<PostProcessLayer>())
-                    {
-                        noReferenceCameraMessage.SetAutoFix(SetReferenceCamera(sceneDescriptor, Camera.main));
-                    }
-
-                    postProcessing.AddMessageGroup(new MessageGroup(NO_REFERENCE_CAMERA_SET, MessageType.Warning).AddSingleMessage(noReferenceCameraMessage));
+                    general.AddMessageGroup(new MessageGroup(NO_SCENE_DESCRIPTOR, MessageType.Error));
+                    return;
                 }
                 else
                 {
-                    // Check for post process volumes in the scene
-                    if (postProcessVolumes.Length == 0)
+                    sceneDescriptor = descriptors[0];
+
+                    // Make sure only one descriptor exists
+                    if (descriptorCount > 1)
                     {
-                        postProcessing.AddMessageGroup(new MessageGroup(NO_POST_PROCESSING_VOLUMES, MessageType.Info));
+                        general.AddMessageGroup(new MessageGroup(TOO_MANY_SCENE_DESCRIPTORS, MessageType.Info).AddSingleMessage(new SingleMessage(Array.ConvertAll(descriptors, s => s.gameObject))));
+                        return;
+                    }
+
+                    // Check for multiple pipeline managers
+                    if (pipelines.Length > 1)
+                    {
+                        general.AddMessageGroup(new MessageGroup(TOO_MANY_PIPELINE_MANAGERS, MessageType.Error).AddSingleMessage(new SingleMessage(Array.ConvertAll(pipelines, s => s.gameObject)).SetAutoFix(RemoveBadPipelineManagers(pipelines))));
+                    }
+
+                    // Check how far the descriptor is from zero point for floating point errors
+                    var descriptorRemoteness = (int) Vector3.Distance(sceneDescriptor.transform.position, new Vector3(0.0f, 0.0f, 0.0f));
+
+                    if (descriptorRemoteness > 1000)
+                    {
+                        general.AddMessageGroup(new MessageGroup(WORLD_DESCRIPTOR_FAR, MessageType.Error).AddSingleMessage(new SingleMessage(descriptorRemoteness.ToString()).SetSelectObject(Array.ConvertAll(descriptors, s => s.gameObject))));
+                    }
+                    else if (descriptorRemoteness > 250)
+                    {
+                        general.AddMessageGroup(new MessageGroup(WORLD_DESCRIPTOR_OFF, MessageType.Error).AddSingleMessage(new SingleMessage(descriptorRemoteness.ToString()).SetSelectObject(Array.ConvertAll(descriptors, s => s.gameObject))));
+                    }
+                }
+
+                var vrcProjectSettings = Resources.Load<VRCProjectSettings>("VRCProjectSettings");
+                if (vrcProjectSettings)
+                {
+                    if (vrcProjectSettings.layers is null || vrcProjectSettings.layers.Length == 0 || vrcProjectSettings.layerCollisionArr is null || vrcProjectSettings.layerCollisionArr.Length == 0)
+                    {
+                        general.AddMessageGroup(new MessageGroup(IMPROPERLY_SETUP_VRC_PROJECT_SETTINGS, MessageType.Error).SetGroupAutoFix(FixVRCProjectSettings(vrcProjectSettings)));
                     }
                     else
                     {
-                        var postprocessLayer = sceneDescriptor.ReferenceCamera.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
-                        if (postprocessLayer == null)
+                        if (!UpdateLayers.AreLayersSetup())
                         {
-                            postProcessing.AddMessageGroup(new MessageGroup(REFERENCE_CAMERA_NO_POST_PROCESSING_LAYER, MessageType.Error).AddSingleMessage(new SingleMessage(postprocessLayer.gameObject)));
+                            general.AddMessageGroup(new MessageGroup(LAYERS_NOT_SETUP, MessageType.Error).SetGroupAutoFix(SetVRChatLayers()));
                         }
 
-                        var volumeLayer = postprocessLayer.volumeLayer;
-                        if (volumeLayer == 0)
+                        if (!UpdateLayers.IsCollisionLayerMatrixSetup())
                         {
-                            postProcessing.AddMessageGroup(new MessageGroup(VOLUME_BLENDING_LAYER_NOT_SET, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.ReferenceCamera.gameObject)));
+                            general.AddMessageGroup(new MessageGroup(COLLISION_MATRIX_NOT_SETUP, MessageType.Error).SetGroupAutoFix(SetVRChatCollisionMatrix()));
+                        }
+                    }
+                }
+                else
+                {
+                    general.AddMessageGroup(new MessageGroup(VRC_PROJECT_SETTINGS_MISSING, MessageType.Error).SetDocumentation("https://docs.vrchat.com/docs/updating-the-sdk"));
+                }
+
+                if (buildReportWindows != null && buildReportWindows.summary.result == BuildResult.Failed || buildReportQuest != null && buildReportQuest.summary.result == BuildResult.Failed)
+                {
+                    general.AddMessageGroup(new MessageGroup(LAST_BUILD_FAILED, MessageType.Error));
+                }
+
+                // Check if multiple scenes loaded
+                if (SceneManager.sceneCount > 1)
+                {
+                    general.AddMessageGroup(new MessageGroup(MULTIPLE_SCENES_LOADED, MessageType.Error));
+                }
+
+                if (EditorPrefs.GetBool("futureProofPublish", true))
+                {
+                    general.AddMessageGroup(new MessageGroup(FUTURE_PROOF_PUBLISH_ENABLED, MessageType.Error).SetGroupAutoFix(SetFutureProofPublish(false)));
+                }
+
+                // Check if console has error pause on
+                if (ConsoleFlagUtil.GetConsoleErrorPause())
+                {
+                    general.AddMessageGroup(new MessageGroup(ERROR_PAUSE_WARNING, MessageType.Error).AddSingleMessage(new SingleMessage(SetErrorPause(false))));
+                }
+
+                // Check reference camera for possible problems
+                if (sceneDescriptor.ReferenceCamera && sceneDescriptor.ReferenceCamera.GetComponent<Camera>())
+                {
+                    var camera = sceneDescriptor.ReferenceCamera.GetComponent<Camera>();
+
+                    if (camera.clearFlags != CameraClearFlags.Skybox)
+                    {
+                        general.AddMessageGroup(new MessageGroup(REFERENCE_CAMERA_CLEAR_FLAGS_NOT_SKYBOX, MessageType.Warning).AddSingleMessage(new SingleMessage(sceneDescriptor.ReferenceCamera)));
+                    }
+
+                    // TODO: Investigate better sanity value
+                    if (camera.farClipPlane / camera.nearClipPlane > 200000f)
+                    {
+                        general.AddMessageGroup(new MessageGroup(REFERENCE_CAMERA_CLIPPING_PLANE_RATIO, MessageType.Warning).AddSingleMessage(new SingleMessage(camera.nearClipPlane.ToString(CultureInfo.InvariantCulture), camera.farClipPlane.ToString(CultureInfo.InvariantCulture)).SetSelectObject(camera.gameObject)));
+                    }
+
+                    if (camera.nearClipPlane > 0.05f)
+                    {
+                        general.AddMessageGroup(new MessageGroup(REFERENCE_CAMERA_NEAR_CLIP_PLANE_OVER, MessageType.Tips).AddSingleMessage(new SingleMessage(camera.nearClipPlane.ToString(CultureInfo.InvariantCulture)).SetSelectObject(camera.gameObject)));
+                    }
+                }
+                else
+                {
+                    general.AddMessageGroup(new MessageGroup(NO_REFERENCE_CAMERA_SET_GENERAL, MessageType.Tips).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject)));
+                }
+
+#if UNITY_EDITOR_WIN
+                // Check for problems with Build & Test
+                var commandPath = Registry.ClassesRoot.OpenSubKey(@"VRChat\shell\open\command");
+                var savedVRCInstallPath = SDKClientUtilities.GetSavedVRCInstallPath();
+                if (commandPath is null && savedVRCInstallPath == "\\VRChat.exe")
+                {
+                    general.AddMessageGroup(new MessageGroup(BUILD_AND_TEST_BROKEN_ERROR, MessageType.Error).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
+                }
+                else if (savedVRCInstallPath == "\\VRChat.exe")
+                {
+                    general.AddMessageGroup(new MessageGroup(BUILD_AND_TEST_FORCE_NON_VR_ERROR, MessageType.Warning).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
+                }
+                else if (!File.Exists(savedVRCInstallPath))
+                {
+                    general.AddMessageGroup(new MessageGroup(BUILD_AND_TEST_NO_EXECUTABLE_FOUND, MessageType.Error).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
+                }
+#endif
+
+                // Get spawn points for any possible problems
+                var spawns = sceneDescriptor.spawns.Where(s => s != null).ToArray();
+
+                var spawnsLength = sceneDescriptor.spawns.Length;
+                var emptySpawns = spawnsLength != spawns.Length;
+
+                if (spawns.Length == 0)
+                {
+                    general.AddMessageGroup(new MessageGroup(NO_SPAWN_POINT_SET, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject).SetAutoFix(FixSpawns(sceneDescriptor))));
+                }
+                else
+                {
+                    if (emptySpawns)
+                    {
+                        general.AddMessageGroup(new MessageGroup(NULL_SPAWN_POINT, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject).SetAutoFix(FixSpawns(sceneDescriptor))));
+                    }
+
+                    var spawnUnderRespawnHeight = general.AddMessageGroup(new MessageGroup(SPAWN_UNDER_RESPAWN_HEIGHT, SPAWN_UNDER_RESPAWN_HEIGHT_COMBINED, SPAWN_UNDER_RESPAWN_HEIGHT_INFO, MessageType.Error));
+                    var noColliderUnderSpawn = general.AddMessageGroup(new MessageGroup(NO_COLLIDER_UNDER_SPAWN, NO_COLLIDER_UNDER_SPAWN_COMBINED, NO_COLLIDER_UNDER_SPAWN_INFO, MessageType.Error));
+                    var colliderUnderSpawnTrigger = general.AddMessageGroup(new MessageGroup(COLLIDER_UNDER_SPAWN_IS_TRIGGER, COLLIDER_UNDER_SPAWN_IS_TRIGGER_COMBINED, COLLIDER_UNDER_SPAWN_IS_TRIGGER_INFO, MessageType.Error));
+
+                    for (int i = 0; i < sceneDescriptor.spawns.Length; i++)
+                    {
+                        if (sceneDescriptor.spawns[i] == null) continue;
+
+                        var spawn = sceneDescriptor.spawns[i];
+
+                        if (spawn.position.y < sceneDescriptor.RespawnHeightY)
+                        {
+                            spawnUnderRespawnHeight.AddSingleMessage(new SingleMessage(spawn.gameObject.name, Math.Abs(spawn.position.y - sceneDescriptor.RespawnHeightY).ToString(CultureInfo.InvariantCulture)).SetSelectObject(spawn.gameObject));
                         }
 
-                        // Check for usage of reserved layers since they break post processing
-                        var numbersFromMask = Helper.GetAllLayerNumbersFromMask(volumeLayer);
-                        if (numbersFromMask.Contains(19) | numbersFromMask.Contains(20) | numbersFromMask.Contains(21))
+                        if (!Physics.Raycast(spawn.position + new Vector3(0, 0.01f, 0), Vector3.down, out RaycastHit hit, Mathf.Infinity, ~0, QueryTriggerInteraction.Ignore))
                         {
-                            postProcessing.AddMessageGroup(new MessageGroup(POST_PROCESS_LAYER_USING_RESERVED_LAYER, MessageType.Error).AddSingleMessage(new SingleMessage(postprocessLayer.gameObject.name).SetSelectObject(postprocessLayer.gameObject)));
-                        }
-
-                        foreach (var postProcessVolume in postProcessVolumes)
-                        {
-                            // Check if the layer matches the cameras post processing layer
-                            if (volumeLayer != 0 && (postprocessLayer.volumeLayer != (postprocessLayer.volumeLayer | (1 << postProcessVolume.gameObject.layer))))
+                            if (Physics.Raycast(spawn.position + new Vector3(0, 0.01f, 0), Vector3.down, out hit, Mathf.Infinity))
                             {
-                                postProcessing.AddMessageGroup(new MessageGroup(VOLUME_ON_WRONG_LAYER, MessageType.Error).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject.name, Helper.GetAllLayersFromMask(postprocessLayer.volumeLayer)).SetSelectObject(postProcessVolume.gameObject)));
-                            }
-
-                            // Check if the volume has a profile set
-                            if (!postProcessVolume.profile && !postProcessVolume.sharedProfile)
-                            {
-                                postProcessing.AddMessageGroup(new MessageGroup(NO_PROFILE_SET, MessageType.Error).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject.name)));
-                                continue;
-                            }
-
-                            // Check if the collider is either global or has a collider on it
-                            if (!postProcessVolume.isGlobal && !postProcessVolume.GetComponent<Collider>())
-                            {
-                                postProcessing.AddMessageGroup(new MessageGroup(POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER, MessageType.Error).AddSingleMessage(new SingleMessage(postProcessVolume.name).SetSelectObject(postProcessVolume.gameObject)));
+                                if (hit.collider.isTrigger)
+                                {
+                                    colliderUnderSpawnTrigger.AddSingleMessage(new SingleMessage(hit.collider.name, spawn.gameObject.name).SetSelectObject(spawn.gameObject));
+                                }
                             }
                             else
                             {
-                                // Go trough the profile settings and see if any bad one's are used
-                                PostProcessProfile postProcessProfile;
+                                noColliderUnderSpawn.AddSingleMessage(new SingleMessage(spawn.gameObject.name).SetSelectObject(spawn.gameObject));
+                            }
+                        }
+                    }
+                }
 
-                                if (postProcessVolume.profile)
+#if VRC_SDK_VRCSDK2
+                // Check if the world has playermods defined
+                var playermods = FindObjectsOfType(typeof(VRC_PlayerMods)) as VRC_PlayerMods[];
+                if (playermods.Length == 0)
+                {
+                    general.AddMessageGroup(new MessageGroup(NO_PLAYER_MODS, MessageType.Tips));
+                }
+
+                // Get triggers in the world
+                var triggerScripts = (VRC_Trigger[]) VRC_Trigger.FindObjectsOfType(typeof(VRC_Trigger));
+
+                var triggerWrongLayer = new List<GameObject>();
+
+                // Check for OnEnterTriggers to make sure they are on mirrorreflection layer
+                foreach (var triggerScript in triggerScripts)
+                {
+                    foreach (var trigger in triggerScript.Triggers)
+                    {
+                        if (trigger.TriggerType == VRC.SDKBase.VRC_Trigger.TriggerType.OnEnterTrigger || trigger.TriggerType == VRC.SDKBase.VRC_Trigger.TriggerType.OnExitTrigger || trigger.TriggerType == VRC.SDKBase.VRC_Trigger.TriggerType.OnEnterCollider || trigger.TriggerType == VRC.SDKBase.VRC_Trigger.TriggerType.OnExitCollider)
+                        {
+                            if (!triggerScript.gameObject.GetComponent<Collider>())
+                            {
+                                if (trigger.TriggerType == VRC.SDKBase.VRC_Trigger.TriggerType.OnEnterTrigger || trigger.TriggerType == VRC.SDKBase.VRC_Trigger.TriggerType.OnExitTrigger)
                                 {
-                                    postProcessProfile = postProcessVolume.profile;
+                                    general.AddMessageGroup(new MessageGroup(TRIGGER_TRIGGER_NO_COLLIDER, MessageType.Error).AddSingleMessage(new SingleMessage(triggerScript.name).SetSelectObject(triggerScript.gameObject)));
+                                }
+                                else if (trigger.TriggerType == VRC.SDKBase.VRC_Trigger.TriggerType.OnEnterCollider || trigger.TriggerType == VRC.SDKBase.VRC_Trigger.TriggerType.OnExitCollider)
+                                {
+                                    general.AddMessageGroup(new MessageGroup(COLLIDER_TRIGGER_NO_COLLIDER, MessageType.Error).AddSingleMessage(new SingleMessage(triggerScript.name).SetSelectObject(triggerScript.gameObject)));
+                                }
+                            }
+
+                            if ((trigger.TriggerType.ToString() == "OnEnterTrigger" || trigger.TriggerType.ToString() == "OnExitTrigger") && triggerScript.gameObject.layer != LayerMask.NameToLayer("MirrorReflection"))
+                            {
+                                var collides = true;
+
+                                var triggerLayers = Helper.GetAllLayerNumbersFromMask(trigger.Layers);
+                                for (var i = 0; i < triggerLayers.Length; i++)
+                                {
+                                    var item = triggerLayers[i];
+
+                                    if (Physics.GetIgnoreLayerCollision(LayerMask.NameToLayer("MirrorReflection"), item))
+                                    {
+                                        collides = false;
+                                        break;
+                                    }
+                                }
+
+                                if (collides)
+                                {
+                                    triggerWrongLayer.Add(triggerScript.gameObject);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (triggerWrongLayer.Count > 0)
+                {
+                    var triggerWrongLayerGroup = new MessageGroup(TRIGGER_TRIGGER_WRONG_LAYER, TRIGGER_TRIGGER_WRONG_LAYER_COMBINED, TRIGGER_TRIGGER_WRONG_LAYER_INFO, MessageType.Warning);
+                    for (var i = 0; i < triggerWrongLayer.Count; i++)
+                    {
+                        triggerWrongLayerGroup.AddSingleMessage(new SingleMessage(triggerWrongLayer[i].name).SetSelectObject(triggerWrongLayer[i].gameObject).SetAutoFix(SetObjectLayer(triggerWrongLayer[i].gameObject, "MirrorReflection")));
+                    }
+
+                    general.AddMessageGroup(triggerWrongLayerGroup.SetGroupAutoFix(SetObjectLayer(triggerWrongLayerGroup.GetSelectObjects(), "MirrorReflection")));
+                }
+#endif
+
+                // Optimization Checks
+
+                // Check for occlusion culling
+                if (StaticOcclusionCulling.umbraDataSize > 0)
+                {
+                    optimization.AddMessageGroup(new MessageGroup(BAKED_OCCLUSION_CULLING, MessageType.GoodFPS));
+
+                    var occlusionAreas = GameObject.FindObjectsOfType<OcclusionArea>();
+
+                    if (occlusionAreas.Length == 0)
+                    {
+                        optimization.AddMessageGroup(new MessageGroup(NO_OCCLUSION_AREAS, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/class-OcclusionArea.html"));
+                    }
+                    else
+                    {
+                        var disabledOcclusionAreasGroup = optimization.AddMessageGroup(new MessageGroup(DISABLED_OCCLUSION_AREA, DISABLED_OCCLUSION_AREA_COMBINED, DISABLED_OCCLUSION_AREA_INFO, MessageType.Warning));
+
+                        foreach (var occlusionArea in occlusionAreas)
+                        {
+                            var so = new SerializedObject(occlusionArea);
+                            var sp = so.FindProperty("m_IsViewVolume");
+
+                            if (!sp.boolValue)
+                            {
+                                disabledOcclusionAreasGroup.AddSingleMessage(new SingleMessage(occlusionArea.name).SetSelectObject(occlusionArea.gameObject));
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    optimization.AddMessageGroup(new MessageGroup(NO_OCCLUSION_CULLING, MessageType.Tips).SetDocumentation("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Occlusion-Culling"));
+                }
+
+                OcclusionMessageCheck();
+
+                // Check for possible camera problems
+                var cameras = FindObjectsOfType<Camera>();
+
+                if (cameras.Length > 0)
+                {
+                    var activeCamerasMessages = optimization.AddMessageGroup(new MessageGroup(ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE, ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE_COMBINED, ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE_INFO, MessageType.BadFPS));
+                    var cameraDepthWarning = general.AddMessageGroup(new MessageGroup(ACTIVE_CAMERA_WITH_OVER_ZERO_DEPTH, ACTIVE_CAMERA_WITH_OVER_ZERO_DEPTH_COMBINED, ACTIVE_CAMERA_WITH_OVER_ZERO_DEPTH_INFO, MessageType.Error));
+
+                    for (var i = 0; i < cameras.Length; i++)
+                    {
+                        var camera = cameras[i];
+
+                        if (!camera.enabled) continue;
+
+                        if (camera.targetTexture)
+                        {
+                            activeCamerasMessages.AddSingleMessage(new SingleMessage(camera.name).SetSelectObject(camera.gameObject));
+                        }
+                        else if (camera.depth > 0 && camera.targetDisplay == 0)
+                        {
+                            cameraDepthWarning.AddSingleMessage(new SingleMessage(camera.name).SetSelectObject(camera.gameObject));
+                        }
+                    }
+                }
+
+                // Get active mirrors in the world and complain about them
+                var mirrors = FindObjectsOfType(typeof(VRC_MirrorReflection)) as VRC_MirrorReflection[];
+
+                if (mirrors.Length > 0)
+                {
+                    var activeCamerasMessage = new MessageGroup(MIRROR_ON_BY_DEFAULT, MIRROR_ON_BY_DEFAULT_COMBINED, MIRROR_ON_BY_DEFAULT_INFO, MessageType.BadFPS);
+                    for (var i = 0; i < mirrors.Length; i++)
+                    {
+                        if (mirrors[i].enabled)
+                        {
+                            activeCamerasMessage.AddSingleMessage(new SingleMessage(mirrors[i].name).SetSelectObject(mirrors[i].gameObject));
+                        }
+                    }
+
+                    optimization.AddMessageGroup(activeCamerasMessage);
+                }
+
+                // Lighting Checks
+
+                switch (RenderSettings.ambientMode)
+                {
+                    case AmbientMode.Custom:
+                        lighting.AddMessageGroup(new MessageGroup(AMBIENT_MODE_SET_TO_CUSTOM, MessageType.Error).AddSingleMessage(new SingleMessage(SetAmbientMode(AmbientMode.Skybox))));
+                        break;
+                    case AmbientMode.Flat:
+                        lighting.AddMessageGroup(new MessageGroup(SINGLE_COLOR_ENVIRONMENT_LIGHTING, MessageType.Tips));
+                        break;
+                }
+
+                if (Helper.GetBrightness(RenderSettings.ambientLight) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Flat) ||
+                    Helper.GetBrightness(RenderSettings.ambientSkyColor) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Trilight) ||
+                    Helper.GetBrightness(RenderSettings.ambientEquatorColor) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Trilight) ||
+                    Helper.GetBrightness(RenderSettings.ambientGroundColor) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Trilight))
+                {
+                    lighting.AddMessageGroup(new MessageGroup(DARK_ENVIRONMENT_LIGHTING, MessageType.Tips));
+                }
+
+                if (RenderSettings.defaultReflectionMode.Equals(DefaultReflectionMode.Custom) && !RenderSettings.customReflection)
+                {
+                    lighting.AddMessageGroup(new MessageGroup(CUSTOM_ENVIRONMENT_REFLECTIONS_NULL, MessageType.Error).AddSingleMessage(new SingleMessage(SetEnviromentReflections(DefaultReflectionMode.Skybox))));
+                }
+
+                var bakedLighting = false;
+                var xatlasUnwrapper = false;
+
+#if BAKERY_INCLUDED
+                var bakeryLights = new List<GameObject>();
+                // TODO: Investigate whether or not these should be included
+                // bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryDirectLight)) as BakeryDirectLight[], s => s.gameObject));
+                bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryPointLight)) as BakeryPointLight[], s => s.gameObject));
+                bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakerySkyLight)) as BakerySkyLight[], s => s.gameObject));
+
+                var bakerySettings = ftRenderLightmap.FindRenderSettingsStorage();
+
+                switch ((ftRenderLightmap.RenderDirMode) bakerySettings.renderSettingsRenderDirMode)
+                {
+                    case ftRenderLightmap.RenderDirMode.RNM:
+                    case ftRenderLightmap.RenderDirMode.SH:
+                        const string className = "Merlin.VRCBakeryAdapter";
+
+                        if (Helper.GetTypeFromName(className) is null)
+                        {
+                            lighting.AddMessageGroup(new MessageGroup(SHRNM_DIRECTIONAL_MODE_BAKERY_ERROR, MessageType.Error).SetDocumentation("https://github.com/Merlin-san/VRC-Bakery-Adapter"));
+                        }
+
+                        break;
+                }
+
+                if (bakerySettings.renderSettingsUnwrapper == 1)
+                {
+                    xatlasUnwrapper = true;
+                }
+
+                if (bakeryLights.Count > 0)
+                {
+                    var notEditorOnly = new List<GameObject>();
+                    var unityLightOnBakeryLight = new List<GameObject>();
+
+                    bakedLighting = true;
+
+                    for (var i = 0; i < bakeryLights.Count; i++)
+                    {
+                        if (!bakeryLights[i].CompareTag("EditorOnly"))
+                        {
+                            notEditorOnly.Add(bakeryLights[i]);
+                        }
+
+                        if (!bakeryLights[i].GetComponent<Light>()) continue;
+
+                        var light = bakeryLights[i].GetComponent<Light>();
+                        if (!light.bakingOutput.isBaked && light.enabled)
+                        {
+                            unityLightOnBakeryLight.Add(bakeryLights[i]);
+                        }
+                    }
+
+                    if (notEditorOnly.Count > 0)
+                    {
+                        var notEditorOnlyGroup = new MessageGroup(BAKERY_LIGHT_NOT_SET_EDITOR_ONLY, BAKERY_LIGHT_NOT_SET_EDITOR_ONLY_COMBINED, BAKERY_LIGHT_NOT_SET_EDITOR_ONLY_INFO, MessageType.Warning);
+                        foreach (var item in notEditorOnly)
+                        {
+                            notEditorOnlyGroup.AddSingleMessage(new SingleMessage(item.name).SetAutoFix(SetGameObjectTag(item, "EditorOnly")).SetSelectObject(item));
+                        }
+
+                        lighting.AddMessageGroup(notEditorOnlyGroup.SetGroupAutoFix(SetGameObjectTag(notEditorOnly.ToArray(), "EditorOnly")));
+                    }
+
+                    if (unityLightOnBakeryLight.Count > 0)
+                    {
+                        var unityLightGroup = new MessageGroup(BAKERY_LIGHT_UNITY_LIGHT, BAKERY_LIGHT_UNITY_LIGHT_COMBINED, BAKERY_LIGHT_UNITY_LIGHT_INFO, MessageType.Warning);
+                        foreach (var item in unityLightOnBakeryLight)
+                        {
+                            unityLightGroup.AddSingleMessage(new SingleMessage(item.name).SetAutoFix(DisableComponent(item.GetComponent<Light>())).SetSelectObject(item));
+                        }
+
+                        lighting.AddMessageGroup(unityLightGroup.SetGroupAutoFix(DisableComponent(Array.ConvertAll(unityLightOnBakeryLight.ToArray(), s => s.GetComponent<Light>()))));
+                    }
+                }
+#endif
+
+                // Get lights in scene
+                var lights = FindObjectsOfType<Light>();
+
+                var nonBakedLights = new List<GameObject>();
+
+                // Go trough the lights to check if the scene contains lights set to be baked
+                for (var i = 0; i < lights.Length; i++)
+                {
+                    // Skip checking realtime lights
+                    if (lights[i].lightmapBakeType == LightmapBakeType.Realtime) continue;
+
+                    bakedLighting = true;
+
+                    if (!lights[i].bakingOutput.isBaked && lights[i].GetComponent<Light>().enabled)
+                    {
+                        nonBakedLights.Add(lights[i].gameObject);
+                    }
+                }
+
+                if (LightmapSettings.lightmaps.Length > 0)
+                {
+                    bakedLighting = true;
+
+                    if (Helper.BuildPlatform() == RuntimePlatform.Android && EditorUserBuildSettings.androidBuildSubtarget == MobileTextureSubtarget.Generic)
+                    {
+                        var lightmaps = LightmapSettings.lightmaps;
+
+                        var androidCompressionGroup = lighting.AddMessageGroup(new MessageGroup(QUEST_LIGHTMAP_COMPRESSION_OVERRIDE, QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_COMBINED, QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_INFO, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/class-TextureImporter.html"));
+
+                        for (var i = 0; i < lightmaps.Length; i++)
+                        {
+                            Object lightmap = lightmaps[i].lightmapColor;
+
+                            var textureImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(lightmaps[i].lightmapColor)) as TextureImporter;
+
+                            var platformSettings = textureImporter.GetPlatformTextureSettings("Android");
+
+                            if (!platformSettings.overridden)
+                            {
+                                androidCompressionGroup.AddSingleMessage(new SingleMessage(lightmap.name).SetAssetPath(textureImporter.assetPath));
+                            }
+                        }
+                    }
+                }
+
+                var probes = LightmapSettings.lightProbes;
+
+                // If the scene has baked lights complain about stuff important to baked lighting missing
+                if (bakedLighting)
+                {
+                    // Count lightmaps and suggest to use bigger lightmaps if needed
+                    var lightMapSize = LightmapEditorSettings.maxAtlasSize;
+                    if (lightMapSize != 4096 && LightmapSettings.lightmaps.Length > 1 && !LightmapEditorSettings.lightmapper.Equals(LightmapEditorSettings.Lightmapper.ProgressiveGPU))
+                    {
+                        if (LightmapSettings.lightmaps[0] != null)
+                        {
+                            var lightmap = LightmapSettings.lightmaps[0];
+
+                            if (lightmap.lightmapColor != null && lightmap.lightmapColor.height != 4096)
+                            {
+                                lighting.AddMessageGroup(new MessageGroup(CONSIDER_LARGER_LIGHTMAPS, MessageType.Tips).AddSingleMessage(new SingleMessage(lightMapSize.ToString()).SetAutoFix(SetLightmapSize(4096))));
+                            }
+                        }
+                    }
+
+                    if (LightmapEditorSettings.lightmapper.Equals(LightmapEditorSettings.Lightmapper.ProgressiveGPU) && lightMapSize == 4096 && SystemInfo.graphicsMemorySize < 12000)
+                    {
+                        lighting.AddMessageGroup(new MessageGroup(CONSIDER_SMALLER_LIGHTMAPS, MessageType.Warning).AddSingleMessage(new SingleMessage(lightMapSize.ToString()).SetAutoFix(SetLightmapSize(2048))));
+                    }
+
+                    // Count how many light probes the scene has
+                    long probeCounter = 0;
+                    long bakedProbes = probes != null ? probes.count : 0;
+
+                    var lightprobegroups = GameObject.FindObjectsOfType<LightProbeGroup>();
+
+                    var overlappingLightProbesGroup = new MessageGroup(OVERLAPPING_LIGHT_PROBES, OVERLAPPING_LIGHT_PROBES_COMBINED, OVERLAPPING_LIGHT_PROBES_INFO, MessageType.Info);
+
+                    for (var i = 0; i < lightprobegroups.Length; i++)
+                    {
+                        if (lightprobegroups[i].probePositions.GroupBy(p => p).Any(g => g.Count() > 1))
+                        {
+                            overlappingLightProbesGroup.AddSingleMessage(new SingleMessage(lightprobegroups[i].name, (lightprobegroups[i].probePositions.Length - lightprobegroups[i].probePositions.Distinct().ToArray().Length).ToString()).SetSelectObject(lightprobegroups[i].gameObject).SetAutoFix(RemoveOverlappingLightprobes(lightprobegroups[i])));
+                        }
+
+                        probeCounter += lightprobegroups[i].probePositions.Length;
+                    }
+
+                    if (probeCounter > 0)
+                    {
+                        if (probeCounter - bakedProbes < 0)
+                        {
+                            lighting.AddMessageGroup(new MessageGroup(LIGHT_PROBES_REMOVED_NOT_RE_BAKED, MessageType.Warning).AddSingleMessage(new SingleMessage(bakedProbes.ToString(), probeCounter.ToString())));
+                        }
+                        else
+                        {
+                            if (bakedProbes - (0.9 * probeCounter) < 0)
+                            {
+                                lighting.AddMessageGroup(new MessageGroup(LIGHT_PROBE_COUNT_NOT_BAKED, MessageType.Info).AddSingleMessage(new SingleMessage(probeCounter.ToString("n0"), (probeCounter - bakedProbes).ToString("n0"))));
+                            }
+                            else
+                            {
+                                lighting.AddMessageGroup(new MessageGroup(LIGHT_PROBE_COUNT, MessageType.Info).AddSingleMessage(new SingleMessage(probeCounter.ToString("n0"))));
+                            }
+                        }
+                    }
+
+                    if (overlappingLightProbesGroup.GetTotalCount() > 0)
+                    {
+                        if (overlappingLightProbesGroup.GetTotalCount() > 1)
+                        {
+                            overlappingLightProbesGroup.SetGroupAutoFix(RemoveOverlappingLightprobes(lightprobegroups));
+                        }
+
+                        lighting.AddMessageGroup(overlappingLightProbesGroup);
+                    }
+
+                    // Since the scene has baked lights complain if there's no lightprobes
+                    else if (probes == null && probeCounter == 0)
+                    {
+                        lighting.AddMessageGroup(new MessageGroup(NO_LIGHT_PROBES, MessageType.Info).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/LightProbes.html"));
+                    }
+
+                    // Check lighting data asset size if it exists
+                    if (Lightmapping.lightingDataAsset != null)
+                    {
+                        var pathTo = AssetDatabase.GetAssetPath(Lightmapping.lightingDataAsset);
+                        var length = new FileInfo(pathTo).Length;
+                        lighting.AddMessageGroup(new MessageGroup(LIGHTING_DATA_ASSET_INFO, MessageType.Info).AddSingleMessage(new SingleMessage((length / 1024.0f / 1024.0f).ToString("F2"))));
+                    }
+
+                    if (nonBakedLights.Count != 0)
+                    {
+                        var nonBakedLightsGroup = new MessageGroup(NON_BAKED_BAKED_LIGHT, NON_BAKED_BAKED_LIGHT_COMBINED, NON_BAKED_BAKED_LIGHT_INFO, MessageType.Warning);
+                        for (var i = 0; i < nonBakedLights.Count; i++)
+                        {
+                            nonBakedLightsGroup.AddSingleMessage(new SingleMessage(nonBakedLights[i].name).SetSelectObject(nonBakedLights[i].gameObject));
+                        }
+
+                        lighting.AddMessageGroup(nonBakedLightsGroup);
+                    }
+                }
+                else
+                {
+#if UNITY_ANDROID
+                lighting.AddMessageGroup(new MessageGroup(QUEST_BAKED_LIGHTING_WARNING, MessageType.BadFPS).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/Lightmapping.html"));
+#else
+                    lighting.AddMessageGroup(new MessageGroup(LIGHTS_NOT_BAKED, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/Lightmapping.html"));
+#endif
+                }
+
+                // ReflectionProbes
+                var reflectionprobes = FindObjectsOfType<ReflectionProbe>();
+                var unbakedprobes = new List<GameObject>();
+                var reflectionProbeCount = reflectionprobes.Count();
+                for (var i = 0; i < reflectionprobes.Length; i++)
+                {
+                    if (!reflectionprobes[i].bakedTexture && reflectionprobes[i].mode == ReflectionProbeMode.Baked)
+                    {
+                        unbakedprobes.Add(reflectionprobes[i].gameObject);
+                    }
+                }
+
+                if (reflectionProbeCount == 0)
+                {
+                    lighting.AddMessageGroup(new MessageGroup(NO_REFLECTION_PROBES, MessageType.Tips).SetDocumentation("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Reflection-Probes"));
+                }
+                else if (reflectionProbeCount > 0)
+                {
+                    lighting.AddMessageGroup(new MessageGroup(REFLECTION_PROBE_COUNT_TEXT, MessageType.Info).AddSingleMessage(new SingleMessage(reflectionProbeCount.ToString())));
+
+                    if (unbakedprobes.Count > 0)
+                    {
+                        var probesUnbakedGroup = new MessageGroup(REFLECTION_PROBES_SOME_UNBAKED, REFLECTION_PROBES_SOME_UNBAKED_COMBINED, MessageType.Warning);
+
+                        foreach (var item in unbakedprobes)
+                        {
+                            probesUnbakedGroup.AddSingleMessage(new SingleMessage(item.name).SetSelectObject(item));
+                        }
+
+                        lighting.AddMessageGroup(probesUnbakedGroup);
+                    }
+                }
+
+                // Post Processing Checks
+
+#if UNITY_POST_PROCESSING_STACK_V2
+                var postProcessVolumes = FindObjectsOfType(typeof(PostProcessVolume)) as PostProcessVolume[];
+                PostProcessLayer mainPostProcessLayer = null;
+
+                // Attempt to find the main post process layer
+                if (sceneDescriptor.ReferenceCamera != null && sceneDescriptor.ReferenceCamera.gameObject.GetComponent(typeof(PostProcessLayer)))
+                {
+                    mainPostProcessLayer = sceneDescriptor.ReferenceCamera.gameObject.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
+                }
+                else
+                {
+                    if (Camera.main != null)
+                    {
+                        if (Camera.main.gameObject.GetComponent(typeof(PostProcessLayer)))
+                        {
+                            mainPostProcessLayer = Camera.main.gameObject.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
+                        }
+                    }
+                }
+
+                // Check if the post processing layer has resources properly set
+                if (mainPostProcessLayer)
+                {
+                    var resourcesInfo = typeof(PostProcessLayer).GetField("m_Resources", BindingFlags.NonPublic | BindingFlags.Instance);
+
+                    var postProcessResources = resourcesInfo.GetValue(mainPostProcessLayer) as PostProcessResources;
+
+                    if (postProcessResources is null)
+                    {
+                        var singleMessage = new SingleMessage(mainPostProcessLayer.gameObject.name).SetSelectObject(mainPostProcessLayer.gameObject);
+
+                        postProcessing.AddMessageGroup(new MessageGroup(POST_PROCESSING_NO_RESOURCES_SET, MessageType.Error).AddSingleMessage(singleMessage));
+
+                        var resources = (PostProcessResources) AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath("d82512f9c8e5d4a4d938b575d47f88d4"), typeof(PostProcessResources));
+
+                        if (resources != null) singleMessage.SetAutoFix(SetPostProcessingLayerResources(mainPostProcessLayer, resources));
+                    }
+                }
+
+                // If post processing is imported but no setup isn't detected show a message
+                if (postProcessVolumes.Length == 0 && mainPostProcessLayer is null)
+                {
+                    postProcessing.AddMessageGroup(new MessageGroup(POST_PROCESSING_IMPORTED_BUT_NOT_SETUP, MessageType.Info));
+                }
+                else
+                {
+                    // Check the scene view for post processing effects being off
+                    var sceneViewState = SceneView.lastActiveSceneView.sceneViewState;
+                    if (!sceneViewState.showImageEffects)
+                    {
+                        postProcessing.AddMessageGroup(new MessageGroup(POST_PROCESSING_DISABLED_IN_SCENE_VIEW, MessageType.Info).SetGroupAutoFix(SetPostProcessingInScene(sceneViewState, true)));
+                    }
+
+                    // Start by checking if reference camera has been set in the Scene Descriptor
+                    if (!sceneDescriptor.ReferenceCamera)
+                    {
+                        var noReferenceCameraMessage = new SingleMessage(sceneDescriptor.gameObject);
+
+                        if (Camera.main && Camera.main.GetComponent<PostProcessLayer>())
+                        {
+                            noReferenceCameraMessage.SetAutoFix(SetReferenceCamera(sceneDescriptor, Camera.main));
+                        }
+
+                        postProcessing.AddMessageGroup(new MessageGroup(NO_REFERENCE_CAMERA_SET_PP, MessageType.Warning).AddSingleMessage(noReferenceCameraMessage));
+                    }
+                    else
+                    {
+                        // Check for post process volumes in the scene
+                        if (postProcessVolumes.Length == 0)
+                        {
+                            postProcessing.AddMessageGroup(new MessageGroup(NO_POST_PROCESSING_VOLUMES, MessageType.Info));
+                        }
+                        else
+                        {
+                            var postprocessLayer = sceneDescriptor.ReferenceCamera.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
+                            if (postprocessLayer is null)
+                            {
+                                postProcessing.AddMessageGroup(new MessageGroup(REFERENCE_CAMERA_NO_POST_PROCESSING_LAYER, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.ReferenceCamera.gameObject)));
+                            }
+
+                            if (postprocessLayer)
+                            {
+                                var volumeLayer = postprocessLayer.volumeLayer;
+                                if (volumeLayer == 0)
+                                {
+                                    postProcessing.AddMessageGroup(new MessageGroup(VOLUME_BLENDING_LAYER_NOT_SET, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.ReferenceCamera.gameObject)));
+                                }
+
+                                // Check for usage of reserved layers since they break post processing
+                                var numbersFromMask = Helper.GetAllLayerNumbersFromMask(volumeLayer);
+                                if (numbersFromMask.Contains(19) | numbersFromMask.Contains(20) | numbersFromMask.Contains(21))
+                                {
+                                    postProcessing.AddMessageGroup(new MessageGroup(POST_PROCESS_LAYER_USING_RESERVED_LAYER, MessageType.Error).AddSingleMessage(new SingleMessage(postprocessLayer.gameObject.name).SetSelectObject(postprocessLayer.gameObject)));
+                                }
+
+                                var noProfileSet = postProcessing.AddMessageGroup(new MessageGroup(NO_PROFILE_SET, NO_PROFILE_SET_COMBINED, MessageType.Error));
+                                var volumeNoGlobalNoCollider = postProcessing.AddMessageGroup(new MessageGroup(POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER, POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER_COMBINED, POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER_INFO, MessageType.Error));
+                                var matchingVolumes = new List<PostProcessVolume>();
+                                foreach (var postProcessVolume in postProcessVolumes)
+                                {
+                                    // Check if the layer matches the cameras post processing layer
+                                    if (volumeLayer != 0 && (postprocessLayer.volumeLayer == (postprocessLayer.volumeLayer | (1 << postProcessVolume.gameObject.layer))))
+                                    {
+                                        matchingVolumes.Add(postProcessVolume);
+                                    }
+
+                                    // Check if the volume has a profile set
+                                    if (postProcessVolume.profile is null && postProcessVolume.sharedProfile is null)
+                                    {
+                                        noProfileSet.AddSingleMessage(new SingleMessage(postProcessVolume.gameObject.name).SetSelectObject(postProcessVolume.gameObject));
+                                    }
+
+                                    // Check if the collider is either global or has a collider on it
+                                    if (!postProcessVolume.isGlobal && !postProcessVolume.GetComponent<Collider>())
+                                    {
+                                        volumeNoGlobalNoCollider.AddSingleMessage(new SingleMessage(postProcessVolume.name).SetSelectObject(postProcessVolume.gameObject));
+                                    }
+                                }
+
+                                if (matchingVolumes.Count == 0)
+                                {
+                                    postProcessing.AddMessageGroup(new MessageGroup(NO_MATCHING_LAYERS_FOUND, MessageType.Warning).AddSingleMessage(new SingleMessage(Helper.GetAllLayersFromMask(postprocessLayer.volumeLayer)).SetSelectObject(postprocessLayer.gameObject)));
+                                }
+
+                                // Go trough the profile settings and see if any bad one's are used
+                                foreach (var postProcessVolume in matchingVolumes)
+                                {
+                                    var postProcessProfile = postProcessVolume.profile ? postProcessVolume.profile : postProcessVolume.sharedProfile;
+
+                                    if (postProcessProfile is null) continue;
+
+                                    if (postProcessProfile.GetSetting<ColorGrading>() && postProcessProfile.GetSetting<ColorGrading>().enabled && postProcessProfile.GetSetting<ColorGrading>().active)
+                                    {
+                                        if (postProcessProfile.GetSetting<ColorGrading>().tonemapper.value == Tonemapper.None)
+                                        {
+                                            postProcessing.AddMessageGroup(new MessageGroup(DONT_USE_NONE_FOR_TONEMAPPING, MessageType.Error).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
+                                        }
+                                    }
+
+                                    if (postProcessProfile.GetSetting<Bloom>() && postProcessProfile.GetSetting<Bloom>().enabled && postProcessProfile.GetSetting<Bloom>().active)
+                                    {
+                                        var bloom = postProcessProfile.GetSetting<Bloom>();
+
+                                        if (bloom.intensity.overrideState && bloom.intensity.value > 0.3f)
+                                        {
+                                            postProcessing.AddMessageGroup(new MessageGroup(TOO_HIGH_BLOOM_INTENSITY, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
+                                        }
+
+                                        if (bloom.threshold.overrideState && bloom.threshold.value > 1f)
+                                        {
+                                            postProcessing.AddMessageGroup(new MessageGroup(TOO_HIGH_BLOOM_THRESHOLD, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
+                                        }
+
+                                        if (bloom.dirtTexture.overrideState && bloom.dirtTexture.value || bloom.dirtIntensity.overrideState && bloom.dirtIntensity.value > 0)
+                                        {
+                                            postProcessing.AddMessageGroup(new MessageGroup(NO_BLOOM_DIRT_IN_VR, MessageType.Error).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.BloomDirt)).SetSelectObject(postProcessVolume.gameObject)));
+                                        }
+                                    }
+
+                                    if (postProcessProfile.GetSetting<AmbientOcclusion>() && postProcessProfile.GetSetting<AmbientOcclusion>().enabled && postProcessProfile.GetSetting<AmbientOcclusion>().active)
+                                    {
+                                        postProcessing.AddMessageGroup(new MessageGroup(NO_AMBIENT_OCCLUSION, MessageType.Error).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.AmbientOcclusion)).SetSelectObject(postProcessVolume.gameObject)));
+                                    }
+
+                                    if (postProcessVolume.isGlobal && postProcessProfile.GetSetting<DepthOfField>() && postProcessProfile.GetSetting<DepthOfField>().enabled && postProcessProfile.GetSetting<DepthOfField>().active)
+                                    {
+                                        postProcessing.AddMessageGroup(new MessageGroup(DEPTH_OF_FIELD_WARNING, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
+                                    }
+
+                                    if (postProcessProfile.GetSetting<ScreenSpaceReflections>() && postProcessProfile.GetSetting<ScreenSpaceReflections>().enabled && postProcessProfile.GetSetting<ScreenSpaceReflections>().active)
+                                    {
+                                        postProcessing.AddMessageGroup(new MessageGroup(SCREEN_SPACE_REFLECTIONS_WARNING, MessageType.Warning).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.ScreenSpaceReflections)).SetSelectObject(postProcessVolume.gameObject)));
+                                    }
+
+                                    if (postProcessProfile.GetSetting<Vignette>() && postProcessProfile.GetSetting<Vignette>().enabled && postProcessProfile.GetSetting<Vignette>().active)
+                                    {
+                                        postProcessing.AddMessageGroup(new MessageGroup(VIGNETTE_WARNING, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (!postProcessing.HasMessages())
+                    {
+                        postProcessing.AddMessageGroup(new MessageGroup(NO_PROBLEMS_FOUND_IN_PP, MessageType.Info));
+                    }
+                }
+#else
+                postProcessing.AddMessageGroup(new MessageGroup(NO_POST_PROCESSING_IMPORTED, MessageType.Info));
+#endif
+
+                // GameObject checks
+
+                var importers = new List<ModelImporter>();
+
+                var unCrunchedTextures = new List<Texture>();
+                var badShaders = 0;
+                var textureCount = 0;
+
+                var missingShaders = new List<Material>();
+                var selectablesNotNone = new List<Selectable>();
+
+                var checkedMaterials = new List<Material>();
+                var checkedShaders = new Dictionary<Shader, CheckedShaderProperties>();
+
+                var mirrorsDefaultLayers = optimization.AddMessageGroup(new MessageGroup(MIRROR_WITH_DEFAULT_LAYERS, MIRROR_WITH_DEFAULT_LAYERS_COMBINED, MIRROR_WITH_DEFAULT_LAYERS_INFO, MessageType.Tips));
+                var legacyBlendShapeIssues = general.AddMessageGroup(new MessageGroup(LEGACY_BLEND_SHAPE_ISSUES, LEGACY_BLEND_SHAPE_ISSUES_COMBINED, LEGACY_BLEND_SHAPE_ISSUES_INFO, MessageType.Warning));
+                var grabPassShaders = general.AddMessageGroup(new MessageGroup(MATERIAL_WITH_GRAB_PASS_SHADER, MATERIAL_WITH_GRAB_PASS_SHADER_COMBINED, Helper.BuildPlatform() == RuntimePlatform.WindowsPlayer ? MATERIAL_WITH_GRAB_PASS_SHADER_INFO_PC : MATERIAL_WITH_GRAB_PASS_SHADER_INFO_QUEST, Helper.BuildPlatform() == RuntimePlatform.Android ? MessageType.Error : MessageType.Info));
+                var disabledPortals = general.AddMessageGroup(new MessageGroup(DISABLED_PORTALS_WARNING, DISABLED_PORTALS_WARNING_COMBINED, DISABLED_PORTALS_WARNING_INFO, MessageType.Warning));
+                var materialWithNonWhitelistedShader = general.AddMessageGroup(new MessageGroup(MATERIAL_WITH_NON_WHITELISTED_SHADER, MATERIAL_WITH_NON_WHITELISTED_SHADER_COMBINED, MATERIAL_WITH_NON_WHITELISTED_SHADER_INFO, MessageType.Warning).SetCombinedSelectionDisabled(true).SetDocumentation("https://docs.vrchat.com/docs/quest-content-limitations#shaders"));
+                var uiElementNavigation = general.AddMessageGroup(new MessageGroup(UI_ELEMENT_WITH_NAVIGATION_NOT_NONE, UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_COMBINED, UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_INFO, MessageType.Tips));
+                var nullTriggerReceivers = general.AddMessageGroup(new MessageGroup(NULL_TRIGGER_RECEIVER, NULL_TRIGGER_RECEIVER_COMBINED, NULL_TRIGGER_RECEIVER_INFO, MessageType.Info));
+
+                var allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
+                for (var i = 0; i < allGameObjects.Length; i++)
+                {
+                    var gameObject = allGameObjects[i] as GameObject;
+
+                    if (gameObject.hideFlags != HideFlags.None || EditorUtility.IsPersistent(gameObject.transform.root.gameObject))
+                        continue;
+
+                    if (gameObject.GetComponent<Renderer>())
+                    {
+                        var renderer = gameObject.GetComponent<Renderer>();
+
+                        // If baked lighting in the scene check for lightmap uvs
+                        if (bakedLighting && !xatlasUnwrapper)
+                        {
+                            if (GameObjectUtility.AreStaticEditorFlagsSet(gameObject, StaticEditorFlags.LightmapStatic) && gameObject.GetComponent<MeshRenderer>())
+                            {
+                                var meshFilter = gameObject.GetComponent<MeshFilter>();
+
+                                if (meshFilter == null)
+                                {
+                                    continue;
+                                }
+
+                                var sharedMesh = meshFilter.sharedMesh;
+
+                                if (AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(sharedMesh)) != null)
+                                {
+                                    var modelImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(sharedMesh)) as ModelImporter;
+
+                                    if (!importers.Contains(modelImporter))
+                                    {
+                                        if (modelImporter != null)
+                                        {
+                                            var so = new SerializedObject(renderer);
+
+                                            if (!modelImporter.generateSecondaryUV && sharedMesh.uv2.Length == 0 && so.FindProperty("m_ScaleInLightmap").floatValue != 0)
+                                            {
+                                                importers.Add(modelImporter);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (gameObject.GetComponent<VRC_MirrorReflection>())
+                        {
+                            var mirrorMask = gameObject.GetComponent<VRC_MirrorReflection>().m_ReflectLayers;
+
+                            if (mirrorMask.value == -1025)
+                            {
+                                mirrorsDefaultLayers.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject));
+                            }
+                        }
+
+                        if (gameObject.GetComponent<SkinnedMeshRenderer>())
+                        {
+                            var mesh = gameObject.GetComponent<SkinnedMeshRenderer>().sharedMesh;
+
+                            if (AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(mesh)) != null)
+                            {
+                                var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(mesh)) as ModelImporter;
+
+                                if (importer != null)
+                                {
+                                    if (mesh.blendShapeCount > 0 && importer.importBlendShapeNormals == ModelImporterNormals.Calculate && !ModelImporterUtil.GetLegacyBlendShapeNormals(importer))
+                                    {
+                                        legacyBlendShapeIssues.AddSingleMessage(new SingleMessage(Path.GetFileName(AssetDatabase.GetAssetPath(mesh)), EditorUtility.FormatBytes(Profiler.GetRuntimeMemorySizeLong(mesh))).SetAssetPath(importer.assetPath).SetAutoFix(SetLegacyBlendShapeNormals(importer)));
+                                    }
+                                }
+                            }
+                        }
+
+                        // Check materials for problems
+                        for (var l = 0; l < renderer.sharedMaterials.Length; l++)
+                        {
+                            var material = renderer.sharedMaterials[l];
+
+                            if (material == null || checkedMaterials.Contains(material))
+                                continue;
+
+                            checkedMaterials.Add(material);
+
+                            var shader = material.shader;
+
+                            if (Helper.BuildPlatform() == RuntimePlatform.Android && Validation.WorldShaderWhiteList.Contains(shader.name))
+                            {
+                                var singleMessage = new SingleMessage(material.name, shader.name);
+
+                                if (AssetDatabase.GetAssetPath(material).EndsWith(".mat"))
+                                {
+                                    singleMessage.SetAssetPath(AssetDatabase.GetAssetPath(material));
                                 }
                                 else
                                 {
-                                    postProcessProfile = postProcessVolume.sharedProfile;
+                                    singleMessage.SetSelectObject(gameObject);
                                 }
 
-                                if (postProcessProfile.GetSetting<ColorGrading>() && postProcessProfile.GetSetting<ColorGrading>().enabled && postProcessProfile.GetSetting<ColorGrading>().active)
+                                materialWithNonWhitelistedShader.AddSingleMessage(singleMessage);
+                            }
+
+                            if (!checkedShaders.ContainsKey(shader) && AssetDatabase.GetAssetPath(shader) != null)
+                            {
+                                var assetPath = AssetDatabase.GetAssetPath(shader);
+
+                                if (File.Exists(assetPath))
                                 {
-                                    if (postProcessProfile.GetSetting<ColorGrading>().tonemapper.value == Tonemapper.None)
+                                    var checkedShaderProperties = new CheckedShaderProperties();
+
+                                    // Read shader file to string
+                                    var word = File.ReadAllText(assetPath);
+
+                                    // Strip comments
+                                    word = Regex.Replace(word, "(\\/\\/.*)|(\\/\\*)(.*)(\\*\\/)", "");
+
+                                    // Match for GrabPass and check if it's active
+                                    var grabPassMatch = Regex.Match(word, "GrabPass\\s*{[\\s\\S]*?}");
+                                    if (grabPassMatch.Success)
                                     {
-                                        postProcessing.AddMessageGroup(new MessageGroup(DONT_USE_NONE_FOR_TONEMAPPING, MessageType.Error).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
+                                        checkedShaderProperties.IncludesGrabPass = true;
+                                        var lightModeTags = Regex.Matches(grabPassMatch.Value, "[\"|']LightMode[\"|']\\s*=\\s*[\"|'](\\w*)[\"|']");
+
+                                        if (lightModeTags.Count > 0)
+                                        {
+                                            for (var j = 0; j < lightModeTags.Count; j++)
+                                            {
+                                                checkedShaderProperties.GrabPassLightModeTags.Add(lightModeTags[j].Groups[1].Value);
+                                            }
+                                        }
                                     }
+
+                                    checkedShaders.Add(shader, checkedShaderProperties);
                                 }
+                            }
 
-                                if (postProcessProfile.GetSetting<Bloom>() && postProcessProfile.GetSetting<Bloom>().enabled && postProcessProfile.GetSetting<Bloom>().active)
+                            if (checkedShaders.ContainsKey(shader))
+                            {
+                                var checkedShader = checkedShaders[shader];
+                                if (checkedShader.IncludesGrabPass)
                                 {
-                                    var bloom = postProcessProfile.GetSetting<Bloom>();
-
-                                    if (bloom.intensity.overrideState && bloom.intensity.value > 0.3f)
+                                    var grabPassActive = false;
+                                    if (checkedShader.GrabPassLightModeTags.Count > 0)
                                     {
-                                        postProcessing.AddMessageGroup(new MessageGroup(TOO_HIGH_BLOOM_INTENSITY, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
+                                        for (var j = 0; j < checkedShader.GrabPassLightModeTags.Count; j++)
+                                        {
+                                            if (material.GetShaderPassEnabled(checkedShader.GrabPassLightModeTags[j])) grabPassActive = true;
+                                        }
                                     }
-
-                                    if (bloom.threshold.overrideState && bloom.threshold.value > 1f)
+                                    else
                                     {
-                                        postProcessing.AddMessageGroup(new MessageGroup(TOO_HIGH_BLOOM_THRESHOLD, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
+                                        grabPassActive = true;
                                     }
 
-                                    if (bloom.dirtTexture.overrideState && bloom.dirtTexture.value || bloom.dirtIntensity.overrideState && bloom.dirtIntensity.value > 0)
+                                    if (grabPassActive) grabPassShaders.AddSingleMessage(new SingleMessage(material.name, shader.name).SetAssetPath(AssetDatabase.GetAssetPath(material)));
+                                }
+                            }
+
+                            if (shader.name == "Hidden/InternalErrorShader" && !missingShaders.Contains(material))
+                                missingShaders.Add(material);
+
+                            if (shader.name.StartsWith(".poiyomi") || shader.name.StartsWith("poiyomi") || shader.name.StartsWith("arktoon") || shader.name.StartsWith("Cubedparadox") || shader.name.StartsWith("Silent's Cel Shading") || shader.name.StartsWith("Xiexe"))
+                                badShaders++;
+
+                            for (var j = 0; j < ShaderUtil.GetPropertyCount(shader); j++)
+                            {
+                                if (ShaderUtil.GetPropertyType(shader, j) == ShaderUtil.ShaderPropertyType.TexEnv)
+                                {
+                                    var texture = material.GetTexture(ShaderUtil.GetPropertyName(shader, j));
+
+                                    if (AssetDatabase.GetAssetPath(texture) != "" && !unCrunchedTextures.Contains(texture))
                                     {
-                                        postProcessing.AddMessageGroup(new MessageGroup(NO_BLOOM_DIRT_IN_VR, MessageType.Error).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.BloomDirt)).SetSelectObject(postProcessVolume.gameObject)));
+                                        var textureImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(texture)) as TextureImporter;
+
+                                        if (textureImporter != null)
+                                        {
+                                            if (!unCrunchedTextures.Contains(texture))
+                                            {
+                                                textureCount++;
+                                            }
+
+                                            if (!textureImporter.crunchedCompression && !unCrunchedTextures.Contains(texture) && !textureImporter.textureCompression.Equals(TextureImporterCompression.Uncompressed) && EditorTextureUtil.GetStorageMemorySize(texture) > 500000)
+                                            {
+                                                unCrunchedTextures.Add(texture);
+                                            }
+                                        }
                                     }
-                                }
-
-                                if (postProcessProfile.GetSetting<AmbientOcclusion>() && postProcessProfile.GetSetting<AmbientOcclusion>().enabled && postProcessProfile.GetSetting<AmbientOcclusion>().active)
-                                {
-                                    postProcessing.AddMessageGroup(new MessageGroup(NO_AMBIENT_OCCLUSION, MessageType.Error).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.AmbientOcclusion)).SetSelectObject(postProcessVolume.gameObject)));
-                                }
-
-                                if (postProcessVolume.isGlobal && postProcessProfile.GetSetting<DepthOfField>() && postProcessProfile.GetSetting<DepthOfField>().enabled && postProcessProfile.GetSetting<DepthOfField>().active)
-                                {
-                                    postProcessing.AddMessageGroup(new MessageGroup(DEPTH_OF_FIELD_WARNING, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
-                                }
-
-                                if (postProcessProfile.GetSetting<ScreenSpaceReflections>() && postProcessProfile.GetSetting<ScreenSpaceReflections>().enabled && postProcessProfile.GetSetting<ScreenSpaceReflections>().active)
-                                {
-                                    postProcessing.AddMessageGroup(new MessageGroup(SCREEN_SPACE_REFLECTIONS_WARNING, MessageType.Warning).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.ScreenSpaceReflections)).SetSelectObject(postProcessVolume.gameObject)));
-                                }
-
-                                if (postProcessProfile.GetSetting<Vignette>() && postProcessProfile.GetSetting<Vignette>().enabled && postProcessProfile.GetSetting<Vignette>().active)
-                                {
-                                    postProcessing.AddMessageGroup(new MessageGroup(VIGNETTE_WARNING, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
                                 }
                             }
                         }
                     }
-                }
 
-                if (!postProcessing.HasMessages())
-                {
-                    postProcessing.AddMessageGroup(new MessageGroup(NO_PROBLEMS_FOUND_IN_PP, MessageType.Info));
-                }
-            }
-#else
-            postProcessing.AddMessageGroup(new MessageGroup(NO_POST_PROCESSING_IMPORTED, MessageType.Info));
+                    if (gameObject.GetComponent<Selectable>())
+                    {
+                        var selectable = gameObject.GetComponent<Selectable>();
+
+                        if (selectable.navigation.mode != Navigation.Mode.None)
+                        {
+                            uiElementNavigation.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject).SetAutoFix(SetSelectableNavigationMode(selectable, Navigation.Mode.None)));
+
+                            selectablesNotNone.Add(selectable);
+                        }
+                    }
+
+                    if (gameObject.activeInHierarchy == false)
+                    {
+                        if (gameObject.GetComponent<VRC_PortalMarker>())
+                        {
+                            disabledPortals.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject));
+                        }
+                    }
+
+#if VRC_SDK_VRCSDK2
+                    if (gameObject.GetComponent<VRC_Trigger>())
+                    {
+                        var trigger = gameObject.GetComponent<VRC_Trigger>();
+                        var missingFound = false;
+                        for (var j = 0; j < trigger.Triggers.Count; j++)
+                        {
+                            var triggerScript = trigger.Triggers[j];
+                            for (var k = 0; k < triggerScript.Events.Count; k++)
+                            {
+                                var parameterObjects = triggerScript.Events[k].ParameterObjects;
+
+                                if (parameterObjects.Length == 0)
+                                {
+                                    nullTriggerReceivers.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject));
+                                    missingFound = true;
+                                    break;
+                                }
+                                else
+                                {
+                                    for (var l = 0; l < parameterObjects.Length; l++)
+                                    {
+                                        if (parameterObjects[l].gameObject == null)
+                                        {
+                                            nullTriggerReceivers.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject));
+                                            missingFound = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (missingFound) break;
+                        }
+                    }
 #endif
+                }
 
-            // GameObject checks
-
-            var importers = new List<ModelImporter>();
-
-            var unCrunchedTextures = new List<Texture>();
-            var badShaders = 0;
-            var textureCount = 0;
-
-            var missingShaders = new List<Material>();
-
-            var checkedMaterials = new List<Material>();
-            var checkedShaders = new List<Shader>();
-            var selectablesNotNone = new List<Selectable>();
-
-            var mirrorsDefaultLayers = optimization.AddMessageGroup(new MessageGroup(MIRROR_WITH_DEFAULT_LAYERS, MIRROR_WITH_DEFAULT_LAYERS_COMBINED, MIRROR_WITH_DEFAULT_LAYERS_INFO, MessageType.Tips));
-            var legacyBlendShapeIssues = general.AddMessageGroup(new MessageGroup(LEGACY_BLEND_SHAPE_ISSUES, LEGACY_BLEND_SHAPE_ISSUES_COMBINED, LEGACY_BLEND_SHAPE_ISSUES_INFO, MessageType.Warning));
-            var grabPassShaders = general.AddMessageGroup(new MessageGroup(MATERIAL_WITH_GRAB_PASS_SHADER, MATERIAL_WITH_GRAB_PASS_SHADER_COMBINED, Helper.BuildPlatform() == RuntimePlatform.WindowsPlayer ? MATERIAL_WITH_GRAB_PASS_SHADER_INFO_PC : MATERIAL_WITH_GRAB_PASS_SHADER_INFO_QUEST, Helper.BuildPlatform() == RuntimePlatform.Android ? MessageType.Error : MessageType.Info));
-            var disabledPortals = general.AddMessageGroup(new MessageGroup(DISABLED_PORTALS_WARNING, DISABLED_PORTALS_WARNING_COMBINED, DISABLED_PORTALS_WARNING_INFO, MessageType.Warning));
-            var materialWithNonWhitelistedShader = general.AddMessageGroup(new MessageGroup(MATERIAL_WITH_NON_WHITELISTED_SHADER, MATERIAL_WITH_NON_WHITELISTED_SHADER_COMBINED, MATERIAL_WITH_NON_WHITELISTED_SHADER_INFO, MessageType.Warning).SetCombinedSelectionDisabled(true));
-            var uiElementNavigation = general.AddMessageGroup(new MessageGroup(UI_ELEMENT_WITH_NAVIGATION_NOT_NONE, UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_COMBINED, UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_INFO, MessageType.Tips));
-
-            var allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
-            for (var i = 0; i < allGameObjects.Length; i++)
-            {
-                var gameObject = allGameObjects[i] as GameObject;
-
-                if (gameObject.hideFlags != HideFlags.None || EditorUtility.IsPersistent(gameObject.transform.root.gameObject))
-                    continue;
-
-                if (gameObject.GetComponent<Renderer>())
+                if (selectablesNotNone.Count > 1)
                 {
-                    var renderer = gameObject.GetComponent<Renderer>();
+                    uiElementNavigation.SetGroupAutoFix(SetSelectableNavigationMode(selectablesNotNone.ToArray(), Navigation.Mode.None));
+                }
 
-                    // If baked lighting in the scene check for lightmap uvs
-                    if (bakedLighting)
+                // If more than 10% of shaders used in scene are toon shaders to leave room for people using them for avatar displays
+                if (checkedMaterials.Count > 0)
+                {
+                    if (badShaders / checkedMaterials.Count * 100 > 10)
                     {
-                        if (GameObjectUtility.AreStaticEditorFlagsSet(gameObject, StaticEditorFlags.LightmapStatic) && gameObject.GetComponent<MeshRenderer>())
-                        {
-                            var meshFilter = gameObject.GetComponent<MeshFilter>();
-
-                            if (meshFilter == null)
-                            {
-                                continue;
-                            }
-
-                            var sharedMesh = meshFilter.sharedMesh;
-
-                            if (AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(sharedMesh)) != null)
-                            {
-                                var modelImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(sharedMesh)) as ModelImporter;
-
-                                if (!importers.Contains(modelImporter))
-                                {
-                                    if (modelImporter != null)
-                                    {
-                                        SerializedObject so = new SerializedObject(renderer);
-
-                                        if (!modelImporter.generateSecondaryUV && sharedMesh.uv2.Length == 0 && so.FindProperty("m_ScaleInLightmap").floatValue != 0)
-                                        {
-                                            importers.Add(modelImporter);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (gameObject.GetComponent<VRC_MirrorReflection>())
-                    {
-                        var mirrorMask = gameObject.GetComponent<VRC_MirrorReflection>().m_ReflectLayers;
-
-                        if (mirrorMask.value == -1025)
-                        {
-                            mirrorsDefaultLayers.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject));
-                        }
-                    }
-
-                    if (gameObject.GetComponent<SkinnedMeshRenderer>())
-                    {
-                        var mesh = gameObject.GetComponent<SkinnedMeshRenderer>().sharedMesh;
-
-                        if (AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(mesh)) != null)
-                        {
-                            var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(mesh)) as ModelImporter;
-
-                            if (importer != null)
-                            {
-                                if (mesh.blendShapeCount > 0 && importer.importBlendShapeNormals == ModelImporterNormals.Calculate && !ModelImporterUtil.GetLegacyBlendShapeNormals(importer))
-                                {
-                                    legacyBlendShapeIssues.AddSingleMessage(new SingleMessage(Path.GetFileName(AssetDatabase.GetAssetPath(mesh)), EditorUtility.FormatBytes(Profiler.GetRuntimeMemorySizeLong(mesh))).SetAssetPath(importer.assetPath).SetAutoFix(SetLegacyBlendShapeNormals(importer)));
-                                }
-                            }
-                        }
-                    }
-
-                    // Check materials for problems
-                    for (var l = 0; l < renderer.sharedMaterials.Length; l++)
-                    {
-                        var material = renderer.sharedMaterials[l];
-
-                        if (material == null || checkedMaterials.Contains(material))
-                            continue;
-
-                        checkedMaterials.Add(material);
-
-                        var shader = material.shader;
-
-                        if (Helper.BuildPlatform() is RuntimePlatform.Android && !VRCSDK2.Validation.WorldValidation.ShaderWhiteList.Contains(shader.name))
-                        {
-                            var singleMessage = new SingleMessage(material.name, shader.name);
-
-                            if (AssetDatabase.GetAssetPath(material).EndsWith(".mat"))
-                            {
-                                singleMessage.SetAssetPath(AssetDatabase.GetAssetPath(material));
-                            }
-                            else
-                            {
-                                singleMessage.SetSelectObject(gameObject);
-                            }
-
-                            materialWithNonWhitelistedShader.AddSingleMessage(singleMessage);
-                        }
-
-                        if (!checkedShaders.Contains(shader) && AssetDatabase.GetAssetPath(shader) != null)
-                        {
-                            var assetPath = AssetDatabase.GetAssetPath(shader);
-
-                            if (File.Exists(assetPath))
-                            {
-                                // Read shader file to string
-                                var word = File.ReadAllText(assetPath);
-
-                                // Strip comments
-                                word = Regex.Replace(word, "(\\/\\/.*)|(\\/\\*)(.*)(\\*\\/)", "");
-
-                                // Match for GrabPass
-                                if (Regex.IsMatch(word, "GrabPass\\s*{"))
-                                {
-                                    grabPassShaders.AddSingleMessage(new SingleMessage(material.name, shader.name).SetAssetPath(AssetDatabase.GetAssetPath(material)));
-                                }
-                            }
-
-                            checkedShaders.Add(shader);
-                        }
-
-                        if (shader.name == "Hidden/InternalErrorShader" && !missingShaders.Contains(material))
-                            missingShaders.Add(material);
-
-                        if (shader.name.StartsWith(".poiyomi") || shader.name.StartsWith("poiyomi") || shader.name.StartsWith("arktoon") || shader.name.StartsWith("Cubedparadox") || shader.name.StartsWith("Silent's Cel Shading") || shader.name.StartsWith("Xiexe"))
-                            badShaders++;
-
-                        for (var j = 0; j < ShaderUtil.GetPropertyCount(shader); j++)
-                        {
-                            if (ShaderUtil.GetPropertyType(shader, j) == ShaderUtil.ShaderPropertyType.TexEnv)
-                            {
-                                var texture = material.GetTexture(ShaderUtil.GetPropertyName(shader, j));
-
-                                if (AssetDatabase.GetAssetPath(texture) != "" && !unCrunchedTextures.Contains(texture))
-                                {
-                                    var textureImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(texture)) as TextureImporter;
-
-                                    if (textureImporter != null)
-                                    {
-                                        if (!unCrunchedTextures.Contains(texture))
-                                        {
-                                            textureCount++;
-                                        }
-
-                                        if (!textureImporter.crunchedCompression && !unCrunchedTextures.Contains(texture) && !textureImporter.textureCompression.Equals(TextureImporterCompression.Uncompressed) && EditorTextureUtil.GetStorageMemorySize(texture) > 500000)
-                                        {
-                                            unCrunchedTextures.Add(texture);
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        optimization.AddMessageGroup(new MessageGroup(NO_TOON_SHADERS, MessageType.Warning));
                     }
                 }
 
-                if (gameObject.GetComponent<Selectable>())
+                // Suggest to crunch textures if there are any uncrunched textures found
+                if (textureCount > 0)
                 {
-                    var selectable = gameObject.GetComponent<Selectable>();
-
-                    if (selectable.navigation.mode != Navigation.Mode.None)
+                    var percent = (int) ((float) unCrunchedTextures.Count / (float) textureCount * 100f);
+                    if (percent > 20)
                     {
-                        uiElementNavigation.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject).SetAutoFix(SetSelectableNavigationMode(selectable, Navigation.Mode.None)));
-
-                        selectablesNotNone.Add(selectable);
+                        optimization.AddMessageGroup(new MessageGroup(NON_CRUNCHED_TEXTURES, MessageType.Tips).AddSingleMessage(new SingleMessage(percent.ToString())));
                     }
                 }
 
-                if (gameObject.activeInHierarchy == false)
+                var modelsCount = importers.Count;
+                if (modelsCount > 0)
                 {
-                    if (gameObject.GetComponent<VRC_PortalMarker>())
+                    var noUVGroup = new MessageGroup(NO_LIGHTMAP_UV, NO_LIGHTMAP_UV_COMBINED, NO_LIGHTMAP_UV_INFO, MessageType.Warning);
+                    for (var i = 0; i < modelsCount; i++)
                     {
-                        disabledPortals.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject));
+                        var modelImporter = importers[i];
+
+                        noUVGroup.AddSingleMessage(new SingleMessage(Path.GetFileName(AssetDatabase.GetAssetPath(modelImporter))).SetAutoFix(SetGenerateLightmapUV(modelImporter)).SetAssetPath(modelImporter.assetPath));
                     }
+
+                    lighting.AddMessageGroup(noUVGroup.SetGroupAutoFix(SetGenerateLightmapUV(importers)).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/LightingGiUvs-GeneratingLightmappingUVs.html"));
+                }
+
+                var missingShadersCount = missingShaders.Count;
+                if (missingShadersCount > 0)
+                {
+                    var missingShadersGroup = new MessageGroup(MISSING_SHADER_WARNING, MISSING_SHADER_WARNING_COMBINED, MISSING_SHADER_WARNING_INFO, MessageType.Error);
+                    for (var i = 0; i < missingShaders.Count; i++)
+                    {
+                        missingShadersGroup.AddSingleMessage(new SingleMessage(missingShaders[i].name).SetAssetPath(AssetDatabase.GetAssetPath(missingShaders[i])).SetAutoFix(ChangeShader(missingShaders[i], "Standard")));
+                    }
+
+                    general.AddMessageGroup(missingShadersGroup.SetGroupAutoFix(ChangeShader(missingShaders.ToArray(), "Standard")));
                 }
             }
-
-            if (selectablesNotNone.Count > 1)
+            catch (Exception exception)
             {
-                uiElementNavigation.SetGroupAutoFix(SetSelectableNavigationMode(selectablesNotNone.ToArray(), Navigation.Mode.None));
-            }
-
-            // If more than 10% of shaders used in scene are toon shaders to leave room for people using them for avatar displays
-            if (checkedMaterials.Count > 0)
-            {
-                if (badShaders / checkedMaterials.Count * 100 > 10)
-                {
-                    optimization.AddMessageGroup(new MessageGroup(NO_TOON_SHADERS, MessageType.Warning));
-                }
-            }
-
-            // Suggest to crunch textures if there are any uncrunched textures found
-            if (textureCount > 0)
-            {
-                var percent = (int) ((float) unCrunchedTextures.Count / (float) textureCount * 100f);
-                if (percent > 20)
-                {
-                    optimization.AddMessageGroup(new MessageGroup(NON_CRUNCHED_TEXTURES, MessageType.Tips).AddSingleMessage(new SingleMessage(percent.ToString())));
-                }
-            }
-
-
-            var modelsCount = importers.Count;
-            if (modelsCount > 0)
-            {
-                var noUVGroup = new MessageGroup(NO_LIGHTMAP_UV, NO_LIGHTMAP_UV_COMBINED, NO_LIGHTMAP_UV_INFO, MessageType.Warning);
-                for (var i = 0; i < modelsCount; i++)
-                {
-                    var modelImporter = importers[i];
-
-                    noUVGroup.AddSingleMessage(new SingleMessage(Path.GetFileName(AssetDatabase.GetAssetPath(modelImporter))).SetAutoFix(SetGenerateLightmapUV(modelImporter)).SetAssetPath(modelImporter.assetPath));
-                }
-
-                lighting.AddMessageGroup(noUVGroup.SetGroupAutoFix(SetGenerateLightmapUV(importers)).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/LightingGiUvs-GeneratingLightmappingUVs.html"));
-            }
-
-            var missingShadersCount = missingShaders.Count;
-            if (missingShadersCount > 0)
-            {
-                var missingShadersGroup = new MessageGroup(MISSING_SHADER_WARNING, MISSING_SHADER_WARNING_COMBINED, MISSING_SHADER_WARNING_INFO, MessageType.Error);
-                for (var i = 0; i < missingShaders.Count; i++)
-                {
-                    missingShadersGroup.AddSingleMessage(new SingleMessage(missingShaders[i].name).SetAssetPath(AssetDatabase.GetAssetPath(missingShaders[i])).SetAutoFix(ChangeShader(missingShaders[i], "Standard")));
-                }
-
-                general.AddMessageGroup(missingShadersGroup.SetGroupAutoFix(ChangeShader(missingShaders.ToArray(), "Standard")));
+                general.AddMessageGroup(new MessageGroup(HEY_YOU_FOUND_A_BUG, MessageType.Error)).AddSingleMessage(new SingleMessage(exception.Message.Replace("\n", " ").Replace("\r", ""), Regex.Matches(exception.StackTrace, "(?<=\\.cs:).*(?<=\\S)")[0].ToString()));
+                Debug.LogError(exception);
+                autoRecheck = false;
             }
         }
 
         private void OnFocus()
         {
-            recheck = true;
+            if (!EditorApplication.isPlaying)
+            {
+                recheck = true;
+            }
+
+            RefreshBuild();
         }
 
         private const string LAST_BUILD = "Library/LastBuild.buildreport";
@@ -2393,6 +2708,9 @@ namespace VRWorldToolkit
 
         private void RefreshBuild()
         {
+#if VRWT_BENCHMARK
+            CheckTime.Restart();
+#endif
             if (!Directory.Exists(BUILD_REPORT_DIR))
                 Directory.CreateDirectory(BUILD_REPORT_DIR);
 
@@ -2436,7 +2754,7 @@ namespace VRWorldToolkit
                 buildReportQuest = (BuildReport) AssetDatabase.LoadAssetAtPath(QUEST_BUILD_REPORT_PATH, typeof(BuildReport));
             }
 
-            if (!m_TreeView.HasReport())
+            if (m_TreeView != null && !m_TreeView.HasReport())
             {
                 if (buildReportWindows != null)
                 {
@@ -2447,6 +2765,10 @@ namespace VRWorldToolkit
                     m_TreeView.SetReport(buildReportWindows);
                 }
             }
+#if VRWT_BENCHMARK
+            CheckTime.Stop();
+            Debug.Log($"Refreshed build reports in: {CheckTime.ElapsedMilliseconds} ms.");
+#endif
         }
 
         private static void DrawBuildSummary(BuildReport report)
@@ -2470,18 +2792,22 @@ namespace VRWorldToolkit
         }
 
         [NonSerialized] private bool initDone;
+        [NonSerialized] private bool buildReportInitDone;
 
-        [SerializeField] private MessageCategoryList masterList;
+        [SerializeField] private static MessageCategoryList masterList;
 
-        private MessageCategory general;
-        private MessageCategory optimization;
-        private MessageCategory lighting;
-        private MessageCategory postProcessing;
+        private static MessageCategory general;
+        private static MessageCategory optimization;
+        private static MessageCategory lighting;
+        private static MessageCategory postProcessing;
 
         private void InitWhenNeeded()
         {
             if (!initDone)
             {
+#if VRWT_BENCHMARK
+                CheckTime.Restart();
+#endif
                 if (masterList is null)
                     masterList = new MessageCategoryList();
 
@@ -2493,6 +2819,28 @@ namespace VRWorldToolkit
 
                 postProcessing = masterList.AddOrGetCategory("Post Processing");
 
+                if (buildReportWindows is null && File.Exists(WINDOWS_BUILD_REPORT_PATH))
+                {
+                    buildReportWindows = (BuildReport) AssetDatabase.LoadAssetAtPath(WINDOWS_BUILD_REPORT_PATH, typeof(BuildReport));
+                }
+
+                if (buildReportQuest is null && File.Exists(QUEST_BUILD_REPORT_PATH))
+                {
+                    buildReportQuest = (BuildReport) AssetDatabase.LoadAssetAtPath(QUEST_BUILD_REPORT_PATH, typeof(BuildReport));
+                }
+
+                initDone = true;
+#if VRWT_BENCHMARK
+                CheckTime.Stop();
+                Debug.Log($"Main initialization done in: {CheckTime.ElapsedMilliseconds} ms.");
+#endif
+            }
+
+            if (!buildReportInitDone && tab == 1)
+            {
+#if VRWT_BENCHMARK
+                CheckTime.Restart();
+#endif
                 var firstInit = m_MultiColumnHeaderState == null;
                 var headerState = BuildReportTreeView.CreateDefaultMultiColumnHeaderState(EditorGUIUtility.currentViewWidth - 121);
                 if (MultiColumnHeaderState.CanOverwriteSerializedFields(m_MultiColumnHeaderState, headerState))
@@ -2508,23 +2856,17 @@ namespace VRWorldToolkit
                     m_TreeViewState = new TreeViewState();
                 }
 
-                if (buildReportWindows is null && File.Exists(WINDOWS_BUILD_REPORT_PATH))
-                {
-                    buildReportWindows = (BuildReport) AssetDatabase.LoadAssetAtPath(WINDOWS_BUILD_REPORT_PATH, typeof(BuildReport));
-                }
-
-                if (buildReportQuest is null && File.Exists(QUEST_BUILD_REPORT_PATH))
-                {
-                    buildReportQuest = (BuildReport) AssetDatabase.LoadAssetAtPath(QUEST_BUILD_REPORT_PATH, typeof(BuildReport));
-                }
-
                 var report = buildReportWindows != null ? buildReportWindows : buildReportQuest;
 
                 m_TreeView = new BuildReportTreeView(m_TreeViewState, multiColumnHeader, report);
                 m_SearchField = new SearchField();
                 m_SearchField.downOrUpArrowKeyPressed += m_TreeView.SetFocusAndEnsureSelectedItem;
 
-                initDone = true;
+                buildReportInitDone = true;
+#if VRWT_BENCHMARK
+                CheckTime.Stop();
+                Debug.Log($"Build report initialization done in: {CheckTime.ElapsedMilliseconds} ms.");
+#endif
             }
         }
 
@@ -2534,28 +2876,29 @@ namespace VRWorldToolkit
         {
             if (recheck && autoRecheck)
             {
-                RefreshBuild();
-
-                // Check for bloat in occlusion cache
-                if (occlusionCacheFiles == 0 && Directory.Exists("Library/Occlusion/"))
+                if (tab == 0)
                 {
-                    Task.Run(CountOcclusionCacheFiles);
-                }
+                    // Check for bloat in occlusion cache
+                    if (occlusionCacheFiles == 0 && Directory.Exists("Library/Occlusion/"))
+                    {
+                        Task.Run(CountOcclusionCacheFiles);
+                    }
 
-                CheckTime.Restart();
-                CheckScene();
-                CheckTime.Stop();
+                    CheckTime.Restart();
+                    CheckScene();
+                    CheckTime.Stop();
 
-                if (CheckTime.ElapsedMilliseconds > 2000)
-                {
-                    autoRecheck = false;
-                }
+                    if (CheckTime.ElapsedMilliseconds >= 1000)
+                    {
+                        autoRecheck = false;
+                    }
 
 #if VRWT_BENCHMARK
-                Debug.Log("Scene checked in: " + CheckTime.ElapsedMilliseconds + " ms.");
+                    Debug.Log("Scene checked in: " + CheckTime.ElapsedMilliseconds + " ms.");
 #endif
 
-                recheck = false;
+                    recheck = false;
+                }
             }
         }
 
@@ -2607,101 +2950,123 @@ namespace VRWorldToolkit
             switch (tab)
             {
                 case 0:
-                    if (!autoRecheck && GUILayout.Button("Refresh"))
+                    if (EditorApplication.isPlaying)
                     {
-                        recheck = true;
-                        autoRecheck = true;
+                        GUILayout.FlexibleSpace();
+
+                        EditorGUILayout.LabelField("The editor is currently in play mode.", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
+                        EditorGUILayout.LabelField("Stop it to see the messages.", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
+
+                        GUILayout.FlexibleSpace();
+                    }
+                    else
+                    {
+                        if (!autoRecheck && GUILayout.Button("Refresh"))
+                        {
+                            recheck = true;
+                            autoRecheck = true;
+                        }
+
+                        masterList.DrawTabSelector();
+
+                        EditorGUILayout.BeginVertical();
+                        scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+
+                        masterList.DrawMessages();
+
+                        EditorGUILayout.EndScrollView();
+                        EditorGUILayout.EndVertical();
                     }
 
-                    masterList.DrawTabSelector();
-
-                    EditorGUILayout.BeginVertical();
-                    scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
-
-                    masterList.DrawMessages();
-
-                    EditorGUILayout.EndScrollView();
-                    EditorGUILayout.EndVertical();
                     break;
                 case 1:
-                    GUILayout.BeginVertical();
-
-                    GUILayout.BeginHorizontal(EditorStyles.toolbar);
-
-                    if (buildReportWindows != null && buildReportQuest != null)
+                    if (buildReportInitDone)
                     {
-                        EditorGUI.BeginChangeCheck();
+                        GUILayout.BeginVertical();
 
-                        selectedBuildReport = GUILayout.Toolbar(selectedBuildReport, buildReportToolbar, EditorStyles.toolbarButton);
+                        GUILayout.BeginHorizontal(EditorStyles.toolbar);
 
-                        if (EditorGUI.EndChangeCheck())
+                        if (buildReportWindows != null && buildReportQuest != null)
                         {
-                            switch ((BuildReportType) selectedBuildReport)
+                            EditorGUI.BeginChangeCheck();
+
+                            selectedBuildReport = GUILayout.Toolbar(selectedBuildReport, buildReportToolbar, EditorStyles.toolbarButton);
+
+                            if (EditorGUI.EndChangeCheck())
                             {
-                                case BuildReportType.Windows:
+                                switch ((BuildReportType) selectedBuildReport)
+                                {
+                                    case BuildReportType.Windows:
+                                        m_TreeView.SetReport(buildReportWindows);
+                                        break;
+                                    case BuildReportType.Quest:
+                                        m_TreeView.SetReport(buildReportQuest);
+                                        break;
+                                }
+                            }
+
+                            GUILayout.Space(10);
+                        }
+
+                        overallStatsFoldout = GUILayout.Toggle(overallStatsFoldout, "Stats", EditorStyles.toolbarButton);
+
+                        buildReportMessagesFoldout = GUILayout.Toggle(buildReportMessagesFoldout, "Messages", EditorStyles.toolbarButton);
+
+                        GUILayout.Space(10);
+
+                        if (GUILayout.Button("Refresh", EditorStyles.toolbarButton))
+                        {
+                            RefreshBuild();
+
+                            if (m_TreeView.HasReport())
+                            {
+                                m_TreeView.Reload();
+                            }
+                            else
+                            {
+                                if (buildReportWindows != null)
+                                {
                                     m_TreeView.SetReport(buildReportWindows);
-                                    break;
-                                case BuildReportType.Quest:
+                                }
+                                else if (buildReportQuest != null)
+                                {
                                     m_TreeView.SetReport(buildReportQuest);
-                                    break;
+                                }
                             }
                         }
 
-                        GUILayout.Space(10);
-                    }
+                        GUILayout.FlexibleSpace();
 
-                    overallStatsFoldout = GUILayout.Toggle(overallStatsFoldout, "Stats", EditorStyles.toolbarButton);
+                        m_TreeView.searchString = m_SearchField.OnToolbarGUI(m_TreeView.searchString);
 
-                    buildReportMessagesFoldout = GUILayout.Toggle(buildReportMessagesFoldout, "Messages", EditorStyles.toolbarButton);
+                        GUILayout.EndHorizontal();
 
-                    GUILayout.Space(10);
+                        GUILayout.EndVertical();
 
-                    if (GUILayout.Button("Refresh", EditorStyles.toolbarButton))
-                    {
-                        if (m_TreeView.HasReport())
+                        if (buildReportMessagesFoldout)
                         {
-                            m_TreeView.Reload();
+                            m_TreeView.DrawMessages();
                         }
                         else
                         {
-                            if (buildReportWindows != null)
+                            if (overallStatsFoldout)
                             {
-                                m_TreeView.SetReport(buildReportWindows);
+                                m_TreeView.DrawOverallStats();
                             }
-                            else if (buildReportQuest != null)
+
+                            var treeViewRect = EditorGUILayout.BeginVertical();
+
+                            if (m_TreeView.HasReport())
                             {
-                                m_TreeView.SetReport(buildReportQuest);
+                                m_TreeView.OnGUI(treeViewRect);
                             }
+
+                            GUILayout.FlexibleSpace();
+
+                            EditorGUILayout.EndVertical();
                         }
                     }
 
-                    GUILayout.FlexibleSpace();
-
-                    m_TreeView.searchString = m_SearchField.OnToolbarGUI(m_TreeView.searchString);
-                    GUILayout.EndHorizontal();
-
-                    GUILayout.EndVertical();
-
-                    if (buildReportMessagesFoldout)
-                    {
-                        m_TreeView.DrawMessages();
-                    }
-
-                    if (overallStatsFoldout)
-                    {
-                        m_TreeView.DrawOverallStats();
-                    }
-
-                    var treeViewRect = EditorGUILayout.BeginVertical();
-
-                    if (m_TreeView.HasReport())
-                    {
-                        m_TreeView.OnGUI(treeViewRect);
-                    }
-
-                    GUILayout.FlexibleSpace();
-
-                    EditorGUILayout.EndVertical();
                     break;
             }
         }

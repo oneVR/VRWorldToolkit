@@ -23,11 +23,11 @@ namespace VRWorldToolkit
             Extension,
         }
 
-        public BuildReportTreeView(TreeViewState state, MultiColumnHeader multicolumnHeader, BuildReport report) : base(state, multicolumnHeader)
+        public BuildReportTreeView(TreeViewState state, MultiColumnHeader multiColumnHeader, BuildReport report) : base(state, multiColumnHeader)
         {
             showBorder = true;
             showAlternatingRowBackgrounds = true;
-            multicolumnHeader.sortingChanged += OnSortingChanged;
+            multiColumnHeader.sortingChanged += OnSortingChanged;
 
             this.report = report;
 
@@ -56,21 +56,20 @@ namespace VRWorldToolkit
             }
         }
 
-        public class BuildReportItem : TreeViewItem
+        private sealed class BuildReportItem : TreeViewItem
         {
             public Texture previewIcon { get; set; }
             public string assetType { get; set; }
-            public string name { get; set; }
             public string path { get; set; }
             public string extension { get; set; }
             public int size { get; set; }
             public double percentage { get; set; }
 
-            public BuildReportItem(int id, Texture previewIcon, string type, string name, string path, string extension, int size, double percentage) : base(id)
+            public BuildReportItem(int id, int depth, Texture previewIcon, string assetType, string displayName, string path, string extension, int size, double percentage) : base(id, depth, displayName)
             {
                 this.previewIcon = previewIcon;
-                this.assetType = type;
-                this.name = name;
+                this.assetType = assetType;
+                this.displayName = displayName;
                 this.path = path;
                 this.extension = extension;
                 this.size = size;
@@ -88,9 +87,7 @@ namespace VRWorldToolkit
 
             var appendices = serializedReport.FindProperty("m_Appendices");
 
-            var summary = serializedReport.FindProperty("m_Summary");
-
-            for (int i = 0; i < appendices.arraySize; i++)
+            for (var i = 0; i < appendices.arraySize; i++)
             {
                 var appendix = appendices.GetArrayElementAtIndex(i);
 
@@ -100,11 +97,9 @@ namespace VRWorldToolkit
 
                 if (serializedAppendix.FindProperty("m_ShortPath") is null) continue;
 
-                int size = serializedAppendix.FindProperty("m_Overhead").intValue;
-
                 var contents = serializedAppendix.FindProperty("m_Contents");
 
-                for (int j = 0; j < contents.arraySize; j++)
+                for (var j = 0; j < contents.arraySize; j++)
                 {
                     var entry = contents.GetArrayElementAtIndex(j);
 
@@ -138,33 +133,33 @@ namespace VRWorldToolkit
                 .OrderByDescending(x => x.size)
                 .ToList();
 
-            var totalSize = results.Sum(x => x.size);
+            var totalSize = results.Sum(x => (long) x.size);
 
-            for (int i = 0; i < results.Count; i++)
+            for (var i = 0; i < results.Count; i++)
             {
                 results[i].percentage = (double) results[i].size / totalSize;
             }
 
-            for (int i = 0; i < results.Count; i++)
+            for (var i = 0; i < results.Count; i++)
             {
                 var asset = results[i];
 
-                root.AddChild(new BuildReportItem(i, AssetDatabase.GetCachedIcon(asset.fullPath), asset.assetType, asset.fullPath == "" ? "Unknown" : Path.GetFileName(asset.fullPath), asset.fullPath, Path.GetExtension(asset.fullPath), asset.size, asset.percentage));
+                root.AddChild(new BuildReportItem(i, 0, AssetDatabase.GetCachedIcon(asset.fullPath), asset.assetType, asset.fullPath == "" ? "Unknown" : Path.GetFileName(asset.fullPath), asset.fullPath, Path.GetExtension(asset.fullPath), asset.size, asset.percentage));
             }
 
             return root;
         }
 
         /// <summary>
-        /// Set new report for treeview
+        /// Set new report for TreeView
         /// </summary>
-        /// <param name="report">New report to set</param>
-        public void SetReport(BuildReport report)
+        /// <param name="newReport">New report to set</param>
+        public void SetReport(BuildReport newReport)
         {
             // Set new report
-            this.report = report;
+            report = newReport;
 
-            // Reload the treeview
+            // Reload the TreeView
             if (HasReport())
             {
                 base.Reload();
@@ -172,7 +167,7 @@ namespace VRWorldToolkit
         }
 
         /// <summary>
-        /// Check if treeview has build report and make sure the build wasn't failed
+        /// Check if TreeView has build report and make sure the build wasn't failed
         /// </summary>
         /// <returns>If build is set and the build succeeded</returns>
         public bool HasReport()
@@ -248,10 +243,15 @@ namespace VRWorldToolkit
             }
         }
 
+        private Vector2 scrollPosMessages;
+
         public void DrawMessages()
         {
             if (HasMessages())
             {
+                EditorGUILayout.BeginVertical();
+                scrollPosMessages = EditorGUILayout.BeginScrollView(scrollPosMessages);
+
                 var steps = report.steps;
 
                 for (var i = 0; i < steps.Length; i++)
@@ -260,7 +260,7 @@ namespace VRWorldToolkit
 
                     if (step.messages.Length > 0)
                     {
-                        GUILayout.Label(step.name, EditorStyles.boldLabel);
+                        GUILayout.Label(step.name, Styles.BoldWrap);
 
                         for (var j = 0; j < step.messages.Length; j++)
                         {
@@ -286,6 +286,9 @@ namespace VRWorldToolkit
                         EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
                     }
                 }
+
+                EditorGUILayout.EndScrollView();
+                EditorGUILayout.EndVertical();
             }
             else
             {
@@ -391,7 +394,7 @@ namespace VRWorldToolkit
                         }
                         else
                         {
-                            EditorGUI.LabelField(rect, buildReportItem.name, labelStyle);
+                            EditorGUI.LabelField(rect, buildReportItem.displayName, labelStyle);
                         }
 
                         break;
@@ -411,7 +414,7 @@ namespace VRWorldToolkit
         }
 
         /// <summary>
-        /// Handle double clicks inside the treeview
+        /// Handle double clicks inside the TreeView
         /// </summary>
         /// <param name="id"></param>
         protected override void DoubleClickedItem(int id)
@@ -426,9 +429,9 @@ namespace VRWorldToolkit
         }
 
         /// <summary>
-        /// Handle context clicks inside the treeview
+        /// Handle context clicks inside the TreeView
         /// </summary>
-        /// <param name="id">ID of the clicked treeview item</param>
+        /// <param name="id">ID of the clicked TreeView item</param>
         protected override void ContextClickedItem(int id)
         {
             base.ContextClickedItem(id);
@@ -439,10 +442,10 @@ namespace VRWorldToolkit
             //base.SetSelection(new IList<int>());
 
             // Create new
-            GenericMenu menu = new GenericMenu();
+            var menu = new GenericMenu();
 
             // Create the menu items
-            menu.AddItem(new GUIContent("Copy Name"), false, ReplaceClipboard, clickedItem.name + clickedItem.extension);
+            menu.AddItem(new GUIContent("Copy Name"), false, ReplaceClipboard, clickedItem.displayName + clickedItem.extension);
             menu.AddItem(new GUIContent("Copy Path"), false, ReplaceClipboard, clickedItem.path);
 
             // Show the menu
@@ -460,28 +463,25 @@ namespace VRWorldToolkit
         /// </summary>
         /// <param name="item">Item to match</param>
         /// <param name="search">Search string</param>
-        /// <returns></returns>
+        /// <returns>Returns true if the search term matches name or asset type</returns>
         protected override bool DoesItemMatchSearch(TreeViewItem item, string search)
         {
-            // Cast match item for parameter acess
+            // Cast match item for parameter access
             var textureTreeViewItem = (BuildReportItem) item;
 
             // Try to match the search string to item name or asset type and return true if it does
-            if (textureTreeViewItem.name.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0 ||
-                textureTreeViewItem.assetType.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0) return true;
-
-            // Return false if the search string doesn't match
-            return false;
+            return textureTreeViewItem.displayName.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   textureTreeViewItem.assetType.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         /// <summary>
-        /// Handle treeview columns sorting changes
+        /// Handle TreeView columns sorting changes
         /// </summary>
         private void OnSortingChanged(MultiColumnHeader multiColumnHeader)
         {
             if (!(multiColumnHeader.sortedColumnIndex > -1)) return;
 
-            // Get treeview items
+            // Get TreeView items
             var items = rootItem.children.Cast<BuildReportItem>();
 
             // Sort items by sorted column
@@ -492,7 +492,7 @@ namespace VRWorldToolkit
                     items = items.OrderBy(x => x.size);
                     break;
                 case 3:
-                    items = items.OrderBy(x => x.name);
+                    items = items.OrderBy(x => x.displayName);
                     break;
                 case 4:
                     items = items.OrderBy(x => x.extension);

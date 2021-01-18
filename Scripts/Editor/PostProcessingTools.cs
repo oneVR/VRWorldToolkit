@@ -7,7 +7,6 @@ using UnityEngine.Rendering.PostProcessing;
 #endif
 #if VRC_SDK_VRCSDK3
 using VRC.SDKBase;
-using System.Reflection;
 #endif
 #if VRC_SDK_VRCSDK2
 using VRCSDK2;
@@ -18,7 +17,23 @@ namespace VRWorldToolkit
 {
     public class PostProcessingTools : MonoBehaviour
     {
-        [MenuItem("VRWorld Toolkit/Post Processing/Setup Post Processing", false, -102)]
+        [MenuItem("VRWorld Toolkit/Post Processing/Import Post Processing", false, 1)]
+        private static void PostProcessingInstall()
+        {
+            Helper.ImportPackage("com.unity.postprocessing@2.3.0");
+        }
+
+        [MenuItem("VRWorld Toolkit/Post Processing/Import Post Processing", true)]
+        private static bool PostProcessingInstallValidation()
+        {
+#if UNITY_POST_PROCESSING_STACK_V2
+            return false;
+#else
+            return true;
+#endif
+        }
+
+        [MenuItem("VRWorld Toolkit/Post Processing/Setup Post Processing", false, 12)]
         private static void PostProcessingSetup()
         {
 #if UNITY_POST_PROCESSING_STACK_V2
@@ -57,29 +72,13 @@ namespace VRWorldToolkit
         private static bool PostProcessingSetupValidation()
         {
 #if UNITY_POST_PROCESSING_STACK_V2
-            return true;
+            return !(Helper.BuildPlatform() is RuntimePlatform.Android);
 #else
             return false;
 #endif
         }
 
-        [MenuItem("VRWorld Toolkit/Post Processing/Import Post Processing", false, -101)]
-        private static void PostProcessingInstall()
-        {
-            Helper.ImportPackage("com.unity.postprocessing");
-        }
-
-        [MenuItem("VRWorld Toolkit/Post Processing/Import Post Processing", true)]
-        private static bool PostProcessingInstallValidation()
-        {
-#if UNITY_POST_PROCESSING_STACK_V2
-            return false;
-#else
-            return true;
-#endif
-        }
-
-        [MenuItem("VRWorld Toolkit/Post Processing/Post Processing Guide", false, -100)]
+        [MenuItem("VRWorld Toolkit/Post Processing/Post Processing Guide", false, 13)]
         private static void PostProcessingGuide()
         {
             Application.OpenURL("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Post-Processing");
@@ -136,6 +135,9 @@ namespace VRWorldToolkit
 
                 if (camera != null)
                 {
+                    descriptors[0].ReferenceCamera = camera;
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(descriptors[0]);
+
                     SetupPostProcessingGenerics(camera);
                 }
             }
