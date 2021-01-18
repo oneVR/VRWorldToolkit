@@ -1503,9 +1503,25 @@ namespace VRWorldToolkit
         {
             occlusionCacheFiles = Directory.EnumerateFiles("Library/Occlusion/").Count();
 
+            OcclusionMessageCheck();
+        }
+
+        private static void OcclusionMessageCheck()
+        {
             if (occlusionCacheFiles > 0)
             {
-                recheck = true;
+                // Set the message type depending on how many files found
+                var cacheWarningType = MessageType.Info;
+                if (occlusionCacheFiles > 50000)
+                {
+                    cacheWarningType = MessageType.Error;
+                }
+                else if (occlusionCacheFiles > 5000)
+                {
+                    cacheWarningType = MessageType.Warning;
+                }
+
+                optimization.AddMessageGroup(new MessageGroup(OCCLUSION_CULLING_CACHE_WARNING, cacheWarningType).AddSingleMessage(new SingleMessage(occlusionCacheFiles.ToString()).SetAutoFix(ClearOcclusionCache(occlusionCacheFiles))));
             }
         }
 
@@ -1808,21 +1824,7 @@ namespace VRWorldToolkit
                     optimization.AddMessageGroup(new MessageGroup(NO_OCCLUSION_CULLING, MessageType.Tips).SetDocumentation("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Occlusion-Culling"));
                 }
 
-                if (occlusionCacheFiles > 0)
-                {
-                    // Set the message type depending on how many files found
-                    var cacheWarningType = MessageType.Info;
-                    if (occlusionCacheFiles > 50000)
-                    {
-                        cacheWarningType = MessageType.Error;
-                    }
-                    else if (occlusionCacheFiles > 5000)
-                    {
-                        cacheWarningType = MessageType.Warning;
-                    }
-
-                    optimization.AddMessageGroup(new MessageGroup(OCCLUSION_CULLING_CACHE_WARNING, cacheWarningType).AddSingleMessage(new SingleMessage(occlusionCacheFiles.ToString()).SetAutoFix(ClearOcclusionCache(occlusionCacheFiles))));
-                }
+                OcclusionMessageCheck();
 
                 // Check for possible camera problems
                 var cameras = FindObjectsOfType<Camera>();
@@ -2680,6 +2682,7 @@ namespace VRWorldToolkit
         private void OnFocus()
         {
             recheck = true;
+            RefreshBuild();
         }
 
         private const string LAST_BUILD = "Library/LastBuild.buildreport";
@@ -2701,6 +2704,9 @@ namespace VRWorldToolkit
 
         private void RefreshBuild()
         {
+#if VRWT_BENCHMARK
+            CheckTime.Restart();
+#endif
             if (!Directory.Exists(BUILD_REPORT_DIR))
                 Directory.CreateDirectory(BUILD_REPORT_DIR);
 
@@ -2744,7 +2750,7 @@ namespace VRWorldToolkit
                 buildReportQuest = (BuildReport) AssetDatabase.LoadAssetAtPath(QUEST_BUILD_REPORT_PATH, typeof(BuildReport));
             }
 
-            if (!m_TreeView.HasReport())
+            if (m_TreeView != null && !m_TreeView.HasReport())
             {
                 if (buildReportWindows != null)
                 {
@@ -2755,6 +2761,10 @@ namespace VRWorldToolkit
                     m_TreeView.SetReport(buildReportWindows);
                 }
             }
+#if VRWT_BENCHMARK
+            CheckTime.Stop();
+            Debug.Log($"Refreshed build reports in: {CheckTime.ElapsedMilliseconds} ms.");
+#endif
         }
 
         private static void DrawBuildSummary(BuildReport report)
@@ -2778,18 +2788,22 @@ namespace VRWorldToolkit
         }
 
         [NonSerialized] private bool initDone;
+        [NonSerialized] private bool buildReportInitDone;
 
-        [SerializeField] private MessageCategoryList masterList;
+        [SerializeField] private static MessageCategoryList masterList;
 
-        private MessageCategory general;
-        private MessageCategory optimization;
-        private MessageCategory lighting;
-        private MessageCategory postProcessing;
+        private static MessageCategory general;
+        private static MessageCategory optimization;
+        private static MessageCategory lighting;
+        private static MessageCategory postProcessing;
 
         private void InitWhenNeeded()
         {
             if (!initDone)
             {
+#if VRWT_BENCHMARK
+                CheckTime.Restart();
+#endif
                 if (masterList is null)
                     masterList = new MessageCategoryList();
 
@@ -2801,6 +2815,28 @@ namespace VRWorldToolkit
 
                 postProcessing = masterList.AddOrGetCategory("Post Processing");
 
+                if (buildReportWindows is null && File.Exists(WINDOWS_BUILD_REPORT_PATH))
+                {
+                    buildReportWindows = (BuildReport) AssetDatabase.LoadAssetAtPath(WINDOWS_BUILD_REPORT_PATH, typeof(BuildReport));
+                }
+
+                if (buildReportQuest is null && File.Exists(QUEST_BUILD_REPORT_PATH))
+                {
+                    buildReportQuest = (BuildReport) AssetDatabase.LoadAssetAtPath(QUEST_BUILD_REPORT_PATH, typeof(BuildReport));
+                }
+
+                initDone = true;
+#if VRWT_BENCHMARK
+                CheckTime.Stop();
+                Debug.Log($"Main initialization done in: {CheckTime.ElapsedMilliseconds} ms.");
+#endif
+            }
+
+            if (!buildReportInitDone && tab == 1)
+            {
+#if VRWT_BENCHMARK
+                CheckTime.Restart();
+#endif
                 var firstInit = m_MultiColumnHeaderState == null;
                 var headerState = BuildReportTreeView.CreateDefaultMultiColumnHeaderState(EditorGUIUtility.currentViewWidth - 121);
                 if (MultiColumnHeaderState.CanOverwriteSerializedFields(m_MultiColumnHeaderState, headerState))
@@ -2816,23 +2852,17 @@ namespace VRWorldToolkit
                     m_TreeViewState = new TreeViewState();
                 }
 
-                if (buildReportWindows is null && File.Exists(WINDOWS_BUILD_REPORT_PATH))
-                {
-                    buildReportWindows = (BuildReport) AssetDatabase.LoadAssetAtPath(WINDOWS_BUILD_REPORT_PATH, typeof(BuildReport));
-                }
-
-                if (buildReportQuest is null && File.Exists(QUEST_BUILD_REPORT_PATH))
-                {
-                    buildReportQuest = (BuildReport) AssetDatabase.LoadAssetAtPath(QUEST_BUILD_REPORT_PATH, typeof(BuildReport));
-                }
-
                 var report = buildReportWindows != null ? buildReportWindows : buildReportQuest;
 
                 m_TreeView = new BuildReportTreeView(m_TreeViewState, multiColumnHeader, report);
                 m_SearchField = new SearchField();
                 m_SearchField.downOrUpArrowKeyPressed += m_TreeView.SetFocusAndEnsureSelectedItem;
 
-                initDone = true;
+                buildReportInitDone = true;
+#if VRWT_BENCHMARK
+                CheckTime.Stop();
+                Debug.Log($"Build report initialization done in: {CheckTime.ElapsedMilliseconds} ms.");
+#endif
             }
         }
 
@@ -2842,28 +2872,29 @@ namespace VRWorldToolkit
         {
             if (recheck && autoRecheck)
             {
-                RefreshBuild();
-
-                // Check for bloat in occlusion cache
-                if (occlusionCacheFiles == 0 && Directory.Exists("Library/Occlusion/"))
+                if (tab == 0)
                 {
-                    Task.Run(CountOcclusionCacheFiles);
-                }
+                    // Check for bloat in occlusion cache
+                    if (occlusionCacheFiles == 0 && Directory.Exists("Library/Occlusion/"))
+                    {
+                        Task.Run(CountOcclusionCacheFiles);
+                    }
 
-                CheckTime.Restart();
-                CheckScene();
-                CheckTime.Stop();
+                    CheckTime.Restart();
+                    CheckScene();
+                    CheckTime.Stop();
 
-                if (CheckTime.ElapsedMilliseconds >= 1000)
-                {
-                    autoRecheck = false;
-                }
+                    if (CheckTime.ElapsedMilliseconds >= 1000)
+                    {
+                        autoRecheck = false;
+                    }
 
 #if VRWT_BENCHMARK
-                Debug.Log("Scene checked in: " + CheckTime.ElapsedMilliseconds + " ms.");
+                    Debug.Log("Scene checked in: " + CheckTime.ElapsedMilliseconds + " ms.");
 #endif
 
-                recheck = false;
+                    recheck = false;
+                }
             }
         }
 
@@ -2932,86 +2963,91 @@ namespace VRWorldToolkit
                     EditorGUILayout.EndVertical();
                     break;
                 case 1:
-                    GUILayout.BeginVertical();
-
-                    GUILayout.BeginHorizontal(EditorStyles.toolbar);
-
-                    if (buildReportWindows != null && buildReportQuest != null)
+                    if (buildReportInitDone)
                     {
-                        EditorGUI.BeginChangeCheck();
+                        GUILayout.BeginVertical();
 
-                        selectedBuildReport = GUILayout.Toolbar(selectedBuildReport, buildReportToolbar, EditorStyles.toolbarButton);
+                        GUILayout.BeginHorizontal(EditorStyles.toolbar);
 
-                        if (EditorGUI.EndChangeCheck())
+                        if (buildReportWindows != null && buildReportQuest != null)
                         {
-                            switch ((BuildReportType) selectedBuildReport)
+                            EditorGUI.BeginChangeCheck();
+
+                            selectedBuildReport = GUILayout.Toolbar(selectedBuildReport, buildReportToolbar, EditorStyles.toolbarButton);
+
+                            if (EditorGUI.EndChangeCheck())
                             {
-                                case BuildReportType.Windows:
-                                    m_TreeView.SetReport(buildReportWindows);
-                                    break;
-                                case BuildReportType.Quest:
-                                    m_TreeView.SetReport(buildReportQuest);
-                                    break;
+                                switch ((BuildReportType) selectedBuildReport)
+                                {
+                                    case BuildReportType.Windows:
+                                        m_TreeView.SetReport(buildReportWindows);
+                                        break;
+                                    case BuildReportType.Quest:
+                                        m_TreeView.SetReport(buildReportQuest);
+                                        break;
+                                }
                             }
+
+                            GUILayout.Space(10);
                         }
+
+                        overallStatsFoldout = GUILayout.Toggle(overallStatsFoldout, "Stats", EditorStyles.toolbarButton);
+
+                        buildReportMessagesFoldout = GUILayout.Toggle(buildReportMessagesFoldout, "Messages", EditorStyles.toolbarButton);
 
                         GUILayout.Space(10);
-                    }
 
-                    overallStatsFoldout = GUILayout.Toggle(overallStatsFoldout, "Stats", EditorStyles.toolbarButton);
-
-                    buildReportMessagesFoldout = GUILayout.Toggle(buildReportMessagesFoldout, "Messages", EditorStyles.toolbarButton);
-
-                    GUILayout.Space(10);
-
-                    if (GUILayout.Button("Refresh", EditorStyles.toolbarButton))
-                    {
-                        if (m_TreeView.HasReport())
+                        if (GUILayout.Button("Refresh", EditorStyles.toolbarButton))
                         {
-                            m_TreeView.Reload();
-                        }
-                        else
-                        {
-                            if (buildReportWindows != null)
+                            RefreshBuild();
+
+                            if (m_TreeView.HasReport())
                             {
-                                m_TreeView.SetReport(buildReportWindows);
+                                m_TreeView.Reload();
                             }
-                            else if (buildReportQuest != null)
+                            else
                             {
-                                m_TreeView.SetReport(buildReportQuest);
+                                if (buildReportWindows != null)
+                                {
+                                    m_TreeView.SetReport(buildReportWindows);
+                                }
+                                else if (buildReportQuest != null)
+                                {
+                                    m_TreeView.SetReport(buildReportQuest);
+                                }
                             }
-                        }
-                    }
-
-                    GUILayout.FlexibleSpace();
-
-                    m_TreeView.searchString = m_SearchField.OnToolbarGUI(m_TreeView.searchString);
-
-                    GUILayout.EndHorizontal();
-
-                    GUILayout.EndVertical();
-
-                    if (buildReportMessagesFoldout)
-                    {
-                        m_TreeView.DrawMessages();
-                    }
-                    else
-                    {
-                        if (overallStatsFoldout)
-                        {
-                            m_TreeView.DrawOverallStats();
-                        }
-
-                        var treeViewRect = EditorGUILayout.BeginVertical();
-
-                        if (m_TreeView.HasReport())
-                        {
-                            m_TreeView.OnGUI(treeViewRect);
                         }
 
                         GUILayout.FlexibleSpace();
 
-                        EditorGUILayout.EndVertical();
+                        m_TreeView.searchString = m_SearchField.OnToolbarGUI(m_TreeView.searchString);
+
+                        GUILayout.EndHorizontal();
+
+                        GUILayout.EndVertical();
+
+                        if (buildReportMessagesFoldout)
+                        {
+                            m_TreeView.DrawMessages();
+                        }
+                        else
+                        {
+                            if (overallStatsFoldout)
+                            {
+                                m_TreeView.DrawOverallStats();
+                            }
+
+                            var treeViewRect = EditorGUILayout.BeginVertical();
+
+                            if (m_TreeView.HasReport())
+                            {
+                                m_TreeView.OnGUI(treeViewRect);
+                            }
+
+                            GUILayout.FlexibleSpace();
+
+                            EditorGUILayout.EndVertical();
+                        }
                     }
 
                     break;
