@@ -1388,7 +1388,7 @@ namespace VRWorldToolkit
 
         private const string REFLECTION_PROBE_COUNT_TEXT = "The current scene has {0} reflection probes.";
 
-        private const string POST_PROCESSING_IMPORTED_BUT_NOT_SETUP = "The current project has post-processing imported, but you have not set it up yet.";
+        private const string POST_PROCESSING_IMPORTED_BUT_NOT_SETUP = "The current project has Post Processing imported, but you have not set it up yet.";
 
         private const string POST_PROCESSING_DISABLED_IN_SCENE_VIEW = "Post-processing is disabled in the scene view. You will not be able to preview any post-processing effects without enabling it first.";
 
