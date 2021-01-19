@@ -817,7 +817,7 @@ namespace VRWorldToolkit
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Change tag?", "This operation will change the layer of " + obj.name + " to " + layer + ".\n\nDo you want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Change layer?", "This operation will change the layer of " + obj.name + " to " + layer + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     Undo.RegisterCompleteObjectUndo(obj, "Layer Change");
                     obj.layer = LayerMask.NameToLayer(layer);
@@ -951,7 +951,7 @@ namespace VRWorldToolkit
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Change tag?", "This operation will change the Tag of " + obj.name + " to " + tag + ".\n\nDo you want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Change tag?", "This operation will change the tag of " + obj.name + " to " + tag + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
                     Undo.RegisterCompleteObjectUndo(obj, "Change Tag");
                     obj.tag = tag;
@@ -1266,13 +1266,13 @@ namespace VRWorldToolkit
 
         private const string TOO_MANY_SCENE_DESCRIPTORS = "Multiple Scene Descriptors were found. Only one scene descriptor can exist in a single scene.";
 
-        private const string TOO_MANY_PIPELINE_MANAGERS = "The current scene has multiple Pipeline Managers in it. This can break the world upload process and cause you not to be able to load into the world.";
+        private const string TOO_MANY_PIPELINE_MANAGERS = "The current scene has multiple Pipeline Managers in it. This can break the world upload process and prevent you from being able to load into the world.";
 
         private const string WORLD_DESCRIPTOR_FAR = "Scene Descriptor is {0} units far from the zero point in Unity. Having your world center out this far will cause some noticeable jittering on models. You should move your world closer to the zero point of your scene.";
 
         private const string WORLD_DESCRIPTOR_OFF = "Scene Descriptor is {0} units far from the zero point in Unity. It is usually good practice to keep it as close as possible to the absolute zero point to avoid floating-point errors.";
 
-        private const string IMPROPERLY_SETUP_VRC_PROJECT_SETTINGS = "Improperly setup VRCProjectSettings detected, this will cause the Control Panel Builder tab to appear empty.";
+        private const string IMPROPERLY_SETUP_VRC_PROJECT_SETTINGS = "Improperly setup VRCProjectSettings detected. This will cause the Control Panel Builder tab to appear empty.";
 
         private const string VRC_PROJECT_SETTINGS_MISSING = "VRCProjectSettings not found. The SDK needs it, and missing it will cause the SDK to error out. To fix the problem, reimport the SDK.";
 
@@ -1282,11 +1282,11 @@ namespace VRWorldToolkit
 
         private const string NULL_SPAWN_POINT = "Null spawn point set Scene Descriptor. Spawning into a null spawn point will cause you to get thrown back to your homeworld.";
 
-        private const string REFERENCE_CAMERA_CLEAR_FLAGS_NOT_SKYBOX = "Current reference cameras clear flags is not set to Skybox this can cause rendering problems in game.";
+        private const string REFERENCE_CAMERA_CLEAR_FLAGS_NOT_SKYBOX = "The current reference camera's clear flags are not set to Skybox. This can cause rendering problems in-game.";
 
-        private const string REFERENCE_CAMERA_CLIPPING_PLANE_RATIO = "Too high of a ratio between reference cameras near ({0}) and far ({1}) clip values can cause rendering issues in-game.";
+        private const string REFERENCE_CAMERA_CLIPPING_PLANE_RATIO = "Too high of a ratio between reference camera's near ({0}) and far ({1}) clip values can cause rendering issues in-game.";
 
-        private const string REFERENCE_CAMERA_NEAR_CLIP_PLANE_OVER = "The current reference camera near clip value is {0}. This value gets clamped to be between 0.01 and 0.05.";
+        private const string REFERENCE_CAMERA_NEAR_CLIP_PLANE_OVER = "The current reference camera's near clip value is {0}. This value gets clamped to be between 0.01 and 0.05.";
 
         private const string NO_REFERENCE_CAMERA_SET_GENERAL = "No reference camera set in the Scene Descriptor. Using a reference camera allows the world's rendering distance to be changed by changing the camera's near and far clipping planes.";
 
@@ -1296,7 +1296,7 @@ namespace VRWorldToolkit
 
         private const string SPAWN_UNDER_RESPAWN_HEIGHT = "Spawn point \"{0}\" is placed {1} units under the Respawn Height set in Scene Descriptor.";
         private const string SPAWN_UNDER_RESPAWN_HEIGHT_COMBINED = "Found {0} spawn points under Respawn Height set in Scene Descriptor.";
-        private const string SPAWN_UNDER_RESPAWN_HEIGHT_INFO = "Spawning under the Respawn Height causes you to get stuck while respawning infinitely.";
+        private const string SPAWN_UNDER_RESPAWN_HEIGHT_INFO = "Spawning under the Respawn Height causes players to get stuck while respawning infinitely.";
 
         private const string NO_COLLIDER_UNDER_SPAWN = "Spawn point \"{0}\" does not have a collider under it.";
         private const string NO_COLLIDER_UNDER_SPAWN_COMBINED = "Found {0} spawn points with no collider under them.";
@@ -1325,13 +1325,13 @@ namespace VRWorldToolkit
 
         private const string BAKED_OCCLUSION_CULLING = "Baked Occlusion Culling found.";
 
-        private const string NO_OCCLUSION_AREAS = "No occlusion areas were found. Occlusion Areas are recommended to help generate higher precision data where the camera is likely to be. If no set, the area is created automatically containing all Occluders and Occludees.";
+        private const string NO_OCCLUSION_AREAS = "No occlusion areas were found. Occlusion Areas are recommended to help generate higher precision data where the camera is likely to be. If none exist, an area is created automatically containing all Occluders and Occludees.";
 
         private const string DISABLED_OCCLUSION_AREA = "Occlusion Area {0} found with Is View Volume disabled.";
         private const string DISABLED_OCCLUSION_AREA_COMBINED = "Occlusion Areas found with Is View Volume disabled.";
         private const string DISABLED_OCCLUSION_AREA_INFO = "Without this enabled, the Occlusion Area does not get used for the occlusion bake.";
 
-        private const string NO_OCCLUSION_CULLING = "The current scene does not have baked Occlusion Culling. Occlusion culling gives a lot more performance for the world, especially in more massive worlds with multiple rooms or areas.";
+        private const string NO_OCCLUSION_CULLING = "The current scene does not have baked Occlusion Culling. Occlusion culling often gives a large performance boost, especially in larger worlds with multiple rooms or areas.";
 
         private const string OCCLUSION_CULLING_CACHE_WARNING = "The current project's occlusion culling cache has {0} files. When the occlusion culling cache grows too big, baking occlusion culling can take much longer than intended. It can be cleared with no adverse effects.";
 
@@ -1353,9 +1353,9 @@ namespace VRWorldToolkit
 
         private const string CUSTOM_ENVIRONMENT_REFLECTIONS_NULL = "The current scenes Environment Reflections have been set to custom, but a custom cubemap has not been defined.";
 
-        private const string NO_LIGHTMAP_UV = "The model found in the scene \"{0}\" is set to be lightmapped but does not have Lightmap UVs.";
+        private const string NO_LIGHTMAP_UV = "The model found in the scene \"{0}\" is set to be lightmapped, but does not have Lightmap UVs.";
         private const string NO_LIGHTMAP_UV_COMBINED = "The current scene has {0} models set to be lightmapped that do not have Lightmap UVs.";
-        private const string NO_LIGHTMAP_UV_INFO = "This can cause issues when baking lighting if the main UV is not suitable for lightmapping. You can enable generating Lightmap UV's in the model's import settings.";
+        private const string NO_LIGHTMAP_UV_INFO = "This can cause issues when baking lighting if the main UV is not suitable for lightmapping. You can enable generating Lightmap UVs in the model's import settings.";
 
         private const string LIGHTS_NOT_BAKED = "The current scene is using realtime lighting. Consider baked lighting for improved performance.";
 
@@ -1369,7 +1369,7 @@ namespace VRWorldToolkit
 
         private const string LIGHTING_DATA_ASSET_INFO = "The current scene's lighting data asset takes up {0} MB of the world's size. This contains the scene's light probe data and realtime GI data.";
 
-        private const string NO_LIGHT_PROBES = "No light probes found in the current scene. Without baked light probes baked lights are not able to affect dynamic objects such as players and pickups.";
+        private const string NO_LIGHT_PROBES = "No light probes found in the current scene. Without light probes, baked lights are not able to affect dynamic objects such as players and pickups.";
 
         private const string LIGHT_PROBE_COUNT_NOT_BAKED = "The current scene contains {0} light probes, but {1} of them have not been baked yet.";
 
@@ -1388,17 +1388,17 @@ namespace VRWorldToolkit
 
         private const string REFLECTION_PROBE_COUNT_TEXT = "The current scene has {0} reflection probes.";
 
-        private const string POST_PROCESSING_IMPORTED_BUT_NOT_SETUP = "The current project has Post Processing imported, but you have not set it up yet.";
+        private const string POST_PROCESSING_IMPORTED_BUT_NOT_SETUP = "The current project has post-processing imported, but you have not set it up yet.";
 
         private const string POST_PROCESSING_DISABLED_IN_SCENE_VIEW = "Post-processing is disabled in the scene view. You will not be able to preview any post-processing effects without enabling it first.";
 
         private const string POST_PROCESSING_NO_RESOURCES_SET = "The Post Process Layer on \"{0}\" does not have its resources field set properly. This causes post-processing to error out. This can be fixed by recreating the Post Processing Layer on the GameObject.";
 
-        private const string NO_REFERENCE_CAMERA_SET_PP = "The current scenes Scene Descriptor has no Reference Camera set. Without a Reference Camera set Post Processing will not be visible in-game.";
+        private const string NO_REFERENCE_CAMERA_SET_PP = "The current scene's Scene Descriptor has no Reference Camera set. Without a Reference Camera set, post-processing will not be visible in-game.";
 
         private const string NO_POST_PROCESSING_VOLUMES = "No enabled Post Processing Volumes found in the scene. A Post Processing Volume is needed to apply effects to the camera's Post Processing Layer.";
 
-        private const string REFERENCE_CAMERA_NO_POST_PROCESSING_LAYER = "The current Reference Camera does not have a Post Processing Layer on it. Post Processing Layer is needed for the Post Processing Volume to affect the camera.";
+        private const string REFERENCE_CAMERA_NO_POST_PROCESSING_LAYER = "The current Reference Camera does not have a Post Processing Layer on it. A Post Processing Layer is needed for the Post Processing Volume to affect the camera.";
 
         private const string POST_PROCESS_LAYER_USING_RESERVED_LAYER = "Your current Post Process Layer uses one of the VRChat reserved layers. Using these will break post-processing while in-game.";
 
