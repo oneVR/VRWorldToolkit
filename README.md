@@ -1,6 +1,6 @@
 # [Download latest version from here](https://github.com/SudoOne/VRWorldToolkit/releases)
 
-VRWorld Toolkit is a Unity Editor extension made to make VRChat world creation more accessible and lower the entry-level to make a good performing world. Currently, the tool is aimed only for people making VRChat worlds and will only work with the VRCSDK imported, but this might change in the future.
+VRWorld Toolkit is a Unity Editor extension made to make VRChat world creation more accessible and lower the entry-level to make a good performing world. Currently, the tool is aimed only at people making VRChat worlds and will only work with the VRCSDK imported, but this might change in the future.
 
 To report problems, you can either contact me on discord at 1.#0001 or create a new issue. Feel free also to join my [discord server](https://discord.com/invite/FCm28DM)!
 
@@ -10,7 +10,7 @@ To report problems, you can either contact me on discord at 1.#0001 or create a 
 
 1. **World Debugger**
 
-Goes over trough your scene and checks for common issues, and makes suggestions on what to improve. Includes over 70 different tips, warnings, errors, and general messages currently!
+Goes through your scene and checks for common issues, and makes suggestions on what to improve. Includes over 70 different tips, warnings, errors, and general messages currently!
 
 2. **Disable On Build**
 
