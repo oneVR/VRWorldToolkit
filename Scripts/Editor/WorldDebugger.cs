@@ -1104,11 +1104,11 @@ namespace VRWorldToolkit
             return () =>
             {
                 Undo.RegisterCompleteObjectUndo(descriptor, "Spawn Points Fixed");
-                descriptor.spawns = descriptor.spawns.Where(c => c != null).ToArray();
-                if (descriptor.spawns.Length == 0)
+                if (descriptor.spawns is null || descriptor.spawns.Length == 0)
                 {
                     descriptor.spawns = new[] {descriptor.gameObject.transform};
                 }
+                descriptor.spawns = descriptor.spawns.Where(c => c != null).ToArray();
 
                 PrefabUtility.RecordPrefabInstancePropertyModifications(descriptor);
             };
@@ -1673,17 +1673,13 @@ namespace VRWorldToolkit
 #endif
 
                 // Get spawn points for any possible problems
-                var spawns = sceneDescriptor.spawns.Where(s => s != null).ToArray();
-
-                var spawnsLength = sceneDescriptor.spawns.Length;
-                var emptySpawns = spawnsLength != spawns.Length;
-
-                if (spawns.Length == 0)
+                if (sceneDescriptor.spawns != null && sceneDescriptor.spawns.Length > 0)
                 {
-                    general.AddMessageGroup(new MessageGroup(NO_SPAWN_POINT_SET, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject).SetAutoFix(FixSpawns(sceneDescriptor))));
-                }
-                else
-                {
+                    var spawns = sceneDescriptor.spawns.Where(s => s != null).ToArray();
+
+                    var spawnsLength = sceneDescriptor.spawns.Length;
+                    var emptySpawns = spawnsLength != spawns.Length;
+
                     if (emptySpawns)
                     {
                         general.AddMessageGroup(new MessageGroup(NULL_SPAWN_POINT, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject).SetAutoFix(FixSpawns(sceneDescriptor))));
@@ -1719,6 +1715,10 @@ namespace VRWorldToolkit
                             }
                         }
                     }
+                }
+                else
+                {
+                    general.AddMessageGroup(new MessageGroup(NO_SPAWN_POINT_SET, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject).SetAutoFix(FixSpawns(sceneDescriptor))));
                 }
 
 #if VRC_SDK_VRCSDK2
