@@ -1608,7 +1608,7 @@ namespace VRWorldToolkit
 
                 if (buildReportWindows != null && buildReportWindows.summary.result == BuildResult.Failed || buildReportQuest != null && buildReportQuest.summary.result == BuildResult.Failed)
                 {
-                    general.AddMessageGroup(new MessageGroup(LAST_BUILD_FAILED, MessageType.Error));
+                    general.AddMessageGroup(new MessageGroup(LAST_BUILD_FAILED, MessageType.Error).SetDocumentation("https://github.com/oneVR/VRWorldToolkit/wiki/Fixing-Build-Problems"));
                 }
 
                 // Check if multiple scenes loaded
