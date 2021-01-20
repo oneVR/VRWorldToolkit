@@ -1108,7 +1108,20 @@ namespace VRWorldToolkit
                 {
                     descriptor.spawns = new[] {descriptor.gameObject.transform};
                 }
+
                 descriptor.spawns = descriptor.spawns.Where(c => c != null).ToArray();
+
+                PrefabUtility.RecordPrefabInstancePropertyModifications(descriptor);
+            };
+        }
+
+        public static Action ChangeRespawnHeight(VRC_SceneDescriptor descriptor, float newHeight)
+        {
+            return () =>
+            {
+                Undo.RegisterCompleteObjectUndo(descriptor, "Respawn Height Change");
+
+                descriptor.RespawnHeightY = newHeight;
 
                 PrefabUtility.RecordPrefabInstancePropertyModifications(descriptor);
             };
@@ -1301,6 +1314,10 @@ namespace VRWorldToolkit
         private const string NO_COLLIDER_UNDER_SPAWN = "Spawn point \"{0}\" does not have a collider under it.";
         private const string NO_COLLIDER_UNDER_SPAWN_COMBINED = "Found {0} spawn points with no collider under them.";
         private const string NO_COLLIDER_UNDER_SPAWN_INFO = "Spawning into a world with nothing to stand on will cause the players to fall forever.";
+
+        private const string RESPAWN_HEIGHT_ABOVE_COLLIDER = "The collider below spawn point \"{1}\" is below respawn height set in scene descriptor.";
+        private const string RESPAWN_HEIGHT_ABOVE_COLLIDER_COMBINED = "Found {0} spawn points where the collider is below the respawn height.";
+        private const string RESPAWN_HEIGHT_ABOVE_COLLIDER_INFO = "This will cause players to get stuck while respawning infinitely.";
 
         private const string NO_PLAYER_MODS = "No Player Mods were found in the scene. Player mods are needed for adding jumping and changing walking speed.";
 
@@ -1688,8 +1705,9 @@ namespace VRWorldToolkit
                     var spawnUnderRespawnHeight = general.AddMessageGroup(new MessageGroup(SPAWN_UNDER_RESPAWN_HEIGHT, SPAWN_UNDER_RESPAWN_HEIGHT_COMBINED, SPAWN_UNDER_RESPAWN_HEIGHT_INFO, MessageType.Error));
                     var noColliderUnderSpawn = general.AddMessageGroup(new MessageGroup(NO_COLLIDER_UNDER_SPAWN, NO_COLLIDER_UNDER_SPAWN_COMBINED, NO_COLLIDER_UNDER_SPAWN_INFO, MessageType.Error));
                     var colliderUnderSpawnTrigger = general.AddMessageGroup(new MessageGroup(COLLIDER_UNDER_SPAWN_IS_TRIGGER, COLLIDER_UNDER_SPAWN_IS_TRIGGER_COMBINED, COLLIDER_UNDER_SPAWN_IS_TRIGGER_INFO, MessageType.Error));
+                    var respawnHeightAboveCollider = general.AddMessageGroup(new MessageGroup(RESPAWN_HEIGHT_ABOVE_COLLIDER, RESPAWN_HEIGHT_ABOVE_COLLIDER_COMBINED, RESPAWN_HEIGHT_ABOVE_COLLIDER_INFO, MessageType.Error));
 
-                    for (int i = 0; i < sceneDescriptor.spawns.Length; i++)
+                    for (var i = 0; i < sceneDescriptor.spawns.Length; i++)
                     {
                         if (sceneDescriptor.spawns[i] == null) continue;
 
@@ -1713,6 +1731,11 @@ namespace VRWorldToolkit
                             {
                                 noColliderUnderSpawn.AddSingleMessage(new SingleMessage(spawn.gameObject.name).SetSelectObject(spawn.gameObject));
                             }
+                        }
+                        // Round respawn height to 2 decimals to reflect in-game functionality
+                        else if (Math.Round(hit.point.y, 2) <= Math.Round(sceneDescriptor.RespawnHeightY, 2))
+                        {
+                            respawnHeightAboveCollider.AddSingleMessage(new SingleMessage(hit.collider.gameObject.name, spawn.gameObject.name).SetSelectObject(spawn.gameObject).SetAutoFix(ChangeRespawnHeight(sceneDescriptor, hit.point.y - 100)));
                         }
                     }
                 }
