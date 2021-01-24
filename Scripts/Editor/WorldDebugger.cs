@@ -2406,10 +2406,9 @@ namespace VRWorldToolkit
 
                     if (gameObject.hideFlags != HideFlags.None || EditorUtility.IsPersistent(gameObject.transform.root.gameObject)) continue;
 
-                    if (gameObject.GetComponent<Renderer>())
+                    var renderer = gameObject.GetComponent<Renderer>();
+                    if (renderer != null)
                     {
-                        var renderer = gameObject.GetComponent<Renderer>();
-
                         // If baked lighting in the scene check for lightmap uvs
                         if (bakedLighting)
                         {
@@ -2592,10 +2591,9 @@ namespace VRWorldToolkit
                         }
                     }
 
-                    if (gameObject.GetComponent<Selectable>())
+                    var selectable = gameObject.GetComponent<Selectable>();
+                    if (selectable != null)
                     {
-                        var selectable = gameObject.GetComponent<Selectable>();
-
                         if (selectable.navigation.mode != Navigation.Mode.None)
                         {
                             uiElementNavigation.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject).SetAutoFix(SetSelectableNavigationMode(selectable, Navigation.Mode.None)));
@@ -2613,9 +2611,9 @@ namespace VRWorldToolkit
                     }
 
 #if VRC_SDK_VRCSDK2
-                    if (gameObject.GetComponent<VRC_Trigger>())
+                    var trigger = gameObject.GetComponent<VRC_Trigger>();
+                    if (trigger != null)
                     {
-                        var trigger = gameObject.GetComponent<VRC_Trigger>();
                         var missingFound = false;
                         for (var j = 0; j < trigger.Triggers.Count; j++)
                         {
