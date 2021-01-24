@@ -2708,8 +2708,11 @@ namespace VRWorldToolkit
 
         private void OnFocus()
         {
+            if (initDone)
+            {
+                RefreshBuild();
+            }
             recheck = true;
-            RefreshBuild();
         }
 
         private const string LAST_BUILD = "Library/LastBuild.buildreport";
@@ -2829,6 +2832,8 @@ namespace VRWorldToolkit
 #if VRWT_BENCHMARK
                 CheckTime.Restart();
 #endif
+                RefreshBuild();
+
                 if (masterList is null)
                     masterList = new MessageCategoryList();
 
