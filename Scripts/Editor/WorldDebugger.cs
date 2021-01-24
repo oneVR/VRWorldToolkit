@@ -2712,6 +2712,7 @@ namespace VRWorldToolkit
             {
                 RefreshBuild();
             }
+
             recheck = true;
         }
 
@@ -2912,7 +2913,7 @@ namespace VRWorldToolkit
                 CheckScene();
                 CheckTime.Stop();
 
-                if (CheckTime.ElapsedMilliseconds >= 1000)
+                if (CheckTime.ElapsedMilliseconds >= 500)
                 {
                     autoRecheck = false;
                 }
