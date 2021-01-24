@@ -2480,7 +2480,7 @@ namespace VRWorldToolkit
 
                             var shader = material.shader;
 
-                            if (Helper.BuildPlatform() == RuntimePlatform.Android && Validation.WorldShaderWhiteList.Contains(shader.name))
+                            if (Helper.BuildPlatform() == RuntimePlatform.Android && !Validation.WorldShaderWhiteList.Contains(shader.name))
                             {
                                 var singleMessage = new SingleMessage(material.name, shader.name);
 
