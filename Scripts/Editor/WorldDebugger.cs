@@ -2704,11 +2704,7 @@ namespace VRWorldToolkit
 
         private void OnFocus()
         {
-            if (!EditorApplication.isPlaying)
-            {
-                recheck = true;
-            }
-
+            recheck = true;
             RefreshBuild();
         }
 
@@ -2897,31 +2893,28 @@ namespace VRWorldToolkit
 
         private void Refresh()
         {
-            if (recheck && autoRecheck)
+            if (!EditorApplication.isPlaying && recheck && autoRecheck && tab == 0)
             {
-                if (tab == 0)
+                // Check for bloat in occlusion cache
+                if (occlusionCacheFiles == 0 && Directory.Exists("Library/Occlusion/"))
                 {
-                    // Check for bloat in occlusion cache
-                    if (occlusionCacheFiles == 0 && Directory.Exists("Library/Occlusion/"))
-                    {
-                        Task.Run(CountOcclusionCacheFiles);
-                    }
+                    Task.Run(CountOcclusionCacheFiles);
+                }
 
-                    CheckTime.Restart();
-                    CheckScene();
-                    CheckTime.Stop();
+                CheckTime.Restart();
+                CheckScene();
+                CheckTime.Stop();
 
-                    if (CheckTime.ElapsedMilliseconds >= 1000)
-                    {
-                        autoRecheck = false;
-                    }
+                if (CheckTime.ElapsedMilliseconds >= 1000)
+                {
+                    autoRecheck = false;
+                }
 
 #if VRWT_BENCHMARK
-                    Debug.Log("Scene checked in: " + CheckTime.ElapsedMilliseconds + " ms.");
+                Debug.Log("Scene checked in: " + CheckTime.ElapsedMilliseconds + " ms.");
 #endif
 
-                    recheck = false;
-                }
+                recheck = false;
             }
         }
 
