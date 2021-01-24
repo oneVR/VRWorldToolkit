@@ -1507,6 +1507,10 @@ namespace VRWorldToolkit
         private const string NULL_TRIGGER_RECEIVER_COMBINED = "Found {0} null receivers in scene triggers.";
         private const string NULL_TRIGGER_RECEIVER_INFO = "This causes the trigger to target itself, which is sometimes wanted.";
 
+        private const string TEXT_MESH_LIGHTMAP_STATIC = "Text Mesh \"{0}\" marked as lightmap static.";
+        private const string TEXT_MESH_LIGHTMAP_STATIC_COMBINED = "Found {0} Text Meshes marked as lightmap static.";
+        private const string TEXT_MESH_LIGHTMAP_STATIC_INFO = "This will cause warnings as the mesh has no normals.";
+
         private const string HEY_YOU_FOUND_A_BUG = "Hey, you found a bug! Please send it my way so I can fix it! Check About VRWorld Toolkit to find all the ways to contact me. \"{0}\" on line {1}.";
 
         private const string FUTURE_PROOF_PUBLISH_ENABLED = "Future Proof Publish is currently enabled. This is a legacy feature that has no planned functions as of right now. Having it enabled will increase upload times and sometimes cause uploading to fail.";
@@ -2393,30 +2397,32 @@ namespace VRWorldToolkit
                 var materialWithNonWhitelistedShader = general.AddMessageGroup(new MessageGroup(MATERIAL_WITH_NON_WHITELISTED_SHADER, MATERIAL_WITH_NON_WHITELISTED_SHADER_COMBINED, MATERIAL_WITH_NON_WHITELISTED_SHADER_INFO, MessageType.Warning).SetCombinedSelectionDisabled(true).SetDocumentation("https://docs.vrchat.com/docs/quest-content-limitations#shaders"));
                 var uiElementNavigation = general.AddMessageGroup(new MessageGroup(UI_ELEMENT_WITH_NAVIGATION_NOT_NONE, UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_COMBINED, UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_INFO, MessageType.Tips));
                 var nullTriggerReceivers = general.AddMessageGroup(new MessageGroup(NULL_TRIGGER_RECEIVER, NULL_TRIGGER_RECEIVER_COMBINED, NULL_TRIGGER_RECEIVER_INFO, MessageType.Info));
+                var textMeshStatic = general.AddMessageGroup(new MessageGroup(TEXT_MESH_LIGHTMAP_STATIC, TEXT_MESH_LIGHTMAP_STATIC_COMBINED, TEXT_MESH_LIGHTMAP_STATIC_INFO, MessageType.Warning));
 
                 var allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
                 for (var i = 0; i < allGameObjects.Length; i++)
                 {
                     var gameObject = allGameObjects[i] as GameObject;
 
-                    if (gameObject.hideFlags != HideFlags.None || EditorUtility.IsPersistent(gameObject.transform.root.gameObject))
-                        continue;
+                    if (gameObject.hideFlags != HideFlags.None || EditorUtility.IsPersistent(gameObject.transform.root.gameObject)) continue;
 
                     if (gameObject.GetComponent<Renderer>())
                     {
                         var renderer = gameObject.GetComponent<Renderer>();
 
                         // If baked lighting in the scene check for lightmap uvs
-                        if (bakedLighting && !xatlasUnwrapper)
+                        if (bakedLighting)
                         {
                             if (GameObjectUtility.AreStaticEditorFlagsSet(gameObject, StaticEditorFlags.LightmapStatic) && gameObject.GetComponent<MeshRenderer>())
                             {
+                                if (gameObject.GetComponent<TextMesh>())
+                                {
+                                    textMeshStatic.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject));
+                                }
+
                                 var meshFilter = gameObject.GetComponent<MeshFilter>();
 
-                                if (meshFilter == null)
-                                {
-                                    continue;
-                                }
+                                if (meshFilter is null || !xatlasUnwrapper) continue;
 
                                 var sharedMesh = meshFilter.sharedMesh;
 
