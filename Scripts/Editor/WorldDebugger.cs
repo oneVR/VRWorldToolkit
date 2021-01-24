@@ -2736,7 +2736,6 @@ namespace VRWorldToolkit
 #endif
             if (!Directory.Exists(BUILD_REPORT_DIR))
                 Directory.CreateDirectory(BUILD_REPORT_DIR);
-
             if (File.Exists(LAST_BUILD) && (!File.Exists(LAST_BUILD_REPORT_PATH) || File.GetLastWriteTime(LAST_BUILD) > File.GetLastWriteTime(LAST_BUILD_REPORT_PATH)))
             {
                 File.Copy(LAST_BUILD, LAST_BUILD_REPORT_PATH, true);
@@ -2797,7 +2796,6 @@ namespace VRWorldToolkit
         private static void DrawBuildSummary(BuildReport report)
         {
             GUILayout.BeginVertical(EditorStyles.helpBox);
-
             if (report != null)
             {
                 GUILayout.Label("<b>Build size:</b> " + EditorUtility.FormatBytes((long) report.summary.totalSize), Styles.LabelRichText);
@@ -2928,7 +2926,10 @@ namespace VRWorldToolkit
             Quest = 1
         }
 
-        private readonly string[] buildReportToolbar = {"Windows", "Quest"};
+        private readonly string[] buildReportToolbar =
+        {
+            "Windows", "Quest"
+        };
 
         [SerializeField] private int selectedBuildReport;
         [SerializeField] private bool overallStatsFoldout;
@@ -2938,9 +2939,7 @@ namespace VRWorldToolkit
         {
             InitWhenNeeded();
             Refresh();
-
             GUILayout.BeginHorizontal();
-
             if (buildReportWindows)
             {
                 GUILayout.BeginVertical();
@@ -2962,11 +2961,11 @@ namespace VRWorldToolkit
             }
 
             GUILayout.EndHorizontal();
-
             EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
-
-            tab = GUILayout.Toolbar(tab, new[] {"Messages", "Build Report"});
-
+            tab = GUILayout.Toolbar(tab, new[]
+            {
+                "Messages", "Build Report"
+            });
             switch (tab)
             {
                 case 0:
