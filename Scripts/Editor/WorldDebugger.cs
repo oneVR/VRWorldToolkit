@@ -1104,11 +1104,24 @@ namespace VRWorldToolkit
             return () =>
             {
                 Undo.RegisterCompleteObjectUndo(descriptor, "Spawn Points Fixed");
-                descriptor.spawns = descriptor.spawns.Where(c => c != null).ToArray();
-                if (descriptor.spawns.Length == 0)
+                if (descriptor.spawns is null || descriptor.spawns.Length == 0)
                 {
                     descriptor.spawns = new[] {descriptor.gameObject.transform};
                 }
+
+                descriptor.spawns = descriptor.spawns.Where(c => c != null).ToArray();
+
+                PrefabUtility.RecordPrefabInstancePropertyModifications(descriptor);
+            };
+        }
+
+        public static Action ChangeRespawnHeight(VRC_SceneDescriptor descriptor, float newHeight)
+        {
+            return () =>
+            {
+                Undo.RegisterCompleteObjectUndo(descriptor, "Respawn Height Change");
+
+                descriptor.RespawnHeightY = newHeight;
 
                 PrefabUtility.RecordPrefabInstancePropertyModifications(descriptor);
             };
@@ -1302,6 +1315,10 @@ namespace VRWorldToolkit
         private const string NO_COLLIDER_UNDER_SPAWN_COMBINED = "Found {0} spawn points with no collider under them.";
         private const string NO_COLLIDER_UNDER_SPAWN_INFO = "Spawning into a world with nothing to stand on will cause the players to fall forever.";
 
+        private const string RESPAWN_HEIGHT_ABOVE_COLLIDER = "The collider below spawn point \"{1}\" is below respawn height set in scene descriptor.";
+        private const string RESPAWN_HEIGHT_ABOVE_COLLIDER_COMBINED = "Found {0} spawn points where the collider is below the respawn height.";
+        private const string RESPAWN_HEIGHT_ABOVE_COLLIDER_INFO = "This will cause players to get stuck while respawning infinitely.";
+
         private const string NO_PLAYER_MODS = "No Player Mods were found in the scene. Player mods are needed for adding jumping and changing walking speed.";
 
         private const string TRIGGER_TRIGGER_NO_COLLIDER = "You have an OnEnterTrigger or OnExitTrigger Trigger \"{0}\" that does not have a Collider on it.";
@@ -1490,6 +1507,10 @@ namespace VRWorldToolkit
         private const string NULL_TRIGGER_RECEIVER_COMBINED = "Found {0} null receivers in scene triggers.";
         private const string NULL_TRIGGER_RECEIVER_INFO = "This causes the trigger to target itself, which is sometimes wanted.";
 
+        private const string TEXT_MESH_LIGHTMAP_STATIC = "Text Mesh \"{0}\" marked as lightmap static.";
+        private const string TEXT_MESH_LIGHTMAP_STATIC_COMBINED = "Found {0} Text Meshes marked as lightmap static.";
+        private const string TEXT_MESH_LIGHTMAP_STATIC_INFO = "This will cause warnings as the mesh has no normals.";
+
         private const string HEY_YOU_FOUND_A_BUG = "Hey, you found a bug! Please send it my way so I can fix it! Check About VRWorld Toolkit to find all the ways to contact me. \"{0}\" on line {1}.";
 
         private const string FUTURE_PROOF_PUBLISH_ENABLED = "Future Proof Publish is currently enabled. This is a legacy feature that has no planned functions as of right now. Having it enabled will increase upload times and sometimes cause uploading to fail.";
@@ -1608,7 +1629,7 @@ namespace VRWorldToolkit
 
                 if (buildReportWindows != null && buildReportWindows.summary.result == BuildResult.Failed || buildReportQuest != null && buildReportQuest.summary.result == BuildResult.Failed)
                 {
-                    general.AddMessageGroup(new MessageGroup(LAST_BUILD_FAILED, MessageType.Error));
+                    general.AddMessageGroup(new MessageGroup(LAST_BUILD_FAILED, MessageType.Error).SetDocumentation("https://github.com/oneVR/VRWorldToolkit/wiki/Fixing-Build-Problems"));
                 }
 
                 // Check if multiple scenes loaded
@@ -1673,17 +1694,13 @@ namespace VRWorldToolkit
 #endif
 
                 // Get spawn points for any possible problems
-                var spawns = sceneDescriptor.spawns.Where(s => s != null).ToArray();
-
-                var spawnsLength = sceneDescriptor.spawns.Length;
-                var emptySpawns = spawnsLength != spawns.Length;
-
-                if (spawns.Length == 0)
+                if (sceneDescriptor.spawns != null && sceneDescriptor.spawns.Length > 0)
                 {
-                    general.AddMessageGroup(new MessageGroup(NO_SPAWN_POINT_SET, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject).SetAutoFix(FixSpawns(sceneDescriptor))));
-                }
-                else
-                {
+                    var spawns = sceneDescriptor.spawns.Where(s => s != null).ToArray();
+
+                    var spawnsLength = sceneDescriptor.spawns.Length;
+                    var emptySpawns = spawnsLength != spawns.Length;
+
                     if (emptySpawns)
                     {
                         general.AddMessageGroup(new MessageGroup(NULL_SPAWN_POINT, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject).SetAutoFix(FixSpawns(sceneDescriptor))));
@@ -1692,8 +1709,9 @@ namespace VRWorldToolkit
                     var spawnUnderRespawnHeight = general.AddMessageGroup(new MessageGroup(SPAWN_UNDER_RESPAWN_HEIGHT, SPAWN_UNDER_RESPAWN_HEIGHT_COMBINED, SPAWN_UNDER_RESPAWN_HEIGHT_INFO, MessageType.Error));
                     var noColliderUnderSpawn = general.AddMessageGroup(new MessageGroup(NO_COLLIDER_UNDER_SPAWN, NO_COLLIDER_UNDER_SPAWN_COMBINED, NO_COLLIDER_UNDER_SPAWN_INFO, MessageType.Error));
                     var colliderUnderSpawnTrigger = general.AddMessageGroup(new MessageGroup(COLLIDER_UNDER_SPAWN_IS_TRIGGER, COLLIDER_UNDER_SPAWN_IS_TRIGGER_COMBINED, COLLIDER_UNDER_SPAWN_IS_TRIGGER_INFO, MessageType.Error));
+                    var respawnHeightAboveCollider = general.AddMessageGroup(new MessageGroup(RESPAWN_HEIGHT_ABOVE_COLLIDER, RESPAWN_HEIGHT_ABOVE_COLLIDER_COMBINED, RESPAWN_HEIGHT_ABOVE_COLLIDER_INFO, MessageType.Error));
 
-                    for (int i = 0; i < sceneDescriptor.spawns.Length; i++)
+                    for (var i = 0; i < sceneDescriptor.spawns.Length; i++)
                     {
                         if (sceneDescriptor.spawns[i] == null) continue;
 
@@ -1718,7 +1736,16 @@ namespace VRWorldToolkit
                                 noColliderUnderSpawn.AddSingleMessage(new SingleMessage(spawn.gameObject.name).SetSelectObject(spawn.gameObject));
                             }
                         }
+                        // Round respawn height to 2 decimals to reflect in-game functionality
+                        else if (Math.Round(hit.point.y, 2) <= Math.Round(sceneDescriptor.RespawnHeightY, 2))
+                        {
+                            respawnHeightAboveCollider.AddSingleMessage(new SingleMessage(hit.collider.gameObject.name, spawn.gameObject.name).SetSelectObject(spawn.gameObject).SetAutoFix(ChangeRespawnHeight(sceneDescriptor, hit.point.y - 100)));
+                        }
                     }
+                }
+                else
+                {
+                    general.AddMessageGroup(new MessageGroup(NO_SPAWN_POINT_SET, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject).SetAutoFix(FixSpawns(sceneDescriptor))));
                 }
 
 #if VRC_SDK_VRCSDK2
@@ -2370,30 +2397,31 @@ namespace VRWorldToolkit
                 var materialWithNonWhitelistedShader = general.AddMessageGroup(new MessageGroup(MATERIAL_WITH_NON_WHITELISTED_SHADER, MATERIAL_WITH_NON_WHITELISTED_SHADER_COMBINED, MATERIAL_WITH_NON_WHITELISTED_SHADER_INFO, MessageType.Warning).SetCombinedSelectionDisabled(true).SetDocumentation("https://docs.vrchat.com/docs/quest-content-limitations#shaders"));
                 var uiElementNavigation = general.AddMessageGroup(new MessageGroup(UI_ELEMENT_WITH_NAVIGATION_NOT_NONE, UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_COMBINED, UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_INFO, MessageType.Tips));
                 var nullTriggerReceivers = general.AddMessageGroup(new MessageGroup(NULL_TRIGGER_RECEIVER, NULL_TRIGGER_RECEIVER_COMBINED, NULL_TRIGGER_RECEIVER_INFO, MessageType.Info));
+                var textMeshStatic = general.AddMessageGroup(new MessageGroup(TEXT_MESH_LIGHTMAP_STATIC, TEXT_MESH_LIGHTMAP_STATIC_COMBINED, TEXT_MESH_LIGHTMAP_STATIC_INFO, MessageType.Warning));
 
                 var allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
                 for (var i = 0; i < allGameObjects.Length; i++)
                 {
                     var gameObject = allGameObjects[i] as GameObject;
 
-                    if (gameObject.hideFlags != HideFlags.None || EditorUtility.IsPersistent(gameObject.transform.root.gameObject))
-                        continue;
+                    if (gameObject.hideFlags != HideFlags.None || EditorUtility.IsPersistent(gameObject.transform.root.gameObject)) continue;
 
-                    if (gameObject.GetComponent<Renderer>())
+                    var renderer = gameObject.GetComponent<Renderer>();
+                    if (renderer != null)
                     {
-                        var renderer = gameObject.GetComponent<Renderer>();
-
                         // If baked lighting in the scene check for lightmap uvs
-                        if (bakedLighting && !xatlasUnwrapper)
+                        if (bakedLighting)
                         {
                             if (GameObjectUtility.AreStaticEditorFlagsSet(gameObject, StaticEditorFlags.LightmapStatic) && gameObject.GetComponent<MeshRenderer>())
                             {
+                                if (gameObject.GetComponent<TextMesh>())
+                                {
+                                    textMeshStatic.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject));
+                                }
+
                                 var meshFilter = gameObject.GetComponent<MeshFilter>();
 
-                                if (meshFilter == null)
-                                {
-                                    continue;
-                                }
+                                if (meshFilter is null || !xatlasUnwrapper) continue;
 
                                 var sharedMesh = meshFilter.sharedMesh;
 
@@ -2457,7 +2485,7 @@ namespace VRWorldToolkit
 
                             var shader = material.shader;
 
-                            if (Helper.BuildPlatform() == RuntimePlatform.Android && Validation.WorldShaderWhiteList.Contains(shader.name))
+                            if (Helper.BuildPlatform() == RuntimePlatform.Android && !Validation.WorldShaderWhiteList.Contains(shader.name))
                             {
                                 var singleMessage = new SingleMessage(material.name, shader.name);
 
@@ -2563,10 +2591,9 @@ namespace VRWorldToolkit
                         }
                     }
 
-                    if (gameObject.GetComponent<Selectable>())
+                    var selectable = gameObject.GetComponent<Selectable>();
+                    if (selectable != null)
                     {
-                        var selectable = gameObject.GetComponent<Selectable>();
-
                         if (selectable.navigation.mode != Navigation.Mode.None)
                         {
                             uiElementNavigation.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject).SetAutoFix(SetSelectableNavigationMode(selectable, Navigation.Mode.None)));
@@ -2584,9 +2611,9 @@ namespace VRWorldToolkit
                     }
 
 #if VRC_SDK_VRCSDK2
-                    if (gameObject.GetComponent<VRC_Trigger>())
+                    var trigger = gameObject.GetComponent<VRC_Trigger>();
+                    if (trigger != null)
                     {
-                        var trigger = gameObject.GetComponent<VRC_Trigger>();
                         var missingFound = false;
                         for (var j = 0; j < trigger.Triggers.Count; j++)
                         {
@@ -2681,12 +2708,12 @@ namespace VRWorldToolkit
 
         private void OnFocus()
         {
-            if (!EditorApplication.isPlaying)
+            if (initDone)
             {
-                recheck = true;
+                RefreshBuild();
             }
 
-            RefreshBuild();
+            recheck = true;
         }
 
         private const string LAST_BUILD = "Library/LastBuild.buildreport";
@@ -2713,7 +2740,6 @@ namespace VRWorldToolkit
 #endif
             if (!Directory.Exists(BUILD_REPORT_DIR))
                 Directory.CreateDirectory(BUILD_REPORT_DIR);
-
             if (File.Exists(LAST_BUILD) && (!File.Exists(LAST_BUILD_REPORT_PATH) || File.GetLastWriteTime(LAST_BUILD) > File.GetLastWriteTime(LAST_BUILD_REPORT_PATH)))
             {
                 File.Copy(LAST_BUILD, LAST_BUILD_REPORT_PATH, true);
@@ -2774,7 +2800,6 @@ namespace VRWorldToolkit
         private static void DrawBuildSummary(BuildReport report)
         {
             GUILayout.BeginVertical(EditorStyles.helpBox);
-
             if (report != null)
             {
                 GUILayout.Label("<b>Build size:</b> " + EditorUtility.FormatBytes((long) report.summary.totalSize), Styles.LabelRichText);
@@ -2808,6 +2833,8 @@ namespace VRWorldToolkit
 #if VRWT_BENCHMARK
                 CheckTime.Restart();
 #endif
+                RefreshBuild();
+
                 if (masterList is null)
                     masterList = new MessageCategoryList();
 
@@ -2874,31 +2901,28 @@ namespace VRWorldToolkit
 
         private void Refresh()
         {
-            if (recheck && autoRecheck)
+            if (!EditorApplication.isPlaying && recheck && autoRecheck && tab == 0)
             {
-                if (tab == 0)
+                // Check for bloat in occlusion cache
+                if (occlusionCacheFiles == 0 && Directory.Exists("Library/Occlusion/"))
                 {
-                    // Check for bloat in occlusion cache
-                    if (occlusionCacheFiles == 0 && Directory.Exists("Library/Occlusion/"))
-                    {
-                        Task.Run(CountOcclusionCacheFiles);
-                    }
+                    Task.Run(CountOcclusionCacheFiles);
+                }
 
-                    CheckTime.Restart();
-                    CheckScene();
-                    CheckTime.Stop();
+                CheckTime.Restart();
+                CheckScene();
+                CheckTime.Stop();
 
-                    if (CheckTime.ElapsedMilliseconds >= 1000)
-                    {
-                        autoRecheck = false;
-                    }
+                if (CheckTime.ElapsedMilliseconds >= 500)
+                {
+                    autoRecheck = false;
+                }
 
 #if VRWT_BENCHMARK
-                    Debug.Log("Scene checked in: " + CheckTime.ElapsedMilliseconds + " ms.");
+                Debug.Log("Scene checked in: " + CheckTime.ElapsedMilliseconds + " ms.");
 #endif
 
-                    recheck = false;
-                }
+                recheck = false;
             }
         }
 
@@ -2908,7 +2932,10 @@ namespace VRWorldToolkit
             Quest = 1
         }
 
-        private readonly string[] buildReportToolbar = {"Windows", "Quest"};
+        private readonly string[] buildReportToolbar =
+        {
+            "Windows", "Quest"
+        };
 
         [SerializeField] private int selectedBuildReport;
         [SerializeField] private bool overallStatsFoldout;
@@ -2918,9 +2945,7 @@ namespace VRWorldToolkit
         {
             InitWhenNeeded();
             Refresh();
-
             GUILayout.BeginHorizontal();
-
             if (buildReportWindows)
             {
                 GUILayout.BeginVertical();
@@ -2942,11 +2967,11 @@ namespace VRWorldToolkit
             }
 
             GUILayout.EndHorizontal();
-
             EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
-
-            tab = GUILayout.Toolbar(tab, new[] {"Messages", "Build Report"});
-
+            tab = GUILayout.Toolbar(tab, new[]
+            {
+                "Messages", "Build Report"
+            });
             switch (tab)
             {
                 case 0:

@@ -233,7 +233,7 @@ namespace VRWorldToolkit
                             break;
                     }
 
-                    if (GUILayout.Button(name + " " + EditorUtility.FormatBytes(item.Size) + " " + ((double) item.Size / totalSize).ToString("P"), EditorStyles.label))
+                    if (GUILayout.Button(name + " -  " + EditorUtility.FormatBytes(item.Size) + " - " + ((double) item.Size / totalSize).ToString("P"), EditorStyles.label))
                     {
                         searchString = item.Name;
                     }
