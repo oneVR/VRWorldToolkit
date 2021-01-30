@@ -1405,7 +1405,7 @@ namespace VRWorldToolkit
 
         private const string REFLECTION_PROBE_COUNT_TEXT = "The current scene has {0} reflection probes.";
 
-        private const string POST_PROCESSING_IMPORTED_BUT_NOT_SETUP = "The current project has post-processing imported, but you have not set it up yet.";
+        private const string POST_PROCESSING_IMPORTED_BUT_NOT_SETUP = "The current project has Post Processing imported, but you have not set it up yet.";
 
         private const string POST_PROCESSING_DISABLED_IN_SCENE_VIEW = "Post-processing is disabled in the scene view. You will not be able to preview any post-processing effects without enabling it first.";
 
@@ -1438,15 +1438,15 @@ namespace VRWorldToolkit
 
         private const string NO_BLOOM_DIRT_IN_VR = "Avoid using Bloom Dirt, it looks terrible in VR!";
 
-        private const string NO_AMBIENT_OCCLUSION = "Do not use post-processing Ambient Occlusion in VRChat! VRChat uses Forward rendering, so it gets applied on top of EVERYTHING, which is bad! It also has a super high rendering cost in VR.";
+        private const string NO_AMBIENT_OCCLUSION = "Do not use Post Processing Ambient Occlusion in VRChat! VRChat uses Forward rendering, so it gets applied on top of EVERYTHING, which is bad! It also has a super high rendering cost in VR.";
 
         private const string DEPTH_OF_FIELD_WARNING = "Depth of field has a high performance cost and is very disorienting in VR. If you want to use depth of field, it should be disabled by default.";
 
         private const string SCREEN_SPACE_REFLECTIONS_WARNING = "Screen-space Reflections only works when using deferred rendering. Because VRChat uses Forward rendering, this should not be used.";
 
-        private const string VIGNETTE_WARNING = "Only use post-processing vignette in small amounts. A powerful vignette can cause sickness in VR.";
+        private const string VIGNETTE_WARNING = "Only use Post Processing Vignette in small amounts. A powerful vignette can cause sickness in VR.";
 
-        private const string NO_POST_PROCESSING_IMPORTED = "Post-processing package not found in the project.";
+        private const string NO_POST_PROCESSING_IMPORTED = "Post Processing package not found in the project.";
 
         private const string QUEST_BAKED_LIGHTING_WARNING = "Realtime lighting for Quest content should be avoided and instead have a properly baked lighting setup for optimal performance.";
 
