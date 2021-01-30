@@ -1422,7 +1422,7 @@ namespace VRWorldToolkit
         private const string VOLUME_BLENDING_LAYER_NOT_SET = "You don't have a Volume Blending Layer set in the Post Process Layer, so post-processing will not work. Using the Water or PostProcessing layer is recommended.";
 
         private const string POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER = "Post Processing Volume \"{0}\" is not marked as Global and does not have a collider.";
-        private const string POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER_COMBINED = "Found {0} Post Processing Volumes that are not marked as global and do not have a collider.";
+        private const string POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER_COMBINED = "Found {0} Post Processing Volumes that are not marked as Global and do not have a collider.";
         private const string POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER_INFO = "The volume will not affect the camera without one of these set on it.";
 
         private const string NO_PROFILE_SET = "Post Processing Volume \"{0}\" does not have a profile set.";
@@ -1434,23 +1434,23 @@ namespace VRWorldToolkit
 
         private const string TOO_HIGH_BLOOM_INTENSITY = "Do not raise the Bloom intensity too high! It is best to use a low Bloom intensity, between 0.01 to 0.3.";
 
-        private const string TOO_HIGH_BLOOM_THRESHOLD = "You should avoid having the Bloom Threshold set high. It might cause unexpected problems with avatars. Ideally, it should be kept at 0, but always below 1.0.";
+        private const string TOO_HIGH_BLOOM_THRESHOLD = "You should avoid having the Bloom Threshold be set to a high value, as it might cause unexpected problems with bright avatars. Ideally, it should be kept at 0, but always below 1.0.";
 
-        private const string NO_BLOOM_DIRT_IN_VR = "Avoid using Bloom Dirt. It looks terrible in VR!";
+        private const string NO_BLOOM_DIRT_IN_VR = "Avoid using Bloom Dirt, it looks terrible in VR!";
 
-        private const string NO_AMBIENT_OCCLUSION = "Do not use Ambient Occlusion in VRChat! VRchat uses Forward rendering, so it gets applied on top of everything else, which is bad! It also has a super high rendering cost in VR.";
+        private const string NO_AMBIENT_OCCLUSION = "Do not use post-processing Ambient Occlusion in VRChat! VRChat uses Forward rendering, so it gets applied on top of EVERYTHING, which is bad! It also has a super high rendering cost in VR.";
 
-        private const string DEPTH_OF_FIELD_WARNING = "Depth of field has a high-performance cost and is very disorientating in VR. If you want to use depth of field, it should be disabled by default.";
+        private const string DEPTH_OF_FIELD_WARNING = "Depth of field has a high performance cost and is very disorienting in VR. If you want to use depth of field, it should be disabled by default.";
 
-        private const string SCREEN_SPACE_REFLECTIONS_WARNING = "Screen-space Reflections only works when using deferred rendering. Because VRchat is not using deferred rendering, so this should not be used.";
+        private const string SCREEN_SPACE_REFLECTIONS_WARNING = "Screen-space Reflections only works when using deferred rendering. Because VRChat uses Forward rendering, this should not be used.";
 
-        private const string VIGNETTE_WARNING = "Only use Post Processing vignette in minimal amounts. A powerful vignette can cause sickness in VR.";
+        private const string VIGNETTE_WARNING = "Only use post-processing vignette in small amounts. A powerful vignette can cause sickness in VR.";
 
-        private const string NO_POST_PROCESSING_IMPORTED = "Post Processing package not found in the project.";
+        private const string NO_POST_PROCESSING_IMPORTED = "Post-processing package not found in the project.";
 
-        private const string QUEST_BAKED_LIGHTING_WARNING = "Realtime lighting for Quest content should be avoided and instead have a properly baked lighting setup for performance.";
+        private const string QUEST_BAKED_LIGHTING_WARNING = "Realtime lighting for Quest content should be avoided and instead have a properly baked lighting setup for optimal performance.";
 
-        private const string AMBIENT_MODE_SET_TO_CUSTOM = "The current scenes Environment Lighting setting is broken. This will override all light probes in the scene with black ambient light. Please change it to something else.";
+        private const string AMBIENT_MODE_SET_TO_CUSTOM = "The current scene's Environment Lighting setting is broken. This will override all light probes in the scene with black ambient light. Please change it to something else.";
 
         private const string NO_PROBLEMS_FOUND_IN_PP = "No problems were found in your post-processing setup. In some cases where post-processing is working in the editor but not in-game, some imported assets may be causing it not to function correctly.";
 
@@ -1464,7 +1464,7 @@ namespace VRWorldToolkit
 
         private const string QUEST_LIGHTMAP_COMPRESSION_OVERRIDE = "Lightmap \"{0}\" does not have a platform-specific override set for Android.";
         private const string QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_COMBINED = "No platform-specific override set on {0} lightmaps for Android.";
-        private const string QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_INFO = "Without setting proper platform-specific override when building for Android, lightmaps can show noticeable banding. Suggested format \"ASTC 4x4 block\".";
+        private const string QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_INFO = "Without setting a proper platform-specific override when building for Android, lightmaps can show noticeable banding. Suggested format \"ASTC 4x4 block\".";
 
         private const string MISSING_SHADER_WARNING = "The material \"{0}\" found in the scene has a missing or broken shader.";
         private const string MISSING_SHADER_WARNING_COMBINED = "Found {0} materials in the current scene that have missing or broken shaders.";
@@ -1476,7 +1476,7 @@ namespace VRWorldToolkit
 
         private const string LAYERS_NOT_SETUP = "Project layers are not set up for VRChat yet.";
 
-        private const string COLLISION_MATRIX_NOT_SETUP = "The projects Collision Matrix is not set up for VRChat yet.";
+        private const string COLLISION_MATRIX_NOT_SETUP = "The project's Collision Matrix is not set up for VRChat yet.";
 
         private const string MATERIAL_WITH_GRAB_PASS_SHADER = "A material ({0}) in the scene is using a GrabPass due to shader \"{1}\".";
         private const string MATERIAL_WITH_GRAB_PASS_SHADER_COMBINED = "Found {0} materials in the scene using a GrabPass.";
@@ -1489,11 +1489,11 @@ namespace VRWorldToolkit
 
         private const string SHRNM_DIRECTIONAL_MODE_BAKERY_ERROR = "SH or RNM directional mode detected in Bakery. Using SH directional mode is not supported in VRChat by default. It requires the usage of VRC Bakery Adapter by Merlin for it to function in-game.";
 
-        private const string BUILD_AND_TEST_BROKEN_ERROR = "VRChat link association has not been set up, and the VRChat client path has not been set in the VRCSDK settings. Without one of these settings set Build & Test will not function.";
+        private const string BUILD_AND_TEST_BROKEN_ERROR = "VRChat link association has not been set up, and the VRChat client path has not been set in the VRCSDK settings. Without one of these settings set, Build & Test will not function.";
 
-        private const string BUILD_AND_TEST_FORCE_NON_VR_ERROR = "VRChat client path has not been set to point directly to the VRChat executable in the VRCSDK settings. This will cause Force Non-VR setting for Build & Test not to work.";
+        private const string BUILD_AND_TEST_FORCE_NON_VR_ERROR = "VRChat client path has not been set to point directly to the VRChat executable in the VRCSDK settings. The Force Non-VR setting for Build & Test will not work.";
 
-        private const string BUILD_AND_TEST_NO_EXECUTABLE_FOUND = "Current client path set in the VRCSDK settings does not contain the VRChat executable this will cause problems with Build & Test functionality.";
+        private const string BUILD_AND_TEST_NO_EXECUTABLE_FOUND = "Current client path set in the VRCSDK settings does not contain the VRChat executable. This will cause problems with Build & Test functionality.";
 
         private const string MATERIAL_WITH_NON_WHITELISTED_SHADER = "Material \"{0}\" is using an unsupported shader \"{1}\".";
         private const string MATERIAL_WITH_NON_WHITELISTED_SHADER_COMBINED = "Found {0} materials with unsupported shaders.";
@@ -1505,7 +1505,7 @@ namespace VRWorldToolkit
 
         private const string NULL_TRIGGER_RECEIVER = "Null receiver found on trigger {0}.";
         private const string NULL_TRIGGER_RECEIVER_COMBINED = "Found {0} null receivers in scene triggers.";
-        private const string NULL_TRIGGER_RECEIVER_INFO = "This causes the trigger to target itself, which is sometimes wanted.";
+        private const string NULL_TRIGGER_RECEIVER_INFO = "This causes the trigger to target itself, which can sometimes be intentional.";
 
         private const string TEXT_MESH_LIGHTMAP_STATIC = "Text Mesh \"{0}\" marked as lightmap static.";
         private const string TEXT_MESH_LIGHTMAP_STATIC_COMBINED = "Found {0} Text Meshes marked as lightmap static.";
