@@ -782,6 +782,23 @@ namespace VRWorldToolkit
             };
         }
 
+
+
+        public static Action SetLegacyBlendShapeNormals(ModelImporter[] importers)
+        {
+            return () =>
+            {
+                if (EditorUtility.DisplayDialog("Enable Legacy Blend Shape Normals?", "This operation will enable Legacy Blend Shape Normals on " + importers.Length + " models. This can take some time, depending on the number of models and their size.\n\nDo you want to continue?", "Yes", "Cancel"))
+                {
+                    for (var i = 0; i < importers.Length; i++)
+                    {
+                        ModelImporterUtil.SetLegacyBlendShapeNormals(importers[i], true);
+                        importers[i].SaveAndReimport();
+                    }
+                }
+            };
+        }
+
         public static Action DisableComponent(Behaviour behaviour)
         {
             return () =>
@@ -2386,6 +2403,7 @@ namespace VRWorldToolkit
 
                 var missingShaders = new List<Material>();
                 var selectablesNotNone = new List<Selectable>();
+                var legacyBlendShapes = new List<ModelImporter>();
 
                 var checkedMaterials = new List<Material>();
                 var checkedShaders = new Dictionary<Shader, CheckedShaderProperties>();
@@ -2467,6 +2485,7 @@ namespace VRWorldToolkit
                                 {
                                     if (mesh.blendShapeCount > 0 && importer.importBlendShapeNormals == ModelImporterNormals.Calculate && !ModelImporterUtil.GetLegacyBlendShapeNormals(importer))
                                     {
+                                        legacyBlendShapes.Add(importer);
                                         legacyBlendShapeIssues.AddSingleMessage(new SingleMessage(Path.GetFileName(AssetDatabase.GetAssetPath(mesh)), EditorUtility.FormatBytes(Profiler.GetRuntimeMemorySizeLong(mesh))).SetAssetPath(importer.assetPath).SetAutoFix(SetLegacyBlendShapeNormals(importer)));
                                     }
                                 }
@@ -2646,6 +2665,11 @@ namespace VRWorldToolkit
                         }
                     }
 #endif
+                }
+
+                if (legacyBlendShapes.Count > 1)
+                {
+                    legacyBlendShapeIssues.SetGroupAutoFix(SetLegacyBlendShapeNormals(legacyBlendShapes.ToArray()));
                 }
 
                 if (selectablesNotNone.Count > 1)
