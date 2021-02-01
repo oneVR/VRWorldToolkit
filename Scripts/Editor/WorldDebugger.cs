@@ -168,27 +168,27 @@ namespace VRWorldToolkit
 
             public Action GroupAutoFix;
 
-            public List<SingleMessage> MessageList = new List<SingleMessage>();
+            public readonly List<SingleMessage> MessageList = new List<SingleMessage>();
 
             public MessageGroup(string message, MessageType messageType)
             {
-                this.Message = message;
-                this.MessageType = messageType;
+                Message = message;
+                MessageType = messageType;
             }
 
             public MessageGroup(string message, string combinedMessage, MessageType messageType)
             {
-                this.Message = message;
-                this.CombinedMessage = combinedMessage;
-                this.MessageType = messageType;
+                Message = message;
+                CombinedMessage = combinedMessage;
+                MessageType = messageType;
             }
 
             public MessageGroup(string message, string combinedMessage, string additionalInfo, MessageType messageType)
             {
-                this.Message = message;
-                this.CombinedMessage = combinedMessage;
-                this.AdditionalInfo = additionalInfo;
-                this.MessageType = messageType;
+                Message = message;
+                CombinedMessage = combinedMessage;
+                AdditionalInfo = additionalInfo;
+                MessageType = messageType;
             }
 
             public MessageGroup SetGroupAutoFix(Action groupAutoFix)
