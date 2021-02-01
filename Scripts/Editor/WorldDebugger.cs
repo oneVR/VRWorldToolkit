@@ -1495,7 +1495,7 @@ namespace VRWorldToolkit
 
         private const string COLLISION_MATRIX_NOT_SETUP = "The project's Collision Matrix is not set up for VRChat yet.";
 
-        private const string MATERIAL_WITH_GRAB_PASS_SHADER = "A material ({0}) in the scene is using a GrabPass due to shader \"{1}\".";
+        private const string MATERIAL_WITH_GRAB_PASS_SHADER = "A material ({0}) in the scene has an active GrabPass due to shader \"{1}\".";
         private const string MATERIAL_WITH_GRAB_PASS_SHADER_COMBINED = "Found {0} materials in the scene using a GrabPass.";
         private const string MATERIAL_WITH_GRAB_PASS_SHADER_INFO_PC = "A GrabPass will halt the rendering to copy the screen's contents into a texture for the shader to read. This has a notable effect on performance.";
         private const string MATERIAL_WITH_GRAB_PASS_SHADER_INFO_QUEST = "Please change the shader for this material. When a shader uses a GrabPass on Quest, it will cause painful visual artifacts to occur, as they are not supported.";
