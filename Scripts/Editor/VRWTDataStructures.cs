@@ -11,7 +11,6 @@ namespace VRWorldToolkit.DataStructures
         public static GUIStyle RichTextWrap { get; internal set; }
         public static GUIStyle BoldWrap { get; internal set; }
         public static GUIStyle RedLabel { get; internal set; }
-        public static GUIStyle WhiteLabel { get; internal set; }
         public static GUIStyle TreeViewLabel { get; internal set; }
         public static GUIStyle TreeViewLabelSelected { get; internal set; }
         public static GUIStyle CenteredLabel { get; internal set; }
@@ -25,6 +24,7 @@ namespace VRWorldToolkit.DataStructures
         {
             HelpBoxRichText = new GUIStyle("HelpBox")
             {
+                alignment = TextAnchor.MiddleLeft,
                 richText = true
             };
 
@@ -46,7 +46,7 @@ namespace VRWorldToolkit.DataStructures
                 richText = true
             };
 
-            RichTextWrap = new GUIStyle
+            RichTextWrap = new GUIStyle("Label")
             {
                 richText = true,
                 wordWrap = true
@@ -57,7 +57,7 @@ namespace VRWorldToolkit.DataStructures
                 wordWrap = true
             };
 
-            RedLabel = new GUIStyle
+            RedLabel = new GUIStyle("Label")
             {
                 normal =
                 {
