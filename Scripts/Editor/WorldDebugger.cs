@@ -479,7 +479,7 @@ namespace VRWorldToolkit
                                     if (hasButtons)
                                     {
                                         var box = new GUIContent(finalMessage, GetDebuggerIcon(messageGroup.MessageType));
-                                        GUILayout.Box(box, Styles.HelpBoxRichText, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
+                                        GUILayout.Box(box, Styles.HelpBoxRichText, GUILayout.ExpandHeight(true), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
 
                                         EditorGUILayout.BeginVertical();
 
@@ -548,7 +548,7 @@ namespace VRWorldToolkit
                                             if (hasButtons)
                                             {
                                                 var box = new GUIContent(finalSingleMessage);
-                                                GUILayout.Box(box, Styles.HelpBoxPadded, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 121));
+                                                GUILayout.Box(box, Styles.HelpBoxPadded, GUILayout.ExpandHeight(true), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 121));
 
                                                 EditorGUILayout.BeginVertical();
 
@@ -577,6 +577,8 @@ namespace VRWorldToolkit
                                                 }
 
                                                 EditorGUI.EndDisabledGroup();
+
+                                                GUILayout.FlexibleSpace();
 
                                                 EditorGUILayout.EndVertical();
                                             }
@@ -608,7 +610,7 @@ namespace VRWorldToolkit
                                         if (hasButtons)
                                         {
                                             var box = new GUIContent(finalMessage, GetDebuggerIcon(messageGroup.MessageType));
-                                            GUILayout.Box(box, Styles.HelpBoxRichText, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
+                                            GUILayout.Box(box, Styles.HelpBoxRichText, GUILayout.ExpandHeight(true), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
 
                                             EditorGUILayout.BeginVertical();
 
@@ -641,6 +643,8 @@ namespace VRWorldToolkit
 
                                             EditorGUI.EndDisabledGroup();
 
+                                            GUILayout.FlexibleSpace();
+
                                             EditorGUILayout.EndVertical();
                                         }
                                         else
@@ -659,7 +663,7 @@ namespace VRWorldToolkit
                                     EditorGUILayout.BeginHorizontal();
 
                                     var box = new GUIContent(messageGroup.Message, GetDebuggerIcon(messageGroup.MessageType));
-                                    GUILayout.Box(box, Styles.HelpBoxRichText, GUILayout.MinHeight(42), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
+                                    GUILayout.Box(box, Styles.HelpBoxRichText, GUILayout.ExpandHeight(true), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
 
                                     EditorGUILayout.BeginVertical();
 
@@ -705,7 +709,7 @@ namespace VRWorldToolkit
             private static void DrawMessage(string messageText, MessageType type)
             {
                 var box = new GUIContent(messageText, GetDebuggerIcon(type));
-                GUILayout.Box(box, Styles.HelpBoxRichText, GUILayout.MinHeight(42), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 18));
+                GUILayout.Box(box, Styles.HelpBoxRichText, GUILayout.ExpandHeight(true), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 18));
             }
         }
 
