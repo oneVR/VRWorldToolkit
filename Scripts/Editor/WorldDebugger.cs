@@ -786,8 +786,6 @@ namespace VRWorldToolkit
             };
         }
 
-
-
         public static Action SetLegacyBlendShapeNormals(ModelImporter[] importers)
         {
             return () =>
@@ -2336,52 +2334,59 @@ namespace VRWorldToolkit
 
                                     if (postProcessProfile is null) continue;
 
-                                    if (postProcessProfile.GetSetting<ColorGrading>() && postProcessProfile.GetSetting<ColorGrading>().enabled && postProcessProfile.GetSetting<ColorGrading>().active)
+                                    var ambientOcclusion = postProcessProfile.GetSetting<AmbientOcclusion>();
+                                    if (ambientOcclusion && ambientOcclusion.enabled && ambientOcclusion.active)
                                     {
-                                        if (postProcessProfile.GetSetting<ColorGrading>().tonemapper.value == Tonemapper.None)
+                                        postProcessing.AddMessageGroup(new MessageGroup(NO_AMBIENT_OCCLUSION, MessageType.Error).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.AmbientOcclusion)).SetSelectObject(postProcessVolume.gameObject)));
+                                    }
+
+                                    var screenSpaceReflections = postProcessProfile.GetSetting<ScreenSpaceReflections>();
+                                    if (screenSpaceReflections && screenSpaceReflections.enabled && screenSpaceReflections.active)
+                                    {
+                                        postProcessing.AddMessageGroup(new MessageGroup(SCREEN_SPACE_REFLECTIONS_WARNING, MessageType.Warning).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.ScreenSpaceReflections)).SetSelectObject(postProcessVolume.gameObject)));
+                                    }
+
+                                    var vignette = postProcessProfile.GetSetting<Vignette>();
+                                    if (vignette && vignette.enabled && vignette.active)
+                                    {
+                                        postProcessing.AddMessageGroup(new MessageGroup(VIGNETTE_WARNING, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
+                                    }
+
+                                    var colorGrading = postProcessProfile.GetSetting<ColorGrading>();
+                                    if (colorGrading && colorGrading.enabled && colorGrading.active)
+                                    {
+                                        if (colorGrading.tonemapper.value == Tonemapper.None && colorGrading.gradingMode == GradingMode.HighDefinitionRange)
                                         {
                                             postProcessing.AddMessageGroup(new MessageGroup(DONT_USE_NONE_FOR_TONEMAPPING, MessageType.Error).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
                                         }
                                     }
 
-                                    if (postProcessProfile.GetSetting<Bloom>() && postProcessProfile.GetSetting<Bloom>().enabled && postProcessProfile.GetSetting<Bloom>().active)
+                                    if (postProcessVolume.isGlobal)
                                     {
                                         var bloom = postProcessProfile.GetSetting<Bloom>();
-
-                                        if (bloom.intensity.overrideState && bloom.intensity.value > 0.3f)
+                                        if (bloom && bloom.enabled && bloom.active)
                                         {
-                                            postProcessing.AddMessageGroup(new MessageGroup(TOO_HIGH_BLOOM_INTENSITY, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
+                                            if (bloom.intensity.overrideState && bloom.intensity.value > 0.3f)
+                                            {
+                                                postProcessing.AddMessageGroup(new MessageGroup(TOO_HIGH_BLOOM_INTENSITY, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
+                                            }
+
+                                            if (bloom.threshold.overrideState && bloom.threshold.value > 1f)
+                                            {
+                                                postProcessing.AddMessageGroup(new MessageGroup(TOO_HIGH_BLOOM_THRESHOLD, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
+                                            }
+
+                                            if (bloom.dirtTexture.overrideState && bloom.dirtTexture.value || bloom.dirtIntensity.overrideState && bloom.dirtIntensity.value > 0)
+                                            {
+                                                postProcessing.AddMessageGroup(new MessageGroup(NO_BLOOM_DIRT_IN_VR, MessageType.Error).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.BloomDirt)).SetSelectObject(postProcessVolume.gameObject)));
+                                            }
                                         }
 
-                                        if (bloom.threshold.overrideState && bloom.threshold.value > 1f)
+                                        var depthOfField = postProcessProfile.GetSetting<DepthOfField>();
+                                        if (depthOfField && depthOfField.enabled && depthOfField.active)
                                         {
-                                            postProcessing.AddMessageGroup(new MessageGroup(TOO_HIGH_BLOOM_THRESHOLD, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
+                                            postProcessing.AddMessageGroup(new MessageGroup(DEPTH_OF_FIELD_WARNING, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
                                         }
-
-                                        if (bloom.dirtTexture.overrideState && bloom.dirtTexture.value || bloom.dirtIntensity.overrideState && bloom.dirtIntensity.value > 0)
-                                        {
-                                            postProcessing.AddMessageGroup(new MessageGroup(NO_BLOOM_DIRT_IN_VR, MessageType.Error).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.BloomDirt)).SetSelectObject(postProcessVolume.gameObject)));
-                                        }
-                                    }
-
-                                    if (postProcessProfile.GetSetting<AmbientOcclusion>() && postProcessProfile.GetSetting<AmbientOcclusion>().enabled && postProcessProfile.GetSetting<AmbientOcclusion>().active)
-                                    {
-                                        postProcessing.AddMessageGroup(new MessageGroup(NO_AMBIENT_OCCLUSION, MessageType.Error).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.AmbientOcclusion)).SetSelectObject(postProcessVolume.gameObject)));
-                                    }
-
-                                    if (postProcessVolume.isGlobal && postProcessProfile.GetSetting<DepthOfField>() && postProcessProfile.GetSetting<DepthOfField>().enabled && postProcessProfile.GetSetting<DepthOfField>().active)
-                                    {
-                                        postProcessing.AddMessageGroup(new MessageGroup(DEPTH_OF_FIELD_WARNING, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
-                                    }
-
-                                    if (postProcessProfile.GetSetting<ScreenSpaceReflections>() && postProcessProfile.GetSetting<ScreenSpaceReflections>().enabled && postProcessProfile.GetSetting<ScreenSpaceReflections>().active)
-                                    {
-                                        postProcessing.AddMessageGroup(new MessageGroup(SCREEN_SPACE_REFLECTIONS_WARNING, MessageType.Warning).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.ScreenSpaceReflections)).SetSelectObject(postProcessVolume.gameObject)));
-                                    }
-
-                                    if (postProcessProfile.GetSetting<Vignette>() && postProcessProfile.GetSetting<Vignette>().enabled && postProcessProfile.GetSetting<Vignette>().active)
-                                    {
-                                        postProcessing.AddMessageGroup(new MessageGroup(VIGNETTE_WARNING, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
                                     }
                                 }
                             }
