@@ -18,9 +18,9 @@ namespace VRWorldToolkit
         {
             Type,
             Size,
-            Percentage,
             Name,
             Extension,
+            Percentage,
         }
 
         public BuildReportTreeView(TreeViewState state, MultiColumnHeader multiColumnHeader, BuildReport report) : base(state, multiColumnHeader)
@@ -303,13 +303,13 @@ namespace VRWorldToolkit
                 new MultiColumnHeaderState.Column
                 {
                     headerContent = EditorGUIUtility.IconContent("FilterByType"),
-                    contextMenuText = "Type",
-                    headerTextAlignment = TextAlignment.Left,
+                    contextMenuText = "Preview",
+                    headerTextAlignment = TextAlignment.Center,
                     canSort = false,
                     width = 20,
                     minWidth = 20,
                     maxWidth = 20,
-                    autoResize = true,
+                    autoResize = false,
                     allowToggleVisibility = true
                 },
                 new MultiColumnHeaderState.Column
@@ -321,21 +321,8 @@ namespace VRWorldToolkit
                     sortingArrowAlignment = TextAlignment.Right,
                     width = 60,
                     minWidth = 60,
-                    maxWidth = 70,
-                    autoResize = true,
-                    allowToggleVisibility = true
-                },
-                new MultiColumnHeaderState.Column
-                {
-                    headerContent = new GUIContent("%", "Percentage out of all assets"),
-                    contextMenuText = "Percentage",
-                    headerTextAlignment = TextAlignment.Left,
-                    sortedAscending = true,
-                    sortingArrowAlignment = TextAlignment.Right,
-                    width = 60,
-                    minWidth = 60,
-                    maxWidth = 70,
-                    autoResize = true,
+                    maxWidth = 75,
+                    autoResize = false,
                     allowToggleVisibility = true
                 },
                 new MultiColumnHeaderState.Column
@@ -361,6 +348,19 @@ namespace VRWorldToolkit
                     maxWidth = 100,
                     autoResize = true,
                     allowToggleVisibility = true
+                },
+                new MultiColumnHeaderState.Column
+                {
+                    headerContent = new GUIContent("%", "Percentage out of all assets"),
+                    contextMenuText = "Percentage",
+                    headerTextAlignment = TextAlignment.Left,
+                    sortedAscending = true,
+                    sortingArrowAlignment = TextAlignment.Right,
+                    width = 60,
+                    minWidth = 60,
+                    maxWidth = 70,
+                    autoResize = false,
+                    allowToggleVisibility = true
                 }
             };
 
@@ -374,8 +374,20 @@ namespace VRWorldToolkit
 
             for (var visibleColumnIndex = 0; visibleColumnIndex < args.GetNumVisibleColumns(); visibleColumnIndex++)
             {
+                Rect rect;
                 // Get the current cell rect and index
-                var rect = args.GetCellRect(visibleColumnIndex);
+                if (visibleColumnIndex == 1)
+                {
+                    var rectOne = args.GetCellRect(visibleColumnIndex);
+                    var rectTwo = args.GetCellRect(2);
+
+                    rect = new Rect(rectOne.position, new Vector2(rectOne.width + rectTwo.width, rectOne.height));
+                }
+                else
+                {
+                    rect = args.GetCellRect(visibleColumnIndex);
+                }
+
                 var columnIndex = (TreeColumns) args.GetColumn(visibleColumnIndex);
 
                 //Set label style to white if cell is selected otherwise to normal
@@ -385,7 +397,7 @@ namespace VRWorldToolkit
                 switch (columnIndex)
                 {
                     case TreeColumns.Type:
-                        GUI.Label(rect, buildReportItem.previewIcon, GUIStyle.none);
+                        GUI.Label(rect, buildReportItem.previewIcon, Styles.Center);
                         break;
                     case TreeColumns.Name:
                         if (args.selected && buildReportItem.path != "")
@@ -398,14 +410,14 @@ namespace VRWorldToolkit
                         }
 
                         break;
+                    case TreeColumns.Extension:
+                        //EditorGUI.LabelField(rect, buildReportItem.extension, labelStyle);
+                        break;
                     case TreeColumns.Size:
                         EditorGUI.LabelField(rect, EditorUtility.FormatBytes(buildReportItem.size), labelStyle);
                         break;
                     case TreeColumns.Percentage:
                         EditorGUI.LabelField(rect, buildReportItem.percentage.ToString("P"), labelStyle);
-                        break;
-                    case TreeColumns.Extension:
-                        EditorGUI.LabelField(rect, buildReportItem.extension, labelStyle);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(columnIndex), columnIndex, null);
@@ -487,15 +499,15 @@ namespace VRWorldToolkit
             // Sort items by sorted column
             switch (multiColumnHeader.sortedColumnIndex)
             {
-                case 1:
                 case 2:
-                    items = items.OrderBy(x => x.size);
-                    break;
-                case 3:
                     items = items.OrderBy(x => x.displayName);
                     break;
-                case 4:
+                case 3:
                     items = items.OrderBy(x => x.extension);
+                    break;
+                case 1:
+                case 4:
+                    items = items.OrderBy(x => x.size);
                     break;
             }
 
