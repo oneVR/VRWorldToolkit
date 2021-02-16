@@ -15,17 +15,15 @@ using System.Linq;
 
 namespace VRWorldToolkit
 {
-    public class BuildChecksManager : MonoBehaviour
+    public class BuildChecksManager : IVRCSDKBuildRequestedCallback
     {
-        public class OnBuildChecksCallback : IVRCSDKBuildRequestedCallback
+        public int callbackOrder => 0;
+
+        public bool OnBuildRequested(VRCSDKRequestedBuildType requestedBuildType)
         {
-            public int callbackOrder => 0;
-
-            public bool OnBuildRequested(VRCSDKRequestedBuildType requestedBuildType)
+            if (requestedBuildType == VRCSDKRequestedBuildType.Scene)
             {
-                var descriptors = FindObjectsOfType(typeof(VRC_SceneDescriptor)) as VRC_SceneDescriptor[];
-
-                if (descriptors.Length > 0)
+                if (Object.FindObjectsOfType(typeof(VRC_SceneDescriptor)) is VRC_SceneDescriptor[] descriptors && descriptors.Length > 0)
                 {
                     var spawnProblems = false;
                     var descriptor = descriptors[0];
@@ -60,9 +58,7 @@ namespace VRWorldToolkit
                         }
                     }
 
-                    var pipelines = FindObjectsOfType(typeof(PipelineManager)) as PipelineManager[];
-
-                    if (pipelines.Length > 1)
+                    if (Object.FindObjectsOfType(typeof(PipelineManager)) is PipelineManager[] pipelines && pipelines.Length > 1)
                     {
                         var selection = EditorUtility.DisplayDialogComplex("VRWorld Toolkit: Multiple Pipeline managers!", "Multiple Pipeline Manager components found in scene.\r\n\r\nThis can break the upload process and cause you to not be able to load into the world.\r\n\r\nSelect Cancel Build if you want to fix the problem yourself or press Bypass to ignore the problem and continue.",
                             "Fix And Continue", "Cancel Build", "Bypass");
@@ -77,9 +73,9 @@ namespace VRWorldToolkit
                         }
                     }
                 }
-
-                return true;
             }
+
+            return true;
         }
     }
 }
