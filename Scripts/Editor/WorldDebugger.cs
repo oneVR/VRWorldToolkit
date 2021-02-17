@@ -493,9 +493,9 @@ namespace VRWorldToolkit
 
                         if (hasButtons)
                         {
-                            if (messageGroup.MessageList.Count == 0)
+                            if (messageGroup.MessageList.Count > 1)
                             {
-                                DrawButtons(null, messageGroup.Documentation, null, messageGroup.GroupAutoFix);
+                                DrawButtons(messageGroup.GetSelectObjects(), messageGroup.Documentation, null, messageGroup.GroupAutoFix);
                             }
                             else if (messageGroup.MessageList.Count == 1)
                             {
