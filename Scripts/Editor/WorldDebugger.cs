@@ -556,7 +556,7 @@ namespace VRWorldToolkit
 
                     if (infoLink != null)
                     {
-                        if (GUILayout.Button("Info", GUILayout.Width(ButtonWidth), GUILayout.Height(ButtonHeight)))
+                        if (GUILayout.Button("More Info", GUILayout.Width(ButtonWidth), GUILayout.Height(ButtonHeight)))
                         {
                             Application.OpenURL(infoLink);
                         }
