@@ -554,9 +554,12 @@ namespace VRWorldToolkit
 
                     EditorGUI.BeginDisabledGroup(!(selectObjects != null || assetPath != null || infoLink != null));
 
-                    if (infoLink != null && GUILayout.Button("Info", GUILayout.Width(ButtonWidth), GUILayout.Height(ButtonHeight)))
+                    if (infoLink != null)
                     {
-                        Application.OpenURL(infoLink);
+                        if (GUILayout.Button("Info", GUILayout.Width(ButtonWidth), GUILayout.Height(ButtonHeight)))
+                        {
+                            Application.OpenURL(infoLink);
+                        }
                     }
                     else if (GUILayout.Button("Select", GUILayout.Width(ButtonWidth), GUILayout.Height(ButtonHeight)))
                     {
