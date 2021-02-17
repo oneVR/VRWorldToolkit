@@ -581,7 +581,7 @@ namespace VRWorldToolkit
                     {
                         autoFix?.Invoke();
 
-                        EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+                        EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
 
                         recheck = true;
                     }
@@ -905,27 +905,27 @@ namespace VRWorldToolkit
             };
         }
 
-        public static Action RemoveOverlappingLightprobes(LightProbeGroup lpg)
+        public static Action RemoveOverlappingLightProbes(LightProbeGroup lightProbeGroup)
         {
             return () =>
             {
-                Undo.RegisterCompleteObjectUndo(lpg, "Removed Overlapping Light Probes");
-                if (EditorUtility.DisplayDialog("Remove overlapping light probes?", "This operation will remove any overlapping light probes in the group \"" + lpg.gameObject.name + "\".\n\nDo you want to continue?", "Yes", "Cancel"))
+                Undo.RegisterCompleteObjectUndo(lightProbeGroup, "Removed Overlapping Light Probes");
+                if (EditorUtility.DisplayDialog("Remove overlapping light probes?", "This operation will remove any overlapping light probes in the group \"" + lightProbeGroup.gameObject.name + "\".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
-                    lpg.probePositions = lpg.probePositions.Distinct().ToArray();
-                    PrefabUtility.RecordPrefabInstancePropertyModifications(lpg);
+                    lightProbeGroup.probePositions = lightProbeGroup.probePositions.Distinct().ToArray();
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(lightProbeGroup);
                 }
             };
         }
 
-        public static Action RemoveOverlappingLightprobes(LightProbeGroup[] lpgs)
+        public static Action RemoveOverlappingLightProbes(LightProbeGroup[] lightProbeGroups)
         {
             return () =>
             {
-                Undo.RegisterCompleteObjectUndo(lpgs, "Removed Overlapping Light Probes");
+                Undo.RegisterCompleteObjectUndo(lightProbeGroups, "Removed Overlapping Light Probes");
                 if (EditorUtility.DisplayDialog("Remove overlapping light probes?", "This operation will remove any overlapping light probes found in the current scene.\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
-                    foreach (var lpg in lpgs)
+                    foreach (var lpg in lightProbeGroups)
                     {
                         lpg.probePositions = lpg.probePositions.Distinct().ToArray();
                         PrefabUtility.RecordPrefabInstancePropertyModifications(lpg);
@@ -934,7 +934,7 @@ namespace VRWorldToolkit
             };
         }
 
-        public static Action RemoveRedundantLightProbes(LightProbeGroup[] lpgs)
+        public static Action RemoveRedundantLightProbes(LightProbeGroup[] lightProbeGroups)
         {
             return () =>
             {
@@ -943,7 +943,7 @@ namespace VRWorldToolkit
                     var probes = LightmapSettings.lightProbes.positions;
                     if (EditorUtility.DisplayDialog("Remove redundant light probes?", "This operation will attempt to remove any redundant light probes in the current scene. Bake your lighting before this operation to avoid any correct light probes getting removed.\n\nDo you want to continue?", "Yes", "Cancel"))
                     {
-                        foreach (var lpg in lpgs)
+                        foreach (var lpg in lightProbeGroups)
                         {
                             lpg.probePositions = lpg.probePositions.Distinct().Where(p => !probes.Contains(p)).ToArray();
                         }
@@ -1176,245 +1176,245 @@ namespace VRWorldToolkit
 
         #region Texts
 
-        private const string NO_SCENE_DESCRIPTOR = "The current scene has no Scene Descriptor. Please add one, or drag the VRCWorld prefab to the scene.";
+        private const string NoSceneDescriptor = "The current scene has no Scene Descriptor. Please add one, or drag the VRCWorld prefab to the scene.";
 
-        private const string TOO_MANY_SCENE_DESCRIPTORS = "Multiple Scene Descriptors were found. Only one scene descriptor can exist in a single scene.";
+        private const string TooManySceneDescriptors = "Multiple Scene Descriptors were found. Only one scene descriptor can exist in a single scene.";
 
-        private const string TOO_MANY_PIPELINE_MANAGERS = "The current scene has multiple Pipeline Managers in it. This can break the world upload process and prevent you from being able to load into the world.";
+        private const string TooManyPipelineManagers = "The current scene has multiple Pipeline Managers in it. This can break the world upload process and prevent you from being able to load into the world.";
 
-        private const string WORLD_DESCRIPTOR_FAR = "Scene Descriptor is {0} units far from the zero point in Unity. Having your world center out this far will cause some noticeable jittering on models. You should move your world closer to the zero point of your scene.";
+        private const string WorldDescriptorFar = "Scene Descriptor is {0} units far from the zero point in Unity. Having your world center out this far will cause some noticeable jittering on models. You should move your world closer to the zero point of your scene.";
 
-        private const string WORLD_DESCRIPTOR_OFF = "Scene Descriptor is {0} units far from the zero point in Unity. It is usually good practice to keep it as close as possible to the absolute zero point to avoid floating-point errors.";
+        private const string WorldDescriptorOff = "Scene Descriptor is {0} units far from the zero point in Unity. It is usually good practice to keep it as close as possible to the absolute zero point to avoid floating-point errors.";
 
-        private const string IMPROPERLY_SETUP_VRC_PROJECT_SETTINGS = "Improperly setup VRCProjectSettings detected. This will cause the Control Panel Builder tab to appear empty.";
+        private const string ImproperlySetupVRCProjectSettings = "Improperly setup VRCProjectSettings detected. This will cause the Control Panel Builder tab to appear empty.";
 
-        private const string VRC_PROJECT_SETTINGS_MISSING = "VRCProjectSettings not found. The SDK needs it, and missing it will cause the SDK to error out. To fix the problem, reimport the SDK.";
+        private const string VRCProjectSettingsMissing = "VRCProjectSettings not found. The SDK needs it, and missing it will cause the SDK to error out. To fix the problem, reimport the SDK.";
 
-        private const string LAST_BUILD_FAILED = "Last build failed! Check the Console for compile errors to find the cause. If the error script is in the SDK, try reimporting it. Otherwise, remove or update the problem asset.";
+        private const string LastBuildFailed = "Last build failed! Check the Console for compile errors to find the cause. If the error script is in the SDK, try reimporting it. Otherwise, remove or update the problem asset.";
 
-        private const string NO_SPAWN_POINT_SET = "There are no spawn points set in your Scene Descriptor. Spawning into a world with no spawn point will cause you to get thrown back to your homeworld.";
+        private const string NoSpawnPointSet = "There are no spawn points set in your Scene Descriptor. Spawning into a world with no spawn point will cause you to get thrown back to your homeworld.";
 
-        private const string NULL_SPAWN_POINT = "Null spawn point set Scene Descriptor. Spawning into a null spawn point will cause you to get thrown back to your homeworld.";
+        private const string NullSpawnPoint = "Null spawn point set Scene Descriptor. Spawning into a null spawn point will cause you to get thrown back to your homeworld.";
 
-        private const string REFERENCE_CAMERA_CLEAR_FLAGS_NOT_SKYBOX = "The current reference camera's clear flags are not set to Skybox. This can cause rendering problems in-game.";
+        private const string ReferenceCameraClearFlagsNotSkybox = "The current reference camera's clear flags are not set to Skybox. This can cause rendering problems in-game.";
 
-        private const string REFERENCE_CAMERA_CLIPPING_PLANE_RATIO = "Too high of a ratio between reference camera's near ({0}) and far ({1}) clip values can cause rendering issues in-game.";
+        private const string ReferenceCameraClippingPlaneRatio = "Too high of a ratio between reference camera's near ({0}) and far ({1}) clip values can cause rendering issues in-game.";
 
-        private const string REFERENCE_CAMERA_NEAR_CLIP_PLANE_OVER = "The current reference camera's near clip value is {0}. This value gets clamped to be between 0.01 and 0.05.";
+        private const string ReferenceCameraNearClipPlaneOver = "The current reference camera's near clip value is {0}. This value gets clamped to be between 0.01 and 0.05.";
 
-        private const string NO_REFERENCE_CAMERA_SET_GENERAL = "No reference camera set in the Scene Descriptor. Using a reference camera allows the world's rendering distance to be changed by changing the camera's near and far clipping planes.";
+        private const string NoReferenceCameraSetGeneral = "No reference camera set in the Scene Descriptor. Using a reference camera allows the world's rendering distance to be changed by changing the camera's near and far clipping planes.";
 
-        private const string COLLIDER_UNDER_SPAWN_IS_TRIGGER = "The collider \"{0}\" under your spawn point {1} has been set as Is Trigger.";
-        private const string COLLIDER_UNDER_SPAWN_IS_TRIGGER_COMBINED = "Found \"{0}\" spawn points which have a collider set as Is Trigger underneath.";
-        private const string COLLIDER_UNDER_SPAWN_IS_TRIGGER_INFO = "Spawning into a world with nothing to stand on will cause the players to fall forever.";
+        private const string ColliderUnderSpawnIsTrigger = "The collider \"{0}\" under your spawn point {1} has been set as Is Trigger.";
+        private const string ColliderUnderSpawnIsTriggerCombined = "Found \"{0}\" spawn points which have a collider set as Is Trigger underneath.";
+        private const string ColliderUnderSpawnIsTriggerInfo = "Spawning into a world with nothing to stand on will cause the players to fall forever.";
 
-        private const string SPAWN_UNDER_RESPAWN_HEIGHT = "Spawn point \"{0}\" is placed {1} units under the Respawn Height set in Scene Descriptor.";
-        private const string SPAWN_UNDER_RESPAWN_HEIGHT_COMBINED = "Found {0} spawn points under Respawn Height set in Scene Descriptor.";
-        private const string SPAWN_UNDER_RESPAWN_HEIGHT_INFO = "Spawning under the Respawn Height causes players to get stuck while respawning infinitely.";
+        private const string SpawnUnderRespawnHeight = "Spawn point \"{0}\" is placed {1} units under the Respawn Height set in Scene Descriptor.";
+        private const string SpawnUnderRespawnHeightCombined = "Found {0} spawn points under Respawn Height set in Scene Descriptor.";
+        private const string SpawnUnderRespawnHeightInfo = "Spawning under the Respawn Height causes players to get stuck while respawning infinitely.";
 
-        private const string NO_COLLIDER_UNDER_SPAWN = "Spawn point \"{0}\" does not have a collider under it.";
-        private const string NO_COLLIDER_UNDER_SPAWN_COMBINED = "Found {0} spawn points with no collider under them.";
-        private const string NO_COLLIDER_UNDER_SPAWN_INFO = "Spawning into a world with nothing to stand on will cause the players to fall forever.";
+        private const string NoColliderUnderSpawn = "Spawn point \"{0}\" does not have a collider under it.";
+        private const string NoColliderUnderSpawnCombined = "Found {0} spawn points with no collider under them.";
+        private const string NoColliderUnderSpawnInfo = "Spawning into a world with nothing to stand on will cause the players to fall forever.";
 
-        private const string RESPAWN_HEIGHT_ABOVE_COLLIDER = "The collider below spawn point \"{1}\" is below respawn height set in scene descriptor.";
-        private const string RESPAWN_HEIGHT_ABOVE_COLLIDER_COMBINED = "Found {0} spawn points where the collider is below the respawn height.";
-        private const string RESPAWN_HEIGHT_ABOVE_COLLIDER_INFO = "This will cause players to get stuck while respawning infinitely.";
+        private const string RespawnHeightAboveCollider = "The collider below spawn point \"{1}\" is below respawn height set in scene descriptor.";
+        private const string RespawnHeightAboveColliderCombined = "Found {0} spawn points where the collider is below the respawn height.";
+        private const string RespawnHeightAboveColliderInfo = "This will cause players to get stuck while respawning infinitely.";
 
-        private const string NO_PLAYER_MODS = "No Player Mods were found in the scene. Player mods are needed for adding jumping and changing walking speed.";
+        private const string NoPlayerMods = "No Player Mods were found in the scene. Player mods are needed for adding jumping and changing walking speed.";
 
-        private const string TRIGGER_TRIGGER_NO_COLLIDER = "You have an OnEnterTrigger or OnExitTrigger Trigger \"{0}\" that does not have a Collider on it.";
-        private const string COLLIDER_TRIGGER_NO_COLLIDER = "You have an OnEnterCollider or OnExitCollider Trigger \"{0}\" that does not have a Collider on it.";
+        private const string TriggerTriggerNoCollider = "You have an OnEnterTrigger or OnExitTrigger Trigger \"{0}\" that does not have a Collider on it.";
+        private const string ColliderTriggerNoCollider = "You have an OnEnterCollider or OnExitCollider Trigger \"{0}\" that does not have a Collider on it.";
 
-        private const string TRIGGER_TRIGGER_WRONG_LAYER = "You have an OnEnterTrigger or OnExitTrigger Trigger \"{0}\" that is not on the MirrorReflection layer.";
-        private const string TRIGGER_TRIGGER_WRONG_LAYER_COMBINED = "You have {0} OnEnterTrigger or OnExitTrigger Triggers that are not on the MirrorReflection layer.";
-        private const string TRIGGER_TRIGGER_WRONG_LAYER_INFO = "This can stop raycasts from working correctly, making you unable to interact with objects and UI Buttons.";
+        private const string TriggerTriggerWrongLayer = "You have an OnEnterTrigger or OnExitTrigger Trigger \"{0}\" that is not on the MirrorReflection layer.";
+        private const string TriggerTriggerWrongLayerCombined = "You have {0} OnEnterTrigger or OnExitTrigger Triggers that are not on the MirrorReflection layer.";
+        private const string TriggerTriggerWrongLayerInfo = "This can stop raycasts from working correctly, making you unable to interact with objects and UI Buttons.";
 
-        private const string MIRROR_ON_BY_DEFAULT = "The mirror \"{0}\" is on by default.";
-        private const string MIRROR_ON_BY_DEFAULT_COMBINED = "The scene has {0} mirrors on by default.";
-        private const string MIRROR_ON_BY_DEFAULT_INFO = "This is an awful practice. Any mirrors in worlds should be disabled by default.";
+        private const string MirrorONByDefault = "The mirror \"{0}\" is on by default.";
+        private const string MirrorONByDefaultCombined = "The scene has {0} mirrors on by default.";
+        private const string MirrorONByDefaultInfo = "This is an awful practice. Any mirrors in worlds should be disabled by default.";
 
-        private const string MIRROR_WITH_DEFAULT_LAYERS = "The mirror \"{0}\" has the default Reflect Layers set.";
-        private const string MIRROR_WITH_DEFAULT_LAYERS_COMBINED = "You have {0} mirrors that have the default Reflect Layers set.";
-        private const string MIRROR_WITH_DEFAULT_LAYERS_INFO = "Only having the layers needed to have enabled in mirrors can save a lot of frames, especially in populated instances.";
+        private const string MirrorWithDefaultLayers = "The mirror \"{0}\" has the default Reflect Layers set.";
+        private const string MirrorWithDefaultLayersCombined = "You have {0} mirrors that have the default Reflect Layers set.";
+        private const string MirrorWithDefaultLayersInfo = "Only having the layers needed to have enabled in mirrors can save a lot of frames, especially in populated instances.";
 
-        private const string LEGACY_BLEND_SHAPE_ISSUES = "Skinned mesh renderer found with model {0} ({1}) without Legacy Blend Shape Normals enabled.";
-        private const string LEGACY_BLEND_SHAPE_ISSUES_COMBINED = "Found {0} models without Legacy Blend Shape Normals enabled.";
-        private const string LEGACY_BLEND_SHAPE_ISSUES_INFO = "This can significantly increase the size of the world.";
+        private const string LegacyBlendShapeIssues = "Skinned mesh renderer found with model {0} ({1}) without Legacy Blend Shape Normals enabled.";
+        private const string LegacyBlendShapeIssuesCombined = "Found {0} models without Legacy Blend Shape Normals enabled.";
+        private const string LegacyBlendShapeIssuesInfo = "This can significantly increase the size of the world.";
 
-        private const string BAKED_OCCLUSION_CULLING = "Baked Occlusion Culling found.";
+        private const string BakedOcclusionCulling = "Baked Occlusion Culling found.";
 
-        private const string NO_OCCLUSION_AREAS = "No occlusion areas were found. Occlusion Areas are recommended to help generate higher precision data where the camera is likely to be. If none exist, an area is created automatically containing all Occluders and Occludees.";
+        private const string NoOcclusionAreas = "No occlusion areas were found. Occlusion Areas are recommended to help generate higher precision data where the camera is likely to be. If none exist, an area is created automatically containing all Occluders and Occludees.";
 
-        private const string DISABLED_OCCLUSION_AREA = "Occlusion Area {0} found with Is View Volume disabled.";
-        private const string DISABLED_OCCLUSION_AREA_COMBINED = "Occlusion Areas found with Is View Volume disabled.";
-        private const string DISABLED_OCCLUSION_AREA_INFO = "Without this enabled, the Occlusion Area does not get used for the occlusion bake.";
+        private const string DisabledOcclusionArea = "Occlusion Area {0} found with Is View Volume disabled.";
+        private const string DisabledOcclusionAreaCombined = "Occlusion Areas found with Is View Volume disabled.";
+        private const string DisabledOcclusionAreaInfo = "Without this enabled, the Occlusion Area does not get used for the occlusion bake.";
 
-        private const string NO_OCCLUSION_CULLING = "The current scene does not have baked Occlusion Culling. Occlusion culling often gives a large performance boost, especially in larger worlds with multiple rooms or areas.";
+        private const string NoOcclusionCulling = "The current scene does not have baked Occlusion Culling. Occlusion culling often gives a large performance boost, especially in larger worlds with multiple rooms or areas.";
 
-        private const string OCCLUSION_CULLING_CACHE_WARNING = "The current project's occlusion culling cache has {0} files. When the occlusion culling cache grows too big, baking occlusion culling can take much longer than intended. It can be cleared with no adverse effects.";
+        private const string OcclusionCullingCacheWarning = "The current project's occlusion culling cache has {0} files. When the occlusion culling cache grows too big, baking occlusion culling can take much longer than intended. It can be cleared with no adverse effects.";
 
-        private const string ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE = "Active camera \"{0}\" outputting to a render texture.";
-        private const string ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE_COMBINED = "The current scene has {0} active cameras outputting to render textures.";
-        private const string ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE_INFO = "This will affect performance negatively by causing more draw calls to happen. They should only be enabled when needed.";
+        private const string ActiveCameraOutputtingToRenderTexture = "Active camera \"{0}\" outputting to a render texture.";
+        private const string ActiveCameraOutputtingToRenderTextureCombined = "The current scene has {0} active cameras outputting to render textures.";
+        private const string ActiveCameraOutputtingToRenderTextureInfo = "This will affect performance negatively by causing more draw calls to happen. They should only be enabled when needed.";
 
-        private const string ACTIVE_CAMERA_WITH_OVER_ZERO_DEPTH = "Active camera \"{0}\" targeting display 1 with render depth over 0.";
-        private const string ACTIVE_CAMERA_WITH_OVER_ZERO_DEPTH_COMBINED = "The current scene has {0} active cameras targeting display 1 with render depth over 0.";
-        private const string ACTIVE_CAMERA_WITH_OVER_ZERO_DEPTH_INFO = "This will cause it to render over the upload screen, not allowing you to upload.";
+        private const string ActiveCameraWithOverZeroDepth = "Active camera \"{0}\" targeting display 1 with render depth over 0.";
+        private const string ActiveCameraWithOverZeroDepthCombined = "The current scene has {0} active cameras targeting display 1 with render depth over 0.";
+        private const string ActiveCameraWithOverZeroDepthInfo = "This will cause it to render over the upload screen, not allowing you to upload.";
 
-        private const string NO_TOON_SHADERS = "Toon shaders should be avoided for world-building, as they are missing crucial things for making worlds. For world-building, the most recommended shader is Standard.";
+        private const string NoToonShaders = "Toon shaders should be avoided for world-building, as they are missing crucial things for making worlds. For world-building, the most recommended shader is Standard.";
 
-        private const string NON_CRUNCHED_TEXTURES = "{0}% of the textures used in the scene have not been crunch compressed. Crunch compression can significantly reduce the size of the world download. It can be found from the texture's import settings.";
+        private const string NonCrunchedTextures = "{0}% of the textures used in the scene have not been crunch compressed. Crunch compression can significantly reduce the size of the world download. It can be found from the texture's import settings.";
 
-        private const string SINGLE_COLOR_ENVIRONMENT_LIGHTING = "Consider changing the Environment Lighting Source from Color to Gradient for better ambient lighting.";
+        private const string SingleColorEnvironmentLighting = "Consider changing the Environment Lighting Source from Color to Gradient for better ambient lighting.";
 
-        private const string DARK_ENVIRONMENT_LIGHTING = "Using dark colors for Environment Lighting can cause avatars to look weird. Only use dark Environment Lighting if the world has dark lighting.";
+        private const string DarkEnvironmentLighting = "Using dark colors for Environment Lighting can cause avatars to look weird. Only use dark Environment Lighting if the world has dark lighting.";
 
-        private const string CUSTOM_ENVIRONMENT_REFLECTIONS_NULL = "The current scenes Environment Reflections have been set to custom, but a custom cubemap has not been defined.";
+        private const string CustomEnvironmentReflectionsNull = "The current scenes Environment Reflections have been set to custom, but a custom cubemap has not been defined.";
 
-        private const string NO_LIGHTMAP_UV = "The model found in the scene \"{0}\" is set to be lightmapped, but does not have Lightmap UVs.";
-        private const string NO_LIGHTMAP_UV_COMBINED = "The current scene has {0} models set to be lightmapped that do not have Lightmap UVs.";
-        private const string NO_LIGHTMAP_UV_INFO = "This can cause issues when baking lighting if the main UV is not suitable for lightmapping. You can enable generating Lightmap UVs in the model's import settings.";
+        private const string NoLightmapUV = "The model found in the scene \"{0}\" is set to be lightmapped, but does not have Lightmap UVs.";
+        private const string NoLightmapUVCombined = "The current scene has {0} models set to be lightmapped that do not have Lightmap UVs.";
+        private const string NoLightmapUVInfo = "This can cause issues when baking lighting if the main UV is not suitable for lightmapping. You can enable generating Lightmap UVs in the model's import settings.";
 
-        private const string LIGHTS_NOT_BAKED = "The current scene is using realtime lighting. Consider baked lighting for improved performance.";
+        private const string LightsNotBaked = "The current scene is using realtime lighting. Consider baked lighting for improved performance.";
 
-        private const string CONSIDER_LARGER_LIGHTMAPS = "Consider increasing Lightmap Size from {0} to 2048 or 4096. This allows for more stuff to fit on a single lightmap, leaving fewer textures that need to be sampled.";
+        private const string ConsiderLargerLightmaps = "Consider increasing Lightmap Size from {0} to 2048 or 4096. This allows for more stuff to fit on a single lightmap, leaving fewer textures that need to be sampled.";
 
-        private const string CONSIDER_SMALLER_LIGHTMAPS = "Baking lightmaps at 4096 with Progressive GPU will silently fall back to CPU Progressive. More than 12GB GPU Memory is needed to bake 4k lightmaps with GPU Progressive.";
+        private const string ConsiderSmallerLightmaps = "Baking lightmaps at 4096 with Progressive GPU will silently fall back to CPU Progressive. More than 12GB GPU Memory is needed to bake 4k lightmaps with GPU Progressive.";
 
-        private const string NON_BAKED_BAKED_LIGHT = "The light {0} is set to be baked/mixed, but it has not been baked yet!";
-        private const string NON_BAKED_BAKED_LIGHT_COMBINED = "The scene contains {0} baked/mixed lights that have not been baked!";
-        private const string NON_BAKED_BAKED_LIGHT_INFO = "Baked lights that have not been baked yet function as realtime lights in-game.";
+        private const string NonBakedBakedLight = "The light {0} is set to be baked/mixed, but it has not been baked yet!";
+        private const string NonBakedBakedLightCombined = "The scene contains {0} baked/mixed lights that have not been baked!";
+        private const string NonBakedBakedLightInfo = "Baked lights that have not been baked yet function as realtime lights in-game.";
 
-        private const string LIGHTING_DATA_ASSET_INFO = "The current scene's lighting data asset takes up {0} MB of the world's size. This contains the scene's light probe data and realtime GI data.";
+        private const string LightingDataAssetInfo = "The current scene's lighting data asset takes up {0} MB of the world's size. This contains the scene's light probe data and realtime GI data.";
 
-        private const string NO_LIGHT_PROBES = "No light probes found in the current scene. Without light probes, baked lights are not able to affect dynamic objects such as players and pickups.";
+        private const string NoLightProbes = "No light probes found in the current scene. Without light probes, baked lights are not able to affect dynamic objects such as players and pickups.";
 
-        private const string LIGHT_PROBE_COUNT_NOT_BAKED = "The current scene contains {0} light probes, but {1} of them have not been baked yet.";
+        private const string LightProbeCountNotBaked = "The current scene contains {0} light probes, but {1} of them have not been baked yet.";
 
-        private const string LIGHT_PROBES_REMOVED_NOT_RE_BAKED = "Some light probes have been removed after the last bake. Bake them again to update the scene's lighting data. The lighting data contains {0} baked light probes, and the current scene has {1} light probes.";
+        private const string LightProbesRemovedNotReBaked = "Some light probes have been removed after the last bake. Bake them again to update the scene's lighting data. The lighting data contains {0} baked light probes, and the current scene has {1} light probes.";
 
-        private const string LIGHT_PROBE_COUNT = "The current scene contains {0} baked light probes.";
+        private const string LightProbeCount = "The current scene contains {0} baked light probes.";
 
-        private const string OVERLAPPING_LIGHT_PROBES = "Light Probe Group \"{0}\" has {1} overlapping light probes.";
-        private const string OVERLAPPING_LIGHT_PROBES_COMBINED = "Found {0} Light Probe Groups with overlapping light probes.";
-        private const string OVERLAPPING_LIGHT_PROBES_INFO = "These can cause a slowdown in the editor and will not get baked because Unity will skip any extra overlapping probes.";
+        private const string OverlappingLightProbes = "Light Probe Group \"{0}\" has {1} overlapping light probes.";
+        private const string OverlappingLightProbesCombined = "Found {0} Light Probe Groups with overlapping light probes.";
+        private const string OverlappingLightProbesInfo = "These can cause a slowdown in the editor and will not get baked because Unity will skip any extra overlapping probes.";
 
-        private const string NO_REFLECTION_PROBES = "The current scene has no active reflection probes. Reflection probes are needed to have proper reflections on reflective materials.";
+        private const string NoReflectionProbes = "The current scene has no active reflection probes. Reflection probes are needed to have proper reflections on reflective materials.";
 
-        private const string REFLECTION_PROBES_SOME_UNBAKED = "The reflection probe \"{0}\" is unbaked.";
-        private const string REFLECTION_PROBES_SOME_UNBAKED_COMBINED = "The current scene has {0} unbaked reflection probes.";
+        private const string ReflectionProbesSomeUnbaked = "The reflection probe \"{0}\" is unbaked.";
+        private const string ReflectionProbesSomeUnbakedCombined = "The current scene has {0} unbaked reflection probes.";
 
-        private const string REFLECTION_PROBE_COUNT_TEXT = "The current scene has {0} reflection probes.";
+        private const string ReflectionProbeCountText = "The current scene has {0} reflection probes.";
 
-        private const string POST_PROCESSING_IMPORTED_BUT_NOT_SETUP = "The current project has Post Processing imported, but you have not set it up yet.";
+        private const string PostProcessingImportedButNotSetup = "The current project has Post Processing imported, but you have not set it up yet.";
 
-        private const string POST_PROCESSING_DISABLED_IN_SCENE_VIEW = "Post-processing is disabled in the scene view. You will not be able to preview any post-processing effects without enabling it first.";
+        private const string PostProcessingDisabledInSceneView = "Post-processing is disabled in the scene view. You will not be able to preview any post-processing effects without enabling it first.";
 
-        private const string POST_PROCESSING_NO_RESOURCES_SET = "The Post Process Layer on \"{0}\" does not have its resources field set properly. This causes post-processing to error out. This can be fixed by recreating the Post Processing Layer on the GameObject.";
+        private const string PostProcessingNoResourcesSet = "The Post Process Layer on \"{0}\" does not have its resources field set properly. This causes post-processing to error out. This can be fixed by recreating the Post Processing Layer on the GameObject.";
 
-        private const string NO_REFERENCE_CAMERA_SET_PP = "The current scene's Scene Descriptor has no Reference Camera set. Without a Reference Camera set, post-processing will not be visible in-game.";
+        private const string NoReferenceCameraSetPp = "The current scene's Scene Descriptor has no Reference Camera set. Without a Reference Camera set, post-processing will not be visible in-game.";
 
-        private const string NO_POST_PROCESSING_VOLUMES = "No enabled Post Processing Volumes found in the scene. A Post Processing Volume is needed to apply effects to the camera's Post Processing Layer.";
+        private const string NoPostProcessingVolumes = "No enabled Post Processing Volumes found in the scene. A Post Processing Volume is needed to apply effects to the camera's Post Processing Layer.";
 
-        private const string REFERENCE_CAMERA_NO_POST_PROCESSING_LAYER = "The current Reference Camera does not have a Post Processing Layer on it. A Post Processing Layer is needed for the Post Processing Volume to affect the camera.";
+        private const string ReferenceCameraNoPostProcessingLayer = "The current Reference Camera does not have a Post Processing Layer on it. A Post Processing Layer is needed for the Post Processing Volume to affect the camera.";
 
-        private const string POST_PROCESS_LAYER_USING_RESERVED_LAYER = "Your current Post Process Layer uses one of the VRChat reserved layers. Using these will break post-processing while in-game.";
+        private const string PostProcessLayerUsingReservedLayer = "Your current Post Process Layer uses one of the VRChat reserved layers. Using these will break post-processing while in-game.";
 
-        private const string VOLUME_BLENDING_LAYER_NOT_SET = "You don't have a Volume Blending Layer set in the Post Process Layer, so post-processing will not work. Using the Water or PostProcessing layer is recommended.";
+        private const string VolumeBlendingLayerNotSet = "You don't have a Volume Blending Layer set in the Post Process Layer, so post-processing will not work. Using the Water or PostProcessing layer is recommended.";
 
-        private const string POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER = "Post Processing Volume \"{0}\" is not marked as Global and does not have a collider.";
-        private const string POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER_COMBINED = "Found {0} Post Processing Volumes that are not marked as Global and do not have a collider.";
-        private const string POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER_INFO = "The volume will not affect the camera without one of these set on it.";
+        private const string PostProcessingVolumeNotGlobalNoCollider = "Post Processing Volume \"{0}\" is not marked as Global and does not have a collider.";
+        private const string PostProcessingVolumeNotGlobalNoColliderCombined = "Found {0} Post Processing Volumes that are not marked as Global and do not have a collider.";
+        private const string PostProcessingVolumeNotGlobalNoColliderInfo = "The volume will not affect the camera without one of these set on it.";
 
-        private const string NO_PROFILE_SET = "Post Processing Volume \"{0}\" does not have a profile set.";
-        private const string NO_PROFILE_SET_COMBINED = "Found {0} Post Processing Volumes with no profile set.";
+        private const string NoProfileSet = "Post Processing Volume \"{0}\" does not have a profile set.";
+        private const string NoProfileSetCombined = "Found {0} Post Processing Volumes with no profile set.";
 
-        private const string NO_MATCHING_LAYERS_FOUND = "No enabled Post Processing Volumes found with matching layers to the main Post Processing Layer. Layers currently set to: {0}";
+        private const string NoMatchingLayersFound = "No enabled Post Processing Volumes found with matching layers to the main Post Processing Layer. Layers currently set to: {0}";
 
-        private const string DONT_USE_NONE_FOR_TONEMAPPING = "Use either Neutral or ACES for Color Grading Tonemapping. Selecting None for Tonemapping is essentially the same as leaving Tonemapping unchecked.";
+        private const string DontUseNoneForTonemapping = "Use either Neutral or ACES for Color Grading Tonemapping. Selecting None for Tonemapping is essentially the same as leaving Tonemapping unchecked.";
 
-        private const string TOO_HIGH_BLOOM_INTENSITY = "Do not raise the Bloom intensity too high! It is best to use a low Bloom intensity, between 0.01 to 0.3.";
+        private const string TooHighBloomIntensity = "Do not raise the Bloom intensity too high! It is best to use a low Bloom intensity, between 0.01 to 0.3.";
 
-        private const string TOO_HIGH_BLOOM_THRESHOLD = "You should avoid having the Bloom Threshold be set to a high value, as it might cause unexpected problems with bright avatars. Ideally, it should be kept at 0, but always below 1.0.";
+        private const string TooHighBloomThreshold = "You should avoid having the Bloom Threshold be set to a high value, as it might cause unexpected problems with bright avatars. Ideally, it should be kept at 0, but always below 1.0.";
 
-        private const string NO_BLOOM_DIRT_IN_VR = "Avoid using Bloom Dirt, it looks terrible in VR!";
+        private const string NoBloomDirtInVR = "Avoid using Bloom Dirt, it looks terrible in VR!";
 
-        private const string NO_AMBIENT_OCCLUSION = "Do not use Post Processing Ambient Occlusion in VRChat! VRChat uses Forward rendering, so it gets applied on top of EVERYTHING, which is bad! It also has a super high rendering cost in VR.";
+        private const string NoAmbientOcclusion = "Do not use Post Processing Ambient Occlusion in VRChat! VRChat uses Forward rendering, so it gets applied on top of EVERYTHING, which is bad! It also has a super high rendering cost in VR.";
 
-        private const string DEPTH_OF_FIELD_WARNING = "Depth of field has a high performance cost and is very disorienting in VR. If you want to use depth of field, it should be disabled by default.";
+        private const string DepthOfFieldWarning = "Depth of field has a high performance cost and is very disorienting in VR. If you want to use depth of field, it should be disabled by default.";
 
-        private const string SCREEN_SPACE_REFLECTIONS_WARNING = "Screen-space Reflections only works when using deferred rendering. Because VRChat uses Forward rendering, this should not be used.";
+        private const string ScreenSpaceReflectionsWarning = "Screen-space Reflections only works when using deferred rendering. Because VRChat uses Forward rendering, this should not be used.";
 
-        private const string VIGNETTE_WARNING = "Only use Post Processing Vignette in small amounts. A powerful vignette can cause sickness in VR.";
+        private const string VignetteWarning = "Only use Post Processing Vignette in small amounts. A powerful vignette can cause sickness in VR.";
 
-        private const string NO_POST_PROCESSING_IMPORTED = "Post Processing package not found in the project.";
+        private const string NoPostProcessingImported = "Post Processing package not found in the project.";
 
-        private const string QUEST_BAKED_LIGHTING_WARNING = "Realtime lighting for Quest content should be avoided and instead have a properly baked lighting setup for optimal performance.";
+        private const string QuestBakedLightingWarning = "Realtime lighting for Quest content should be avoided and instead have a properly baked lighting setup for optimal performance.";
 
-        private const string AMBIENT_MODE_SET_TO_CUSTOM = "The current scene's Environment Lighting setting is broken. This will override all light probes in the scene with black ambient light. Please change it to something else.";
+        private const string AmbientModeSetToCustom = "The current scene's Environment Lighting setting is broken. This will override all light probes in the scene with black ambient light. Please change it to something else.";
 
-        private const string NO_PROBLEMS_FOUND_IN_PP = "No problems were found in your post-processing setup. In some cases where post-processing is working in the editor but not in-game, some imported assets may be causing it not to function correctly.";
+        private const string NoProblemsFoundInPp = "No problems were found in your post-processing setup. In some cases where post-processing is working in the editor but not in-game, some imported assets may be causing it not to function correctly.";
 
-        private const string BAKERY_LIGHT_NOT_SET_EDITOR_ONLY = "Your Bakery light named \"{0}\" is not set to be EditorOnly.";
-        private const string BAKERY_LIGHT_NOT_SET_EDITOR_ONLY_COMBINED = "You have {0} Bakery lights are not set to be EditorOnly.";
-        private const string BAKERY_LIGHT_NOT_SET_EDITOR_ONLY_INFO = "This causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
+        private const string BakeryLightNotSetEditorOnly = "Your Bakery light named \"{0}\" is not set to be EditorOnly.";
+        private const string BakeryLightNotSetEditorOnlyCombined = "You have {0} Bakery lights are not set to be EditorOnly.";
+        private const string BakeryLightNotSetEditorOnlyInfo = "This causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
 
-        private const string BAKERY_LIGHT_UNITY_LIGHT = "Your Bakery light named \"{0}\" has an active Unity Light component on it.";
-        private const string BAKERY_LIGHT_UNITY_LIGHT_COMBINED = "You have {0} Bakery lights that have an active Unity Light component on it.";
-        private const string BAKERY_LIGHT_UNITY_LIGHT_INFO = "These will not get baked with Bakery and will keep acting as realtime lights even if set to baked.";
+        private const string BakeryLightUnityLight = "Your Bakery light named \"{0}\" has an active Unity Light component on it.";
+        private const string BakeryLightUnityLightCombined = "You have {0} Bakery lights that have an active Unity Light component on it.";
+        private const string BakeryLightUnityLightInfo = "These will not get baked with Bakery and will keep acting as realtime lights even if set to baked.";
 
-        private const string QUEST_LIGHTMAP_COMPRESSION_OVERRIDE = "Lightmap \"{0}\" does not have a platform-specific override set for Android.";
-        private const string QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_COMBINED = "No platform-specific override set on {0} lightmaps for Android.";
-        private const string QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_INFO = "Without setting a proper platform-specific override when building for Android, lightmaps can show noticeable banding. Suggested format \"ASTC 4x4 block\".";
+        private const string QuestLightmapCompressionOverride = "Lightmap \"{0}\" does not have a platform-specific override set for Android.";
+        private const string QuestLightmapCompressionOverrideCombined = "No platform-specific override set on {0} lightmaps for Android.";
+        private const string QuestLightmapCompressionOverrideInfo = "Without setting a proper platform-specific override when building for Android, lightmaps can show noticeable banding. Suggested format \"ASTC 4x4 block\".";
 
-        private const string MISSING_SHADER_WARNING = "The material \"{0}\" found in the scene has a missing or broken shader.";
-        private const string MISSING_SHADER_WARNING_COMBINED = "Found {0} materials in the current scene that have missing or broken shaders.";
-        private const string MISSING_SHADER_WARNING_INFO = "These will fallback to the pink error shader.";
+        private const string MissingShaderWarning = "The material \"{0}\" found in the scene has a missing or broken shader.";
+        private const string MissingShaderWarningCombined = "Found {0} materials in the current scene that have missing or broken shaders.";
+        private const string MissingShaderWarningInfo = "These will fallback to the pink error shader.";
 
-        private const string ERROR_PAUSE_WARNING = "You have Error Pause enabled in your console. This can cause your world upload to fail by interrupting the build process.";
+        private const string ErrorPauseWarning = "You have Error Pause enabled in your console. This can cause your world upload to fail by interrupting the build process.";
 
-        private const string MULTIPLE_SCENES_LOADED = "Multiple scenes loaded, this is not supported by VRChat and can cause the world upload to fail. Only one scene should be used for world creation at a time.";
+        private const string MultipleScenesLoaded = "Multiple scenes loaded, this is not supported by VRChat and can cause the world upload to fail. Only one scene should be used for world creation at a time.";
 
-        private const string LAYERS_NOT_SETUP = "Project layers are not set up for VRChat yet.";
+        private const string LayersNotSetup = "Project layers are not set up for VRChat yet.";
 
-        private const string COLLISION_MATRIX_NOT_SETUP = "The project's Collision Matrix is not set up for VRChat yet.";
+        private const string CollisionMatrixNotSetup = "The project's Collision Matrix is not set up for VRChat yet.";
 
-        private const string MATERIAL_WITH_GRAB_PASS_SHADER = "A material ({0}) in the scene has an active GrabPass due to shader \"{1}\".";
-        private const string MATERIAL_WITH_GRAB_PASS_SHADER_COMBINED = "Found {0} materials in the scene using a GrabPass.";
-        private const string MATERIAL_WITH_GRAB_PASS_SHADER_INFO_PC = "A GrabPass will halt the rendering to copy the screen's contents into a texture for the shader to read. This has a notable effect on performance.";
-        private const string MATERIAL_WITH_GRAB_PASS_SHADER_INFO_QUEST = "Please change the shader for this material. When a shader uses a GrabPass on Quest, it will cause painful visual artifacts to occur, as they are not supported.";
+        private const string MaterialWithGrabPassShader = "A material ({0}) in the scene has an active GrabPass due to shader \"{1}\".";
+        private const string MaterialWithGrabPassShaderCombined = "Found {0} materials in the scene using a GrabPass.";
+        private const string MaterialWithGrabPassShaderInfoPC = "A GrabPass will halt the rendering to copy the screen's contents into a texture for the shader to read. This has a notable effect on performance.";
+        private const string MaterialWithGrabPassShaderInfoQuest = "Please change the shader for this material. When a shader uses a GrabPass on Quest, it will cause painful visual artifacts to occur, as they are not supported.";
 
-        private const string DISABLED_PORTALS_WARNING = "Portal \"{0}\" disabled by default.";
-        private const string DISABLED_PORTALS_WARNING_COMBINED = "Found {0} portals disabled by default.";
-        private const string DISABLED_PORTALS_WARNING_INFO = "Having a portal disabled by default may cause players that are entering to end up in different instances.";
+        private const string DisabledPortalsWarning = "Portal \"{0}\" disabled by default.";
+        private const string DisabledPortalsWarningCombined = "Found {0} portals disabled by default.";
+        private const string DisabledPortalsWarningInfo = "Having a portal disabled by default may cause players that are entering to end up in different instances.";
 
-        private const string SHRNM_DIRECTIONAL_MODE_BAKERY_ERROR = "SH or RNM directional mode detected in Bakery. Using SH directional mode is not supported in VRChat by default. It requires the usage of VRC Bakery Adapter by Merlin for it to function in-game.";
+        private const string ShrnmDirectionalModeBakeryError = "SH or RNM directional mode detected in Bakery. Using SH directional mode is not supported in VRChat by default. It requires the usage of VRC Bakery Adapter by Merlin for it to function in-game.";
 
-        private const string BUILD_AND_TEST_BROKEN_ERROR = "VRChat link association has not been set up, and the VRChat client path has not been set in the VRCSDK settings. Without one of these settings set, Build & Test will not function.";
+        private const string BuildANDTestBrokenError = "VRChat link association has not been set up, and the VRChat client path has not been set in the VRCSDK settings. Without one of these settings set, Build & Test will not function.";
 
-        private const string BUILD_AND_TEST_FORCE_NON_VR_ERROR = "VRChat client path has not been set to point directly to the VRChat executable in the VRCSDK settings. The Force Non-VR setting for Build & Test will not work.";
+        private const string BuildANDTestForceNonVRError = "VRChat client path has not been set to point directly to the VRChat executable in the VRCSDK settings. The Force Non-VR setting for Build & Test will not work.";
 
-        private const string BUILD_AND_TEST_NO_EXECUTABLE_FOUND = "Current client path set in the VRCSDK settings does not contain the VRChat executable. This will cause problems with Build & Test functionality.";
+        private const string BuildANDTestNoExecutableFound = "Current client path set in the VRCSDK settings does not contain the VRChat executable. This will cause problems with Build & Test functionality.";
 
-        private const string MATERIAL_WITH_NON_WHITELISTED_SHADER = "Material \"{0}\" is using an unsupported shader \"{1}\".";
-        private const string MATERIAL_WITH_NON_WHITELISTED_SHADER_COMBINED = "Found {0} materials with unsupported shaders.";
-        private const string MATERIAL_WITH_NON_WHITELISTED_SHADER_INFO = "Unsupported shaders can cause problems on the Quest platform if not appropriately used.";
+        private const string MaterialWithNonWhitelistedShader = "Material \"{0}\" is using an unsupported shader \"{1}\".";
+        private const string MaterialWithNonWhitelistedShaderCombined = "Found {0} materials with unsupported shaders.";
+        private const string MaterialWithNonWhitelistedShaderInfo = "Unsupported shaders can cause problems on the Quest platform if not appropriately used.";
 
-        private const string UI_ELEMENT_WITH_NAVIGATION_NOT_NONE = "The UI Element \"{0}\" does not have its Navigation set to None.";
-        private const string UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_COMBINED = "Found {0} UI Elements with their Navigation not set to None.";
-        private const string UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_INFO = "Setting Navigation to None on UI Elements can stop accidental interactions with them while trying to walk around.";
+        private const string UIElementWithNavigationNotNone = "The UI Element \"{0}\" does not have its Navigation set to None.";
+        private const string UIElementWithNavigationNotNoneCombined = "Found {0} UI Elements with their Navigation not set to None.";
+        private const string UIElementWithNavigationNotNoneInfo = "Setting Navigation to None on UI Elements can stop accidental interactions with them while trying to walk around.";
 
-        private const string NULL_TRIGGER_RECEIVER = "Null receiver found on trigger {0}.";
-        private const string NULL_TRIGGER_RECEIVER_COMBINED = "Found {0} null receivers in scene triggers.";
-        private const string NULL_TRIGGER_RECEIVER_INFO = "This causes the trigger to target itself, which can sometimes be intentional.";
+        private const string NullTriggerReceiver = "Null receiver found on trigger {0}.";
+        private const string NullTriggerReceiverCombined = "Found {0} null receivers in scene triggers.";
+        private const string NullTriggerReceiverInfo = "This causes the trigger to target itself, which can sometimes be intentional.";
 
-        private const string TEXT_MESH_LIGHTMAP_STATIC = "Text Mesh \"{0}\" marked as lightmap static.";
-        private const string TEXT_MESH_LIGHTMAP_STATIC_COMBINED = "Found {0} Text Meshes marked as lightmap static.";
-        private const string TEXT_MESH_LIGHTMAP_STATIC_INFO = "This will cause warnings as the mesh has no normals.";
+        private const string TextMeshLightmapStatic = "Text Mesh \"{0}\" marked as lightmap static.";
+        private const string TextMeshLightmapStaticCombined = "Found {0} Text Meshes marked as lightmap static.";
+        private const string TextMeshLightmapStaticInfo = "This will cause warnings as the mesh has no normals.";
 
-        private const string HEY_YOU_FOUND_A_BUG = "Hey, you found a bug! Please send it my way so I can fix it! Check About VRWorld Toolkit to find all the ways to contact me. \"{0}\" on line {1}.";
+        private const string HeyYouFoundABug = "Hey, you found a bug! Please send it my way so I can fix it! Check About VRWorld Toolkit to find all the ways to contact me. \"{0}\" on line {1}.";
 
-        private const string FUTURE_PROOF_PUBLISH_ENABLED = "Future Proof Publish is currently enabled. This is a legacy feature that has no planned functions as of right now. Having it enabled will increase upload times and sometimes cause uploading to fail.";
+        private const string FutureProofPublishEnabled = "Future Proof Publish is currently enabled. This is a legacy feature that has no planned functions as of right now. Having it enabled will increase upload times and sometimes cause uploading to fail.";
 
         #endregion
 
@@ -1443,14 +1443,14 @@ namespace VRWorldToolkit
                     cacheWarningType = MessageType.Warning;
                 }
 
-                optimization.AddMessageGroup(new MessageGroup(OCCLUSION_CULLING_CACHE_WARNING, cacheWarningType).AddSingleMessage(new SingleMessage(occlusionCacheFiles.ToString()).SetAutoFix(ClearOcclusionCache(occlusionCacheFiles))));
+                optimization.AddMessageGroup(new MessageGroup(OcclusionCullingCacheWarning, cacheWarningType).AddSingleMessage(new SingleMessage(occlusionCacheFiles.ToString()).SetAutoFix(ClearOcclusionCache(occlusionCacheFiles))));
             }
         }
 
         private class CheckedShaderProperties
         {
             public bool IncludesGrabPass = false;
-            public List<string> GrabPassLightModeTags = new List<string>();
+            public readonly List<string> GrabPassLightModeTags = new List<string>();
         }
 
         private void CheckScene()
@@ -1470,7 +1470,7 @@ namespace VRWorldToolkit
                 // Check if a descriptor exists
                 if (descriptorCount == 0)
                 {
-                    general.AddMessageGroup(new MessageGroup(NO_SCENE_DESCRIPTOR, MessageType.Error));
+                    general.AddMessageGroup(new MessageGroup(NoSceneDescriptor, MessageType.Error));
                     return;
                 }
                 else
@@ -1480,14 +1480,14 @@ namespace VRWorldToolkit
                     // Make sure only one descriptor exists
                     if (descriptorCount > 1)
                     {
-                        general.AddMessageGroup(new MessageGroup(TOO_MANY_SCENE_DESCRIPTORS, MessageType.Info).AddSingleMessage(new SingleMessage(Array.ConvertAll(descriptors, s => s.gameObject))));
+                        general.AddMessageGroup(new MessageGroup(TooManySceneDescriptors, MessageType.Info).AddSingleMessage(new SingleMessage(Array.ConvertAll(descriptors, s => s.gameObject))));
                         return;
                     }
 
                     // Check for multiple pipeline managers
                     if (pipelines.Length > 1)
                     {
-                        general.AddMessageGroup(new MessageGroup(TOO_MANY_PIPELINE_MANAGERS, MessageType.Error).AddSingleMessage(new SingleMessage(Array.ConvertAll(pipelines, s => s.gameObject)).SetAutoFix(RemoveBadPipelineManagers(pipelines))));
+                        general.AddMessageGroup(new MessageGroup(TooManyPipelineManagers, MessageType.Error).AddSingleMessage(new SingleMessage(Array.ConvertAll(pipelines, s => s.gameObject)).SetAutoFix(RemoveBadPipelineManagers(pipelines))));
                     }
 
                     // Check how far the descriptor is from zero point for floating point errors
@@ -1495,11 +1495,11 @@ namespace VRWorldToolkit
 
                     if (descriptorRemoteness > 1000)
                     {
-                        general.AddMessageGroup(new MessageGroup(WORLD_DESCRIPTOR_FAR, MessageType.Error).AddSingleMessage(new SingleMessage(descriptorRemoteness.ToString()).SetSelectObject(Array.ConvertAll(descriptors, s => s.gameObject))));
+                        general.AddMessageGroup(new MessageGroup(WorldDescriptorFar, MessageType.Error).AddSingleMessage(new SingleMessage(descriptorRemoteness.ToString()).SetSelectObject(Array.ConvertAll(descriptors, s => s.gameObject))));
                     }
                     else if (descriptorRemoteness > 250)
                     {
-                        general.AddMessageGroup(new MessageGroup(WORLD_DESCRIPTOR_OFF, MessageType.Error).AddSingleMessage(new SingleMessage(descriptorRemoteness.ToString()).SetSelectObject(Array.ConvertAll(descriptors, s => s.gameObject))));
+                        general.AddMessageGroup(new MessageGroup(WorldDescriptorOff, MessageType.Error).AddSingleMessage(new SingleMessage(descriptorRemoteness.ToString()).SetSelectObject(Array.ConvertAll(descriptors, s => s.gameObject))));
                     }
                 }
 
@@ -1508,46 +1508,46 @@ namespace VRWorldToolkit
                 {
                     if (vrcProjectSettings.layers is null || vrcProjectSettings.layers.Length == 0 || vrcProjectSettings.layerCollisionArr is null || vrcProjectSettings.layerCollisionArr.Length == 0)
                     {
-                        general.AddMessageGroup(new MessageGroup(IMPROPERLY_SETUP_VRC_PROJECT_SETTINGS, MessageType.Error).SetGroupAutoFix(FixVRCProjectSettings(vrcProjectSettings)));
+                        general.AddMessageGroup(new MessageGroup(ImproperlySetupVRCProjectSettings, MessageType.Error).SetGroupAutoFix(FixVRCProjectSettings(vrcProjectSettings)));
                     }
                     else
                     {
                         if (!UpdateLayers.AreLayersSetup())
                         {
-                            general.AddMessageGroup(new MessageGroup(LAYERS_NOT_SETUP, MessageType.Error).SetGroupAutoFix(SetVRChatLayers()));
+                            general.AddMessageGroup(new MessageGroup(LayersNotSetup, MessageType.Error).SetGroupAutoFix(SetVRChatLayers()));
                         }
 
                         if (!UpdateLayers.IsCollisionLayerMatrixSetup())
                         {
-                            general.AddMessageGroup(new MessageGroup(COLLISION_MATRIX_NOT_SETUP, MessageType.Error).SetGroupAutoFix(SetVRChatCollisionMatrix()));
+                            general.AddMessageGroup(new MessageGroup(CollisionMatrixNotSetup, MessageType.Error).SetGroupAutoFix(SetVRChatCollisionMatrix()));
                         }
                     }
                 }
                 else
                 {
-                    general.AddMessageGroup(new MessageGroup(VRC_PROJECT_SETTINGS_MISSING, MessageType.Error).SetDocumentation("https://docs.vrchat.com/docs/updating-the-sdk"));
+                    general.AddMessageGroup(new MessageGroup(VRCProjectSettingsMissing, MessageType.Error).SetDocumentation("https://docs.vrchat.com/docs/updating-the-sdk"));
                 }
 
                 if (buildReportWindows != null && buildReportWindows.summary.result == BuildResult.Failed || buildReportQuest != null && buildReportQuest.summary.result == BuildResult.Failed)
                 {
-                    general.AddMessageGroup(new MessageGroup(LAST_BUILD_FAILED, MessageType.Error).SetDocumentation("https://github.com/oneVR/VRWorldToolkit/wiki/Fixing-Build-Problems"));
+                    general.AddMessageGroup(new MessageGroup(LastBuildFailed, MessageType.Error).SetDocumentation("https://github.com/oneVR/VRWorldToolkit/wiki/Fixing-Build-Problems"));
                 }
 
                 // Check if multiple scenes loaded
                 if (SceneManager.sceneCount > 1)
                 {
-                    general.AddMessageGroup(new MessageGroup(MULTIPLE_SCENES_LOADED, MessageType.Error));
+                    general.AddMessageGroup(new MessageGroup(MultipleScenesLoaded, MessageType.Error));
                 }
 
                 if (EditorPrefs.GetBool("futureProofPublish", true))
                 {
-                    general.AddMessageGroup(new MessageGroup(FUTURE_PROOF_PUBLISH_ENABLED, MessageType.Error).SetGroupAutoFix(SetFutureProofPublish(false)));
+                    general.AddMessageGroup(new MessageGroup(FutureProofPublishEnabled, MessageType.Error).SetGroupAutoFix(SetFutureProofPublish(false)));
                 }
 
                 // Check if console has error pause on
                 if (ConsoleFlagUtil.GetConsoleErrorPause())
                 {
-                    general.AddMessageGroup(new MessageGroup(ERROR_PAUSE_WARNING, MessageType.Error).AddSingleMessage(new SingleMessage(SetErrorPause(false))));
+                    general.AddMessageGroup(new MessageGroup(ErrorPauseWarning, MessageType.Error).AddSingleMessage(new SingleMessage(SetErrorPause(false))));
                 }
 
                 // Check reference camera for possible problems
@@ -1557,23 +1557,23 @@ namespace VRWorldToolkit
 
                     if (camera.clearFlags != CameraClearFlags.Skybox)
                     {
-                        general.AddMessageGroup(new MessageGroup(REFERENCE_CAMERA_CLEAR_FLAGS_NOT_SKYBOX, MessageType.Warning).AddSingleMessage(new SingleMessage(sceneDescriptor.ReferenceCamera)));
+                        general.AddMessageGroup(new MessageGroup(ReferenceCameraClearFlagsNotSkybox, MessageType.Warning).AddSingleMessage(new SingleMessage(sceneDescriptor.ReferenceCamera)));
                     }
 
                     // TODO: Investigate better sanity value
                     if (camera.farClipPlane / camera.nearClipPlane > 200000f)
                     {
-                        general.AddMessageGroup(new MessageGroup(REFERENCE_CAMERA_CLIPPING_PLANE_RATIO, MessageType.Warning).AddSingleMessage(new SingleMessage(camera.nearClipPlane.ToString(CultureInfo.InvariantCulture), camera.farClipPlane.ToString(CultureInfo.InvariantCulture)).SetSelectObject(camera.gameObject)));
+                        general.AddMessageGroup(new MessageGroup(ReferenceCameraClippingPlaneRatio, MessageType.Warning).AddSingleMessage(new SingleMessage(camera.nearClipPlane.ToString(CultureInfo.InvariantCulture), camera.farClipPlane.ToString(CultureInfo.InvariantCulture)).SetSelectObject(camera.gameObject)));
                     }
 
                     if (camera.nearClipPlane > 0.05f)
                     {
-                        general.AddMessageGroup(new MessageGroup(REFERENCE_CAMERA_NEAR_CLIP_PLANE_OVER, MessageType.Tips).AddSingleMessage(new SingleMessage(camera.nearClipPlane.ToString(CultureInfo.InvariantCulture)).SetSelectObject(camera.gameObject)));
+                        general.AddMessageGroup(new MessageGroup(ReferenceCameraNearClipPlaneOver, MessageType.Tips).AddSingleMessage(new SingleMessage(camera.nearClipPlane.ToString(CultureInfo.InvariantCulture)).SetSelectObject(camera.gameObject)));
                     }
                 }
                 else
                 {
-                    general.AddMessageGroup(new MessageGroup(NO_REFERENCE_CAMERA_SET_GENERAL, MessageType.Tips).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject)));
+                    general.AddMessageGroup(new MessageGroup(NoReferenceCameraSetGeneral, MessageType.Tips).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject)));
                 }
 
 #if UNITY_EDITOR_WIN
@@ -1582,15 +1582,15 @@ namespace VRWorldToolkit
                 var savedVRCInstallPath = SDKClientUtilities.GetSavedVRCInstallPath();
                 if (commandPath is null && savedVRCInstallPath == "\\VRChat.exe")
                 {
-                    general.AddMessageGroup(new MessageGroup(BUILD_AND_TEST_BROKEN_ERROR, MessageType.Error).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
+                    general.AddMessageGroup(new MessageGroup(BuildANDTestBrokenError, MessageType.Error).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
                 }
                 else if (savedVRCInstallPath == "\\VRChat.exe")
                 {
-                    general.AddMessageGroup(new MessageGroup(BUILD_AND_TEST_FORCE_NON_VR_ERROR, MessageType.Warning).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
+                    general.AddMessageGroup(new MessageGroup(BuildANDTestForceNonVRError, MessageType.Warning).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
                 }
                 else if (!File.Exists(savedVRCInstallPath))
                 {
-                    general.AddMessageGroup(new MessageGroup(BUILD_AND_TEST_NO_EXECUTABLE_FOUND, MessageType.Error).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
+                    general.AddMessageGroup(new MessageGroup(BuildANDTestNoExecutableFound, MessageType.Error).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
                 }
 #endif
 
@@ -1604,13 +1604,13 @@ namespace VRWorldToolkit
 
                     if (emptySpawns)
                     {
-                        general.AddMessageGroup(new MessageGroup(NULL_SPAWN_POINT, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject).SetAutoFix(FixSpawns(sceneDescriptor))));
+                        general.AddMessageGroup(new MessageGroup(NullSpawnPoint, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject).SetAutoFix(FixSpawns(sceneDescriptor))));
                     }
 
-                    var spawnUnderRespawnHeight = general.AddMessageGroup(new MessageGroup(SPAWN_UNDER_RESPAWN_HEIGHT, SPAWN_UNDER_RESPAWN_HEIGHT_COMBINED, SPAWN_UNDER_RESPAWN_HEIGHT_INFO, MessageType.Error));
-                    var noColliderUnderSpawn = general.AddMessageGroup(new MessageGroup(NO_COLLIDER_UNDER_SPAWN, NO_COLLIDER_UNDER_SPAWN_COMBINED, NO_COLLIDER_UNDER_SPAWN_INFO, MessageType.Error));
-                    var colliderUnderSpawnTrigger = general.AddMessageGroup(new MessageGroup(COLLIDER_UNDER_SPAWN_IS_TRIGGER, COLLIDER_UNDER_SPAWN_IS_TRIGGER_COMBINED, COLLIDER_UNDER_SPAWN_IS_TRIGGER_INFO, MessageType.Error));
-                    var respawnHeightAboveCollider = general.AddMessageGroup(new MessageGroup(RESPAWN_HEIGHT_ABOVE_COLLIDER, RESPAWN_HEIGHT_ABOVE_COLLIDER_COMBINED, RESPAWN_HEIGHT_ABOVE_COLLIDER_INFO, MessageType.Error));
+                    var spawnUnderRespawnHeight = general.AddMessageGroup(new MessageGroup(SpawnUnderRespawnHeight, SpawnUnderRespawnHeightCombined, SpawnUnderRespawnHeightInfo, MessageType.Error));
+                    var noColliderUnderSpawn = general.AddMessageGroup(new MessageGroup(NoColliderUnderSpawn, NoColliderUnderSpawnCombined, NoColliderUnderSpawnInfo, MessageType.Error));
+                    var colliderUnderSpawnTrigger = general.AddMessageGroup(new MessageGroup(ColliderUnderSpawnIsTrigger, ColliderUnderSpawnIsTriggerCombined, ColliderUnderSpawnIsTriggerInfo, MessageType.Error));
+                    var respawnHeightAboveCollider = general.AddMessageGroup(new MessageGroup(RespawnHeightAboveCollider, RespawnHeightAboveColliderCombined, RespawnHeightAboveColliderInfo, MessageType.Error));
 
                     for (var i = 0; i < sceneDescriptor.spawns.Length; i++)
                     {
@@ -1646,7 +1646,7 @@ namespace VRWorldToolkit
                 }
                 else
                 {
-                    general.AddMessageGroup(new MessageGroup(NO_SPAWN_POINT_SET, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject).SetAutoFix(FixSpawns(sceneDescriptor))));
+                    general.AddMessageGroup(new MessageGroup(NoSpawnPointSet, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject).SetAutoFix(FixSpawns(sceneDescriptor))));
                 }
 
 #if VRC_SDK_VRCSDK2
@@ -1654,7 +1654,7 @@ namespace VRWorldToolkit
                 var playermods = FindObjectsOfType(typeof(VRC_PlayerMods)) as VRC_PlayerMods[];
                 if (playermods.Length == 0)
                 {
-                    general.AddMessageGroup(new MessageGroup(NO_PLAYER_MODS, MessageType.Tips));
+                    general.AddMessageGroup(new MessageGroup(NoPlayerMods, MessageType.Tips));
                 }
 
                 // Get triggers in the world
@@ -1673,11 +1673,11 @@ namespace VRWorldToolkit
                             {
                                 if (trigger.TriggerType == VRC.SDKBase.VRC_Trigger.TriggerType.OnEnterTrigger || trigger.TriggerType == VRC.SDKBase.VRC_Trigger.TriggerType.OnExitTrigger)
                                 {
-                                    general.AddMessageGroup(new MessageGroup(TRIGGER_TRIGGER_NO_COLLIDER, MessageType.Error).AddSingleMessage(new SingleMessage(triggerScript.name).SetSelectObject(triggerScript.gameObject)));
+                                    general.AddMessageGroup(new MessageGroup(TriggerTriggerNoCollider, MessageType.Error).AddSingleMessage(new SingleMessage(triggerScript.name).SetSelectObject(triggerScript.gameObject)));
                                 }
                                 else if (trigger.TriggerType == VRC.SDKBase.VRC_Trigger.TriggerType.OnEnterCollider || trigger.TriggerType == VRC.SDKBase.VRC_Trigger.TriggerType.OnExitCollider)
                                 {
-                                    general.AddMessageGroup(new MessageGroup(COLLIDER_TRIGGER_NO_COLLIDER, MessageType.Error).AddSingleMessage(new SingleMessage(triggerScript.name).SetSelectObject(triggerScript.gameObject)));
+                                    general.AddMessageGroup(new MessageGroup(ColliderTriggerNoCollider, MessageType.Error).AddSingleMessage(new SingleMessage(triggerScript.name).SetSelectObject(triggerScript.gameObject)));
                                 }
                             }
 
@@ -1708,7 +1708,7 @@ namespace VRWorldToolkit
 
                 if (triggerWrongLayer.Count > 0)
                 {
-                    var triggerWrongLayerGroup = new MessageGroup(TRIGGER_TRIGGER_WRONG_LAYER, TRIGGER_TRIGGER_WRONG_LAYER_COMBINED, TRIGGER_TRIGGER_WRONG_LAYER_INFO, MessageType.Warning);
+                    var triggerWrongLayerGroup = new MessageGroup(TriggerTriggerWrongLayer, TriggerTriggerWrongLayerCombined, TriggerTriggerWrongLayerInfo, MessageType.Warning);
                     for (var i = 0; i < triggerWrongLayer.Count; i++)
                     {
                         triggerWrongLayerGroup.AddSingleMessage(new SingleMessage(triggerWrongLayer[i].name).SetSelectObject(triggerWrongLayer[i].gameObject).SetAutoFix(SetObjectLayer(triggerWrongLayer[i].gameObject, "MirrorReflection")));
@@ -1723,17 +1723,17 @@ namespace VRWorldToolkit
                 // Check for occlusion culling
                 if (StaticOcclusionCulling.umbraDataSize > 0)
                 {
-                    optimization.AddMessageGroup(new MessageGroup(BAKED_OCCLUSION_CULLING, MessageType.GoodFPS));
+                    optimization.AddMessageGroup(new MessageGroup(BakedOcclusionCulling, MessageType.GoodFPS));
 
                     var occlusionAreas = GameObject.FindObjectsOfType<OcclusionArea>();
 
                     if (occlusionAreas.Length == 0)
                     {
-                        optimization.AddMessageGroup(new MessageGroup(NO_OCCLUSION_AREAS, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/class-OcclusionArea.html"));
+                        optimization.AddMessageGroup(new MessageGroup(NoOcclusionAreas, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/class-OcclusionArea.html"));
                     }
                     else
                     {
-                        var disabledOcclusionAreasGroup = optimization.AddMessageGroup(new MessageGroup(DISABLED_OCCLUSION_AREA, DISABLED_OCCLUSION_AREA_COMBINED, DISABLED_OCCLUSION_AREA_INFO, MessageType.Warning));
+                        var disabledOcclusionAreasGroup = optimization.AddMessageGroup(new MessageGroup(DisabledOcclusionArea, DisabledOcclusionAreaCombined, DisabledOcclusionAreaInfo, MessageType.Warning));
 
                         foreach (var occlusionArea in occlusionAreas)
                         {
@@ -1749,7 +1749,7 @@ namespace VRWorldToolkit
                 }
                 else
                 {
-                    optimization.AddMessageGroup(new MessageGroup(NO_OCCLUSION_CULLING, MessageType.Tips).SetDocumentation("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Occlusion-Culling"));
+                    optimization.AddMessageGroup(new MessageGroup(NoOcclusionCulling, MessageType.Tips).SetDocumentation("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Occlusion-Culling"));
                 }
 
                 OcclusionMessageCheck();
@@ -1759,8 +1759,8 @@ namespace VRWorldToolkit
 
                 if (cameras.Length > 0)
                 {
-                    var activeCamerasMessages = optimization.AddMessageGroup(new MessageGroup(ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE, ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE_COMBINED, ACTIVE_CAMERA_OUTPUTTING_TO_RENDER_TEXTURE_INFO, MessageType.BadFPS));
-                    var cameraDepthWarning = general.AddMessageGroup(new MessageGroup(ACTIVE_CAMERA_WITH_OVER_ZERO_DEPTH, ACTIVE_CAMERA_WITH_OVER_ZERO_DEPTH_COMBINED, ACTIVE_CAMERA_WITH_OVER_ZERO_DEPTH_INFO, MessageType.Error));
+                    var activeCamerasMessages = optimization.AddMessageGroup(new MessageGroup(ActiveCameraOutputtingToRenderTexture, ActiveCameraOutputtingToRenderTextureCombined, ActiveCameraOutputtingToRenderTextureInfo, MessageType.BadFPS));
+                    var cameraDepthWarning = general.AddMessageGroup(new MessageGroup(ActiveCameraWithOverZeroDepth, ActiveCameraWithOverZeroDepthCombined, ActiveCameraWithOverZeroDepthInfo, MessageType.Error));
 
                     for (var i = 0; i < cameras.Length; i++)
                     {
@@ -1784,7 +1784,7 @@ namespace VRWorldToolkit
 
                 if (mirrors.Length > 0)
                 {
-                    var activeCamerasMessage = new MessageGroup(MIRROR_ON_BY_DEFAULT, MIRROR_ON_BY_DEFAULT_COMBINED, MIRROR_ON_BY_DEFAULT_INFO, MessageType.BadFPS);
+                    var activeCamerasMessage = new MessageGroup(MirrorONByDefault, MirrorONByDefaultCombined, MirrorONByDefaultInfo, MessageType.BadFPS);
                     for (var i = 0; i < mirrors.Length; i++)
                     {
                         if (mirrors[i].enabled)
@@ -1801,10 +1801,10 @@ namespace VRWorldToolkit
                 switch (RenderSettings.ambientMode)
                 {
                     case AmbientMode.Custom:
-                        lighting.AddMessageGroup(new MessageGroup(AMBIENT_MODE_SET_TO_CUSTOM, MessageType.Error).AddSingleMessage(new SingleMessage(SetAmbientMode(AmbientMode.Skybox))));
+                        lighting.AddMessageGroup(new MessageGroup(AmbientModeSetToCustom, MessageType.Error).AddSingleMessage(new SingleMessage(SetAmbientMode(AmbientMode.Skybox))));
                         break;
                     case AmbientMode.Flat:
-                        lighting.AddMessageGroup(new MessageGroup(SINGLE_COLOR_ENVIRONMENT_LIGHTING, MessageType.Tips));
+                        lighting.AddMessageGroup(new MessageGroup(SingleColorEnvironmentLighting, MessageType.Tips));
                         break;
                 }
 
@@ -1813,12 +1813,12 @@ namespace VRWorldToolkit
                     Helper.GetBrightness(RenderSettings.ambientEquatorColor) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Trilight) ||
                     Helper.GetBrightness(RenderSettings.ambientGroundColor) < 0.1f && RenderSettings.ambientMode.Equals(AmbientMode.Trilight))
                 {
-                    lighting.AddMessageGroup(new MessageGroup(DARK_ENVIRONMENT_LIGHTING, MessageType.Tips));
+                    lighting.AddMessageGroup(new MessageGroup(DarkEnvironmentLighting, MessageType.Tips));
                 }
 
                 if (RenderSettings.defaultReflectionMode.Equals(DefaultReflectionMode.Custom) && !RenderSettings.customReflection)
                 {
-                    lighting.AddMessageGroup(new MessageGroup(CUSTOM_ENVIRONMENT_REFLECTIONS_NULL, MessageType.Error).AddSingleMessage(new SingleMessage(SetEnviromentReflections(DefaultReflectionMode.Skybox))));
+                    lighting.AddMessageGroup(new MessageGroup(CustomEnvironmentReflectionsNull, MessageType.Error).AddSingleMessage(new SingleMessage(SetEnviromentReflections(DefaultReflectionMode.Skybox))));
                 }
 
                 var bakedLighting = false;
@@ -1841,7 +1841,7 @@ namespace VRWorldToolkit
 
                         if (Helper.GetTypeFromName(className) is null)
                         {
-                            lighting.AddMessageGroup(new MessageGroup(SHRNM_DIRECTIONAL_MODE_BAKERY_ERROR, MessageType.Error).SetDocumentation("https://github.com/Merlin-san/VRC-Bakery-Adapter"));
+                            lighting.AddMessageGroup(new MessageGroup(ShrnmDirectionalModeBakeryError, MessageType.Error).SetDocumentation("https://github.com/Merlin-san/VRC-Bakery-Adapter"));
                         }
 
                         break;
@@ -1877,7 +1877,7 @@ namespace VRWorldToolkit
 
                     if (notEditorOnly.Count > 0)
                     {
-                        var notEditorOnlyGroup = new MessageGroup(BAKERY_LIGHT_NOT_SET_EDITOR_ONLY, BAKERY_LIGHT_NOT_SET_EDITOR_ONLY_COMBINED, BAKERY_LIGHT_NOT_SET_EDITOR_ONLY_INFO, MessageType.Warning);
+                        var notEditorOnlyGroup = new MessageGroup(BakeryLightNotSetEditorOnly, BakeryLightNotSetEditorOnlyCombined, BakeryLightNotSetEditorOnlyInfo, MessageType.Warning);
                         foreach (var item in notEditorOnly)
                         {
                             notEditorOnlyGroup.AddSingleMessage(new SingleMessage(item.name).SetAutoFix(SetGameObjectTag(item, "EditorOnly")).SetSelectObject(item));
@@ -1888,7 +1888,7 @@ namespace VRWorldToolkit
 
                     if (unityLightOnBakeryLight.Count > 0)
                     {
-                        var unityLightGroup = new MessageGroup(BAKERY_LIGHT_UNITY_LIGHT, BAKERY_LIGHT_UNITY_LIGHT_COMBINED, BAKERY_LIGHT_UNITY_LIGHT_INFO, MessageType.Warning);
+                        var unityLightGroup = new MessageGroup(BakeryLightUnityLight, BakeryLightUnityLightCombined, BakeryLightUnityLightInfo, MessageType.Warning);
                         foreach (var item in unityLightOnBakeryLight)
                         {
                             unityLightGroup.AddSingleMessage(new SingleMessage(item.name).SetAutoFix(DisableComponent(item.GetComponent<Light>())).SetSelectObject(item));
@@ -1926,7 +1926,7 @@ namespace VRWorldToolkit
                     {
                         var lightmaps = LightmapSettings.lightmaps;
 
-                        var androidCompressionGroup = lighting.AddMessageGroup(new MessageGroup(QUEST_LIGHTMAP_COMPRESSION_OVERRIDE, QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_COMBINED, QUEST_LIGHTMAP_COMPRESSION_OVERRIDE_INFO, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/class-TextureImporter.html"));
+                        var androidCompressionGroup = lighting.AddMessageGroup(new MessageGroup(QuestLightmapCompressionOverride, QuestLightmapCompressionOverrideCombined, QuestLightmapCompressionOverrideInfo, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/class-TextureImporter.html"));
 
                         for (var i = 0; i < lightmaps.Length; i++)
                         {
@@ -1959,14 +1959,14 @@ namespace VRWorldToolkit
 
                             if (lightmap.lightmapColor != null && lightmap.lightmapColor.height != 4096)
                             {
-                                lighting.AddMessageGroup(new MessageGroup(CONSIDER_LARGER_LIGHTMAPS, MessageType.Tips).AddSingleMessage(new SingleMessage(lightMapSize.ToString()).SetAutoFix(SetLightmapSize(4096))));
+                                lighting.AddMessageGroup(new MessageGroup(ConsiderLargerLightmaps, MessageType.Tips).AddSingleMessage(new SingleMessage(lightMapSize.ToString()).SetAutoFix(SetLightmapSize(4096))));
                             }
                         }
                     }
 
                     if (LightmapEditorSettings.lightmapper.Equals(LightmapEditorSettings.Lightmapper.ProgressiveGPU) && lightMapSize == 4096 && SystemInfo.graphicsMemorySize < 12000)
                     {
-                        lighting.AddMessageGroup(new MessageGroup(CONSIDER_SMALLER_LIGHTMAPS, MessageType.Warning).AddSingleMessage(new SingleMessage(lightMapSize.ToString()).SetAutoFix(SetLightmapSize(2048))));
+                        lighting.AddMessageGroup(new MessageGroup(ConsiderSmallerLightmaps, MessageType.Warning).AddSingleMessage(new SingleMessage(lightMapSize.ToString()).SetAutoFix(SetLightmapSize(2048))));
                     }
 
                     // Count how many light probes the scene has
@@ -1975,13 +1975,13 @@ namespace VRWorldToolkit
 
                     var lightprobegroups = GameObject.FindObjectsOfType<LightProbeGroup>();
 
-                    var overlappingLightProbesGroup = new MessageGroup(OVERLAPPING_LIGHT_PROBES, OVERLAPPING_LIGHT_PROBES_COMBINED, OVERLAPPING_LIGHT_PROBES_INFO, MessageType.Info);
+                    var overlappingLightProbesGroup = new MessageGroup(OverlappingLightProbes, OverlappingLightProbesCombined, OverlappingLightProbesInfo, MessageType.Info);
 
                     for (var i = 0; i < lightprobegroups.Length; i++)
                     {
                         if (lightprobegroups[i].probePositions.GroupBy(p => p).Any(g => g.Count() > 1))
                         {
-                            overlappingLightProbesGroup.AddSingleMessage(new SingleMessage(lightprobegroups[i].name, (lightprobegroups[i].probePositions.Length - lightprobegroups[i].probePositions.Distinct().ToArray().Length).ToString()).SetSelectObject(lightprobegroups[i].gameObject).SetAutoFix(RemoveOverlappingLightprobes(lightprobegroups[i])));
+                            overlappingLightProbesGroup.AddSingleMessage(new SingleMessage(lightprobegroups[i].name, (lightprobegroups[i].probePositions.Length - lightprobegroups[i].probePositions.Distinct().ToArray().Length).ToString()).SetSelectObject(lightprobegroups[i].gameObject).SetAutoFix(RemoveOverlappingLightProbes(lightprobegroups[i])));
                         }
 
                         probeCounter += lightprobegroups[i].probePositions.Length;
@@ -1991,17 +1991,17 @@ namespace VRWorldToolkit
                     {
                         if (probeCounter - bakedProbes < 0)
                         {
-                            lighting.AddMessageGroup(new MessageGroup(LIGHT_PROBES_REMOVED_NOT_RE_BAKED, MessageType.Warning).AddSingleMessage(new SingleMessage(bakedProbes.ToString(), probeCounter.ToString())));
+                            lighting.AddMessageGroup(new MessageGroup(LightProbesRemovedNotReBaked, MessageType.Warning).AddSingleMessage(new SingleMessage(bakedProbes.ToString(), probeCounter.ToString())));
                         }
                         else
                         {
                             if (bakedProbes - (0.9 * probeCounter) < 0)
                             {
-                                lighting.AddMessageGroup(new MessageGroup(LIGHT_PROBE_COUNT_NOT_BAKED, MessageType.Info).AddSingleMessage(new SingleMessage(probeCounter.ToString("n0"), (probeCounter - bakedProbes).ToString("n0"))));
+                                lighting.AddMessageGroup(new MessageGroup(LightProbeCountNotBaked, MessageType.Info).AddSingleMessage(new SingleMessage(probeCounter.ToString("n0"), (probeCounter - bakedProbes).ToString("n0"))));
                             }
                             else
                             {
-                                lighting.AddMessageGroup(new MessageGroup(LIGHT_PROBE_COUNT, MessageType.Info).AddSingleMessage(new SingleMessage(probeCounter.ToString("n0"))));
+                                lighting.AddMessageGroup(new MessageGroup(LightProbeCount, MessageType.Info).AddSingleMessage(new SingleMessage(probeCounter.ToString("n0"))));
                             }
                         }
                     }
@@ -2010,7 +2010,7 @@ namespace VRWorldToolkit
                     {
                         if (overlappingLightProbesGroup.GetTotalCount() > 1)
                         {
-                            overlappingLightProbesGroup.SetGroupAutoFix(RemoveOverlappingLightprobes(lightprobegroups));
+                            overlappingLightProbesGroup.SetGroupAutoFix(RemoveOverlappingLightProbes(lightprobegroups));
                         }
 
                         lighting.AddMessageGroup(overlappingLightProbesGroup);
@@ -2019,7 +2019,7 @@ namespace VRWorldToolkit
                     // Since the scene has baked lights complain if there's no lightprobes
                     else if (probes == null && probeCounter == 0)
                     {
-                        lighting.AddMessageGroup(new MessageGroup(NO_LIGHT_PROBES, MessageType.Info).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/LightProbes.html"));
+                        lighting.AddMessageGroup(new MessageGroup(NoLightProbes, MessageType.Info).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/LightProbes.html"));
                     }
 
                     // Check lighting data asset size if it exists
@@ -2027,12 +2027,12 @@ namespace VRWorldToolkit
                     {
                         var pathTo = AssetDatabase.GetAssetPath(Lightmapping.lightingDataAsset);
                         var length = new FileInfo(pathTo).Length;
-                        lighting.AddMessageGroup(new MessageGroup(LIGHTING_DATA_ASSET_INFO, MessageType.Info).AddSingleMessage(new SingleMessage((length / 1024.0f / 1024.0f).ToString("F2"))));
+                        lighting.AddMessageGroup(new MessageGroup(LightingDataAssetInfo, MessageType.Info).AddSingleMessage(new SingleMessage((length / 1024.0f / 1024.0f).ToString("F2"))));
                     }
 
                     if (nonBakedLights.Count != 0)
                     {
-                        var nonBakedLightsGroup = new MessageGroup(NON_BAKED_BAKED_LIGHT, NON_BAKED_BAKED_LIGHT_COMBINED, NON_BAKED_BAKED_LIGHT_INFO, MessageType.Warning);
+                        var nonBakedLightsGroup = new MessageGroup(NonBakedBakedLight, NonBakedBakedLightCombined, NonBakedBakedLightInfo, MessageType.Warning);
                         for (var i = 0; i < nonBakedLights.Count; i++)
                         {
                             nonBakedLightsGroup.AddSingleMessage(new SingleMessage(nonBakedLights[i].name).SetSelectObject(nonBakedLights[i].gameObject));
@@ -2044,9 +2044,9 @@ namespace VRWorldToolkit
                 else
                 {
 #if UNITY_ANDROID
-                lighting.AddMessageGroup(new MessageGroup(QUEST_BAKED_LIGHTING_WARNING, MessageType.BadFPS).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/Lightmapping.html"));
+                    lighting.AddMessageGroup(new MessageGroup(QuestBakedLightingWarning, MessageType.BadFPS).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/Lightmapping.html"));
 #else
-                    lighting.AddMessageGroup(new MessageGroup(LIGHTS_NOT_BAKED, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/Lightmapping.html"));
+                    lighting.AddMessageGroup(new MessageGroup(LightsNotBaked, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/Lightmapping.html"));
 #endif
                 }
 
@@ -2064,15 +2064,15 @@ namespace VRWorldToolkit
 
                 if (reflectionProbeCount == 0)
                 {
-                    lighting.AddMessageGroup(new MessageGroup(NO_REFLECTION_PROBES, MessageType.Tips).SetDocumentation("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Reflection-Probes"));
+                    lighting.AddMessageGroup(new MessageGroup(NoReflectionProbes, MessageType.Tips).SetDocumentation("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Reflection-Probes"));
                 }
                 else if (reflectionProbeCount > 0)
                 {
-                    lighting.AddMessageGroup(new MessageGroup(REFLECTION_PROBE_COUNT_TEXT, MessageType.Info).AddSingleMessage(new SingleMessage(reflectionProbeCount.ToString())));
+                    lighting.AddMessageGroup(new MessageGroup(ReflectionProbeCountText, MessageType.Info).AddSingleMessage(new SingleMessage(reflectionProbeCount.ToString())));
 
                     if (unbakedprobes.Count > 0)
                     {
-                        var probesUnbakedGroup = new MessageGroup(REFLECTION_PROBES_SOME_UNBAKED, REFLECTION_PROBES_SOME_UNBAKED_COMBINED, MessageType.Warning);
+                        var probesUnbakedGroup = new MessageGroup(ReflectionProbesSomeUnbaked, ReflectionProbesSomeUnbakedCombined, MessageType.Warning);
 
                         foreach (var item in unbakedprobes)
                         {
@@ -2116,7 +2116,7 @@ namespace VRWorldToolkit
                     {
                         var singleMessage = new SingleMessage(mainPostProcessLayer.gameObject.name).SetSelectObject(mainPostProcessLayer.gameObject);
 
-                        postProcessing.AddMessageGroup(new MessageGroup(POST_PROCESSING_NO_RESOURCES_SET, MessageType.Error).AddSingleMessage(singleMessage));
+                        postProcessing.AddMessageGroup(new MessageGroup(PostProcessingNoResourcesSet, MessageType.Error).AddSingleMessage(singleMessage));
 
                         var resources = (PostProcessResources) AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath("d82512f9c8e5d4a4d938b575d47f88d4"), typeof(PostProcessResources));
 
@@ -2127,7 +2127,7 @@ namespace VRWorldToolkit
                 // If post processing is imported but no setup isn't detected show a message
                 if (postProcessVolumes.Length == 0 && mainPostProcessLayer is null)
                 {
-                    postProcessing.AddMessageGroup(new MessageGroup(POST_PROCESSING_IMPORTED_BUT_NOT_SETUP, MessageType.Info));
+                    postProcessing.AddMessageGroup(new MessageGroup(PostProcessingImportedButNotSetup, MessageType.Info));
                 }
                 else
                 {
@@ -2135,7 +2135,7 @@ namespace VRWorldToolkit
                     var sceneViewState = SceneView.lastActiveSceneView.sceneViewState;
                     if (!sceneViewState.showImageEffects)
                     {
-                        postProcessing.AddMessageGroup(new MessageGroup(POST_PROCESSING_DISABLED_IN_SCENE_VIEW, MessageType.Info).SetGroupAutoFix(SetPostProcessingInScene(sceneViewState, true)));
+                        postProcessing.AddMessageGroup(new MessageGroup(PostProcessingDisabledInSceneView, MessageType.Info).SetGroupAutoFix(SetPostProcessingInScene(sceneViewState, true)));
                     }
 
                     // Start by checking if reference camera has been set in the Scene Descriptor
@@ -2148,21 +2148,21 @@ namespace VRWorldToolkit
                             noReferenceCameraMessage.SetAutoFix(SetReferenceCamera(sceneDescriptor, Camera.main));
                         }
 
-                        postProcessing.AddMessageGroup(new MessageGroup(NO_REFERENCE_CAMERA_SET_PP, MessageType.Warning).AddSingleMessage(noReferenceCameraMessage));
+                        postProcessing.AddMessageGroup(new MessageGroup(NoReferenceCameraSetPp, MessageType.Warning).AddSingleMessage(noReferenceCameraMessage));
                     }
                     else
                     {
                         // Check for post process volumes in the scene
                         if (postProcessVolumes.Length == 0)
                         {
-                            postProcessing.AddMessageGroup(new MessageGroup(NO_POST_PROCESSING_VOLUMES, MessageType.Info));
+                            postProcessing.AddMessageGroup(new MessageGroup(NoPostProcessingVolumes, MessageType.Info));
                         }
                         else
                         {
                             var postprocessLayer = sceneDescriptor.ReferenceCamera.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
                             if (postprocessLayer is null)
                             {
-                                postProcessing.AddMessageGroup(new MessageGroup(REFERENCE_CAMERA_NO_POST_PROCESSING_LAYER, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.ReferenceCamera.gameObject)));
+                                postProcessing.AddMessageGroup(new MessageGroup(ReferenceCameraNoPostProcessingLayer, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.ReferenceCamera.gameObject)));
                             }
 
                             if (postprocessLayer)
@@ -2170,18 +2170,18 @@ namespace VRWorldToolkit
                                 var volumeLayer = postprocessLayer.volumeLayer;
                                 if (volumeLayer == 0)
                                 {
-                                    postProcessing.AddMessageGroup(new MessageGroup(VOLUME_BLENDING_LAYER_NOT_SET, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.ReferenceCamera.gameObject)));
+                                    postProcessing.AddMessageGroup(new MessageGroup(VolumeBlendingLayerNotSet, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.ReferenceCamera.gameObject)));
                                 }
 
                                 // Check for usage of reserved layers since they break post processing
                                 var numbersFromMask = Helper.GetAllLayerNumbersFromMask(volumeLayer);
                                 if (numbersFromMask.Contains(19) | numbersFromMask.Contains(20) | numbersFromMask.Contains(21))
                                 {
-                                    postProcessing.AddMessageGroup(new MessageGroup(POST_PROCESS_LAYER_USING_RESERVED_LAYER, MessageType.Error).AddSingleMessage(new SingleMessage(postprocessLayer.gameObject.name).SetSelectObject(postprocessLayer.gameObject)));
+                                    postProcessing.AddMessageGroup(new MessageGroup(PostProcessLayerUsingReservedLayer, MessageType.Error).AddSingleMessage(new SingleMessage(postprocessLayer.gameObject.name).SetSelectObject(postprocessLayer.gameObject)));
                                 }
 
-                                var noProfileSet = postProcessing.AddMessageGroup(new MessageGroup(NO_PROFILE_SET, NO_PROFILE_SET_COMBINED, MessageType.Error));
-                                var volumeNoGlobalNoCollider = postProcessing.AddMessageGroup(new MessageGroup(POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER, POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER_COMBINED, POST_PROCESSING_VOLUME_NOT_GLOBAL_NO_COLLIDER_INFO, MessageType.Error));
+                                var noProfileSet = postProcessing.AddMessageGroup(new MessageGroup(NoProfileSet, NoProfileSetCombined, MessageType.Error));
+                                var volumeNoGlobalNoCollider = postProcessing.AddMessageGroup(new MessageGroup(PostProcessingVolumeNotGlobalNoCollider, PostProcessingVolumeNotGlobalNoColliderCombined, PostProcessingVolumeNotGlobalNoColliderInfo, MessageType.Error));
                                 var matchingVolumes = new List<PostProcessVolume>();
                                 foreach (var postProcessVolume in postProcessVolumes)
                                 {
@@ -2206,7 +2206,7 @@ namespace VRWorldToolkit
 
                                 if (matchingVolumes.Count == 0)
                                 {
-                                    postProcessing.AddMessageGroup(new MessageGroup(NO_MATCHING_LAYERS_FOUND, MessageType.Warning).AddSingleMessage(new SingleMessage(Helper.GetAllLayersFromMask(postprocessLayer.volumeLayer)).SetSelectObject(postprocessLayer.gameObject)));
+                                    postProcessing.AddMessageGroup(new MessageGroup(NoMatchingLayersFound, MessageType.Warning).AddSingleMessage(new SingleMessage(Helper.GetAllLayersFromMask(postprocessLayer.volumeLayer)).SetSelectObject(postprocessLayer.gameObject)));
                                 }
 
                                 // Go trough the profile settings and see if any bad one's are used
@@ -2219,19 +2219,19 @@ namespace VRWorldToolkit
                                     var ambientOcclusion = postProcessProfile.GetSetting<AmbientOcclusion>();
                                     if (ambientOcclusion && ambientOcclusion.enabled && ambientOcclusion.active)
                                     {
-                                        postProcessing.AddMessageGroup(new MessageGroup(NO_AMBIENT_OCCLUSION, MessageType.Error).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.AmbientOcclusion)).SetSelectObject(postProcessVolume.gameObject)));
+                                        postProcessing.AddMessageGroup(new MessageGroup(NoAmbientOcclusion, MessageType.Error).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.AmbientOcclusion)).SetSelectObject(postProcessVolume.gameObject)));
                                     }
 
                                     var screenSpaceReflections = postProcessProfile.GetSetting<ScreenSpaceReflections>();
                                     if (screenSpaceReflections && screenSpaceReflections.enabled && screenSpaceReflections.active)
                                     {
-                                        postProcessing.AddMessageGroup(new MessageGroup(SCREEN_SPACE_REFLECTIONS_WARNING, MessageType.Warning).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.ScreenSpaceReflections)).SetSelectObject(postProcessVolume.gameObject)));
+                                        postProcessing.AddMessageGroup(new MessageGroup(ScreenSpaceReflectionsWarning, MessageType.Warning).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.ScreenSpaceReflections)).SetSelectObject(postProcessVolume.gameObject)));
                                     }
 
                                     var vignette = postProcessProfile.GetSetting<Vignette>();
                                     if (vignette && vignette.enabled && vignette.active)
                                     {
-                                        postProcessing.AddMessageGroup(new MessageGroup(VIGNETTE_WARNING, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
+                                        postProcessing.AddMessageGroup(new MessageGroup(VignetteWarning, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
                                     }
 
                                     var colorGrading = postProcessProfile.GetSetting<ColorGrading>();
@@ -2239,7 +2239,7 @@ namespace VRWorldToolkit
                                     {
                                         if (colorGrading.tonemapper.value == Tonemapper.None && colorGrading.gradingMode == GradingMode.HighDefinitionRange)
                                         {
-                                            postProcessing.AddMessageGroup(new MessageGroup(DONT_USE_NONE_FOR_TONEMAPPING, MessageType.Error).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
+                                            postProcessing.AddMessageGroup(new MessageGroup(DontUseNoneForTonemapping, MessageType.Error).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
                                         }
                                     }
 
@@ -2250,24 +2250,24 @@ namespace VRWorldToolkit
                                         {
                                             if (bloom.intensity.overrideState && bloom.intensity.value > 0.3f)
                                             {
-                                                postProcessing.AddMessageGroup(new MessageGroup(TOO_HIGH_BLOOM_INTENSITY, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
+                                                postProcessing.AddMessageGroup(new MessageGroup(TooHighBloomIntensity, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
                                             }
 
                                             if (bloom.threshold.overrideState && bloom.threshold.value > 1f)
                                             {
-                                                postProcessing.AddMessageGroup(new MessageGroup(TOO_HIGH_BLOOM_THRESHOLD, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
+                                                postProcessing.AddMessageGroup(new MessageGroup(TooHighBloomThreshold, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
                                             }
 
                                             if (bloom.dirtTexture.overrideState && bloom.dirtTexture.value || bloom.dirtIntensity.overrideState && bloom.dirtIntensity.value > 0)
                                             {
-                                                postProcessing.AddMessageGroup(new MessageGroup(NO_BLOOM_DIRT_IN_VR, MessageType.Error).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.BloomDirt)).SetSelectObject(postProcessVolume.gameObject)));
+                                                postProcessing.AddMessageGroup(new MessageGroup(NoBloomDirtInVR, MessageType.Error).AddSingleMessage(new SingleMessage(DisablePostProcessEffect(postProcessProfile, RemovePpEffect.BloomDirt)).SetSelectObject(postProcessVolume.gameObject)));
                                             }
                                         }
 
                                         var depthOfField = postProcessProfile.GetSetting<DepthOfField>();
                                         if (depthOfField && depthOfField.enabled && depthOfField.active)
                                         {
-                                            postProcessing.AddMessageGroup(new MessageGroup(DEPTH_OF_FIELD_WARNING, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
+                                            postProcessing.AddMessageGroup(new MessageGroup(DepthOfFieldWarning, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
                                         }
                                     }
                                 }
@@ -2277,11 +2277,11 @@ namespace VRWorldToolkit
 
                     if (!postProcessing.HasMessages())
                     {
-                        postProcessing.AddMessageGroup(new MessageGroup(NO_PROBLEMS_FOUND_IN_PP, MessageType.Info));
+                        postProcessing.AddMessageGroup(new MessageGroup(NoProblemsFoundInPp, MessageType.Info));
                     }
                 }
 #else
-                postProcessing.AddMessageGroup(new MessageGroup(NO_POST_PROCESSING_IMPORTED, MessageType.Info));
+                postProcessing.AddMessageGroup(new MessageGroup(NoPostProcessingImported, MessageType.Info));
 #endif
 
                 // GameObject checks
@@ -2299,14 +2299,14 @@ namespace VRWorldToolkit
                 var checkedMaterials = new List<Material>();
                 var checkedShaders = new Dictionary<Shader, CheckedShaderProperties>();
 
-                var mirrorsDefaultLayers = optimization.AddMessageGroup(new MessageGroup(MIRROR_WITH_DEFAULT_LAYERS, MIRROR_WITH_DEFAULT_LAYERS_COMBINED, MIRROR_WITH_DEFAULT_LAYERS_INFO, MessageType.Tips));
-                var legacyBlendShapeIssues = general.AddMessageGroup(new MessageGroup(LEGACY_BLEND_SHAPE_ISSUES, LEGACY_BLEND_SHAPE_ISSUES_COMBINED, LEGACY_BLEND_SHAPE_ISSUES_INFO, MessageType.Warning));
-                var grabPassShaders = general.AddMessageGroup(new MessageGroup(MATERIAL_WITH_GRAB_PASS_SHADER, MATERIAL_WITH_GRAB_PASS_SHADER_COMBINED, Helper.BuildPlatform() == RuntimePlatform.WindowsPlayer ? MATERIAL_WITH_GRAB_PASS_SHADER_INFO_PC : MATERIAL_WITH_GRAB_PASS_SHADER_INFO_QUEST, Helper.BuildPlatform() == RuntimePlatform.Android ? MessageType.Error : MessageType.Info));
-                var disabledPortals = general.AddMessageGroup(new MessageGroup(DISABLED_PORTALS_WARNING, DISABLED_PORTALS_WARNING_COMBINED, DISABLED_PORTALS_WARNING_INFO, MessageType.Warning));
-                var materialWithNonWhitelistedShader = general.AddMessageGroup(new MessageGroup(MATERIAL_WITH_NON_WHITELISTED_SHADER, MATERIAL_WITH_NON_WHITELISTED_SHADER_COMBINED, MATERIAL_WITH_NON_WHITELISTED_SHADER_INFO, MessageType.Warning).SetCombinedSelectionDisabled(true).SetDocumentation("https://docs.vrchat.com/docs/quest-content-limitations#shaders"));
-                var uiElementNavigation = general.AddMessageGroup(new MessageGroup(UI_ELEMENT_WITH_NAVIGATION_NOT_NONE, UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_COMBINED, UI_ELEMENT_WITH_NAVIGATION_NOT_NONE_INFO, MessageType.Tips));
-                var nullTriggerReceivers = general.AddMessageGroup(new MessageGroup(NULL_TRIGGER_RECEIVER, NULL_TRIGGER_RECEIVER_COMBINED, NULL_TRIGGER_RECEIVER_INFO, MessageType.Info));
-                var textMeshStatic = general.AddMessageGroup(new MessageGroup(TEXT_MESH_LIGHTMAP_STATIC, TEXT_MESH_LIGHTMAP_STATIC_COMBINED, TEXT_MESH_LIGHTMAP_STATIC_INFO, MessageType.Warning));
+                var mirrorsDefaultLayers = optimization.AddMessageGroup(new MessageGroup(MirrorWithDefaultLayers, MirrorWithDefaultLayersCombined, MirrorWithDefaultLayersInfo, MessageType.Tips));
+                var legacyBlendShapeIssues = general.AddMessageGroup(new MessageGroup(LegacyBlendShapeIssues, LegacyBlendShapeIssuesCombined, LegacyBlendShapeIssuesInfo, MessageType.Warning));
+                var grabPassShaders = general.AddMessageGroup(new MessageGroup(MaterialWithGrabPassShader, MaterialWithGrabPassShaderCombined, Helper.BuildPlatform() == RuntimePlatform.WindowsPlayer ? MaterialWithGrabPassShaderInfoPC : MaterialWithGrabPassShaderInfoQuest, Helper.BuildPlatform() == RuntimePlatform.Android ? MessageType.Error : MessageType.Info));
+                var disabledPortals = general.AddMessageGroup(new MessageGroup(DisabledPortalsWarning, DisabledPortalsWarningCombined, DisabledPortalsWarningInfo, MessageType.Warning));
+                var materialWithNonWhitelistedShader = general.AddMessageGroup(new MessageGroup(MaterialWithNonWhitelistedShader, MaterialWithNonWhitelistedShaderCombined, MaterialWithNonWhitelistedShaderInfo, MessageType.Warning).SetCombinedSelectionDisabled(true).SetDocumentation("https://docs.vrchat.com/docs/quest-content-limitations#shaders"));
+                var uiElementNavigation = general.AddMessageGroup(new MessageGroup(UIElementWithNavigationNotNone, UIElementWithNavigationNotNoneCombined, UIElementWithNavigationNotNoneInfo, MessageType.Tips));
+                var nullTriggerReceivers = general.AddMessageGroup(new MessageGroup(NullTriggerReceiver, NullTriggerReceiverCombined, NullTriggerReceiverInfo, MessageType.Info));
+                var textMeshStatic = general.AddMessageGroup(new MessageGroup(TextMeshLightmapStatic, TextMeshLightmapStaticCombined, TextMeshLightmapStaticInfo, MessageType.Warning));
 
                 var allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
                 for (var i = 0; i < allGameObjects.Length; i++)
@@ -2573,7 +2573,7 @@ namespace VRWorldToolkit
                 {
                     if (badShaders / checkedMaterials.Count * 100 > 10)
                     {
-                        optimization.AddMessageGroup(new MessageGroup(NO_TOON_SHADERS, MessageType.Warning));
+                        optimization.AddMessageGroup(new MessageGroup(NoToonShaders, MessageType.Warning));
                     }
                 }
 
@@ -2583,14 +2583,14 @@ namespace VRWorldToolkit
                     var percent = (int) ((float) unCrunchedTextures.Count / (float) textureCount * 100f);
                     if (percent > 20)
                     {
-                        optimization.AddMessageGroup(new MessageGroup(NON_CRUNCHED_TEXTURES, MessageType.Tips).AddSingleMessage(new SingleMessage(percent.ToString())));
+                        optimization.AddMessageGroup(new MessageGroup(NonCrunchedTextures, MessageType.Tips).AddSingleMessage(new SingleMessage(percent.ToString())));
                     }
                 }
 
                 var modelsCount = importers.Count;
                 if (modelsCount > 0)
                 {
-                    var noUVGroup = new MessageGroup(NO_LIGHTMAP_UV, NO_LIGHTMAP_UV_COMBINED, NO_LIGHTMAP_UV_INFO, MessageType.Warning);
+                    var noUVGroup = new MessageGroup(NoLightmapUV, NoLightmapUVCombined, NoLightmapUVInfo, MessageType.Warning);
                     for (var i = 0; i < modelsCount; i++)
                     {
                         var modelImporter = importers[i];
@@ -2604,7 +2604,7 @@ namespace VRWorldToolkit
                 var missingShadersCount = missingShaders.Count;
                 if (missingShadersCount > 0)
                 {
-                    var missingShadersGroup = new MessageGroup(MISSING_SHADER_WARNING, MISSING_SHADER_WARNING_COMBINED, MISSING_SHADER_WARNING_INFO, MessageType.Error);
+                    var missingShadersGroup = new MessageGroup(MissingShaderWarning, MissingShaderWarningCombined, MissingShaderWarningInfo, MessageType.Error);
                     for (var i = 0; i < missingShaders.Count; i++)
                     {
                         missingShadersGroup.AddSingleMessage(new SingleMessage(missingShaders[i].name).SetAssetPath(AssetDatabase.GetAssetPath(missingShaders[i])).SetAutoFix(ChangeShader(missingShaders[i], "Standard")));
@@ -2615,7 +2615,7 @@ namespace VRWorldToolkit
             }
             catch (Exception exception)
             {
-                general.AddMessageGroup(new MessageGroup(HEY_YOU_FOUND_A_BUG, MessageType.Error)).AddSingleMessage(new SingleMessage(exception.Message.Replace("\n", " ").Replace("\r", ""), Regex.Matches(exception.StackTrace, "(?<=\\.cs:).*(?<=\\S)")[0].ToString()));
+                general.AddMessageGroup(new MessageGroup(HeyYouFoundABug, MessageType.Error)).AddSingleMessage(new SingleMessage(exception.Message.Replace("\n", " ").Replace("\r", ""), Regex.Matches(exception.StackTrace, "(?<=\\.cs:).*(?<=\\S)")[0].ToString()));
                 Debug.LogError(exception);
                 autoRecheck = false;
             }
@@ -2631,79 +2631,79 @@ namespace VRWorldToolkit
             recheck = true;
         }
 
-        private const string LAST_BUILD = "Library/LastBuild.buildreport";
+        private const string LastBuild = "Library/LastBuild.buildreport";
 
-        private const string BUILD_REPORT_DIR = "Assets/_LastBuild/";
+        private const string BuildReportDir = "Assets/_LastBuild/";
 
-        private const string LAST_BUILD_REPORT_PATH = "Assets/_LastBuild/LastBuild.buildreport";
-        private const string WINDOWS_BUILD_REPORT_PATH = "Assets/_LastBuild/LastWindowsBuild.buildreport";
-        private const string QUEST_BUILD_REPORT_PATH = "Assets/_LastBuild/LastQuestBuild.buildreport";
+        private const string LastBuildReportPath = "Assets/_LastBuild/LastBuild.buildreport";
+        private const string WindowsBuildReportPath = "Assets/_LastBuild/LastWindowsBuild.buildreport";
+        private const string QuestBuildReportPath = "Assets/_LastBuild/LastQuestBuild.buildreport";
 
         [SerializeField] private BuildReport buildReportWindows;
         [SerializeField] private BuildReport buildReportQuest;
 
-        [SerializeField] TreeViewState m_TreeViewState;
-        [SerializeField] MultiColumnHeaderState m_MultiColumnHeaderState;
+        [SerializeField] private TreeViewState treeViewState;
+        [SerializeField] private MultiColumnHeaderState multiColumnHeaderState;
 
-        private BuildReportTreeView m_TreeView;
-        private SearchField m_SearchField;
+        private BuildReportTreeView buildReportTreeView;
+        private SearchField searchField;
 
         private void RefreshBuild()
         {
 #if VRWT_BENCHMARK
             CheckTime.Restart();
 #endif
-            if (!Directory.Exists(BUILD_REPORT_DIR))
-                Directory.CreateDirectory(BUILD_REPORT_DIR);
-            if (File.Exists(LAST_BUILD) && (!File.Exists(LAST_BUILD_REPORT_PATH) || File.GetLastWriteTime(LAST_BUILD) > File.GetLastWriteTime(LAST_BUILD_REPORT_PATH)))
+            if (!Directory.Exists(BuildReportDir))
+                Directory.CreateDirectory(BuildReportDir);
+            if (File.Exists(LastBuild) && (!File.Exists(LastBuildReportPath) || File.GetLastWriteTime(LastBuild) > File.GetLastWriteTime(LastBuildReportPath)))
             {
-                File.Copy(LAST_BUILD, LAST_BUILD_REPORT_PATH, true);
-                AssetDatabase.ImportAsset(LAST_BUILD_REPORT_PATH);
+                File.Copy(LastBuild, LastBuildReportPath, true);
+                AssetDatabase.ImportAsset(LastBuildReportPath);
             }
 
-            if (File.Exists(LAST_BUILD_REPORT_PATH))
+            if (File.Exists(LastBuildReportPath))
             {
-                switch (AssetDatabase.LoadAssetAtPath<BuildReport>(LAST_BUILD_REPORT_PATH).summary.platform)
+                switch (AssetDatabase.LoadAssetAtPath<BuildReport>(LastBuildReportPath).summary.platform)
                 {
                     case BuildTarget.StandaloneWindows:
                     case BuildTarget.StandaloneWindows64:
-                        if (File.GetLastWriteTime(LAST_BUILD_REPORT_PATH) > File.GetLastWriteTime(WINDOWS_BUILD_REPORT_PATH))
+                        if (File.GetLastWriteTime(LastBuildReportPath) > File.GetLastWriteTime(WindowsBuildReportPath))
                         {
-                            AssetDatabase.CopyAsset(LAST_BUILD_REPORT_PATH, WINDOWS_BUILD_REPORT_PATH);
-                            buildReportWindows = (BuildReport) AssetDatabase.LoadAssetAtPath(WINDOWS_BUILD_REPORT_PATH, typeof(BuildReport));
+                            AssetDatabase.CopyAsset(LastBuildReportPath, WindowsBuildReportPath);
+                            buildReportWindows = (BuildReport) AssetDatabase.LoadAssetAtPath(WindowsBuildReportPath, typeof(BuildReport));
                         }
 
                         break;
                     case BuildTarget.Android:
-                        if (File.GetLastWriteTime(LAST_BUILD_REPORT_PATH) > File.GetLastWriteTime(QUEST_BUILD_REPORT_PATH))
+                        if (File.GetLastWriteTime(LastBuildReportPath) > File.GetLastWriteTime(QuestBuildReportPath))
                         {
-                            AssetDatabase.CopyAsset(LAST_BUILD_REPORT_PATH, QUEST_BUILD_REPORT_PATH);
-                            buildReportQuest = (BuildReport) AssetDatabase.LoadAssetAtPath(QUEST_BUILD_REPORT_PATH, typeof(BuildReport));
+                            AssetDatabase.CopyAsset(LastBuildReportPath, QuestBuildReportPath);
+                            buildReportQuest = (BuildReport) AssetDatabase.LoadAssetAtPath(QuestBuildReportPath, typeof(BuildReport));
                         }
 
                         break;
                 }
             }
 
-            if (buildReportWindows is null && File.Exists(WINDOWS_BUILD_REPORT_PATH))
+            if (buildReportWindows is null && File.Exists(WindowsBuildReportPath))
             {
-                buildReportWindows = (BuildReport) AssetDatabase.LoadAssetAtPath(WINDOWS_BUILD_REPORT_PATH, typeof(BuildReport));
+                buildReportWindows = (BuildReport) AssetDatabase.LoadAssetAtPath(WindowsBuildReportPath, typeof(BuildReport));
             }
 
-            if (buildReportQuest is null && File.Exists(QUEST_BUILD_REPORT_PATH))
+            if (buildReportQuest is null && File.Exists(QuestBuildReportPath))
             {
-                buildReportQuest = (BuildReport) AssetDatabase.LoadAssetAtPath(QUEST_BUILD_REPORT_PATH, typeof(BuildReport));
+                buildReportQuest = (BuildReport) AssetDatabase.LoadAssetAtPath(QuestBuildReportPath, typeof(BuildReport));
             }
 
-            if (m_TreeView != null && !m_TreeView.HasReport())
+            if (buildReportTreeView != null && !buildReportTreeView.HasReport())
             {
                 if (buildReportWindows != null)
                 {
-                    m_TreeView.SetReport(buildReportWindows);
+                    buildReportTreeView.SetReport(buildReportWindows);
                 }
                 else if (buildReportQuest != null)
                 {
-                    m_TreeView.SetReport(buildReportWindows);
+                    buildReportTreeView.SetReport(buildReportWindows);
                 }
             }
 #if VRWT_BENCHMARK
@@ -2761,14 +2761,14 @@ namespace VRWorldToolkit
 
                 postProcessing = masterList.AddOrGetCategory("Post Processing");
 
-                if (buildReportWindows is null && File.Exists(WINDOWS_BUILD_REPORT_PATH))
+                if (buildReportWindows is null && File.Exists(WindowsBuildReportPath))
                 {
-                    buildReportWindows = (BuildReport) AssetDatabase.LoadAssetAtPath(WINDOWS_BUILD_REPORT_PATH, typeof(BuildReport));
+                    buildReportWindows = (BuildReport) AssetDatabase.LoadAssetAtPath(WindowsBuildReportPath, typeof(BuildReport));
                 }
 
-                if (buildReportQuest is null && File.Exists(QUEST_BUILD_REPORT_PATH))
+                if (buildReportQuest is null && File.Exists(QuestBuildReportPath))
                 {
-                    buildReportQuest = (BuildReport) AssetDatabase.LoadAssetAtPath(QUEST_BUILD_REPORT_PATH, typeof(BuildReport));
+                    buildReportQuest = (BuildReport) AssetDatabase.LoadAssetAtPath(QuestBuildReportPath, typeof(BuildReport));
                 }
 
                 initDone = true;
@@ -2783,26 +2783,26 @@ namespace VRWorldToolkit
 #if VRWT_BENCHMARK
                 CheckTime.Restart();
 #endif
-                var firstInit = m_MultiColumnHeaderState == null;
+                var firstInit = multiColumnHeaderState == null;
                 var headerState = BuildReportTreeView.CreateDefaultMultiColumnHeaderState(EditorGUIUtility.currentViewWidth - 121);
-                if (MultiColumnHeaderState.CanOverwriteSerializedFields(m_MultiColumnHeaderState, headerState))
-                    MultiColumnHeaderState.OverwriteSerializedFields(m_MultiColumnHeaderState, headerState);
-                m_MultiColumnHeaderState = headerState;
+                if (MultiColumnHeaderState.CanOverwriteSerializedFields(multiColumnHeaderState, headerState))
+                    MultiColumnHeaderState.OverwriteSerializedFields(multiColumnHeaderState, headerState);
+                multiColumnHeaderState = headerState;
 
                 var multiColumnHeader = new MultiColumnHeader(headerState);
                 if (firstInit)
                     multiColumnHeader.ResizeToFit();
 
-                if (m_TreeViewState is null)
+                if (treeViewState is null)
                 {
-                    m_TreeViewState = new TreeViewState();
+                    treeViewState = new TreeViewState();
                 }
 
                 var report = buildReportWindows != null ? buildReportWindows : buildReportQuest;
 
-                m_TreeView = new BuildReportTreeView(m_TreeViewState, multiColumnHeader, report);
-                m_SearchField = new SearchField();
-                m_SearchField.downOrUpArrowKeyPressed += m_TreeView.SetFocusAndEnsureSelectedItem;
+                buildReportTreeView = new BuildReportTreeView(treeViewState, multiColumnHeader, report);
+                searchField = new SearchField();
+                searchField.downOrUpArrowKeyPressed += buildReportTreeView.SetFocusAndEnsureSelectedItem;
 
                 buildReportInitDone = true;
 #if VRWT_BENCHMARK
@@ -2960,10 +2960,10 @@ namespace VRWorldToolkit
                         switch ((BuildReportType) selectedBuildReport)
                         {
                             case BuildReportType.Windows:
-                                m_TreeView.SetReport(buildReportWindows);
+                                buildReportTreeView.SetReport(buildReportWindows);
                                 break;
                             case BuildReportType.Quest:
-                                m_TreeView.SetReport(buildReportQuest);
+                                buildReportTreeView.SetReport(buildReportQuest);
                                 break;
                         }
                     }
@@ -2981,26 +2981,26 @@ namespace VRWorldToolkit
                 {
                     RefreshBuild();
 
-                    if (m_TreeView.HasReport())
+                    if (buildReportTreeView.HasReport())
                     {
-                        m_TreeView.Reload();
+                        buildReportTreeView.Reload();
                     }
                     else
                     {
                         if (buildReportWindows != null)
                         {
-                            m_TreeView.SetReport(buildReportWindows);
+                            buildReportTreeView.SetReport(buildReportWindows);
                         }
                         else if (buildReportQuest != null)
                         {
-                            m_TreeView.SetReport(buildReportQuest);
+                            buildReportTreeView.SetReport(buildReportQuest);
                         }
                     }
                 }
 
                 GUILayout.FlexibleSpace();
 
-                m_TreeView.searchString = m_SearchField.OnToolbarGUI(m_TreeView.searchString);
+                buildReportTreeView.searchString = searchField.OnToolbarGUI(buildReportTreeView.searchString);
 
                 GUILayout.EndHorizontal();
 
@@ -3008,20 +3008,20 @@ namespace VRWorldToolkit
 
                 if (buildReportMessagesFoldout)
                 {
-                    m_TreeView.DrawMessages();
+                    buildReportTreeView.DrawMessages();
                 }
                 else
                 {
                     if (overallStatsFoldout)
                     {
-                        m_TreeView.DrawOverallStats();
+                        buildReportTreeView.DrawOverallStats();
                     }
 
                     var treeViewRect = EditorGUILayout.BeginVertical();
 
-                    if (m_TreeView.HasReport())
+                    if (buildReportTreeView.HasReport())
                     {
-                        m_TreeView.OnGUI(treeViewRect);
+                        buildReportTreeView.OnGUI(treeViewRect);
                     }
 
                     GUILayout.FlexibleSpace();
