@@ -2847,9 +2847,14 @@ namespace VRWorldToolkit
             Quest = 1
         }
 
-        private readonly string[] buildReportToolbar =
+        private static readonly string[] BuildReportToolbar =
         {
             "Windows", "Quest"
+        };
+
+        private static readonly string[] MainToolbar =
+        {
+            "Messages", "Build Report"
         };
 
         [SerializeField] private int selectedBuildReport;
@@ -2860,7 +2865,28 @@ namespace VRWorldToolkit
         {
             InitWhenNeeded();
             Refresh();
+
+            BuildReportOverview();
+
+            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+
+            tab = GUILayout.Toolbar(tab, MainToolbar);
+
+            switch (tab)
+            {
+                case 0:
+                    MessagesTab();
+                    break;
+                case 1:
+                    BuildReportTab();
+                    break;
+            }
+        }
+
+        private void BuildReportOverview()
+        {
             GUILayout.BeginHorizontal();
+
             if (buildReportWindows)
             {
                 GUILayout.BeginVertical();
@@ -2882,132 +2908,126 @@ namespace VRWorldToolkit
             }
 
             GUILayout.EndHorizontal();
-            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
-            tab = GUILayout.Toolbar(tab, new[]
+        }
+
+        private void MessagesTab()
+        {
+            if (EditorApplication.isPlaying)
             {
-                "Messages", "Build Report"
-            });
-            switch (tab)
+                GUILayout.FlexibleSpace();
+
+                EditorGUILayout.LabelField("The editor is currently in play mode.", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
+                EditorGUILayout.LabelField("Stop it to see the messages.", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
+
+                GUILayout.FlexibleSpace();
+            }
+            else
             {
-                case 0:
-                    if (EditorApplication.isPlaying)
+                if (!autoRecheck && GUILayout.Button("Refresh"))
+                {
+                    recheck = true;
+                    autoRecheck = true;
+                }
+
+                masterList.DrawTabSelector();
+
+                EditorGUILayout.BeginVertical();
+                scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+
+                masterList.DrawMessages();
+
+                EditorGUILayout.EndScrollView();
+                EditorGUILayout.EndVertical();
+            }
+        }
+
+        private void BuildReportTab()
+        {
+            if (buildReportInitDone)
+            {
+                GUILayout.BeginVertical();
+
+                GUILayout.BeginHorizontal(EditorStyles.toolbar);
+
+                if (buildReportWindows != null && buildReportQuest != null)
+                {
+                    EditorGUI.BeginChangeCheck();
+
+                    selectedBuildReport = GUILayout.Toolbar(selectedBuildReport, BuildReportToolbar, EditorStyles.toolbarButton);
+
+                    if (EditorGUI.EndChangeCheck())
                     {
-                        GUILayout.FlexibleSpace();
+                        switch ((BuildReportType) selectedBuildReport)
+                        {
+                            case BuildReportType.Windows:
+                                m_TreeView.SetReport(buildReportWindows);
+                                break;
+                            case BuildReportType.Quest:
+                                m_TreeView.SetReport(buildReportQuest);
+                                break;
+                        }
+                    }
 
-                        EditorGUILayout.LabelField("The editor is currently in play mode.", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
-                        EditorGUILayout.LabelField("Stop it to see the messages.", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
+                    GUILayout.Space(10);
+                }
 
-                        GUILayout.FlexibleSpace();
+                overallStatsFoldout = GUILayout.Toggle(overallStatsFoldout, "Stats", EditorStyles.toolbarButton);
+
+                buildReportMessagesFoldout = GUILayout.Toggle(buildReportMessagesFoldout, "Messages", EditorStyles.toolbarButton);
+
+                GUILayout.Space(10);
+
+                if (GUILayout.Button("Refresh", EditorStyles.toolbarButton))
+                {
+                    RefreshBuild();
+
+                    if (m_TreeView.HasReport())
+                    {
+                        m_TreeView.Reload();
                     }
                     else
                     {
-                        if (!autoRecheck && GUILayout.Button("Refresh"))
+                        if (buildReportWindows != null)
                         {
-                            recheck = true;
-                            autoRecheck = true;
+                            m_TreeView.SetReport(buildReportWindows);
                         }
-
-                        masterList.DrawTabSelector();
-
-                        EditorGUILayout.BeginVertical();
-                        scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
-
-                        masterList.DrawMessages();
-
-                        EditorGUILayout.EndScrollView();
-                        EditorGUILayout.EndVertical();
+                        else if (buildReportQuest != null)
+                        {
+                            m_TreeView.SetReport(buildReportQuest);
+                        }
                     }
+                }
 
-                    break;
-                case 1:
-                    if (buildReportInitDone)
+                GUILayout.FlexibleSpace();
+
+                m_TreeView.searchString = m_SearchField.OnToolbarGUI(m_TreeView.searchString);
+
+                GUILayout.EndHorizontal();
+
+                GUILayout.EndVertical();
+
+                if (buildReportMessagesFoldout)
+                {
+                    m_TreeView.DrawMessages();
+                }
+                else
+                {
+                    if (overallStatsFoldout)
                     {
-                        GUILayout.BeginVertical();
-
-                        GUILayout.BeginHorizontal(EditorStyles.toolbar);
-
-                        if (buildReportWindows != null && buildReportQuest != null)
-                        {
-                            EditorGUI.BeginChangeCheck();
-
-                            selectedBuildReport = GUILayout.Toolbar(selectedBuildReport, buildReportToolbar, EditorStyles.toolbarButton);
-
-                            if (EditorGUI.EndChangeCheck())
-                            {
-                                switch ((BuildReportType) selectedBuildReport)
-                                {
-                                    case BuildReportType.Windows:
-                                        m_TreeView.SetReport(buildReportWindows);
-                                        break;
-                                    case BuildReportType.Quest:
-                                        m_TreeView.SetReport(buildReportQuest);
-                                        break;
-                                }
-                            }
-
-                            GUILayout.Space(10);
-                        }
-
-                        overallStatsFoldout = GUILayout.Toggle(overallStatsFoldout, "Stats", EditorStyles.toolbarButton);
-
-                        buildReportMessagesFoldout = GUILayout.Toggle(buildReportMessagesFoldout, "Messages", EditorStyles.toolbarButton);
-
-                        GUILayout.Space(10);
-
-                        if (GUILayout.Button("Refresh", EditorStyles.toolbarButton))
-                        {
-                            RefreshBuild();
-
-                            if (m_TreeView.HasReport())
-                            {
-                                m_TreeView.Reload();
-                            }
-                            else
-                            {
-                                if (buildReportWindows != null)
-                                {
-                                    m_TreeView.SetReport(buildReportWindows);
-                                }
-                                else if (buildReportQuest != null)
-                                {
-                                    m_TreeView.SetReport(buildReportQuest);
-                                }
-                            }
-                        }
-
-                        GUILayout.FlexibleSpace();
-
-                        m_TreeView.searchString = m_SearchField.OnToolbarGUI(m_TreeView.searchString);
-
-                        GUILayout.EndHorizontal();
-
-                        GUILayout.EndVertical();
-
-                        if (buildReportMessagesFoldout)
-                        {
-                            m_TreeView.DrawMessages();
-                        }
-                        else
-                        {
-                            if (overallStatsFoldout)
-                            {
-                                m_TreeView.DrawOverallStats();
-                            }
-
-                            var treeViewRect = EditorGUILayout.BeginVertical();
-
-                            if (m_TreeView.HasReport())
-                            {
-                                m_TreeView.OnGUI(treeViewRect);
-                            }
-
-                            GUILayout.FlexibleSpace();
-
-                            EditorGUILayout.EndVertical();
-                        }
+                        m_TreeView.DrawOverallStats();
                     }
 
-                    break;
+                    var treeViewRect = EditorGUILayout.BeginVertical();
+
+                    if (m_TreeView.HasReport())
+                    {
+                        m_TreeView.OnGUI(treeViewRect);
+                    }
+
+                    GUILayout.FlexibleSpace();
+
+                    EditorGUILayout.EndVertical();
+                }
             }
         }
 
