@@ -435,281 +435,160 @@ namespace VRWorldToolkit
                 messageCategory.ForEach(m => m.ClearMessages());
             }
 
+            private const int ButtonWidth = 80;
+            private const int ButtonHeight = 20;
+
             public void DrawMessages()
             {
                 var drawList = messageCategory;
 
                 for (var i = 0; i < drawList.Count; i++)
                 {
+                    if (drawList[i].disabled) continue;
+
                     var group = drawList[i];
-                    if (!group.disabled)
+
+                    EditorGUILayout.BeginVertical();
+
+                    GUILayout.Label(group.listName, EditorStyles.boldLabel);
+
+                    if (!group.HasMessages())
                     {
-                        GUILayout.Label(group.listName, EditorStyles.boldLabel);
+                        EditorGUILayout.BeginHorizontal();
+                        DrawMessage("No messages found for " + group.listName + ".", MessageType.Info);
+                        EditorGUILayout.EndHorizontal();
 
-                        const int buttonWidth = 80;
-                        const int buttonHeight = 20;
+                        continue;
+                    }
 
-                        if (!group.HasMessages())
+                    for (var l = 0; l < group.MessageGroups.Count; l++)
+                    {
+                        var messageGroup = group.MessageGroups[l];
+
+                        if (messageGroup.CombinedMessage != null && messageGroup.MessageList.Count == 0) continue;
+
+                        var singleCombinedMessage = messageGroup.MessageList.Count == 1;
+                        var expanded = !singleCombinedMessage && group.IsExpanded(messageGroup);
+                        var hasButtons = messageGroup.Buttons();
+
+                        string finalMessage;
+
+                        if (messageGroup.MessageList.Count == 0)
                         {
-                            DrawMessage("No messages found for " + group.listName + ".", MessageType.Info);
-
-                            continue;
+                            finalMessage = messageGroup.Message;
+                        }
+                        else
+                        {
+                            finalMessage = singleCombinedMessage ? string.Format(messageGroup.Message, messageGroup.MessageList[0].variable, messageGroup.MessageList[0].variable2) : string.Format(messageGroup.CombinedMessage, messageGroup.GetTotalCount().ToString());
                         }
 
-                        for (var l = 0; l < group.MessageGroups.Count; l++)
+                        if (messageGroup.AdditionalInfo != null)
                         {
-                            var messageGroup = group.MessageGroups[l];
-                            var hasButtons = messageGroup.Buttons();
+                            finalMessage += " " + messageGroup.AdditionalInfo;
+                        }
 
-                            if (messageGroup.CombinedMessage != null && messageGroup.GetTotalCount() == 0) continue;
+                        EditorGUILayout.BeginHorizontal();
 
-                            if (messageGroup.MessageList.Count > 0)
+                        DrawMessage(finalMessage, messageGroup.MessageType);
+
+                        if (hasButtons)
+                        {
+                            if (messageGroup.MessageList.Count == 0)
                             {
-                                if (messageGroup.CombinedMessage != null && messageGroup.MessageList.Count != 1)
-                                {
-                                    EditorGUILayout.BeginHorizontal();
-
-                                    var finalMessage = string.Format(messageGroup.CombinedMessage, messageGroup.GetTotalCount().ToString());
-
-                                    if (messageGroup.AdditionalInfo != null)
-                                    {
-                                        finalMessage += " " + messageGroup.AdditionalInfo;
-                                    }
-
-                                    if (hasButtons)
-                                    {
-                                        var box = new GUIContent(finalMessage, GetDebuggerIcon(messageGroup.MessageType));
-                                        GUILayout.Box(box, Styles.HelpBoxRichText, GUILayout.ExpandHeight(true), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
-
-                                        EditorGUILayout.BeginVertical();
-
-                                        if (messageGroup.Documentation != null)
-                                        {
-                                            if (GUILayout.Button("Info", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
-                                            {
-                                                if (messageGroup.Documentation != null)
-                                                {
-                                                    Application.OpenURL(messageGroup.Documentation);
-                                                }
-                                            }
-                                        }
-                                        else
-                                        {
-                                            EditorGUI.BeginDisabledGroup(messageGroup.DisableCombinedSelection || messageGroup.GetSelectObjects().Length == 0);
-
-                                            if (GUILayout.Button("Select", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
-                                            {
-                                                Selection.objects = messageGroup.GetSelectObjects();
-                                            }
-
-                                            EditorGUI.EndDisabledGroup();
-                                        }
-
-                                        EditorGUI.EndDisabledGroup();
-
-                                        EditorGUI.BeginDisabledGroup(messageGroup.GroupAutoFix == null);
-
-                                        if (GUILayout.Button("Auto Fix", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
-                                        {
-                                            messageGroup.GroupAutoFix();
-
-                                            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
-
-                                            recheck = true;
-                                        }
-
-                                        EditorGUI.EndDisabledGroup();
-
-                                        EditorGUILayout.EndVertical();
-                                    }
-                                    else
-                                    {
-                                        DrawMessage(finalMessage, messageGroup.MessageType);
-                                    }
-
-                                    EditorGUILayout.EndHorizontal();
-
-                                    var expanded = group.IsExpanded(messageGroup);
-
-                                    expanded = EditorGUILayout.Foldout(expanded, "Show separate messages");
-
-                                    group.SetExpanded(messageGroup, expanded);
-
-                                    if (expanded)
-                                    {
-                                        for (var j = 0; j < messageGroup.MessageList.Count; j++)
-                                        {
-                                            var message = messageGroup.MessageList[j];
-
-                                            EditorGUILayout.BeginHorizontal();
-
-                                            var finalSingleMessage = string.Format(messageGroup.Message, message.variable, message.variable2);
-
-                                            if (hasButtons)
-                                            {
-                                                var box = new GUIContent(finalSingleMessage);
-                                                GUILayout.Box(box, Styles.HelpBoxPadded, GUILayout.ExpandHeight(true), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 121));
-
-                                                EditorGUILayout.BeginVertical();
-
-                                                EditorGUI.BeginDisabledGroup(!(message.selectObjects != null || message.assetPath != null));
-
-                                                if (GUILayout.Button("Select", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
-                                                {
-                                                    if (message.assetPath != null)
-                                                        EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<Object>(message.assetPath));
-
-                                                    else
-                                                        Selection.objects = message.selectObjects;
-                                                }
-
-                                                EditorGUI.EndDisabledGroup();
-
-                                                EditorGUI.BeginDisabledGroup(message.AutoFix == null);
-
-                                                if (GUILayout.Button("Auto Fix", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
-                                                {
-                                                    message.AutoFix();
-
-                                                    EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
-
-                                                    recheck = true;
-                                                }
-
-                                                EditorGUI.EndDisabledGroup();
-
-                                                GUILayout.FlexibleSpace();
-
-                                                EditorGUILayout.EndVertical();
-                                            }
-                                            else
-                                            {
-                                                DrawMessage(finalSingleMessage, messageGroup.MessageType);
-                                            }
-
-                                            EditorGUILayout.EndHorizontal();
-                                        }
-
-                                        EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
-                                    }
-                                }
-                                else
-                                {
-                                    for (var j = 0; j < messageGroup.MessageList.Count; j++)
-                                    {
-                                        var message = messageGroup.MessageList[j];
-                                        EditorGUILayout.BeginHorizontal();
-
-                                        var finalMessage = string.Format(messageGroup.Message, message.variable, message.variable2);
-
-                                        if (messageGroup.AdditionalInfo != null)
-                                        {
-                                            finalMessage = string.Concat(finalMessage, " ", messageGroup.AdditionalInfo);
-                                        }
-
-                                        if (hasButtons)
-                                        {
-                                            var box = new GUIContent(finalMessage, GetDebuggerIcon(messageGroup.MessageType));
-                                            GUILayout.Box(box, Styles.HelpBoxRichText, GUILayout.ExpandHeight(true), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
-
-                                            EditorGUILayout.BeginVertical();
-
-                                            EditorGUI.BeginDisabledGroup(!(message.selectObjects != null || message.assetPath != null));
-
-                                            if (GUILayout.Button("Select", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
-                                            {
-                                                if (message.assetPath != null)
-                                                {
-                                                    EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<Object>(message.assetPath));
-                                                }
-                                                else
-                                                {
-                                                    Selection.objects = message.selectObjects;
-                                                }
-                                            }
-
-                                            EditorGUI.EndDisabledGroup();
-
-                                            EditorGUI.BeginDisabledGroup(message.AutoFix == null);
-
-                                            if (GUILayout.Button("Auto Fix", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
-                                            {
-                                                message.AutoFix();
-
-                                                EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
-
-                                                recheck = true;
-                                            }
-
-                                            EditorGUI.EndDisabledGroup();
-
-                                            GUILayout.FlexibleSpace();
-
-                                            EditorGUILayout.EndVertical();
-                                        }
-                                        else
-                                        {
-                                            DrawMessage(finalMessage, messageGroup.MessageType);
-                                        }
-
-                                        EditorGUILayout.EndHorizontal();
-                                    }
-                                }
+                                DrawButtons(null, messageGroup.Documentation, null, messageGroup.GroupAutoFix);
                             }
-                            else
+                            else if (messageGroup.MessageList.Count == 1)
                             {
-                                if (hasButtons)
-                                {
-                                    EditorGUILayout.BeginHorizontal();
-
-                                    var box = new GUIContent(messageGroup.Message, GetDebuggerIcon(messageGroup.MessageType));
-                                    GUILayout.Box(box, Styles.HelpBoxRichText, GUILayout.ExpandHeight(true), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 107));
-
-                                    EditorGUILayout.BeginVertical();
-
-                                    EditorGUI.BeginDisabledGroup(messageGroup.Documentation == null);
-
-                                    if (GUILayout.Button("Info", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
-                                    {
-                                        if (messageGroup.Documentation != null)
-                                        {
-                                            Application.OpenURL(messageGroup.Documentation);
-                                        }
-                                    }
-
-                                    EditorGUI.EndDisabledGroup();
-
-                                    EditorGUI.BeginDisabledGroup(messageGroup.GroupAutoFix == null);
-
-                                    if (GUILayout.Button("Auto Fix", GUILayout.Width(buttonWidth), GUILayout.Height(buttonHeight)))
-                                    {
-                                        if (messageGroup.GroupAutoFix != null)
-                                        {
-                                            messageGroup.GroupAutoFix();
-                                            recheck = true;
-                                        }
-                                    }
-
-                                    EditorGUI.EndDisabledGroup();
-
-                                    EditorGUILayout.EndVertical();
-
-                                    EditorGUILayout.EndHorizontal();
-                                }
-                                else
-                                {
-                                    DrawMessage(messageGroup.Message, messageGroup.MessageType);
-                                }
+                                var message = messageGroup.MessageList[0];
+                                DrawButtons(message.selectObjects, null, message.assetPath, message.AutoFix);
                             }
+                        }
+
+                        EditorGUILayout.EndHorizontal();
+
+                        if (messageGroup.MessageList.Count > 1)
+                        {
+                            EditorGUILayout.BeginVertical();
+                            expanded = EditorGUILayout.Foldout(expanded, "Show separate messages");
+                            group.SetExpanded(messageGroup, expanded);
+                            EditorGUILayout.EndVertical();
+                        }
+
+                        if (!expanded) continue;
+
+                        for (var j = 0; j < messageGroup.MessageList.Count; j++)
+                        {
+                            var message = messageGroup.MessageList[j];
+
+                            var finalSingleMessage = string.Format(messageGroup.Message, message.variable, message.variable2);
+
+                            EditorGUILayout.BeginHorizontal();
+                            DrawPaddedMessage(finalSingleMessage);
+
+                            DrawButtons(message.selectObjects, null, message.assetPath, message.AutoFix);
+
+                            EditorGUILayout.EndHorizontal();
+                        }
+
+                        EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+                    }
+
+                    EditorGUILayout.EndVertical();
+                }
+
+                void DrawPaddedMessage(string messageText)
+                {
+                    var box = new GUIContent(messageText);
+                    GUILayout.Box(box, Styles.HelpBoxPadded, GUILayout.ExpandHeight(true), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 121));
+                }
+
+                void DrawMessage(string messageText, MessageType type)
+                {
+                    var box = new GUIContent(messageText, GetDebuggerIcon(type));
+                    GUILayout.Box(box, Styles.HelpBoxRichText, GUILayout.ExpandHeight(true), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 18));
+                }
+
+                void DrawButtons(GameObject[] selectObjects, string infoLink, string assetPath, Action autoFix)
+                {
+                    EditorGUILayout.BeginVertical();
+
+                    EditorGUI.BeginDisabledGroup(!(selectObjects != null || assetPath != null || infoLink != null));
+
+                    if (infoLink != null && GUILayout.Button("Info", GUILayout.Width(ButtonWidth), GUILayout.Height(ButtonHeight)))
+                    {
+                        Application.OpenURL(infoLink);
+                    }
+                    else if (GUILayout.Button("Select", GUILayout.Width(ButtonWidth), GUILayout.Height(ButtonHeight)))
+                    {
+                        if (assetPath != null)
+                        {
+                            EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<Object>(assetPath));
+                        }
+                        else
+                        {
+                            Selection.objects = selectObjects;
                         }
                     }
-                }
-            }
 
-            private static void DrawMessage(string messageText, MessageType type)
-            {
-                var box = new GUIContent(messageText, GetDebuggerIcon(type));
-                GUILayout.Box(box, Styles.HelpBoxRichText, GUILayout.ExpandHeight(true), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 18));
+                    EditorGUI.EndDisabledGroup();
+
+                    EditorGUI.BeginDisabledGroup(autoFix == null);
+
+                    if (GUILayout.Button("Auto Fix", GUILayout.Width(ButtonWidth), GUILayout.Height(ButtonHeight)))
+                    {
+                        autoFix?.Invoke();
+
+                        EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+
+                        recheck = true;
+                    }
+
+                    EditorGUI.EndDisabledGroup();
+
+                    GUILayout.FlexibleSpace();
+
+                    EditorGUILayout.EndVertical();
+                }
             }
         }
 
@@ -722,7 +601,7 @@ namespace VRWorldToolkit
         {
             var window = GetWindow(typeof(WorldDebugger));
             window.titleContent = new GUIContent("World Debugger");
-            window.minSize = new Vector2(530, 600);
+            window.minSize = new Vector2(520, 600);
             window.Show();
         }
 
