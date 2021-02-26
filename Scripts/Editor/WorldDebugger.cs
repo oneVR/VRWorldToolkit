@@ -493,14 +493,14 @@ namespace VRWorldToolkit
 
                         if (hasButtons)
                         {
-                            if (messageGroup.MessageList.Count > 1)
-                            {
-                                DrawButtons(messageGroup.GetSelectObjects(), messageGroup.Documentation, null, messageGroup.GroupAutoFix);
-                            }
-                            else if (messageGroup.MessageList.Count == 1)
+                            if (singleCombinedMessage)
                             {
                                 var message = messageGroup.MessageList[0];
                                 DrawButtons(message.selectObjects, null, message.assetPath, message.AutoFix);
+                            }
+                            else if (messageGroup.MessageList.Count > 1 || messageGroup.Documentation != null || messageGroup.GroupAutoFix != null)
+                            {
+                                DrawButtons(messageGroup.GetSelectObjects(), messageGroup.Documentation, null, messageGroup.GroupAutoFix);
                             }
                         }
 
