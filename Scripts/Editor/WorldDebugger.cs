@@ -498,7 +498,7 @@ namespace VRWorldToolkit
                                 var message = messageGroup.MessageList[0];
                                 DrawButtons(message.selectObjects, null, message.assetPath, message.AutoFix);
                             }
-                            else if (messageGroup.MessageList.Count > 1 || messageGroup.Documentation != null || messageGroup.GroupAutoFix != null)
+                            else
                             {
                                 DrawButtons(messageGroup.GetSelectObjects(), messageGroup.Documentation, null, messageGroup.GroupAutoFix);
                             }
