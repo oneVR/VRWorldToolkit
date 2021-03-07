@@ -384,6 +384,8 @@ namespace VRWorldToolkit
         {
             public List<MessageCategory> messageCategory = new List<MessageCategory>();
 
+            [SerializeField] private Vector2 scrollPos;
+
             public MessageCategory AddOrGetCategory(string listName)
             {
                 var newMessageCategory = new MessageCategory(listName);
@@ -435,111 +437,111 @@ namespace VRWorldToolkit
                 messageCategory.ForEach(m => m.ClearMessages());
             }
 
-            private const int ButtonWidth = 80;
+            private const int ButtonWidth = 75;
             private const int ButtonHeight = 20;
 
             public void DrawMessages()
             {
                 var drawList = messageCategory;
 
-                for (var i = 0; i < drawList.Count; i++)
+                using (var scrollView = new EditorGUILayout.ScrollViewScope(scrollPos))
                 {
-                    if (drawList[i].disabled) continue;
+                    scrollPos = scrollView.scrollPosition;
 
-                    var group = drawList[i];
-
-                    EditorGUILayout.BeginVertical();
-
-                    GUILayout.Label(group.listName, EditorStyles.boldLabel);
-
-                    if (!group.HasMessages())
+                    for (var i = 0; i < drawList.Count; i++)
                     {
-                        EditorGUILayout.BeginHorizontal();
-                        DrawMessage("No messages found for " + group.listName + ".", MessageType.Info);
-                        EditorGUILayout.EndHorizontal();
+                        if (drawList[i].disabled) continue;
 
-                        continue;
-                    }
+                        var group = drawList[i];
 
-                    for (var l = 0; l < group.MessageGroups.Count; l++)
-                    {
-                        var messageGroup = group.MessageGroups[l];
+                        GUILayout.Label(group.listName, EditorStyles.boldLabel);
 
-                        if (messageGroup.CombinedMessage != null && messageGroup.MessageList.Count == 0) continue;
-
-                        var singleCombinedMessage = messageGroup.MessageList.Count == 1;
-                        var expanded = !singleCombinedMessage && group.IsExpanded(messageGroup);
-                        var hasButtons = messageGroup.Buttons();
-
-                        string finalMessage;
-
-                        if (messageGroup.MessageList.Count == 0)
+                        if (!group.HasMessages())
                         {
-                            finalMessage = messageGroup.Message;
-                        }
-                        else
-                        {
-                            finalMessage = singleCombinedMessage ? string.Format(messageGroup.Message, messageGroup.MessageList[0].variable, messageGroup.MessageList[0].variable2) : string.Format(messageGroup.CombinedMessage, messageGroup.GetTotalCount().ToString());
-                        }
-
-                        if (messageGroup.AdditionalInfo != null)
-                        {
-                            finalMessage += " " + messageGroup.AdditionalInfo;
-                        }
-
-                        EditorGUILayout.BeginHorizontal();
-
-                        DrawMessage(finalMessage, messageGroup.MessageType);
-
-                        if (hasButtons)
-                        {
-                            if (singleCombinedMessage)
+                            using (new EditorGUILayout.HorizontalScope())
                             {
-                                var message = messageGroup.MessageList[0];
-                                DrawButtons(message.selectObjects, null, message.assetPath, message.AutoFix);
+                                DrawMessage("No messages found for " + group.listName + ".", MessageType.Info);
+                            }
+
+                            continue;
+                        }
+
+                        for (var l = 0; l < group.MessageGroups.Count; l++)
+                        {
+                            var messageGroup = group.MessageGroups[l];
+
+                            if (messageGroup.CombinedMessage != null && messageGroup.MessageList.Count == 0) continue;
+
+                            var singleCombinedMessage = messageGroup.MessageList.Count == 1;
+                            var expanded = !singleCombinedMessage && group.IsExpanded(messageGroup);
+                            var hasButtons = messageGroup.Buttons();
+
+                            string finalMessage;
+
+                            if (messageGroup.MessageList.Count == 0)
+                            {
+                                finalMessage = messageGroup.Message;
                             }
                             else
                             {
-                                DrawButtons(messageGroup.GetSelectObjects(), messageGroup.Documentation, null, messageGroup.GroupAutoFix);
+                                finalMessage = singleCombinedMessage ? string.Format(messageGroup.Message, messageGroup.MessageList[0].variable, messageGroup.MessageList[0].variable2) : string.Format(messageGroup.CombinedMessage ?? string.Empty, messageGroup.GetTotalCount().ToString());
+                            }
+
+                            if (messageGroup.AdditionalInfo != null)
+                            {
+                                finalMessage += " " + messageGroup.AdditionalInfo;
+                            }
+
+                            using (new EditorGUILayout.HorizontalScope())
+                            {
+                                DrawMessage(finalMessage, messageGroup.MessageType);
+
+                                if (hasButtons)
+                                {
+                                    if (singleCombinedMessage)
+                                    {
+                                        var message = messageGroup.MessageList[0];
+                                        DrawButtons(message.selectObjects, null, message.assetPath, message.AutoFix);
+                                    }
+                                    else
+                                    {
+                                        DrawButtons(messageGroup.GetSelectObjects(), messageGroup.Documentation, null, messageGroup.GroupAutoFix);
+                                    }
+                                }
+                            }
+
+                            if (messageGroup.MessageList.Count > 1)
+                            {
+                                expanded = EditorGUILayout.Foldout(expanded, "Show separate messages");
+                                group.SetExpanded(messageGroup, expanded);
+
+                                if (!expanded) continue;
+
+                                for (var j = 0; j < messageGroup.MessageList.Count; j++)
+                                {
+                                    var message = messageGroup.MessageList[j];
+
+                                    var finalSingleMessage = string.Format(messageGroup.Message, message.variable, message.variable2);
+
+                                    using (new EditorGUILayout.HorizontalScope())
+                                    {
+                                        DrawPaddedMessage(finalSingleMessage);
+                                        DrawButtons(message.selectObjects, null, message.assetPath, message.AutoFix);
+                                    }
+                                }
+
+                                EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
                             }
                         }
-
-                        EditorGUILayout.EndHorizontal();
-
-                        if (messageGroup.MessageList.Count > 1)
-                        {
-                            EditorGUILayout.BeginVertical();
-                            expanded = EditorGUILayout.Foldout(expanded, "Show separate messages");
-                            group.SetExpanded(messageGroup, expanded);
-                            EditorGUILayout.EndVertical();
-                        }
-
-                        if (!expanded) continue;
-
-                        for (var j = 0; j < messageGroup.MessageList.Count; j++)
-                        {
-                            var message = messageGroup.MessageList[j];
-
-                            var finalSingleMessage = string.Format(messageGroup.Message, message.variable, message.variable2);
-
-                            EditorGUILayout.BeginHorizontal();
-                            DrawPaddedMessage(finalSingleMessage);
-
-                            DrawButtons(message.selectObjects, null, message.assetPath, message.AutoFix);
-
-                            EditorGUILayout.EndHorizontal();
-                        }
-
-                        EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
                     }
 
-                    EditorGUILayout.EndVertical();
+                    GUILayout.FlexibleSpace();
                 }
 
                 void DrawPaddedMessage(string messageText)
                 {
                     var box = new GUIContent(messageText);
-                    GUILayout.Box(box, Styles.HelpBoxPadded, GUILayout.ExpandHeight(true), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 121));
+                    GUILayout.Box(box, Styles.HelpBoxPadded, GUILayout.ExpandHeight(true), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 116));
                 }
 
                 void DrawMessage(string messageText, MessageType type)
@@ -550,52 +552,47 @@ namespace VRWorldToolkit
 
                 void DrawButtons(GameObject[] selectObjects, string infoLink, string assetPath, Action autoFix)
                 {
-                    EditorGUILayout.BeginVertical();
-
-                    EditorGUI.BeginDisabledGroup(!(selectObjects != null || assetPath != null || infoLink != null));
-
-                    if (infoLink != null)
+                    using (new EditorGUILayout.VerticalScope())
                     {
-                        if (GUILayout.Button("More Info", GUILayout.Width(ButtonWidth), GUILayout.Height(ButtonHeight)))
+                        using (new EditorGUI.DisabledGroupScope(!(selectObjects != null || assetPath != null || infoLink != null)))
                         {
-                            Application.OpenURL(infoLink);
+                            if (infoLink != null)
+                            {
+                                if (GUILayout.Button("More Info", GUILayout.Width(ButtonWidth), GUILayout.Height(ButtonHeight)))
+                                {
+                                    Application.OpenURL(infoLink);
+                                }
+                            }
+                            else if (GUILayout.Button("Select", GUILayout.Width(ButtonWidth), GUILayout.Height(ButtonHeight)))
+                            {
+                                if (assetPath != null)
+                                {
+                                    EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<Object>(assetPath));
+                                }
+                                else
+                                {
+                                    Selection.objects = selectObjects;
+                                }
+                            }
                         }
-                    }
-                    else if (GUILayout.Button("Select", GUILayout.Width(ButtonWidth), GUILayout.Height(ButtonHeight)))
-                    {
-                        if (assetPath != null)
+
+                        using (new EditorGUI.DisabledGroupScope(autoFix == null))
                         {
-                            EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<Object>(assetPath));
+                            if (GUILayout.Button("Auto Fix", GUILayout.Width(ButtonWidth), GUILayout.Height(ButtonHeight)))
+                            {
+                                autoFix?.Invoke();
+
+                                EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+
+                                recheck = true;
+                            }
                         }
-                        else
-                        {
-                            Selection.objects = selectObjects;
-                        }
+
+                        GUILayout.FlexibleSpace();
                     }
-
-                    EditorGUI.EndDisabledGroup();
-
-                    EditorGUI.BeginDisabledGroup(autoFix == null);
-
-                    if (GUILayout.Button("Auto Fix", GUILayout.Width(ButtonWidth), GUILayout.Height(ButtonHeight)))
-                    {
-                        autoFix?.Invoke();
-
-                        EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
-
-                        recheck = true;
-                    }
-
-                    EditorGUI.EndDisabledGroup();
-
-                    GUILayout.FlexibleSpace();
-
-                    EditorGUILayout.EndVertical();
                 }
             }
         }
-
-        private Vector2 scrollPos;
 
         [SerializeField] private int tab;
 
@@ -2931,13 +2928,7 @@ namespace VRWorldToolkit
 
                 masterList.DrawTabSelector();
 
-                EditorGUILayout.BeginVertical();
-                scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
-
                 masterList.DrawMessages();
-
-                EditorGUILayout.EndScrollView();
-                EditorGUILayout.EndVertical();
             }
         }
 
