@@ -98,7 +98,7 @@ namespace VRWorldToolkit.DataStructures
 
     public static class Validation
     {
-        public static readonly string[] WorldShaderWhiteList = new string[]
+        public static readonly string[] WorldShaderWhiteList =
         {
             "VRChat/Mobile/Standard Lite",
             "VRChat/Mobile/Diffuse",
@@ -111,7 +111,7 @@ namespace VRWorldToolkit.DataStructures
             "VRChat/Mobile/Particles/Additive",
             "VRChat/Mobile/Particles/Multiply",
             "FX/MirrorReflection",
-            "UI/Default",
+            "UI/Default"
         };
     }
 }
