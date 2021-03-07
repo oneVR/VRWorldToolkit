@@ -154,6 +154,7 @@ namespace VRWorldToolkit
             }
         }
 
+        [Serializable]
         private class MessageGroup : IEquatable<MessageGroup>
         {
             public readonly string Message;
@@ -305,12 +306,11 @@ namespace VRWorldToolkit
         [Serializable]
         private class MessageCategory
         {
-            [SerializeField] public List<MessageGroup> MessageGroups;
-
-            [SerializeField] private Dictionary<int, bool> expandedGroups;
-
             public string listName;
-            public bool disabled;
+
+            [SerializeField] public List<MessageGroup> MessageGroups;
+            private Dictionary<int, bool> expandedGroups;
+            [SerializeField] public bool disabled;
 
             public MessageCategory()
             {
@@ -382,20 +382,18 @@ namespace VRWorldToolkit
         [Serializable]
         private class MessageCategoryList
         {
-            public List<MessageCategory> messageCategory = new List<MessageCategory>();
+            [SerializeField] public List<MessageCategory> messageCategory = new List<MessageCategory>();
 
             [SerializeField] private Vector2 scrollPos;
 
-            public MessageCategory AddOrGetCategory(string listName)
+            public MessageCategory CreateOrGetCategory(string listName)
             {
-                var newMessageCategory = new MessageCategory(listName);
-
                 var oldMessageCategory = messageCategory.Find(x => x.listName == listName);
 
                 if (oldMessageCategory is null)
                 {
+                    var newMessageCategory = new MessageCategory(listName);
                     messageCategory.Add(newMessageCategory);
-
                     return newMessageCategory;
                 }
 
@@ -1418,14 +1416,14 @@ namespace VRWorldToolkit
         private static long occlusionCacheFiles;
 
         // TODO: Better check threading
-        private static void CountOcclusionCacheFiles()
+        private void CountOcclusionCacheFiles()
         {
             occlusionCacheFiles = Directory.EnumerateFiles("Library/Occlusion/").Count();
 
             OcclusionMessageCheck();
         }
 
-        private static void OcclusionMessageCheck()
+        private void OcclusionMessageCheck()
         {
             if (occlusionCacheFiles > 0)
             {
@@ -2731,12 +2729,12 @@ namespace VRWorldToolkit
         [NonSerialized] private bool initDone;
         [NonSerialized] private bool buildReportInitDone;
 
-        [SerializeField] private static MessageCategoryList masterList;
+        [SerializeField] private MessageCategoryList masterList;
 
-        private static MessageCategory general;
-        private static MessageCategory optimization;
-        private static MessageCategory lighting;
-        private static MessageCategory postProcessing;
+        [SerializeField] private MessageCategory general;
+        [SerializeField] private MessageCategory optimization;
+        [SerializeField] private MessageCategory lighting;
+        [SerializeField] private MessageCategory postProcessing;
 
         private void InitWhenNeeded()
         {
@@ -2750,13 +2748,13 @@ namespace VRWorldToolkit
                 if (masterList is null)
                     masterList = new MessageCategoryList();
 
-                general = masterList.AddOrGetCategory("General");
+                general = masterList.CreateOrGetCategory("General");
 
-                optimization = masterList.AddOrGetCategory("Optimization");
+                optimization = masterList.CreateOrGetCategory("Optimization");
 
-                lighting = masterList.AddOrGetCategory("Lighting");
+                lighting = masterList.CreateOrGetCategory("Lighting");
 
-                postProcessing = masterList.AddOrGetCategory("Post Processing");
+                postProcessing = masterList.CreateOrGetCategory("Post Processing");
 
                 if (buildReportWindows is null && File.Exists(WindowsBuildReportPath))
                 {
