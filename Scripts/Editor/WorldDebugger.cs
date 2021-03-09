@@ -516,7 +516,7 @@ namespace VRWorldToolkit
                                     if (singleCombinedMessage)
                                     {
                                         var message = messageGroup.MessageList[0];
-                                        DrawButtons(message.selectObjects, messageGroup.Documentation, message.assetPath, message.AutoFix, false);
+                                        DrawButtons(message.selectObjects, messageGroup.Documentation, message.assetPath, message.AutoFix, messageGroup.HasSelectGameObjects());
                                     }
                                     else
                                     {
