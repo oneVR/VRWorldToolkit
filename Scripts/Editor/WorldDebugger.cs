@@ -2358,23 +2358,24 @@ namespace VRWorldToolkit
 
                                 var meshFilter = gameObject.GetComponent<MeshFilter>();
 
-                                if (meshFilter is null || !xatlasUnwrapper) continue;
-
-                                var sharedMesh = meshFilter.sharedMesh;
-
-                                if (AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(sharedMesh)) != null)
+                                if (meshFilter != null && !xatlasUnwrapper)
                                 {
-                                    var modelImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(sharedMesh)) as ModelImporter;
+                                    var sharedMesh = meshFilter.sharedMesh;
 
-                                    if (!importers.Contains(modelImporter))
+                                    if (AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(sharedMesh)) != null)
                                     {
-                                        if (modelImporter != null)
-                                        {
-                                            var so = new SerializedObject(renderer);
+                                        var modelImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(sharedMesh)) as ModelImporter;
 
-                                            if (!modelImporter.generateSecondaryUV && sharedMesh.uv2.Length == 0 && so.FindProperty("m_ScaleInLightmap").floatValue != 0)
+                                        if (!importers.Contains(modelImporter))
+                                        {
+                                            if (modelImporter != null)
                                             {
-                                                importers.Add(modelImporter);
+                                                var so = new SerializedObject(renderer);
+
+                                                if (!modelImporter.generateSecondaryUV && sharedMesh.uv2.Length == 0 && so.FindProperty("m_ScaleInLightmap").floatValue != 0)
+                                                {
+                                                    importers.Add(modelImporter);
+                                                }
                                             }
                                         }
                                     }
