@@ -123,7 +123,7 @@ namespace VRWorldToolkit.DataStructures
         /// Sourced from Unity documentation at:
         /// https://docs.unity3d.com/2018.4/Documentation/Manual/class-TextureImporterOverride.html
         /// </summary>
-        public static TextureImporterFormat[] UnsupportedCompressionFormatsQuest =
+        public static readonly TextureImporterFormat[] UnsupportedCompressionFormatsQuest =
         {
             TextureImporterFormat.DXT1,
             TextureImporterFormat.DXT5,
