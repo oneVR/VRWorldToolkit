@@ -161,7 +161,8 @@ namespace VRWorldToolkit
             public readonly string CombinedMessage;
             public readonly string AdditionalInfo;
 
-            public bool DisableCombinedSelection;
+            private bool? disableCombinedSelection = null;
+            private int? objectCount = null;
 
             public readonly MessageType MessageType;
 
@@ -212,34 +213,50 @@ namespace VRWorldToolkit
 
             public int GetTotalCount()
             {
-                var count = 0;
-
-                if (MessageList == null) return count;
-
-                for (var i = 0; i < MessageList.Count; i++)
+                if (objectCount is null)
                 {
-                    var item = MessageList[i];
-                    if (item.selectObjects != null)
+                    var count = 0;
+
+                    for (var i = 0; i < MessageList.Count; i++)
                     {
-                        count += item.selectObjects.Count();
-                    }
-                    else
-                    {
-                        if (item.assetPath != null)
+                        var item = MessageList[i];
+                        if (item.selectObjects != null)
                         {
-                            count++;
+                            count += item.selectObjects.Count();
+                        }
+                        else
+                        {
+                            if (item.assetPath != null)
+                            {
+                                count++;
+                            }
                         }
                     }
+
+                    objectCount = count;
                 }
 
-                return count == 0 ? MessageList.Count : count;
+                return (int) objectCount;
             }
 
-            public MessageGroup SetCombinedSelectionDisabled(bool enabled)
+            public bool HasSelectGameObjects()
             {
-                DisableCombinedSelection = enabled;
+                if (disableCombinedSelection is null)
+                {
+                    for (var i = 0; i < MessageList.Count; i++)
+                    {
+                        var item = MessageList[i];
+                        if (item.selectObjects != null && item.selectObjects.Any())
+                        {
+                            disableCombinedSelection = true;
+                        }
+                    }
 
-                return this;
+                    if (disableCombinedSelection == null)
+                        disableCombinedSelection = false;
+                }
+
+                return (bool) disableCombinedSelection;
             }
 
             public GameObject[] GetSelectObjects()
@@ -499,11 +516,11 @@ namespace VRWorldToolkit
                                     if (singleCombinedMessage)
                                     {
                                         var message = messageGroup.MessageList[0];
-                                        DrawButtons(message.selectObjects, null, message.assetPath, message.AutoFix);
+                                        DrawButtons(message.selectObjects, messageGroup.Documentation, message.assetPath, message.AutoFix, false);
                                     }
                                     else
                                     {
-                                        DrawButtons(messageGroup.GetSelectObjects(), messageGroup.Documentation, null, messageGroup.GroupAutoFix);
+                                        DrawButtons(messageGroup.GetSelectObjects(), messageGroup.Documentation, null, messageGroup.GroupAutoFix, messageGroup.HasSelectGameObjects());
                                     }
                                 }
                             }
@@ -524,7 +541,7 @@ namespace VRWorldToolkit
                                     using (new EditorGUILayout.HorizontalScope())
                                     {
                                         DrawPaddedMessage(finalSingleMessage);
-                                        DrawButtons(message.selectObjects, null, message.assetPath, message.AutoFix);
+                                        DrawButtons(message.selectObjects, null, message.assetPath, message.AutoFix, true);
                                     }
                                 }
 
@@ -548,33 +565,44 @@ namespace VRWorldToolkit
                     GUILayout.Box(box, Styles.HelpBoxRichText, GUILayout.ExpandHeight(true), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 18));
                 }
 
-                void DrawButtons(GameObject[] selectObjects, string infoLink, string assetPath, Action autoFix)
+                void DrawButtons(GameObject[] selectObjects, string infoLink, string assetPath, Action autoFix, bool hasGameObjects)
                 {
                     using (new EditorGUILayout.VerticalScope())
                     {
-                        using (new EditorGUI.DisabledGroupScope(!(selectObjects != null || assetPath != null || infoLink != null)))
+                        var infoLinkSet = infoLink != null;
+                        var autoFixSet = autoFix != null;
+                        var assetPathSet = assetPath != null;
+
+                        if (infoLinkSet && GUILayout.Button("More Info", GUILayout.Width(ButtonWidth), GUILayout.Height(ButtonHeight)))
                         {
-                            if (infoLink != null)
+                            Application.OpenURL(infoLink);
+                        }
+
+                        if (!infoLinkSet || assetPathSet || hasGameObjects)
+                        {
+                            using (new EditorGUI.DisabledScope(!assetPathSet && !hasGameObjects))
                             {
-                                if (GUILayout.Button("More Info", GUILayout.Width(ButtonWidth), GUILayout.Height(ButtonHeight)))
+                                if (assetPathSet)
                                 {
-                                    Application.OpenURL(infoLink);
-                                }
-                            }
-                            else if (GUILayout.Button("Select", GUILayout.Width(ButtonWidth), GUILayout.Height(ButtonHeight)))
-                            {
-                                if (assetPath != null)
-                                {
-                                    EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<Object>(assetPath));
+                                    if (GUILayout.Button("Ping Asset", GUILayout.Width(ButtonWidth), GUILayout.Height(ButtonHeight)))
+                                    {
+                                        EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<Object>(assetPath));
+                                    }
                                 }
                                 else
                                 {
-                                    Selection.objects = selectObjects;
+                                    if (GUILayout.Button("Select", GUILayout.Width(ButtonWidth), GUILayout.Height(ButtonHeight)))
+                                    {
+                                        if (selectObjects != null)
+                                        {
+                                            Selection.objects = selectObjects;
+                                        }
+                                    }
                                 }
                             }
                         }
 
-                        using (new EditorGUI.DisabledGroupScope(autoFix == null))
+                        using (new EditorGUI.DisabledScope(!autoFixSet))
                         {
                             if (GUILayout.Button("Auto Fix", GUILayout.Width(ButtonWidth), GUILayout.Height(ButtonHeight)))
                             {
@@ -1406,6 +1434,10 @@ namespace VRWorldToolkit
         private const string TextMeshLightmapStatic = "Text Mesh \"{0}\" marked as lightmap static.";
         private const string TextMeshLightmapStaticCombined = "Found {0} Text Meshes marked as lightmap static.";
         private const string TextMeshLightmapStaticInfo = "This will cause warnings as the mesh has no normals.";
+
+        private const string UnsupportedCompressionFormatQuest = "Texture {0} using compression format {1} that is not supported on Quest.";
+        private const string UnsupportedCompressionFormatQuestCombined = "Found {0} textures with compression format not supported on Quest.";
+        private const string UnsupportedCompressionFormatQuestInfo = "These will appear fine in editor but black in game.";
 
         private const string HeyYouFoundABug = "Hey, you found a bug! Please send it my way so I can fix it! Check About VRWorld Toolkit to find all the ways to contact me. \"{0}\" on line {1}.";
 
@@ -2298,10 +2330,11 @@ namespace VRWorldToolkit
                 var legacyBlendShapeIssues = general.AddMessageGroup(new MessageGroup(LegacyBlendShapeIssues, LegacyBlendShapeIssuesCombined, LegacyBlendShapeIssuesInfo, MessageType.Warning));
                 var grabPassShaders = general.AddMessageGroup(new MessageGroup(MaterialWithGrabPassShader, MaterialWithGrabPassShaderCombined, Helper.BuildPlatform() == RuntimePlatform.WindowsPlayer ? MaterialWithGrabPassShaderInfoPC : MaterialWithGrabPassShaderInfoQuest, Helper.BuildPlatform() == RuntimePlatform.Android ? MessageType.Error : MessageType.Info));
                 var disabledPortals = general.AddMessageGroup(new MessageGroup(DisabledPortalsWarning, DisabledPortalsWarningCombined, DisabledPortalsWarningInfo, MessageType.Warning));
-                var materialWithNonWhitelistedShader = general.AddMessageGroup(new MessageGroup(MaterialWithNonWhitelistedShader, MaterialWithNonWhitelistedShaderCombined, MaterialWithNonWhitelistedShaderInfo, MessageType.Warning).SetCombinedSelectionDisabled(true).SetDocumentation("https://docs.vrchat.com/docs/quest-content-limitations#shaders"));
+                var materialWithNonWhitelistedShader = general.AddMessageGroup(new MessageGroup(MaterialWithNonWhitelistedShader, MaterialWithNonWhitelistedShaderCombined, MaterialWithNonWhitelistedShaderInfo, MessageType.Warning).SetDocumentation("https://docs.vrchat.com/docs/quest-content-limitations#shaders"));
                 var uiElementNavigation = general.AddMessageGroup(new MessageGroup(UIElementWithNavigationNotNone, UIElementWithNavigationNotNoneCombined, UIElementWithNavigationNotNoneInfo, MessageType.Tips));
                 var nullTriggerReceivers = general.AddMessageGroup(new MessageGroup(NullTriggerReceiver, NullTriggerReceiverCombined, NullTriggerReceiverInfo, MessageType.Info));
                 var textMeshStatic = general.AddMessageGroup(new MessageGroup(TextMeshLightmapStatic, TextMeshLightmapStaticCombined, TextMeshLightmapStaticInfo, MessageType.Warning));
+                var unsupportedCompressionFormatQuest = general.AddMessageGroup(new MessageGroup(UnsupportedCompressionFormatQuest, UnsupportedCompressionFormatQuestCombined, UnsupportedCompressionFormatQuestInfo, MessageType.Error).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/class-TextureImporterOverride.html"));
 
                 var allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
                 for (var i = 0; i < allGameObjects.Length; i++)
@@ -2476,13 +2509,20 @@ namespace VRWorldToolkit
 
                                     if (AssetDatabase.GetAssetPath(texture) != "" && !unCrunchedTextures.Contains(texture))
                                     {
-                                        var textureImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(texture)) as TextureImporter;
+                                        var assetPath = AssetDatabase.GetAssetPath(texture);
+                                        var textureImporter = AssetImporter.GetAtPath(assetPath) as TextureImporter;
 
                                         if (textureImporter != null)
                                         {
                                             if (!unCrunchedTextures.Contains(texture))
                                             {
                                                 textureCount++;
+                                            }
+
+                                            var platformTextureSettings = textureImporter.GetPlatformTextureSettings("Android");
+                                            if (platformTextureSettings.overridden && Validation.UnsupportedCompressionFormatsQuest.Contains(platformTextureSettings.format))
+                                            {
+                                                unsupportedCompressionFormatQuest.AddSingleMessage(new SingleMessage(texture.name, platformTextureSettings.format.ToString()).SetAssetPath(assetPath));
                                             }
 
                                             if (!textureImporter.crunchedCompression && !unCrunchedTextures.Contains(texture) && !textureImporter.textureCompression.Equals(TextureImporterCompression.Uncompressed) && EditorTextureUtil.GetStorageMemorySize(texture) > 500000)

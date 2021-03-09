@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using UnityEditor;
+using UnityEngine;
 
 namespace VRWorldToolkit.DataStructures
 {
@@ -112,6 +113,24 @@ namespace VRWorldToolkit.DataStructures
             "VRChat/Mobile/Particles/Multiply",
             "FX/MirrorReflection",
             "UI/Default"
+        };
+
+        /// <summary>
+        /// Sourced from Unity documentation at:
+        /// https://docs.unity3d.com/2018.4/Documentation/Manual/class-TextureImporterOverride.html
+        /// </summary>
+        public static TextureImporterFormat[] UnsupportedCompressionFormatsQuest =
+        {
+            TextureImporterFormat.DXT1,
+            TextureImporterFormat.DXT5,
+            TextureImporterFormat.DXT1Crunched,
+            TextureImporterFormat.DXT5Crunched,
+            TextureImporterFormat.BC6H,
+            TextureImporterFormat.BC7,
+            TextureImporterFormat.PVRTC_RGB2,
+            TextureImporterFormat.PVRTC_RGB4,
+            TextureImporterFormat.PVRTC_RGBA2,
+            TextureImporterFormat.PVRTC_RGBA4,
         };
     }
 }
