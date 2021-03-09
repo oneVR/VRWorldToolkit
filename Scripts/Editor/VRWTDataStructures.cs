@@ -99,6 +99,10 @@ namespace VRWorldToolkit.DataStructures
 
     public static class Validation
     {
+        /// <summary>
+        /// Sourced from the whitelist included in the VRCSDK
+        /// https://docs.vrchat.com/docs/quest-content-limitations
+        /// </summary>
         public static readonly string[] WorldShaderWhiteList =
         {
             "VRChat/Mobile/Standard Lite",
