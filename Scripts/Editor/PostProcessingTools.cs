@@ -2,6 +2,7 @@
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 #if UNITY_POST_PROCESSING_STACK_V2
 using UnityEngine.Rendering.PostProcessing;
 #endif
@@ -184,7 +185,7 @@ namespace VRWorldToolkit
             volume.gameObject.layer = LayerMask.NameToLayer(layer);
 
             // Mark the scene as dirty for saving
-            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+            EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
 
             // Set the created volume as active selection in hierarchy
             Selection.activeGameObject = volume.gameObject;
