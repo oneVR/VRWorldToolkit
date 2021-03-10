@@ -20,7 +20,7 @@ namespace VRWorldToolkit
         [MenuItem("VRWorld Toolkit/Post Processing/Import Post Processing", false, 1)]
         private static void PostProcessingInstall()
         {
-            Helper.ImportPackage("com.unity.postprocessing@2.3.0");
+            Helper.ImportPackage("com.unity.postprocessing@3.0.3");
         }
 
         [MenuItem("VRWorld Toolkit/Post Processing/Import Post Processing", true)]
@@ -50,7 +50,9 @@ namespace VRWorldToolkit
                     {
                         SetupBasicPostProcessing();
                     }
-                    else if (EditorUtility.DisplayDialog("Scene descriptor missing!", "No scene descriptor or avatar descriptors was found. A scene descriptor must exist and contain a reference camera for post-processing to appear in-game.\r\n\r\nYou can add a scene descriptor by adding a VRCWorld prefab included with the SDK.\r\n\r\nSelect Cancel to return and add a scene descriptor so the setup can set the reference camera for you, or select Continue to ignore this warning.", "Continue",
+                    else if (EditorUtility.DisplayDialog("Scene descriptor missing!",
+                        "No scene descriptor or avatar descriptors was found. A scene descriptor must exist and contain a reference camera for post-processing to appear in-game.\r\n\r\nYou can add a scene descriptor by adding a VRCWorld prefab included with the SDK.\r\n\r\nSelect Cancel to return and add a scene descriptor so the setup can set the reference camera for you, or select Continue to ignore this warning.",
+                        "Continue",
                         "Cancel"))
                     {
                         SetupBasicPostProcessing();
@@ -159,7 +161,7 @@ namespace VRWorldToolkit
                 AssetDatabase.CreateFolder("Assets", "Post Processing");
             if (AssetDatabase.LoadAssetAtPath("Assets/Post Processing/SilentProfile.asset", typeof(PostProcessProfile)) == null)
             {
-                var path = AssetDatabase.GUIDToAssetPath("eaac6f7291834264f97854154e89bf76");
+                var path = AssetDatabase.GetAssetPath(Resources.Load("PostProcessing/SilentProfile"));
 
                 if (path != null)
                 {
@@ -167,15 +169,29 @@ namespace VRWorldToolkit
                 }
             }
 
+            var profileFound = false;
+
             //Set up the post process volume
-            var volume = GameObject.Instantiate(PostProcessManager.instance.QuickVolume(16, 100f));
+            var volume = Instantiate(PostProcessManager.instance.QuickVolume(16, 100f));
             if (File.Exists("Assets/Post Processing/SilentProfile.asset"))
+            {
                 volume.sharedProfile = (PostProcessProfile) AssetDatabase.LoadAssetAtPath("Assets/Post Processing/SilentProfile.asset", typeof(PostProcessProfile));
+                profileFound = true;
+            }
+
+            // Set volume name and layer
             volume.gameObject.name = "Post Processing Volume";
             volume.gameObject.layer = LayerMask.NameToLayer(layer);
 
-            //Mark the scene as dirty for saving
+            // Mark the scene as dirty for saving
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+
+            // Set the created volume as active selection in hierarchy
+            Selection.activeGameObject = volume.gameObject;
+
+            // Notify the user if the default profile was not found during setup
+            if (!profileFound)
+                EditorUtility.DisplayDialog("Default profile not found!", "Default Post Processing Profile was not found during setup, so it was automatically not set in the Post Processing Volume.\n\nCreate your profile to finish the setup.", "Ok");
         }
 #endif
     }
