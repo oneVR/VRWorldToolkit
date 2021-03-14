@@ -2347,180 +2347,177 @@ namespace VRWorldToolkit
                     var hasMeshRenderer = false;
                     var renderers = gameObject.GetComponents<Renderer>();
 
-                    if (renderers.Length > 0)
+                    for (var k = 0; k < renderers.Length; k++)
                     {
-                        for (var k = 0; k < renderers.Length; k++)
+                        var renderer = renderers[k];
+
+                        if (renderer.GetType() == typeof(MeshRenderer))
                         {
-                            var renderer = renderers[k];
+                            hasMeshRenderer = true;
 
-                            if (renderer.GetType() == typeof(MeshRenderer))
+                            // If baked lighting in the scene check for lightmap uvs
+                            if (bakedLighting && (staticEditorFlags & StaticEditorFlags.LightmapStatic) != 0 && !xatlasUnwrapper)
                             {
-                                hasMeshRenderer = true;
+                                var meshFilter = gameObject.GetComponent<MeshFilter>();
 
-                                // If baked lighting in the scene check for lightmap uvs
-                                if (bakedLighting && (staticEditorFlags & StaticEditorFlags.LightmapStatic) != 0 && !xatlasUnwrapper)
+                                if (meshFilter != null)
                                 {
-                                    var meshFilter = gameObject.GetComponent<MeshFilter>();
+                                    var sharedMesh = meshFilter.sharedMesh;
 
-                                    if (meshFilter != null)
+                                    if (AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(sharedMesh)) != null)
                                     {
-                                        var sharedMesh = meshFilter.sharedMesh;
+                                        var modelImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(sharedMesh)) as ModelImporter;
 
-                                        if (AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(sharedMesh)) != null)
+                                        if (!importers.Contains(modelImporter))
                                         {
-                                            var modelImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(sharedMesh)) as ModelImporter;
-
-                                            if (!importers.Contains(modelImporter))
+                                            if (modelImporter != null)
                                             {
-                                                if (modelImporter != null)
-                                                {
-                                                    var so = new SerializedObject(renderer);
+                                                var so = new SerializedObject(renderer);
 
-                                                    if (!modelImporter.generateSecondaryUV && sharedMesh.uv2.Length == 0 && so.FindProperty("m_ScaleInLightmap").floatValue != 0)
-                                                    {
-                                                        importers.Add(modelImporter);
-                                                    }
+                                                if (!modelImporter.generateSecondaryUV && sharedMesh.uv2.Length == 0 && so.FindProperty("m_ScaleInLightmap").floatValue != 0)
+                                                {
+                                                    importers.Add(modelImporter);
                                                 }
                                             }
                                         }
                                     }
                                 }
                             }
+                        }
 
-                            if (renderer.GetType() == typeof(SkinnedMeshRenderer))
+                        if (renderer.GetType() == typeof(SkinnedMeshRenderer))
+                        {
+                            var skinnedMesh = (SkinnedMeshRenderer) renderer;
+                            var sharedMesh = skinnedMesh.sharedMesh;
+                            var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(sharedMesh)) as ModelImporter;
+
+                            if (importer != null)
                             {
-                                var skinnedMesh = (SkinnedMeshRenderer) renderer;
-                                var sharedMesh = skinnedMesh.sharedMesh;
-                                var importer = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(sharedMesh)) as ModelImporter;
-
-                                if (importer != null)
+                                if (sharedMesh.blendShapeCount > 0 && importer.importBlendShapeNormals == ModelImporterNormals.Calculate && !ModelImporterUtil.GetLegacyBlendShapeNormals(importer))
                                 {
-                                    if (sharedMesh.blendShapeCount > 0 && importer.importBlendShapeNormals == ModelImporterNormals.Calculate && !ModelImporterUtil.GetLegacyBlendShapeNormals(importer))
+                                    legacyBlendShapes.Add(importer);
+                                    legacyBlendShapeIssues.AddSingleMessage(new SingleMessage(Path.GetFileName(AssetDatabase.GetAssetPath(sharedMesh)), EditorUtility.FormatBytes(Profiler.GetRuntimeMemorySizeLong(sharedMesh))).SetAssetPath(importer.assetPath).SetAutoFix(SetLegacyBlendShapeNormals(importer)));
+                                }
+                            }
+                        }
+
+                        // Check materials for problems
+                        for (var l = 0; l < renderer.sharedMaterials.Length; l++)
+                        {
+                            var material = renderer.sharedMaterials[l];
+
+                            if (material == null || checkedMaterials.Contains(material))
+                                continue;
+
+                            checkedMaterials.Add(material);
+
+                            var shader = material.shader;
+
+                            if (Helper.BuildPlatform() == RuntimePlatform.Android && !Validation.WorldShaderWhiteList.Contains(shader.name))
+                            {
+                                var singleMessage = new SingleMessage(material.name, shader.name);
+
+                                if (AssetDatabase.GetAssetPath(material).EndsWith(".mat"))
+                                {
+                                    singleMessage.SetAssetPath(AssetDatabase.GetAssetPath(material));
+                                }
+                                else
+                                {
+                                    singleMessage.SetSelectObject(gameObject);
+                                }
+
+                                materialWithNonWhitelistedShader.AddSingleMessage(singleMessage);
+                            }
+
+                            if (!checkedShaders.ContainsKey(shader) && AssetDatabase.GetAssetPath(shader) != null)
+                            {
+                                var assetPath = AssetDatabase.GetAssetPath(shader);
+
+                                if (File.Exists(assetPath))
+                                {
+                                    var checkedShaderProperties = new CheckedShaderProperties();
+
+                                    // Read shader file to string
+                                    var word = File.ReadAllText(assetPath);
+
+                                    // Strip comments
+                                    word = Regex.Replace(word, "(\\/\\/.*)|(\\/\\*)(.*)(\\*\\/)", "");
+
+                                    // Match for GrabPass and check if it's active
+                                    var grabPassMatch = Regex.Match(word, "GrabPass\\s*{[\\s\\S]*?}");
+                                    if (grabPassMatch.Success)
                                     {
-                                        legacyBlendShapes.Add(importer);
-                                        legacyBlendShapeIssues.AddSingleMessage(new SingleMessage(Path.GetFileName(AssetDatabase.GetAssetPath(sharedMesh)), EditorUtility.FormatBytes(Profiler.GetRuntimeMemorySizeLong(sharedMesh))).SetAssetPath(importer.assetPath).SetAutoFix(SetLegacyBlendShapeNormals(importer)));
+                                        checkedShaderProperties.IncludesGrabPass = true;
+                                        var lightModeTags = Regex.Matches(grabPassMatch.Value, "[\"|']LightMode[\"|']\\s*=\\s*[\"|'](\\w*)[\"|']");
+
+                                        if (lightModeTags.Count > 0)
+                                        {
+                                            for (var j = 0; j < lightModeTags.Count; j++)
+                                            {
+                                                checkedShaderProperties.GrabPassLightModeTags.Add(lightModeTags[j].Groups[1].Value);
+                                            }
+                                        }
                                     }
+
+                                    checkedShaders.Add(shader, checkedShaderProperties);
                                 }
                             }
 
-                            // Check materials for problems
-                            for (var l = 0; l < renderer.sharedMaterials.Length; l++)
+                            if (checkedShaders.ContainsKey(shader))
                             {
-                                var material = renderer.sharedMaterials[l];
-
-                                if (material == null || checkedMaterials.Contains(material))
-                                    continue;
-
-                                checkedMaterials.Add(material);
-
-                                var shader = material.shader;
-
-                                if (Helper.BuildPlatform() == RuntimePlatform.Android && !Validation.WorldShaderWhiteList.Contains(shader.name))
+                                var checkedShader = checkedShaders[shader];
+                                if (checkedShader.IncludesGrabPass)
                                 {
-                                    var singleMessage = new SingleMessage(material.name, shader.name);
-
-                                    if (AssetDatabase.GetAssetPath(material).EndsWith(".mat"))
+                                    var grabPassActive = false;
+                                    if (checkedShader.GrabPassLightModeTags.Count > 0)
                                     {
-                                        singleMessage.SetAssetPath(AssetDatabase.GetAssetPath(material));
+                                        for (var j = 0; j < checkedShader.GrabPassLightModeTags.Count; j++)
+                                        {
+                                            if (material.GetShaderPassEnabled(checkedShader.GrabPassLightModeTags[j])) grabPassActive = true;
+                                        }
                                     }
                                     else
                                     {
-                                        singleMessage.SetSelectObject(gameObject);
+                                        grabPassActive = true;
                                     }
 
-                                    materialWithNonWhitelistedShader.AddSingleMessage(singleMessage);
+                                    if (grabPassActive) grabPassShaders.AddSingleMessage(new SingleMessage(material.name, shader.name).SetAssetPath(AssetDatabase.GetAssetPath(material)));
                                 }
+                            }
 
-                                if (!checkedShaders.ContainsKey(shader) && AssetDatabase.GetAssetPath(shader) != null)
+                            if (shader.name == "Hidden/InternalErrorShader" && !missingShaders.Contains(material))
+                                missingShaders.Add(material);
+
+                            if (shader.name.StartsWith(".poiyomi") || shader.name.StartsWith("poiyomi") || shader.name.StartsWith("arktoon") || shader.name.StartsWith("Cubedparadox") || shader.name.StartsWith("Silent's Cel Shading") || shader.name.StartsWith("Xiexe"))
+                                badShaders++;
+
+                            for (var j = 0; j < ShaderUtil.GetPropertyCount(shader); j++)
+                            {
+                                if (ShaderUtil.GetPropertyType(shader, j) == ShaderUtil.ShaderPropertyType.TexEnv)
                                 {
-                                    var assetPath = AssetDatabase.GetAssetPath(shader);
+                                    var texture = material.GetTexture(ShaderUtil.GetPropertyName(shader, j));
 
-                                    if (File.Exists(assetPath))
+                                    if (AssetDatabase.GetAssetPath(texture) != "" && !unCrunchedTextures.Contains(texture))
                                     {
-                                        var checkedShaderProperties = new CheckedShaderProperties();
+                                        var assetPath = AssetDatabase.GetAssetPath(texture);
+                                        var textureImporter = AssetImporter.GetAtPath(assetPath) as TextureImporter;
 
-                                        // Read shader file to string
-                                        var word = File.ReadAllText(assetPath);
-
-                                        // Strip comments
-                                        word = Regex.Replace(word, "(\\/\\/.*)|(\\/\\*)(.*)(\\*\\/)", "");
-
-                                        // Match for GrabPass and check if it's active
-                                        var grabPassMatch = Regex.Match(word, "GrabPass\\s*{[\\s\\S]*?}");
-                                        if (grabPassMatch.Success)
+                                        if (textureImporter != null)
                                         {
-                                            checkedShaderProperties.IncludesGrabPass = true;
-                                            var lightModeTags = Regex.Matches(grabPassMatch.Value, "[\"|']LightMode[\"|']\\s*=\\s*[\"|'](\\w*)[\"|']");
-
-                                            if (lightModeTags.Count > 0)
+                                            if (!unCrunchedTextures.Contains(texture))
                                             {
-                                                for (var j = 0; j < lightModeTags.Count; j++)
-                                                {
-                                                    checkedShaderProperties.GrabPassLightModeTags.Add(lightModeTags[j].Groups[1].Value);
-                                                }
+                                                textureCount++;
                                             }
-                                        }
 
-                                        checkedShaders.Add(shader, checkedShaderProperties);
-                                    }
-                                }
-
-                                if (checkedShaders.ContainsKey(shader))
-                                {
-                                    var checkedShader = checkedShaders[shader];
-                                    if (checkedShader.IncludesGrabPass)
-                                    {
-                                        var grabPassActive = false;
-                                        if (checkedShader.GrabPassLightModeTags.Count > 0)
-                                        {
-                                            for (var j = 0; j < checkedShader.GrabPassLightModeTags.Count; j++)
+                                            var platformTextureSettings = textureImporter.GetPlatformTextureSettings("Android");
+                                            if (platformTextureSettings.overridden && Validation.UnsupportedCompressionFormatsQuest.Contains(platformTextureSettings.format))
                                             {
-                                                if (material.GetShaderPassEnabled(checkedShader.GrabPassLightModeTags[j])) grabPassActive = true;
+                                                unsupportedCompressionFormatQuest.AddSingleMessage(new SingleMessage(texture.name, platformTextureSettings.format.ToString()).SetAssetPath(assetPath));
                                             }
-                                        }
-                                        else
-                                        {
-                                            grabPassActive = true;
-                                        }
 
-                                        if (grabPassActive) grabPassShaders.AddSingleMessage(new SingleMessage(material.name, shader.name).SetAssetPath(AssetDatabase.GetAssetPath(material)));
-                                    }
-                                }
-
-                                if (shader.name == "Hidden/InternalErrorShader" && !missingShaders.Contains(material))
-                                    missingShaders.Add(material);
-
-                                if (shader.name.StartsWith(".poiyomi") || shader.name.StartsWith("poiyomi") || shader.name.StartsWith("arktoon") || shader.name.StartsWith("Cubedparadox") || shader.name.StartsWith("Silent's Cel Shading") || shader.name.StartsWith("Xiexe"))
-                                    badShaders++;
-
-                                for (var j = 0; j < ShaderUtil.GetPropertyCount(shader); j++)
-                                {
-                                    if (ShaderUtil.GetPropertyType(shader, j) == ShaderUtil.ShaderPropertyType.TexEnv)
-                                    {
-                                        var texture = material.GetTexture(ShaderUtil.GetPropertyName(shader, j));
-
-                                        if (AssetDatabase.GetAssetPath(texture) != "" && !unCrunchedTextures.Contains(texture))
-                                        {
-                                            var assetPath = AssetDatabase.GetAssetPath(texture);
-                                            var textureImporter = AssetImporter.GetAtPath(assetPath) as TextureImporter;
-
-                                            if (textureImporter != null)
+                                            if (!textureImporter.crunchedCompression && !unCrunchedTextures.Contains(texture) && !textureImporter.textureCompression.Equals(TextureImporterCompression.Uncompressed) && EditorTextureUtil.GetStorageMemorySize(texture) > 500000)
                                             {
-                                                if (!unCrunchedTextures.Contains(texture))
-                                                {
-                                                    textureCount++;
-                                                }
-
-                                                var platformTextureSettings = textureImporter.GetPlatformTextureSettings("Android");
-                                                if (platformTextureSettings.overridden && Validation.UnsupportedCompressionFormatsQuest.Contains(platformTextureSettings.format))
-                                                {
-                                                    unsupportedCompressionFormatQuest.AddSingleMessage(new SingleMessage(texture.name, platformTextureSettings.format.ToString()).SetAssetPath(assetPath));
-                                                }
-
-                                                if (!textureImporter.crunchedCompression && !unCrunchedTextures.Contains(texture) && !textureImporter.textureCompression.Equals(TextureImporterCompression.Uncompressed) && EditorTextureUtil.GetStorageMemorySize(texture) > 500000)
-                                                {
-                                                    unCrunchedTextures.Add(texture);
-                                                }
+                                                unCrunchedTextures.Add(texture);
                                             }
                                         }
                                     }
