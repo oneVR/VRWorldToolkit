@@ -2627,7 +2627,7 @@ namespace VRWorldToolkit
                     var percent = (int) ((float) unCrunchedTextures.Count / (float) textureCount * 100f);
                     if (percent > 20)
                     {
-                        optimization.AddMessageGroup(new MessageGroup(NonCrunchedTextures, MessageType.Tips).AddSingleMessage(new SingleMessage(percent.ToString())));
+                        optimization.AddMessageGroup(new MessageGroup(NonCrunchedTextures, MessageType.Tips).AddSingleMessage(new SingleMessage(percent.ToString()).SetAutoFix(MassTextureImporter.ShowWindow)));
                     }
                 }
 
