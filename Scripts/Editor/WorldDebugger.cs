@@ -610,6 +610,7 @@ namespace VRWorldToolkit
 
                                 EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
 
+                                autoRecheck = true;
                                 recheck = true;
                             }
                         }
