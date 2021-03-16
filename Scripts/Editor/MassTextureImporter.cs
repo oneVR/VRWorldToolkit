@@ -105,9 +105,9 @@ namespace VRWorldToolkit
 
         // Crunch compression
         public bool CrunchCompression { get; private set; } = true;
-        public int CompressionQuality { get; private set; } = 50;
-        public DontOverrideWhen DontOverrideCrunchWhen { get; private set; }
-        public OverrideWhenSize OverrideCrunchCompressionSizeWhen { get; private set; }
+        public int CompressionQuality { get; private set; } = 80;
+        public DontOverrideWhen DontOverrideCrunchWhen { get; private set; } = DontOverrideWhen.AlreadyEnabled;
+        public OverrideWhenSize OverrideCrunchCompressionSizeWhen { get; private set; } = OverrideWhenSize.BiggerThan;
 
         // Ignores
         public bool IgnoreCubemaps { get; private set; } = true;
