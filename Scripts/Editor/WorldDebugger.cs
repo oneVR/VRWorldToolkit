@@ -2823,6 +2823,8 @@ namespace VRWorldToolkit
                         projectType = ProjectType.Avatar;
                     }
                 }
+#else
+                projectType = ProjectType.Generic;
 #endif
 
                 initDone = true;
@@ -2926,11 +2928,13 @@ namespace VRWorldToolkit
 
         private enum ProjectType
         {
+            NotDetected,
+            Generic,
             World,
             Avatar
         }
 
-        private ProjectType? projectType = null;
+        private ProjectType projectType = ProjectType.NotDetected;
 
         private void OnGUI()
         {
@@ -2985,6 +2989,12 @@ namespace VRWorldToolkit
         {
             switch (projectType)
             {
+                case ProjectType.NotDetected:
+                    ProjectTypeNotDetected();
+                    break;
+                case ProjectType.Generic:
+                    ProjectTypeNotSupportedYet();
+                    break;
                 case ProjectType.World:
                     if (EditorApplication.isPlaying)
                     {
@@ -3010,12 +3020,21 @@ namespace VRWorldToolkit
 
                     break;
                 case ProjectType.Avatar:
-                    TypeNotSupportedYet();
+                    ProjectTypeNotSupportedYet();
                     break;
             }
         }
 
-        private void TypeNotSupportedYet()
+        private void ProjectTypeNotDetected()
+        {
+            GUILayout.FlexibleSpace();
+
+            EditorGUILayout.LabelField($"Current project type not detected.", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true), GUILayout.Height(40));
+
+            GUILayout.FlexibleSpace();
+        }
+
+        private void ProjectTypeNotSupportedYet()
         {
             GUILayout.FlexibleSpace();
 
