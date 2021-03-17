@@ -2805,15 +2805,25 @@ namespace VRWorldToolkit
 
                 postProcessing = masterList.CreateOrGetCategory("Post Processing");
 
-                if (buildReportWindows is null && File.Exists(WindowsBuildReportPath))
+#if VRC_SDK_VRCSDK3 && UDON
+                projectType = ProjectType.World;
+#elif VRC_SDK_VRCSDK3 && !UDON
+                projectType = ProjectType.Avatar;
+#elif VRC_SDK_VRCSDK2
+                var sceneDescriptors = FindObjectsOfType(typeof(VRC_SceneDescriptor)) as VRC_SceneDescriptor[];
+                if (sceneDescriptors.Length > 0)
                 {
-                    buildReportWindows = (BuildReport) AssetDatabase.LoadAssetAtPath(WindowsBuildReportPath, typeof(BuildReport));
+                    projectType = ProjectType.World;
                 }
-
-                if (buildReportQuest is null && File.Exists(QuestBuildReportPath))
+                else
                 {
-                    buildReportQuest = (BuildReport) AssetDatabase.LoadAssetAtPath(QuestBuildReportPath, typeof(BuildReport));
+                    var avatarDescriptors = FindObjectsOfType(typeof(VRC_AvatarDescriptor)) as VRC_AvatarDescriptor[];
+                    if (avatarDescriptors.Length > 0)
+                    {
+                        projectType = ProjectType.Avatar;
+                    }
                 }
+#endif
 
                 initDone = true;
 #if VRWT_BENCHMARK
@@ -2869,7 +2879,16 @@ namespace VRWorldToolkit
                 }
 
                 CheckTime.Restart();
-                CheckScene();
+
+                switch (projectType)
+                {
+                    case ProjectType.World:
+                        CheckScene();
+                        break;
+                    case ProjectType.Avatar:
+                        break;
+                }
+
                 CheckTime.Stop();
 
                 if (CheckTime.ElapsedMilliseconds >= 500)
@@ -2878,7 +2897,7 @@ namespace VRWorldToolkit
                 }
 
 #if VRWT_BENCHMARK
-                Debug.Log("Scene checked in: " + CheckTime.ElapsedMilliseconds + " ms.");
+                Debug.Log("Checks done in: " + CheckTime.ElapsedMilliseconds + " ms.");
 #endif
 
                 recheck = false;
@@ -2904,6 +2923,14 @@ namespace VRWorldToolkit
         [SerializeField] private int selectedBuildReport;
         [SerializeField] private bool overallStatsFoldout;
         [SerializeField] private bool buildReportMessagesFoldout;
+
+        private enum ProjectType
+        {
+            World,
+            Avatar
+        }
+
+        private ProjectType? projectType = null;
 
         private void OnGUI()
         {
@@ -2956,27 +2983,45 @@ namespace VRWorldToolkit
 
         private void MessagesTab()
         {
-            if (EditorApplication.isPlaying)
+            switch (projectType)
             {
-                GUILayout.FlexibleSpace();
+                case ProjectType.World:
+                    if (EditorApplication.isPlaying)
+                    {
+                        GUILayout.FlexibleSpace();
 
-                EditorGUILayout.LabelField("The editor is currently in play mode.", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
-                EditorGUILayout.LabelField("Stop it to see the messages.", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
+                        EditorGUILayout.LabelField("The editor is currently in play mode.", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
+                        EditorGUILayout.LabelField("Stop it to see the messages.", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
 
-                GUILayout.FlexibleSpace();
+                        GUILayout.FlexibleSpace();
+                    }
+                    else
+                    {
+                        if (!autoRecheck && GUILayout.Button("Refresh"))
+                        {
+                            recheck = true;
+                            autoRecheck = true;
+                        }
+
+                        masterList.DrawTabSelector();
+
+                        masterList.DrawMessages();
+                    }
+
+                    break;
+                case ProjectType.Avatar:
+                    TypeNotSupportedYet();
+                    break;
             }
-            else
-            {
-                if (!autoRecheck && GUILayout.Button("Refresh"))
-                {
-                    recheck = true;
-                    autoRecheck = true;
-                }
+        }
 
-                masterList.DrawTabSelector();
+        private void TypeNotSupportedYet()
+        {
+            GUILayout.FlexibleSpace();
 
-                masterList.DrawMessages();
-            }
+            EditorGUILayout.LabelField($"{projectType} projects\nnot fully supported yet.", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true), GUILayout.Height(40));
+
+            GUILayout.FlexibleSpace();
         }
 
         private void BuildReportTab()
