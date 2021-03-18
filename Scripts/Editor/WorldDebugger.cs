@@ -2887,8 +2887,6 @@ namespace VRWorldToolkit
                     case ProjectType.World:
                         CheckScene();
                         break;
-                    case ProjectType.Avatar:
-                        break;
                 }
 
                 CheckTime.Stop();
