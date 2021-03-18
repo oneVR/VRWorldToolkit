@@ -2670,9 +2670,8 @@ namespace VRWorldToolkit
             if (initDone)
             {
                 RefreshBuild();
+                recheck = true;
             }
-
-            recheck = true;
         }
 
         private const string LastBuild = "Library/LastBuild.buildreport";
@@ -2936,8 +2935,11 @@ namespace VRWorldToolkit
 
         private void OnGUI()
         {
-            InitWhenNeeded();
-            Refresh();
+            if (Event.current.type == EventType.Layout)
+            {
+                InitWhenNeeded();
+                Refresh();
+            }
 
             BuildReportOverview();
 
