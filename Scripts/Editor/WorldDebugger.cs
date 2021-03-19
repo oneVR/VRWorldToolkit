@@ -2670,8 +2670,9 @@ namespace VRWorldToolkit
             if (initDone)
             {
                 RefreshBuild();
-                recheck = true;
             }
+
+            recheck = true;
         }
 
         private const string LastBuild = "Library/LastBuild.buildreport";
