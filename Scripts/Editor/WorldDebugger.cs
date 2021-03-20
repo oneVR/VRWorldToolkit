@@ -614,8 +614,6 @@ namespace VRWorldToolkit
                                 recheck = true;
                             }
                         }
-
-                        GUILayout.FlexibleSpace();
                     }
                 }
             }
