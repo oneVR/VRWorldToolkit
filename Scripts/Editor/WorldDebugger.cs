@@ -400,6 +400,7 @@ namespace VRWorldToolkit
         private class MessageCategoryList
         {
             [SerializeField] public List<MessageCategory> messageCategory = new List<MessageCategory>();
+            private List<MessageCategory> drawList = new List<MessageCategory>();
 
             [SerializeField] private Vector2 scrollPos;
 
@@ -457,7 +458,10 @@ namespace VRWorldToolkit
 
             public void DrawMessages()
             {
-                var drawList = messageCategory;
+                if (Event.current.type == EventType.Layout)
+                {
+                    drawList = messageCategory;
+                }
 
                 using (var scrollView = new EditorGUILayout.ScrollViewScope(scrollPos))
                 {
