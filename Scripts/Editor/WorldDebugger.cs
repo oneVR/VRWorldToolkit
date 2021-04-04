@@ -2950,20 +2950,20 @@ namespace VRWorldToolkit
             {
                 if (buildReportWindows)
                 {
-                    DrawOverview(buildReportWindows);
+                    DrawOverview(buildReportWindows, "Windows");
                 }
 
                 if (buildReportQuest)
                 {
-                    DrawOverview(buildReportQuest);
+                    DrawOverview(buildReportQuest, "Quest");
                 }
             }
 
-            void DrawOverview(BuildReport report)
+            void DrawOverview(BuildReport report, string platform)
             {
                 using (var verticalScope = new EditorGUILayout.VerticalScope())
                 {
-                    GUILayout.Label($"Last found {report.summary.platformGroup} build:", EditorStyles.boldLabel);
+                    GUILayout.Label($"Last found {platform} build:", EditorStyles.boldLabel);
 
                     using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
                     {
