@@ -1,5 +1,2 @@
 Version.txt
-*.meta
-!Resources/DebuggerIcons/*
-!Resources/PostProcessing/*
-!Prefabs/*
+Version.txt.meta
