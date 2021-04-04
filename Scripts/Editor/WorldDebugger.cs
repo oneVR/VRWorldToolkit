@@ -195,13 +195,13 @@ namespace VRWorldToolkit
 
             public MessageGroup SetGroupAutoFix(Action groupAutoFix)
             {
-                this.GroupAutoFix = groupAutoFix;
+                GroupAutoFix = groupAutoFix;
                 return this;
             }
 
             public MessageGroup SetDocumentation(string documentation)
             {
-                this.Documentation = documentation;
+                Documentation = documentation;
                 return this;
             }
 
