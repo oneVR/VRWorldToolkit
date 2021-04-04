@@ -489,7 +489,7 @@ namespace VRWorldToolkit
                         {
                             var messageGroup = group.MessageGroups[l];
 
-                            if (messageGroup.CombinedMessage != null && messageGroup.MessageList.Count == 0) continue;
+                            if (messageGroup.MessageList is null || messageGroup.CombinedMessage != null && messageGroup.MessageList.Count == 0) continue;
 
                             var singleCombinedMessage = messageGroup.MessageList.Count == 1;
                             var expanded = !singleCombinedMessage && group.IsExpanded(messageGroup);
