@@ -2758,25 +2758,6 @@ namespace VRWorldToolkit
 #endif
         }
 
-        private static void DrawBuildSummary(BuildReport report)
-        {
-            GUILayout.BeginVertical(EditorStyles.helpBox);
-            if (report != null)
-            {
-                GUILayout.Label("<b>Build size:</b> " + EditorUtility.FormatBytes((long) report.summary.totalSize), Styles.LabelRichText);
-
-                GUILayout.Label("<b>Build done:</b> " + report.summary.buildEndedAt.ToLocalTime(), Styles.LabelRichText);
-
-                GUILayout.Label("<b>Errors during build:</b> " + report.summary.totalErrors, Styles.LabelRichText);
-
-                GUILayout.Label("<b>Warnings during build:</b> " + report.summary.totalWarnings, Styles.LabelRichText);
-
-                GUILayout.Label("<b>Build result:</b> " + report.summary.result, Styles.LabelRichText);
-            }
-
-            GUILayout.EndVertical();
-        }
-
         [NonSerialized] private bool initDone;
         [NonSerialized] private bool buildReportInitDone;
 
@@ -2938,13 +2919,15 @@ namespace VRWorldToolkit
 
         private void OnGUI()
         {
-            if (Event.current.type == EventType.Layout)
+            var current = Event.current;
+
+            if (current.type == EventType.Layout)
             {
                 InitWhenNeeded();
                 Refresh();
             }
 
-            BuildReportOverview();
+            DrawBuildReportOverviews(current);
 
             EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
 
@@ -2961,31 +2944,58 @@ namespace VRWorldToolkit
             }
         }
 
-        private void BuildReportOverview()
+        private void DrawBuildReportOverviews(Event current)
         {
-            GUILayout.BeginHorizontal();
-
-            if (buildReportWindows)
+            using (new EditorGUILayout.HorizontalScope())
             {
-                GUILayout.BeginVertical();
-                GUILayout.Label("Last found Windows build:", EditorStyles.boldLabel);
+                if (buildReportWindows)
+                {
+                    DrawOverview(buildReportWindows);
+                }
 
-                DrawBuildSummary(buildReportWindows);
-
-                GUILayout.EndVertical();
+                if (buildReportQuest)
+                {
+                    DrawOverview(buildReportQuest);
+                }
             }
 
-            if (buildReportQuest)
+            void DrawOverview(BuildReport report)
             {
-                GUILayout.BeginVertical();
-                GUILayout.Label("Last found Quest build:", EditorStyles.boldLabel);
+                using (var verticalScope = new EditorGUILayout.VerticalScope())
+                {
+                    GUILayout.Label($"Last found {report.summary.platformGroup} build:", EditorStyles.boldLabel);
 
-                DrawBuildSummary(buildReportQuest);
+                    using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+                    {
+                        GUILayout.Label("<b>Build size:</b> " + EditorUtility.FormatBytes((long) report.summary.totalSize), Styles.LabelRichText);
 
-                GUILayout.EndVertical();
+                        GUILayout.Label("<b>Build done:</b> " + report.summary.buildEndedAt.ToLocalTime(), Styles.LabelRichText);
+
+                        GUILayout.Label("<b>Errors during build:</b> " + report.summary.totalErrors, Styles.LabelRichText);
+
+                        GUILayout.Label("<b>Warnings during build:</b> " + report.summary.totalWarnings, Styles.LabelRichText);
+
+                        GUILayout.Label("<b>Build result:</b> " + report.summary.result, Styles.LabelRichText);
+                    }
+
+                    if (current.type == EventType.ContextClick && verticalScope.rect.Contains(current.mousePosition))
+                    {
+                        var path = report.summary.outputPath;
+                        var menu = new GenericMenu();
+
+                        if (File.Exists(path))
+                        {
+                            menu.AddItem(new GUIContent("Show in Explorer"), false, () => EditorUtility.RevealInFinder(report.summary.outputPath));
+                        }
+                        else
+                        {
+                            menu.AddDisabledItem(new GUIContent("Show in Explorer"));
+                        }
+
+                        menu.ShowAsContext();
+                    }
+                }
             }
-
-            GUILayout.EndHorizontal();
         }
 
         private void MessagesTab()
@@ -3054,7 +3064,7 @@ namespace VRWorldToolkit
 
                 GUILayout.BeginHorizontal(EditorStyles.toolbar);
 
-                if (buildReportWindows != null && buildReportQuest != null)
+                if (buildReportWindows && buildReportQuest)
                 {
                     EditorGUI.BeginChangeCheck();
 
