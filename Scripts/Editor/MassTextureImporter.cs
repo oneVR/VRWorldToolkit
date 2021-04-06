@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -394,11 +395,17 @@ namespace VRWorldToolkit
             var checkedMaterials = new List<Material>();
 
             var allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
-            for (var i = 0; i < allGameObjects.Length; i++)
+            var allGameObjectsLength = allGameObjects.Length;
+            for (var i = 0; i < allGameObjectsLength; i++)
             {
                 var gameObject = allGameObjects[i] as GameObject;
 
                 if (gameObject.hideFlags != HideFlags.None || EditorUtility.IsPersistent(gameObject.transform.root.gameObject)) continue;
+
+                if (EditorUtility.DisplayCancelableProgressBar("Getting All Textures from Scene", gameObject.name, (float) i / allGameObjectsLength))
+                {
+                    break;
+                }
 
                 var renderers = gameObject.GetComponents<Renderer>();
                 for (var j = 0; j < renderers.Length; j++)
@@ -433,6 +440,7 @@ namespace VRWorldToolkit
                 }
             }
 
+            EditorUtility.ClearProgressBar();
             return details;
         }
 
@@ -442,15 +450,23 @@ namespace VRWorldToolkit
 
             var assetGuidStrings = AssetDatabase.FindAssets("t:texture2D", new[] {"Assets"});
 
-            for (var i = 0; i < assetGuidStrings.Length; i++)
+            var assetsLength = assetGuidStrings.Length;
+            for (var i = 0; i < assetsLength; i++)
             {
                 var path = AssetDatabase.GUIDToAssetPath(assetGuidStrings[i]);
+
+                if (EditorUtility.DisplayCancelableProgressBar("Getting All Textures from Assets", Path.GetFileName(path), (float) i / assetsLength))
+                {
+                    break;
+                }
+
                 var texture = AssetDatabase.LoadAssetAtPath<Texture>(path);
                 var textureImporter = AssetImporter.GetAtPath(path) as TextureImporter;
 
                 details.AddTexture(textureImporter, texture);
             }
 
+            EditorUtility.ClearProgressBar();
             return details;
         }
     }
