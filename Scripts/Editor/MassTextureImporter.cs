@@ -324,64 +324,17 @@ namespace VRWorldToolkit
         {
             var window = GetWindow(typeof(MassTextureImporter));
             window.titleContent = new GUIContent("Mass Texture Importer");
-            window.minSize = new Vector2(400, 510);
+            window.minSize = new Vector2(400, 530);
             window.Show();
         }
 
-        private TextureDetails details;
+        private TextureDetails details = new TextureDetails();
 
         private Vector2 scrollPos;
 
         private ImporterSettingsManager importerSettingsManager = new ImporterSettingsManager();
 
         private void OnGUI()
-        {
-            if (details is null || details.TextureCount == 0)
-            {
-                TextureSelection();
-            }
-            else
-            {
-                MainUI();
-            }
-        }
-
-        private void TextureSelection()
-        {
-            GUILayout.FlexibleSpace();
-
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                GUILayout.FlexibleSpace();
-
-                GUILayout.Label("Get all textures from:");
-
-                GUILayout.FlexibleSpace();
-            }
-
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                GUILayout.FlexibleSpace();
-
-                if (GUILayout.Button("Scene", GUILayout.Width(80), GUILayout.Height(20)))
-                {
-                    details = GetAllTexturesFromScene();
-                }
-
-                GUILayout.Space(5);
-
-                if (GUILayout.Button("Assets", GUILayout.Width(80), GUILayout.Height(20)))
-                {
-                    details = GetAllTexturesFromAssets();
-                }
-
-                GUILayout.FlexibleSpace();
-            }
-
-            GUILayout.FlexibleSpace();
-        }
-
-        private void MainUI()
         {
             GUILayout.Label("Selected Textures", Styles.BoldWrap);
             using (new EditorGUILayout.HorizontalScope(EditorStyles.helpBox))
@@ -404,21 +357,28 @@ namespace VRWorldToolkit
 
             GUILayout.Space(5);
 
+            GUILayout.Label("Get textures from:");
+
             using (new EditorGUILayout.HorizontalScope())
             {
-                if (GUILayout.Button("Go Back"))
+                if (GUILayout.Button("Scene", GUILayout.Width(70), GUILayout.Height(20)))
                 {
-                    details = new TextureDetails();
+                    details = GetAllTexturesFromScene();
+                }
+
+                if (GUILayout.Button("Assets", GUILayout.Width(70), GUILayout.Height(20)))
+                {
+                    details = GetAllTexturesFromAssets();
                 }
 
                 GUILayout.FlexibleSpace();
 
-                if (GUILayout.Button("Revert"))
+                if (GUILayout.Button("Revert", GUILayout.Width(70), GUILayout.Height(20)))
                 {
                     importerSettingsManager = new ImporterSettingsManager();
                 }
 
-                if (GUILayout.Button("Apply"))
+                if (GUILayout.Button("Apply", GUILayout.Width(70), GUILayout.Height(20)))
                 {
                     if (EditorUtility.DisplayDialog("Process Importers?", $"About to process Texture Import settings on {details.TextureCount} textures, this can take a while depending on the amount and size of them.\n\nDo you want to continue?", "Ok", "Cancel"))
                     {
@@ -427,7 +387,6 @@ namespace VRWorldToolkit
                 }
             }
         }
-
 
         private static TextureDetails GetAllTexturesFromScene()
         {
