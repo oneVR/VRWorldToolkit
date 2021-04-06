@@ -9,10 +9,10 @@ namespace VRWorldToolkit
 {
     public class TextureDetails
     {
-        private int? uncrunchedCount = null;
-        private int? normalMaps = null;
-        private int? cubemaps = null;
-        private long? storageSize = null;
+        private int? uncrunchedCount;
+        private int? normalMaps;
+        private int? cubemaps;
+        private long? storageSize;
 
         private readonly Dictionary<Texture, TextureImporter> textureList = new Dictionary<Texture, TextureImporter>();
 
