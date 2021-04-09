@@ -385,10 +385,10 @@ namespace VRWorldToolkit
             {
                 Rect rect;
                 // Get the current cell rect and index
-                if (visibleColumnIndex == 1)
+                if (visibleColumnIndex == 2)
                 {
                     var rectOne = args.GetCellRect(visibleColumnIndex);
-                    var rectTwo = args.GetCellRect(2);
+                    var rectTwo = args.GetCellRect(3);
 
                     rect = new Rect(rectOne.position, new Vector2(rectOne.width + rectTwo.width, rectOne.height));
                 }
