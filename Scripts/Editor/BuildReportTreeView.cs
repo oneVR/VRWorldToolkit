@@ -144,7 +144,16 @@ namespace VRWorldToolkit
             {
                 var asset = results[i];
 
-                root.AddChild(new BuildReportItem(i, 0, AssetDatabase.GetCachedIcon(asset.fullPath), asset.assetType, asset.fullPath == "" ? "Unknown" : Path.GetFileName(asset.fullPath), asset.fullPath, Path.GetExtension(asset.fullPath), asset.size, asset.percentage));
+                root.AddChild(new BuildReportItem(i,
+                    0,
+                    AssetDatabase.GetCachedIcon(asset.fullPath),
+                    asset.assetType,
+                    asset.fullPath == "" ? "Unknown" : Path.GetFileName(asset.fullPath),
+                    asset.fullPath,
+                    Path.GetExtension(asset.fullPath),
+                    asset.size,
+                    asset.percentage)
+                );
             }
 
             return root;
