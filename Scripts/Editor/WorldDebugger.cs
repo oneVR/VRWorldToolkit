@@ -606,16 +606,19 @@ namespace VRWorldToolkit
                             }
                         }
 
-                        using (new EditorGUI.DisabledScope(!autoFixSet))
+                        if (!(infoLinkSet && (assetPathSet || hasGameObjects)))
                         {
-                            if (GUILayout.Button("Auto Fix", GUILayout.Width(ButtonWidth), GUILayout.Height(ButtonHeight)))
+                            using (new EditorGUI.DisabledScope(!autoFixSet))
                             {
-                                autoFix?.Invoke();
+                                if (GUILayout.Button("Auto Fix", GUILayout.Width(ButtonWidth), GUILayout.Height(ButtonHeight)))
+                                {
+                                    autoFix?.Invoke();
 
-                                EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+                                    EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
 
-                                autoRecheck = true;
-                                recheck = true;
+                                    autoRecheck = true;
+                                    recheck = true;
+                                }
                             }
                         }
                     }
