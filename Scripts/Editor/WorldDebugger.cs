@@ -1489,6 +1489,9 @@ namespace VRWorldToolkit
 
             try
             {
+                // Cache repeatedly used values
+                var androidBuildPlatform = Helper.BuildPlatform() == RuntimePlatform.Android;
+
                 // General Checks
 
                 // Get Descriptors
@@ -1952,7 +1955,7 @@ namespace VRWorldToolkit
                 {
                     bakedLighting = true;
 
-                    if (Helper.BuildPlatform() == RuntimePlatform.Android && EditorUserBuildSettings.androidBuildSubtarget == MobileTextureSubtarget.Generic)
+                    if (androidBuildPlatform && EditorUserBuildSettings.androidBuildSubtarget == MobileTextureSubtarget.Generic)
                     {
                         var lightmaps = LightmapSettings.lightmaps;
 
@@ -2073,11 +2076,8 @@ namespace VRWorldToolkit
                 }
                 else
                 {
-#if UNITY_ANDROID
-                    lighting.AddMessageGroup(new MessageGroup(QuestBakedLightingWarning, MessageType.BadFPS).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/Lightmapping.html"));
-#else
-                    lighting.AddMessageGroup(new MessageGroup(LightsNotBaked, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/Lightmapping.html"));
-#endif
+                    lighting.AddMessageGroup(new MessageGroup(androidBuildPlatform ? QuestBakedLightingWarning : LightsNotBaked, androidBuildPlatform ? MessageType.Warning : MessageType.Tips)
+                        .SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/Lightmapping.html"));
                 }
 
                 // ReflectionProbes
@@ -2331,7 +2331,7 @@ namespace VRWorldToolkit
 
                 var mirrorsDefaultLayers = optimization.AddMessageGroup(new MessageGroup(MirrorWithDefaultLayers, MirrorWithDefaultLayersCombined, MirrorWithDefaultLayersInfo, MessageType.Tips));
                 var legacyBlendShapeIssues = general.AddMessageGroup(new MessageGroup(LegacyBlendShapeIssues, LegacyBlendShapeIssuesCombined, LegacyBlendShapeIssuesInfo, MessageType.Warning));
-                var grabPassShaders = general.AddMessageGroup(new MessageGroup(MaterialWithGrabPassShader, MaterialWithGrabPassShaderCombined, Helper.BuildPlatform() == RuntimePlatform.WindowsPlayer ? MaterialWithGrabPassShaderInfoPC : MaterialWithGrabPassShaderInfoQuest, Helper.BuildPlatform() == RuntimePlatform.Android ? MessageType.Error : MessageType.Info));
+                var grabPassShaders = general.AddMessageGroup(new MessageGroup(MaterialWithGrabPassShader, MaterialWithGrabPassShaderCombined, androidBuildPlatform ? MaterialWithGrabPassShaderInfoPC : MaterialWithGrabPassShaderInfoQuest, androidBuildPlatform ? MessageType.Error : MessageType.Info));
                 var disabledPortals = general.AddMessageGroup(new MessageGroup(DisabledPortalsWarning, DisabledPortalsWarningCombined, DisabledPortalsWarningInfo, MessageType.Warning));
                 var materialWithNonWhitelistedShader = general.AddMessageGroup(new MessageGroup(MaterialWithNonWhitelistedShader, MaterialWithNonWhitelistedShaderCombined, MaterialWithNonWhitelistedShaderInfo, MessageType.Warning).SetDocumentation("https://docs.vrchat.com/docs/quest-content-limitations#shaders"));
                 var uiElementNavigation = general.AddMessageGroup(new MessageGroup(UIElementWithNavigationNotNone, UIElementWithNavigationNotNoneCombined, UIElementWithNavigationNotNoneInfo, MessageType.Tips));
@@ -2416,7 +2416,7 @@ namespace VRWorldToolkit
 
                             var shader = material.shader;
 
-                            if (Helper.BuildPlatform() == RuntimePlatform.Android && !Validation.WorldShaderWhiteList.Contains(shader.name))
+                            if (androidBuildPlatform && !Validation.WorldShaderWhiteList.Contains(shader.name))
                             {
                                 var singleMessage = new SingleMessage(material.name, shader.name);
 
