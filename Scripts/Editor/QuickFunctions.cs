@@ -45,6 +45,31 @@ namespace VRWorldToolkit
 
             return false;
         }
+
+        [MenuItem("VRWorld Toolkit/Quick Functions/Setup Layers and Collision Matrix", false, 5)]
+        public static void SetupLayersCollisionMatrix()
+        {
+            if (!UpdateLayers.AreLayersSetup())
+            {
+                UpdateLayers.SetupEditorLayers();
+            }
+
+            if (!UpdateLayers.IsCollisionLayerMatrixSetup())
+            {
+                UpdateLayers.SetupCollisionLayerMatrix();
+            }
+        }
+
+        [MenuItem("VRWorld Toolkit/Quick Functions/Setup Layers and Collision Matrix", true)]
+        private static bool SetupLayersCollisionMatrixValidate()
+        {
+            if (UpdateLayers.AreLayersSetup() && UpdateLayers.IsCollisionLayerMatrixSetup())
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }
 #endif
