@@ -2710,6 +2710,7 @@ namespace VRWorldToolkit
                 AssetDatabase.ImportAsset(LastBuildReportPath);
             }
 
+            var newBuildSet = false;
             if (File.Exists(LastBuildReportPath))
             {
                 switch (AssetDatabase.LoadAssetAtPath<BuildReport>(LastBuildReportPath).summary.platform)
@@ -2720,6 +2721,7 @@ namespace VRWorldToolkit
                         {
                             AssetDatabase.CopyAsset(LastBuildReportPath, WindowsBuildReportPath);
                             buildReportWindows = (BuildReport) AssetDatabase.LoadAssetAtPath(WindowsBuildReportPath, typeof(BuildReport));
+                            newBuildSet = true;
                         }
 
                         break;
@@ -2728,6 +2730,7 @@ namespace VRWorldToolkit
                         {
                             AssetDatabase.CopyAsset(LastBuildReportPath, QuestBuildReportPath);
                             buildReportQuest = (BuildReport) AssetDatabase.LoadAssetAtPath(QuestBuildReportPath, typeof(BuildReport));
+                            newBuildSet = true;
                         }
 
                         break;
@@ -2744,17 +2747,40 @@ namespace VRWorldToolkit
                 buildReportQuest = (BuildReport) AssetDatabase.LoadAssetAtPath(QuestBuildReportPath, typeof(BuildReport));
             }
 
-            if (buildReportTreeView != null && !buildReportTreeView.HasReport())
+            if (buildReportInitDone)
             {
-                if (buildReportWindows != null)
+                BuildReport report = null;
+
+                if (newBuildSet)
                 {
-                    buildReportTreeView.SetReport(buildReportWindows);
+                    switch (Helper.BuildPlatform())
+                    {
+                        case RuntimePlatform.WindowsPlayer:
+                            report = buildReportWindows;
+                            selectedBuildReport = 0;
+                            break;
+                        case RuntimePlatform.Android:
+                            report = buildReportQuest;
+                            selectedBuildReport = 1;
+                            break;
+                    }
                 }
-                else if (buildReportQuest != null)
+                else
                 {
-                    buildReportTreeView.SetReport(buildReportWindows);
+                    if (selectedBuildReport == 1 && buildReportQuest != null)
+                    {
+                        report = buildReportQuest;
+                    }
+                    else
+                    {
+                        selectedBuildReport = 0;
+                        report = buildReportWindows;
+                    }
                 }
+
+                buildReportTreeView.SetReport(report);
             }
+
 #if VRWT_BENCHMARK
             CheckTime.Stop();
             Debug.Log($"Refreshed build reports in: {CheckTime.ElapsedMilliseconds} ms.");
@@ -2840,7 +2866,16 @@ namespace VRWorldToolkit
                     treeViewState = new TreeViewState();
                 }
 
-                var report = buildReportWindows != null ? buildReportWindows : buildReportQuest;
+                BuildReport report;
+                if (selectedBuildReport == 1 && buildReportQuest != null)
+                {
+                    report = buildReportQuest;
+                }
+                else
+                {
+                    selectedBuildReport = 0;
+                    report = buildReportWindows;
+                }
 
                 buildReportTreeView = new BuildReportTreeView(treeViewState, multiColumnHeader, report);
                 searchField = new SearchField();
@@ -3099,7 +3134,7 @@ namespace VRWorldToolkit
                 {
                     RefreshBuild();
 
-                    if (buildReportTreeView.HasReport())
+                    if (buildReportTreeView.BuildSucceeded)
                     {
                         buildReportTreeView.Reload();
                     }
@@ -3137,9 +3172,17 @@ namespace VRWorldToolkit
 
                     var treeViewRect = EditorGUILayout.BeginVertical();
 
-                    if (buildReportTreeView.HasReport())
+                    if (buildReportTreeView.BuildSucceeded)
                     {
                         buildReportTreeView.OnGUI(treeViewRect);
+                    }
+                    else
+                    {
+                        GUILayout.FlexibleSpace();
+
+                        EditorGUILayout.LabelField($"Last {BuildReportToolbar[selectedBuildReport]} Build Failed", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true), GUILayout.Height(40));
+
+                        GUILayout.FlexibleSpace();
                     }
 
                     GUILayout.FlexibleSpace();
