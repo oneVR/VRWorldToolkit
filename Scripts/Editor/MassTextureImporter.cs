@@ -320,7 +320,7 @@ namespace VRWorldToolkit
 
     public class MassTextureImporter : EditorWindow
     {
-        [MenuItem("VRWorld Toolkit/Quick Functions/Mass Texture Importer", false, 5)]
+        [MenuItem("VRWorld Toolkit/Quick Functions/Mass Texture Importer", false, 4)]
         public static void ShowWindow()
         {
             var window = GetWindow(typeof(MassTextureImporter));
