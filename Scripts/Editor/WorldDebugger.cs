@@ -1246,6 +1246,8 @@ namespace VRWorldToolkit
 
         private const string NoReferenceCameraSetGeneral = "No reference camera set in the Scene Descriptor. Using a reference camera allows the world's rendering distance to be changed by changing the camera's near and far clipping planes.";
 
+        private const string ReferenceCameraHasNoCameraComponent = "The GameObject \"{0}\" currently set in the Scene Descriptor as a reference camera does not have a camera component. This can cause various problems in-game.";
+
         private const string ColliderUnderSpawnIsTrigger = "The collider \"{0}\" under your spawn point {1} has been set as Is Trigger.";
         private const string ColliderUnderSpawnIsTriggerCombined = "Found \"{0}\" spawn points which have a collider set as Is Trigger underneath.";
         private const string ColliderUnderSpawnIsTriggerInfo = "Spawning into a world with nothing to stand on will cause the players to fall forever.";
@@ -1616,24 +1618,30 @@ namespace VRWorldToolkit
                 }
 
                 // Check reference camera for possible problems
-                if (sceneDescriptor.ReferenceCamera && sceneDescriptor.ReferenceCamera.GetComponent<Camera>())
+                if (sceneDescriptor.ReferenceCamera != null)
                 {
                     var camera = sceneDescriptor.ReferenceCamera.GetComponent<Camera>();
-
-                    if (camera.clearFlags != CameraClearFlags.Skybox)
+                    if (camera != null)
                     {
-                        general.AddMessageGroup(new MessageGroup(ReferenceCameraClearFlagsNotSkybox, MessageType.Warning).AddSingleMessage(new SingleMessage(sceneDescriptor.ReferenceCamera)));
+                        if (camera.clearFlags != CameraClearFlags.Skybox)
+                        {
+                            general.AddMessageGroup(new MessageGroup(ReferenceCameraClearFlagsNotSkybox, MessageType.Warning).AddSingleMessage(new SingleMessage(sceneDescriptor.ReferenceCamera)));
+                        }
+
+                        // TODO: Investigate better sanity value
+                        if (camera.farClipPlane / camera.nearClipPlane > 200000f)
+                        {
+                            general.AddMessageGroup(new MessageGroup(ReferenceCameraClippingPlaneRatio, MessageType.Warning).AddSingleMessage(new SingleMessage(camera.nearClipPlane.ToString(CultureInfo.InvariantCulture), camera.farClipPlane.ToString(CultureInfo.InvariantCulture)).SetSelectObject(camera.gameObject)));
+                        }
+
+                        if (camera.nearClipPlane > 0.05f)
+                        {
+                            general.AddMessageGroup(new MessageGroup(ReferenceCameraNearClipPlaneOver, MessageType.Tips).AddSingleMessage(new SingleMessage(camera.nearClipPlane.ToString(CultureInfo.InvariantCulture)).SetSelectObject(camera.gameObject)));
+                        }
                     }
-
-                    // TODO: Investigate better sanity value
-                    if (camera.farClipPlane / camera.nearClipPlane > 200000f)
+                    else
                     {
-                        general.AddMessageGroup(new MessageGroup(ReferenceCameraClippingPlaneRatio, MessageType.Warning).AddSingleMessage(new SingleMessage(camera.nearClipPlane.ToString(CultureInfo.InvariantCulture), camera.farClipPlane.ToString(CultureInfo.InvariantCulture)).SetSelectObject(camera.gameObject)));
-                    }
-
-                    if (camera.nearClipPlane > 0.05f)
-                    {
-                        general.AddMessageGroup(new MessageGroup(ReferenceCameraNearClipPlaneOver, MessageType.Tips).AddSingleMessage(new SingleMessage(camera.nearClipPlane.ToString(CultureInfo.InvariantCulture)).SetSelectObject(camera.gameObject)));
+                        general.AddMessageGroup(new MessageGroup(ReferenceCameraHasNoCameraComponent, MessageType.Error)).AddSingleMessage(new SingleMessage(sceneDescriptor.ReferenceCamera.name).SetSelectObject(sceneDescriptor.ReferenceCamera).SetAutoFix(() => sceneDescriptor.ReferenceCamera = null));
                     }
                 }
                 else
