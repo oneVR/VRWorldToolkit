@@ -1641,7 +1641,11 @@ namespace VRWorldToolkit
                     }
                     else
                     {
-                        general.AddMessageGroup(new MessageGroup(ReferenceCameraHasNoCameraComponent, MessageType.Error)).AddSingleMessage(new SingleMessage(sceneDescriptor.ReferenceCamera.name).SetSelectObject(sceneDescriptor.ReferenceCamera).SetAutoFix(() => sceneDescriptor.ReferenceCamera = null));
+                        general.AddMessageGroup(new MessageGroup(ReferenceCameraHasNoCameraComponent, MessageType.Error)).AddSingleMessage(new SingleMessage(sceneDescriptor.ReferenceCamera.name).SetSelectObject(sceneDescriptor.ReferenceCamera).SetAutoFix(() =>
+                        {
+                            sceneDescriptor.ReferenceCamera = null;
+                            PrefabUtility.RecordPrefabInstancePropertyModifications(sceneDescriptor.gameObject);
+                        }));
                     }
                 }
                 else
