@@ -1057,6 +1057,17 @@ namespace VRWorldToolkit
             };
         }
 
+        public static Action SetBuildTarget(BuildTargetGroup group, BuildTarget target)
+        {
+            return () =>
+            {
+                EditorUserBuildSettings.selectedBuildTargetGroup = group;
+                EditorUserBuildSettings.selectedStandaloneTarget = target;
+                EditorUserBuildSettings.SwitchActiveBuildTargetAsync(group, target);
+                EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+            };
+        }
+
         public static Action FixVRCProjectSettings(VRCProjectSettings settings)
         {
             return () =>
@@ -1214,6 +1225,8 @@ namespace VRWorldToolkit
         private const string WorldDescriptorFar = "Scene Descriptor is {0} units far from the zero point in Unity. Having your world center out this far will cause some noticeable jittering on models. You should move your world closer to the zero point of your scene.";
 
         private const string WorldDescriptorOff = "Scene Descriptor is {0} units far from the zero point in Unity. It is usually good practice if possible to keep it as close as possible to the absolute zero point to avoid floating-point errors.";
+
+        private const string WronglySetBuildSettings = "Wrongly set build settings detected for current editor runtime. This can cause builds to not go through properly.";
 
         private const string ImproperlySetupVRCProjectSettings = "Improperly setup VRCProjectSettings detected. This will cause the Control Panel Builder tab to appear empty.";
 
@@ -1495,48 +1508,64 @@ namespace VRWorldToolkit
                 // Cache repeatedly used values
                 var androidBuildPlatform = Helper.BuildPlatform() == RuntimePlatform.Android;
 
-                // General Checks
-
                 // Get Descriptors
                 var descriptors = FindObjectsOfType(typeof(VRC_SceneDescriptor)) as VRC_SceneDescriptor[];
-                long descriptorCount = descriptors.Length;
-                VRC_SceneDescriptor sceneDescriptor;
                 var pipelines = FindObjectsOfType(typeof(PipelineManager)) as PipelineManager[];
 
                 // Check if a descriptor exists
-                if (descriptorCount == 0)
+                if (descriptors.Length == 0)
                 {
                     general.AddMessageGroup(new MessageGroup(NoSceneDescriptor, MessageType.Error));
                     return;
                 }
-                else
+
+                var sceneDescriptor = descriptors[0];
+
+                // General Checks
+
+                // Make sure only one descriptor exists
+                if (descriptors.Length > 1)
                 {
-                    sceneDescriptor = descriptors[0];
+                    general.AddMessageGroup(new MessageGroup(TooManySceneDescriptors, MessageType.Info).AddSingleMessage(new SingleMessage(Array.ConvertAll(descriptors, s => s.gameObject))));
+                    return;
+                }
 
-                    // Make sure only one descriptor exists
-                    if (descriptorCount > 1)
-                    {
-                        general.AddMessageGroup(new MessageGroup(TooManySceneDescriptors, MessageType.Info).AddSingleMessage(new SingleMessage(Array.ConvertAll(descriptors, s => s.gameObject))));
-                        return;
-                    }
+                // Check for multiple pipeline managers
+                if (pipelines.Length > 1)
+                {
+                    general.AddMessageGroup(new MessageGroup(TooManyPipelineManagers, MessageType.Error).AddSingleMessage(new SingleMessage(Array.ConvertAll(pipelines, s => s.gameObject)).SetAutoFix(RemoveBadPipelineManagers(pipelines))));
+                }
 
-                    // Check for multiple pipeline managers
-                    if (pipelines.Length > 1)
-                    {
-                        general.AddMessageGroup(new MessageGroup(TooManyPipelineManagers, MessageType.Error).AddSingleMessage(new SingleMessage(Array.ConvertAll(pipelines, s => s.gameObject)).SetAutoFix(RemoveBadPipelineManagers(pipelines))));
-                    }
+                // Check how far the descriptor is from zero point for floating point errors
+                var descriptorRemoteness = (int) Vector3.Distance(sceneDescriptor.transform.position, new Vector3(0.0f, 0.0f, 0.0f));
 
-                    // Check how far the descriptor is from zero point for floating point errors
-                    var descriptorRemoteness = (int) Vector3.Distance(sceneDescriptor.transform.position, new Vector3(0.0f, 0.0f, 0.0f));
+                if (descriptorRemoteness > 1500)
+                {
+                    general.AddMessageGroup(new MessageGroup(WorldDescriptorFar, MessageType.Error).AddSingleMessage(new SingleMessage(descriptorRemoteness.ToString()).SetSelectObject(Array.ConvertAll(descriptors, s => s.gameObject))));
+                }
+                else if (descriptorRemoteness > 500)
+                {
+                    general.AddMessageGroup(new MessageGroup(WorldDescriptorOff, MessageType.Tips).AddSingleMessage(new SingleMessage(descriptorRemoteness.ToString()).SetSelectObject(Array.ConvertAll(descriptors, s => s.gameObject))));
+                }
 
-                    if (descriptorRemoteness > 1500)
-                    {
-                        general.AddMessageGroup(new MessageGroup(WorldDescriptorFar, MessageType.Error).AddSingleMessage(new SingleMessage(descriptorRemoteness.ToString()).SetSelectObject(Array.ConvertAll(descriptors, s => s.gameObject))));
-                    }
-                    else if (descriptorRemoteness > 500)
-                    {
-                        general.AddMessageGroup(new MessageGroup(WorldDescriptorOff, MessageType.Tips).AddSingleMessage(new SingleMessage(descriptorRemoteness.ToString()).SetSelectObject(Array.ConvertAll(descriptors, s => s.gameObject))));
-                    }
+                switch (Helper.BuildPlatform())
+                {
+                    case RuntimePlatform.WindowsPlayer:
+                        if (EditorUserBuildSettings.selectedBuildTargetGroup != BuildTargetGroup.Standalone ||
+                            EditorUserBuildSettings.selectedStandaloneTarget != BuildTarget.StandaloneWindows64)
+                        {
+                            general.AddMessageGroup(new MessageGroup(WronglySetBuildSettings, MessageType.Error)).SetGroupAutoFix(SetBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64));
+                        }
+
+                        break;
+                    case RuntimePlatform.Android:
+                        if (EditorUserBuildSettings.selectedBuildTargetGroup != BuildTargetGroup.Android ||
+                            EditorUserBuildSettings.selectedStandaloneTarget != BuildTarget.Android)
+                        {
+                            general.AddMessageGroup(new MessageGroup(WronglySetBuildSettings, MessageType.Error)).SetGroupAutoFix(SetBuildTarget(BuildTargetGroup.Android, BuildTarget.Android));
+                        }
+
+                        break;
                 }
 
                 var vrcProjectSettings = Resources.Load<VRCProjectSettings>("VRCProjectSettings");
