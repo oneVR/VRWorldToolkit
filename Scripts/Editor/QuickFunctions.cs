@@ -8,13 +8,15 @@ using VRCSDK2;
 using VRC.Core;
 #endif
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace VRWorldToolkit
 {
-#if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
     public class QuickFunctions : EditorWindow
     {
+#if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
         [MenuItem("VRWorld Toolkit/Quick Functions/Copy World ID", false, 15)]
         public static void CopyWorldID()
         {
@@ -72,6 +74,7 @@ namespace VRWorldToolkit
             return true;
         }
 #endif
+#if UNITY_2019_1_OR_NEWER
         [MenuItem("VRWorld Toolkit/Quick Functions/Remove Missing Scripts From Scene", false, 17)]
         private static void FindAndRemoveMissingScripts()
         {
@@ -91,27 +94,21 @@ namespace VRWorldToolkit
                         break;
                     }
 
-                    var serializedObject = new SerializedObject(gameObject);
-                    var property = serializedObject.FindProperty("m_Component");
-                    var components = gameObject.GetComponents<Component>();
-                    var removedCount = 0;
-                    for (var j = 0; j < components.Length; j++)
+                    var removedCount = GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(gameObject);
+                    if (removedCount > 0)
                     {
-                        if (components[j] is null)
-                        {
-                            property.DeleteArrayElementAtIndex(j - removedCount);
-                            removedCount++;
-                        }
+                        GameObjectUtility.RemoveMonoBehavioursWithMissingScript(gameObject);
+                        PrefabUtility.RecordPrefabInstancePropertyModifications(gameObject);
+                        overallRemovedCount += removedCount;
                     }
-
-                    overallRemovedCount += removedCount;
-                    if (removedCount > 0) serializedObject.ApplyModifiedPropertiesWithoutUndo();
                 }
 
                 EditorUtility.ClearProgressBar();
+                EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
                 var message = overallRemovedCount > 0 ? $"Removed total of {overallRemovedCount} components with missing scripts." : "No components with missing scripts were found.";
                 EditorUtility.DisplayDialog("Remove Missing Scripts", message, "Ok");
             }
         }
+#endif
     }
 }
