@@ -1321,7 +1321,7 @@ namespace VRWorldToolkit
 
         private const string LightsNotBaked = "The current scene is using realtime lighting. Consider baked lighting for improved performance.";
 
-        private const string ConsiderLargerLightmaps = "Consider increasing Lightmap Size from {0} to 2048 or 4096. This allows for more stuff to fit on a single lightmap, leaving fewer textures that need to be sampled.";
+        private const string ConsiderLargerLightmaps = "Possibly unoptimized lighting setup detected with a high amount of separate lightmaps compared to the currently set Lightmap Size.\nConsider increasing Lightmap Size from {0} to 2048 or larger and adjusting the individual Scale In Lightmap value on mesh renderers to fit things on a smaller amount of lightmaps.";
 
         private const string ConsiderSmallerLightmaps = "Baking lightmaps at 4096 with Progressive GPU will silently fall back to CPU Progressive. More than 12GB GPU Memory is needed to bake 4k lightmaps with GPU Progressive.";
 
@@ -2028,7 +2028,7 @@ namespace VRWorldToolkit
                 {
                     // Count lightmaps and suggest to use bigger lightmaps if needed
                     var lightMapSize = LightmapEditorSettings.maxAtlasSize;
-                    if (lightMapSize != 4096 && LightmapSettings.lightmaps.Length > 1 && !LightmapEditorSettings.lightmapper.Equals(LightmapEditorSettings.Lightmapper.ProgressiveGPU))
+                    if (lightMapSize < 2048 && LightmapSettings.lightmaps.Length >= 4)
                     {
                         if (LightmapSettings.lightmaps[0] != null)
                         {
@@ -2036,7 +2036,7 @@ namespace VRWorldToolkit
 
                             if (lightmap.lightmapColor != null && lightmap.lightmapColor.height != 4096)
                             {
-                                lighting.AddMessageGroup(new MessageGroup(ConsiderLargerLightmaps, MessageType.Tips).AddSingleMessage(new SingleMessage(lightMapSize.ToString()).SetAutoFix(SetLightmapSize(4096))));
+                                lighting.AddMessageGroup(new MessageGroup(ConsiderLargerLightmaps, MessageType.Tips).AddSingleMessage(new SingleMessage(lightMapSize.ToString())));
                             }
                         }
                     }
