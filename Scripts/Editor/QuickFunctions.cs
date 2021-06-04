@@ -75,7 +75,7 @@ namespace VRWorldToolkit
             return true;
         }
 #endif
-        [MenuItem("VRWorld Toolkit/Quick Functions/Remove Missing Scripts From Scene", false, 17)]
+        [MenuItem("VRWorld Toolkit/Quick Functions/Remove Missing Scripts from Scene", false, 17)]
         private static void FindAndRemoveMissingScripts()
         {
             if (EditorUtility.DisplayDialog("Remove Missing Scripts", "Running this will go through all GameObjects in the open scene and remove any components with missing scripts. This action can't be reversed!\n\nAre you sure you want to continue?", "Continue", "Cancel"))
