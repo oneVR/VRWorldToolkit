@@ -2315,7 +2315,7 @@ namespace VRWorldToolkit
                                         var colorGrading = postProcessProfile.GetSetting<ColorGrading>();
                                         if (colorGrading && colorGrading.enabled && colorGrading.active)
                                         {
-                                            if (colorGrading.tonemapper.overrideState && colorGrading.tonemapper.value == Tonemapper.None || !colorGrading.tonemapper.overrideState && colorGrading.gradingMode == GradingMode.HighDefinitionRange)
+                                            if (colorGrading.tonemapper.overrideState && colorGrading.tonemapper.value != Tonemapper.None)
                                             {
                                                 noTonemapper = false;
                                             }
