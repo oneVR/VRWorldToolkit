@@ -75,7 +75,6 @@ namespace VRWorldToolkit
             return true;
         }
 #endif
-#if UNITY_2019_1_OR_NEWER
         [MenuItem("VRWorld Toolkit/Quick Functions/Remove Missing Scripts From Scene", false, 17)]
         private static void FindAndRemoveMissingScripts()
         {
@@ -88,12 +87,9 @@ namespace VRWorldToolkit
                 {
                     var gameObject = allGameObjects[i] as GameObject;
 
-                    if (gameObject.hideFlags != HideFlags.None || EditorUtility.IsPersistent(gameObject.transform.root.gameObject)) continue;
+                    if (gameObject != null && (gameObject.hideFlags != HideFlags.None || EditorUtility.IsPersistent(gameObject.transform.root.gameObject))) continue;
 
-                    if (EditorUtility.DisplayCancelableProgressBar("Checking For Missing Scripts", gameObject.name, (float) i / allGameObjectsLength))
-                    {
-                        break;
-                    }
+                    if (EditorUtility.DisplayCancelableProgressBar("Checking For Missing Scripts", gameObject.name, (float) i / allGameObjectsLength)) break;
 
                     var removedCount = GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(gameObject);
                     if (removedCount > 0)
@@ -110,7 +106,6 @@ namespace VRWorldToolkit
                 EditorUtility.DisplayDialog("Remove Missing Scripts", message, "Ok");
             }
         }
-#endif
 
         /// <summary>
         /// Sourced from: https://docs.vrchat.com/v2021.2.3/docs/vrchat-configuration-window
