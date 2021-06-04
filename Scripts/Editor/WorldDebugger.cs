@@ -1375,7 +1375,7 @@ namespace VRWorldToolkit
 
         private const string NoMatchingLayersFound = "No enabled Post Processing Volumes found with matching layers to the main Post Processing Layer. Layers currently set to: {0}";
 
-        private const string DontUseNoneForTonemapping = "Use either Neutral or ACES for Color Grading Tonemapping. Selecting None for Tonemapping is essentially the same as leaving Tonemapping unchecked.";
+        private const string TonemapperMissing = "No global Tonemapper found. When there is no Tonemapper set, the colors in the scene will be distorted. Ideally, use Neutral or ACES.";
 
         private const string TooHighBloomIntensity = "Do not raise the Bloom intensity too high! It is best to use a low Bloom intensity, between 0.01 to 0.3.";
 
@@ -2283,6 +2283,8 @@ namespace VRWorldToolkit
                                     postProcessing.AddMessageGroup(new MessageGroup(NoMatchingLayersFound, MessageType.Warning).AddSingleMessage(new SingleMessage(Helper.GetAllLayersFromMask(postprocessLayer.volumeLayer)).SetSelectObject(postprocessLayer.gameObject)));
                                 }
 
+                                var noTonemapper = true;
+
                                 // Go trough the profile settings and see if any bad one's are used
                                 foreach (var postProcessVolume in matchingVolumes)
                                 {
@@ -2308,17 +2310,17 @@ namespace VRWorldToolkit
                                         postProcessing.AddMessageGroup(new MessageGroup(VignetteWarning, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
                                     }
 
-                                    var colorGrading = postProcessProfile.GetSetting<ColorGrading>();
-                                    if (colorGrading && colorGrading.enabled && colorGrading.active)
-                                    {
-                                        if (colorGrading.tonemapper.value == Tonemapper.None && colorGrading.gradingMode == GradingMode.HighDefinitionRange)
-                                        {
-                                            postProcessing.AddMessageGroup(new MessageGroup(DontUseNoneForTonemapping, MessageType.Error).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
-                                        }
-                                    }
-
                                     if (postProcessVolume.isGlobal)
                                     {
+                                        var colorGrading = postProcessProfile.GetSetting<ColorGrading>();
+                                        if (colorGrading && colorGrading.enabled && colorGrading.active)
+                                        {
+                                            if (colorGrading.tonemapper.overrideState && colorGrading.tonemapper.value == Tonemapper.None || !colorGrading.tonemapper.overrideState && colorGrading.gradingMode == GradingMode.HighDefinitionRange)
+                                            {
+                                                noTonemapper = false;
+                                            }
+                                        }
+
                                         var bloom = postProcessProfile.GetSetting<Bloom>();
                                         if (bloom && bloom.enabled && bloom.active)
                                         {
@@ -2344,6 +2346,11 @@ namespace VRWorldToolkit
                                             postProcessing.AddMessageGroup(new MessageGroup(DepthOfFieldWarning, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
                                         }
                                     }
+                                }
+
+                                if (noTonemapper)
+                                {
+                                    postProcessing.AddMessageGroup(new MessageGroup(TonemapperMissing, MessageType.Tips).SetDocumentation("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Post-Processing#colour-grading"));
                                 }
                             }
                         }
