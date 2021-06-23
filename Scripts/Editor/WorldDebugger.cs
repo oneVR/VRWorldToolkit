@@ -2870,19 +2870,7 @@ namespace VRWorldToolkit
 #elif VRC_SDK_VRCSDK3 && !UDON
                 projectType = ProjectType.Avatar;
 #elif VRC_SDK_VRCSDK2
-                var sceneDescriptors = FindObjectsOfType(typeof(VRC_SceneDescriptor)) as VRC_SceneDescriptor[];
-                if (sceneDescriptors.Length > 0)
-                {
-                    projectType = ProjectType.World;
-                }
-                else
-                {
-                    var avatarDescriptors = FindObjectsOfType(typeof(VRC_AvatarDescriptor)) as VRC_AvatarDescriptor[];
-                    if (avatarDescriptors.Length > 0)
-                    {
-                        projectType = ProjectType.Avatar;
-                    }
-                }
+                projectType = FindObjectsOfType(typeof(VRC_AvatarDescriptor)) is VRC_AvatarDescriptor[] avatarDescriptors && avatarDescriptors.Length > 0 ? ProjectType.Avatar : ProjectType.World;
 #else
                 projectType = ProjectType.Generic;
 #endif
