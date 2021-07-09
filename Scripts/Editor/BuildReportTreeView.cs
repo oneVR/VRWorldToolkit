@@ -88,7 +88,12 @@ namespace VRWorldToolkit
             {
                 var appendix = appendices.GetArrayElementAtIndex(i);
 
+#if UNITY_2018
                 if (appendix.objectReferenceValue.GetType() != typeof(UnityEngine.Object)) continue;
+#elif UNITY_2019
+                // Temporary fix to preemptively support Unity 2019
+                if (appendix.objectReferenceValue.GetType() != typeof(PackedAssets)) continue;
+#endif
 
                 var serializedAppendix = new SerializedObject(appendix.objectReferenceValue);
 
