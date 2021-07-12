@@ -13,7 +13,7 @@ namespace VRWorldToolkit
     public class BuildReportTreeView : TreeView
     {
         private BuildReport report;
-        private bool hasReport;
+        public bool HasReport { get; private set; }
         public bool BuildSucceeded { get; private set; }
 
         private enum TreeColumns
@@ -164,10 +164,10 @@ namespace VRWorldToolkit
         public void SetReport(BuildReport newReport)
         {
             report = newReport;
-            hasReport = report != null;
-            BuildSucceeded = hasReport && report.summary.result == BuildResult.Succeeded;
+            HasReport = report != null;
+            BuildSucceeded = HasReport && report.summary.result == BuildResult.Succeeded;
 
-            if (hasReport && BuildSucceeded)
+            if (HasReport && BuildSucceeded)
             {
                 Reload();
             }
@@ -189,7 +189,7 @@ namespace VRWorldToolkit
         /// </summary>
         public void DrawOverallStats()
         {
-            if (BuildSucceeded)
+            if (HasReport && BuildSucceeded)
             {
                 var stats = base.GetRows().Cast<BuildReportItem>().ToList();
 
@@ -245,7 +245,7 @@ namespace VRWorldToolkit
 
         public void DrawMessages()
         {
-            if (HasMessages())
+            if (HasReport && HasMessages())
             {
                 EditorGUILayout.BeginVertical();
                 scrollPosMessages = EditorGUILayout.BeginScrollView(scrollPosMessages);
