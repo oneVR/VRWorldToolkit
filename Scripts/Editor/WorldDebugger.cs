@@ -34,6 +34,7 @@ using Debug = UnityEngine.Debug;
 using System.Diagnostics;
 using System.Globalization;
 using UnityEngine.Assertions;
+using UnityEngine.Networking;
 
 #if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
 namespace VRWorldToolkit
@@ -1057,6 +1058,16 @@ namespace VRWorldToolkit
             };
         }
 
+        public static Action SanitizeBuildPath()
+        {
+            return () =>
+            {
+                PlayerSettings.companyName = UnityWebRequest.UnEscapeURL(PlayerSettings.companyName).Trim();
+                PlayerSettings.productName = UnityWebRequest.UnEscapeURL(PlayerSettings.productName).Trim();
+                EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+            };
+        }
+
         public static Action SetBuildTarget(BuildTargetGroup group, BuildTarget target)
         {
             return () =>
@@ -1227,6 +1238,8 @@ namespace VRWorldToolkit
         private const string WorldDescriptorOff = "Scene Descriptor is {0} units far from the zero point in Unity. It is usually good practice if possible to keep it as close as possible to the absolute zero point to avoid floating-point errors.";
 
         private const string WronglySetBuildSettings = "Wrongly set build settings detected for current editor runtime. This can cause builds to not go through properly.";
+
+        private const string DifferingSanitizedBuildPath = "The last build path differs from the one seen by the VRCSDK. This can happen with certain characters that get stripped from the path only during Build & Publish. The build path is created using the Company and Product name in the projects Player Settings.";
 
         private const string ImproperlySetupVRCProjectSettings = "Improperly setup VRCProjectSettings detected. This will cause the Control Panel Builder tab to appear empty.";
 
@@ -1548,6 +1561,16 @@ namespace VRWorldToolkit
                 else if (descriptorRemoteness > 500)
                 {
                     general.AddMessageGroup(new MessageGroup(WorldDescriptorOff, MessageType.Tips).AddSingleMessage(new SingleMessage(descriptorRemoteness.ToString()).SetSelectObject(Array.ConvertAll(descriptors, s => s.gameObject))));
+                }
+
+                var lastVRCPath = $"{PlayerSettings.productName}/{PlayerSettings.companyName}";
+                if (!string.IsNullOrEmpty(lastVRCPath))
+                {
+                    var lastEscapedVRCPath = UnityWebRequest.UnEscapeURL(lastVRCPath);
+                    if (lastVRCPath != lastEscapedVRCPath)
+                    {
+                        general.AddMessageGroup(new MessageGroup(DifferingSanitizedBuildPath, MessageType.Error).AddSingleMessage(new SingleMessage(lastVRCPath, lastEscapedVRCPath).SetAutoFix(SanitizeBuildPath())));
+                    }
                 }
 
                 switch (Helper.BuildPlatform())
