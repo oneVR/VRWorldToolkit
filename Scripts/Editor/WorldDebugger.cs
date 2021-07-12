@@ -3216,7 +3216,14 @@ namespace VRWorldToolkit
                     {
                         GUILayout.FlexibleSpace();
 
-                        EditorGUILayout.LabelField($"Last {BuildReportToolbar[selectedBuildReport]} Build Failed", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true), GUILayout.Height(40));
+                        if (!buildReportTreeView.HasReport)
+                        {
+                            EditorGUILayout.LabelField($"No Last Build Found", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true), GUILayout.Height(40));
+                        }
+                        else
+                        {
+                            EditorGUILayout.LabelField($"Last {BuildReportToolbar[selectedBuildReport]} Build Failed", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true), GUILayout.Height(40));
+                        }
 
                         GUILayout.FlexibleSpace();
                     }
