@@ -2121,7 +2121,7 @@ namespace VRWorldToolkit
                 else
                 {
                     lighting.AddMessageGroup(new MessageGroup(androidBuildPlatform ? QuestBakedLightingWarning : LightsNotBaked, androidBuildPlatform ? MessageType.Warning : MessageType.Tips)
-                        .SetDocumentation("https://docs.unity3d.com/2018.4/Documentation/Manual/Lightmapping.html"));
+                        .SetDocumentation("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Light-Baking"));
                 }
 
                 // ReflectionProbes
