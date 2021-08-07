@@ -27,10 +27,7 @@ namespace VRWorldToolkit
             {
                 var pipelineManager = descriptors[0].GetComponent<PipelineManager>();
 
-                if (pipelineManager)
-                {
-                    EditorGUIUtility.systemCopyBuffer = pipelineManager.blueprintId;
-                }
+                if (pipelineManager) EditorGUIUtility.systemCopyBuffer = pipelineManager.blueprintId;
             }
         }
 
@@ -43,8 +40,7 @@ namespace VRWorldToolkit
             {
                 var pipelineManager = descriptors[0].GetComponent<PipelineManager>();
 
-                if (pipelineManager)
-                    return pipelineManager.blueprintId.Length > 0;
+                if (pipelineManager) return pipelineManager.blueprintId.Length > 0;
             }
 
             return false;
@@ -53,26 +49,15 @@ namespace VRWorldToolkit
         [MenuItem("VRWorld Toolkit/Quick Functions/Setup Layers and Collision Matrix", false, 16)]
         public static void SetupLayersCollisionMatrix()
         {
-            if (!UpdateLayers.AreLayersSetup())
-            {
-                UpdateLayers.SetupEditorLayers();
-            }
+            if (!UpdateLayers.AreLayersSetup()) UpdateLayers.SetupEditorLayers();
 
-            if (!UpdateLayers.IsCollisionLayerMatrixSetup())
-            {
-                UpdateLayers.SetupCollisionLayerMatrix();
-            }
+            if (!UpdateLayers.IsCollisionLayerMatrixSetup()) UpdateLayers.SetupCollisionLayerMatrix();
         }
 
         [MenuItem("VRWorld Toolkit/Quick Functions/Setup Layers and Collision Matrix", true)]
         private static bool SetupLayersCollisionMatrixValidate()
         {
-            if (UpdateLayers.AreLayersSetup() && UpdateLayers.IsCollisionLayerMatrixSetup())
-            {
-                return false;
-            }
-
-            return true;
+            return !UpdateLayers.AreLayersSetup() || !UpdateLayers.IsCollisionLayerMatrixSetup();
         }
 #endif
         [MenuItem("VRWorld Toolkit/Quick Functions/Remove Missing Scripts from Scene", false, 17)]
