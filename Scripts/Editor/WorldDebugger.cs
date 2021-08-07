@@ -2433,7 +2433,7 @@ namespace VRWorldToolkit
                             hasMeshRenderer = true;
 
                             // If baked lighting in the scene check for lightmap uvs
-                            if (bakedLighting && (staticEditorFlags & StaticEditorFlags.LightmapStatic) != 0 && !xatlasUnwrapper)
+                            if (bakedLighting && (staticEditorFlags & StaticEditorFlags.ContributeGI) != 0 && !xatlasUnwrapper)
                             {
                                 var meshFilter = gameObject.GetComponent<MeshFilter>();
 
@@ -2605,7 +2605,7 @@ namespace VRWorldToolkit
 
                     if (hasMeshRenderer)
                     {
-                        if ((staticEditorFlags & StaticEditorFlags.LightmapStatic) != 0 && gameObject.GetComponent<TextMesh>())
+                        if ((staticEditorFlags & StaticEditorFlags.ContributeGI) != 0 && gameObject.GetComponent<TextMesh>())
                         {
                             textMeshStatic.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject));
                         }
