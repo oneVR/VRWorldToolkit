@@ -1441,10 +1441,6 @@ namespace VRWorldToolkit
         private const string MaterialWithGrabPassShaderInfoPC = "A GrabPass will halt the rendering to copy the screen's contents into a texture for the shader to read. This has a notable effect on performance.";
         private const string MaterialWithGrabPassShaderInfoQuest = "Please change the shader for this material. When a shader uses a GrabPass on Quest, it will cause painful visual artifacts to occur, as they are not supported.";
 
-        private const string DisabledPortalsWarning = "Portal \"{0}\" disabled by default.";
-        private const string DisabledPortalsWarningCombined = "Found {0} portals disabled by default.";
-        private const string DisabledPortalsWarningInfo = "Having a portal disabled by default may cause players that are entering to end up in different instances.";
-
         private const string ShrnmDirectionalModeBakeryError = "SH or RNM directional mode detected in Bakery. Using SH directional mode is not supported in VRChat by default. It requires the usage of VRC Bakery Adapter by Merlin for it to function in-game.";
 
         private const string BuildANDTestBrokenError = "VRChat link association has not been set up, and the VRChat client path has not been set in the VRCSDK settings. Without one of these settings set, Build & Test will not function.";
@@ -2406,7 +2402,6 @@ namespace VRWorldToolkit
                 var mirrorsDefaultLayers = optimization.AddMessageGroup(new MessageGroup(MirrorWithDefaultLayers, MirrorWithDefaultLayersCombined, MirrorWithDefaultLayersInfo, MessageType.Tips));
                 var legacyBlendShapeIssues = general.AddMessageGroup(new MessageGroup(LegacyBlendShapeIssues, LegacyBlendShapeIssuesCombined, LegacyBlendShapeIssuesInfo, MessageType.Warning));
                 var grabPassShaders = general.AddMessageGroup(new MessageGroup(MaterialWithGrabPassShader, MaterialWithGrabPassShaderCombined, androidBuildPlatform ? MaterialWithGrabPassShaderInfoPC : MaterialWithGrabPassShaderInfoQuest, androidBuildPlatform ? MessageType.Error : MessageType.Info));
-                var disabledPortals = general.AddMessageGroup(new MessageGroup(DisabledPortalsWarning, DisabledPortalsWarningCombined, DisabledPortalsWarningInfo, MessageType.Warning));
                 var materialWithNonWhitelistedShader = general.AddMessageGroup(new MessageGroup(MaterialWithNonWhitelistedShader, MaterialWithNonWhitelistedShaderCombined, MaterialWithNonWhitelistedShaderInfo, MessageType.Warning).SetDocumentation("https://docs.vrchat.com/docs/quest-content-limitations#shaders"));
                 var uiElementNavigation = general.AddMessageGroup(new MessageGroup(UIElementWithNavigationNotNone, UIElementWithNavigationNotNoneCombined, UIElementWithNavigationNotNoneInfo, MessageType.Tips));
                 var nullTriggerReceivers = general.AddMessageGroup(new MessageGroup(NullTriggerReceiver, NullTriggerReceiverCombined, NullTriggerReceiverInfo, MessageType.Info));
@@ -2629,14 +2624,6 @@ namespace VRWorldToolkit
                             uiElementNavigation.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject).SetAutoFix(SetSelectableNavigationMode(selectable, Navigation.Mode.None)));
 
                             selectablesNotNone.Add(selectable);
-                        }
-                    }
-
-                    if (gameObject.activeInHierarchy == false)
-                    {
-                        if (gameObject.GetComponent<VRC_PortalMarker>())
-                        {
-                            disabledPortals.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject));
                         }
                     }
 
