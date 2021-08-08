@@ -1754,7 +1754,7 @@ namespace VRWorldToolkit
                 }
 
                 // Get triggers in the world
-                var triggerScripts = (VRC_Trigger[]) VRC_Trigger.FindObjectsOfType(typeof(VRC_Trigger));
+                var triggerScripts = (VRC_Trigger[]) FindObjectsOfType(typeof(VRC_Trigger));
 
                 var triggerWrongLayer = new List<GameObject>();
 
@@ -1821,7 +1821,7 @@ namespace VRWorldToolkit
                 {
                     optimization.AddMessageGroup(new MessageGroup(BakedOcclusionCulling, MessageType.GoodFPS));
 
-                    var occlusionAreas = GameObject.FindObjectsOfType<OcclusionArea>();
+                    var occlusionAreas = FindObjectsOfType<OcclusionArea>();
 
                     if (occlusionAreas.Length == 0)
                     {
@@ -2069,7 +2069,7 @@ namespace VRWorldToolkit
                     long probeCounter = 0;
                     long bakedProbes = probes != null ? probes.count : 0;
 
-                    var lightprobegroups = GameObject.FindObjectsOfType<LightProbeGroup>();
+                    var lightprobegroups = FindObjectsOfType<LightProbeGroup>();
 
                     var overlappingLightProbesGroup = new MessageGroup(OverlappingLightProbes, OverlappingLightProbesCombined, OverlappingLightProbesInfo, MessageType.Info);
 
