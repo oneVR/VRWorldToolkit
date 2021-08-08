@@ -1068,17 +1068,6 @@ namespace VRWorldToolkit
             };
         }
 
-        public static Action SetBuildTarget(BuildTargetGroup group, BuildTarget target)
-        {
-            return () =>
-            {
-                EditorUserBuildSettings.selectedBuildTargetGroup = group;
-                EditorUserBuildSettings.selectedStandaloneTarget = target;
-                EditorUserBuildSettings.SwitchActiveBuildTargetAsync(group, target);
-                EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
-            };
-        }
-
         public static Action FixVRCProjectSettings(VRCProjectSettings settings)
         {
             return () =>
@@ -1236,8 +1225,6 @@ namespace VRWorldToolkit
         private const string WorldDescriptorFar = "Scene Descriptor is {0} units far from the zero point in Unity. Having your world center out this far will cause some noticeable jittering on models. You should move your world closer to the zero point of your scene.";
 
         private const string WorldDescriptorOff = "Scene Descriptor is {0} units far from the zero point in Unity. It is usually good practice if possible to keep it as close as possible to the absolute zero point to avoid floating-point errors.";
-
-        private const string WronglySetBuildSettings = "Wrongly set build settings detected for current editor runtime. This can cause builds to not go through properly.";
 
         private const string DifferingSanitizedBuildPath = "The last build path differs from the one seen by the VRCSDK. This can happen with certain characters that get stripped from the path only during Build & Publish. The build path is created using the Company and Product name in the projects Player Settings.";
 
@@ -1567,26 +1554,6 @@ namespace VRWorldToolkit
                     {
                         general.AddMessageGroup(new MessageGroup(DifferingSanitizedBuildPath, MessageType.Error).AddSingleMessage(new SingleMessage(lastVRCPath, lastEscapedVRCPath).SetAutoFix(SanitizeBuildPath())));
                     }
-                }
-
-                switch (Helper.BuildPlatform())
-                {
-                    case RuntimePlatform.WindowsPlayer:
-                        if (EditorUserBuildSettings.selectedBuildTargetGroup != BuildTargetGroup.Standalone ||
-                            EditorUserBuildSettings.selectedStandaloneTarget != BuildTarget.StandaloneWindows64)
-                        {
-                            general.AddMessageGroup(new MessageGroup(WronglySetBuildSettings, MessageType.Error)).SetGroupAutoFix(SetBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64));
-                        }
-
-                        break;
-                    case RuntimePlatform.Android:
-                        if (EditorUserBuildSettings.selectedBuildTargetGroup != BuildTargetGroup.Android ||
-                            EditorUserBuildSettings.selectedStandaloneTarget != BuildTarget.Android)
-                        {
-                            general.AddMessageGroup(new MessageGroup(WronglySetBuildSettings, MessageType.Error)).SetGroupAutoFix(SetBuildTarget(BuildTargetGroup.Android, BuildTarget.Android));
-                        }
-
-                        break;
                 }
 
                 var vrcProjectSettings = Resources.Load<VRCProjectSettings>("VRCProjectSettings");
