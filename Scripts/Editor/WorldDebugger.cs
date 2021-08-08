@@ -2645,16 +2645,14 @@ namespace VRWorldToolkit
                                     missingFound = true;
                                     break;
                                 }
-                                else
+
+                                for (var l = 0; l < parameterObjects.Length; l++)
                                 {
-                                    for (var l = 0; l < parameterObjects.Length; l++)
+                                    if (parameterObjects[l].gameObject == null)
                                     {
-                                        if (parameterObjects[l].gameObject == null)
-                                        {
-                                            nullTriggerReceivers.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject));
-                                            missingFound = true;
-                                            break;
-                                        }
+                                        nullTriggerReceivers.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject));
+                                        missingFound = true;
+                                        break;
                                     }
                                 }
                             }
