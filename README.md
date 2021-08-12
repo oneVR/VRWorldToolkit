@@ -6,7 +6,7 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/oneVR/VRWorldToolkit?style=for-the-badge)](https://github.com/oneVR/VRWorldToolkit/stargazers)
 [![GitHub all releases](https://img.shields.io/github/downloads/oneVR/VRWorldToolkit/total?style=for-the-badge)](https://github.com/oneVR/VRWorldToolkit/releases)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/oneVR/VRWorldToolkit?style=for-the-badge)](https://github.com/oneVR/VRWorldToolkit/releases/latest)
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/oneVR/VRWorldToolkit?sort=semver&style=for-the-badge)](https://github.com/oneVR/VRWorldToolkit/releases/latest)
 [![Project License](https://img.shields.io/badge/license-MIT-brightgreen?style=for-the-badge)](https://github.com/oneVR/VRWorldToolkit/blob/master/LICENSE)
 ![GitHub repo size](https://img.shields.io/github/repo-size/oneVR/VRWorldToolkit?style=for-the-badge)
 
