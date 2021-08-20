@@ -16,7 +16,7 @@ namespace VRWorldToolkit
 
         private static GUIStyle header, text;
 
-        private static Texture iconTwitter, iconDiscord, iconGithub, iconPatreon, iconKofi;
+        private static Texture iconTwitter, iconDiscord, iconGithub;
 
         public void OnEnable()
         {
@@ -39,8 +39,6 @@ namespace VRWorldToolkit
             iconTwitter = Resources.Load("SplashTextures/IconTwitter") as Texture2D;
             iconDiscord = Resources.Load("SplashTextures/IconDiscord") as Texture2D;
             iconGithub = Resources.Load("SplashTextures/IconGithub") as Texture2D;
-            iconPatreon = Resources.Load("SplashTextures/IconPatreon") as Texture2D;
-            iconKofi = Resources.Load("SplashTextures/IconKofi") as Texture2D;
         }
 
         private void OnGUI()
@@ -61,15 +59,11 @@ namespace VRWorldToolkit
             EditorGUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button(iconTwitter, GUIStyle.none)) Application.OpenURL("https://twitter.com/Sackboy_1");
+            if (GUILayout.Button(iconTwitter, GUIStyle.none)) Application.OpenURL("https://twitter.com/oneVRdev");
             GUILayout.Space(20);
             if (GUILayout.Button(iconDiscord, GUIStyle.none)) Application.OpenURL("https://discord.gg/8w2Tc6C");
             GUILayout.Space(20);
             if (GUILayout.Button(iconGithub, GUIStyle.none)) Application.OpenURL("https://github.com/oneVR/VRWorldToolkit");
-            GUILayout.Space(20);
-            if (GUILayout.Button(iconPatreon, GUIStyle.none)) Application.OpenURL("https://www.patreon.com/onevr");
-            GUILayout.Space(20);
-            if (GUILayout.Button(iconKofi, GUIStyle.none)) Application.OpenURL("https://ko-fi.com/onevr");
 
             GUILayout.FlexibleSpace();
             EditorGUILayout.EndHorizontal();
