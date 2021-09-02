@@ -816,6 +816,41 @@ namespace VRWorldToolkit
             };
         }
 
+        public static Action SetScrollRectScrollSensitivity(ScrollRect scrollRect, float scrollSensitivity)
+        {
+            return () =>
+            {
+                if (EditorUtility.DisplayDialog("Change Scroll Sensitivity?", "This operation will change the Scroll Sensitivity on ScrollRect component \"" + scrollRect.gameObject.name + "\" to " + scrollSensitivity + ".\n\nDo you want to continue?", "Yes", "Cancel"))
+                {
+                    Undo.RegisterCompleteObjectUndo(scrollRect, "ScrollRect Scroll Sensitivity Change");
+
+                    scrollRect.scrollSensitivity = scrollSensitivity;
+
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(scrollRect);
+                }
+            };
+        }
+
+        public static Action SetScrollRectScrollSensitivity(ScrollRect[] scrollRects, float scrollSensitivity)
+        {
+            return () =>
+            {
+                if (EditorUtility.DisplayDialog("Change Scroll Sensitivity?", "This operation will change " + scrollRects.Length + " ScrollRect components Scroll Sensitivity to " + scrollSensitivity + ".\n\nDo you want to continue?", "Yes", "Cancel"))
+                {
+                    Undo.RegisterCompleteObjectUndo(scrollRects.ToArray<Object>(), "Mass ScrollRect Scroll Sensitivity Change");
+
+                    for (var i = 0; i < scrollRects.Length; i++)
+                    {
+                        var scrollRect = scrollRects[i];
+
+                        scrollRect.scrollSensitivity = scrollSensitivity;
+
+                        PrefabUtility.RecordPrefabInstancePropertyModifications(scrollRects[i]);
+                    }
+                }
+            };
+        }
+
         public static Action SetLightmapSize(int newSize)
         {
             return () =>
@@ -1443,6 +1478,10 @@ namespace VRWorldToolkit
         private const string UIElementWithNavigationNotNone = "The UI Element \"{0}\" does not have its Navigation set to None.";
         private const string UIElementWithNavigationNotNoneCombined = "Found {0} UI Elements with their Navigation not set to None.";
         private const string UIElementWithNavigationNotNoneInfo = "Setting Navigation to None on UI Elements can stop accidental interactions with them while trying to walk around.";
+
+        private const string ScrollRectWithScrollSensitivityNotZero = "The ScrollRect component \"{0}\" does not have its Scroll Sensitivity set to 0.";
+        private const string ScrollRectWithScrollSensitivityNotZeroCombined = "Found {0} ScrollRect components with their Scroll Sensitivity not set to 0.";
+        private const string ScrollRectWithScrollSensitivityNotZeroInfo = "Setting Scroll Sensitivity not set to 0 on ScrollRect components can stop accidental interactions with them while trying to walk around.";
 
         private const string NullTriggerReceiver = "Null receiver found on trigger {0}.";
         private const string NullTriggerReceiverCombined = "Found {0} null receivers in scene triggers.";
@@ -2361,6 +2400,7 @@ namespace VRWorldToolkit
 
                 var missingShaders = new List<Material>();
                 var selectablesNotNone = new List<Selectable>();
+                var scrollRectsScrollSensitivityNotZero = new List<ScrollRect>();
                 var legacyBlendShapes = new List<ModelImporter>();
 
                 var checkedMaterials = new List<Material>();
@@ -2371,6 +2411,7 @@ namespace VRWorldToolkit
                 var grabPassShaders = general.AddMessageGroup(new MessageGroup(MaterialWithGrabPassShader, MaterialWithGrabPassShaderCombined, androidBuildPlatform ? MaterialWithGrabPassShaderInfoPC : MaterialWithGrabPassShaderInfoQuest, androidBuildPlatform ? MessageType.Error : MessageType.Info));
                 var materialWithNonWhitelistedShader = general.AddMessageGroup(new MessageGroup(MaterialWithNonWhitelistedShader, MaterialWithNonWhitelistedShaderCombined, MaterialWithNonWhitelistedShaderInfo, MessageType.Warning).SetDocumentation("https://docs.vrchat.com/docs/quest-content-limitations#shaders"));
                 var uiElementNavigation = general.AddMessageGroup(new MessageGroup(UIElementWithNavigationNotNone, UIElementWithNavigationNotNoneCombined, UIElementWithNavigationNotNoneInfo, MessageType.Tips));
+                var scrollRectScrollSensitivity = general.AddMessageGroup(new MessageGroup(ScrollRectWithScrollSensitivityNotZero, ScrollRectWithScrollSensitivityNotZeroCombined, ScrollRectWithScrollSensitivityNotZeroInfo, MessageType.Tips));
                 var nullTriggerReceivers = general.AddMessageGroup(new MessageGroup(NullTriggerReceiver, NullTriggerReceiverCombined, NullTriggerReceiverInfo, MessageType.Info));
                 var textMeshStatic = general.AddMessageGroup(new MessageGroup(TextMeshLightmapStatic, TextMeshLightmapStaticCombined, TextMeshLightmapStaticInfo, MessageType.Warning));
                 var unsupportedCompressionFormatQuest = general.AddMessageGroup(new MessageGroup(UnsupportedCompressionFormatQuest, UnsupportedCompressionFormatQuestCombined, UnsupportedCompressionFormatQuestInfo, MessageType.Error).SetDocumentation("https://docs.unity3d.com/2019.4/Documentation/Manual/class-TextureImporterOverride.html"));
@@ -2594,6 +2635,17 @@ namespace VRWorldToolkit
                         }
                     }
 
+                    var scrollRect = gameObject.GetComponent<ScrollRect>();
+                    if (scrollRect != null)
+                    {
+                        if (scrollRect.scrollSensitivity != 0)
+                        {
+                            scrollRectScrollSensitivity.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject).SetAutoFix(SetScrollRectScrollSensitivity(scrollRect, 0)));
+
+                            scrollRectsScrollSensitivityNotZero.Add(scrollRect);
+                        }
+                    }
+
 #if VRC_SDK_VRCSDK2
                     var trigger = gameObject.GetComponent<VRC_Trigger>();
                     if (trigger != null)
@@ -2638,6 +2690,11 @@ namespace VRWorldToolkit
                 if (selectablesNotNone.Count > 1)
                 {
                     uiElementNavigation.SetGroupAutoFix(SetSelectableNavigationMode(selectablesNotNone.ToArray(), Navigation.Mode.None));
+                }
+
+                if (scrollRectsScrollSensitivityNotZero.Count > 1)
+                {
+                    scrollRectScrollSensitivity.SetGroupAutoFix(SetScrollRectScrollSensitivity(scrollRectsScrollSensitivityNotZero.ToArray(), 0));
                 }
 
                 // If more than 10% of shaders used in scene are toon shaders to leave room for people using them for avatar displays
