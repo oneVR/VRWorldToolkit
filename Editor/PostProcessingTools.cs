@@ -10,7 +10,7 @@ namespace VRWorldToolkit.Editor
 {
     public class PostProcessingTools : MonoBehaviour
     {
-        [MenuItem("VRWorld Toolkit/Post Processing/Setup Post Processing", false, 12)]
+        [MenuItem("VRWorld Toolkit/Post Processing/Setup Post Processing", false, 1)]
         private static void PostProcessingSetup()
         {
 #if UNITY_POST_PROCESSING_STACK_V2
@@ -53,7 +53,7 @@ namespace VRWorldToolkit.Editor
             return !(Helper.BuildPlatform() is RuntimePlatform.Android);
         }
 
-        [MenuItem("VRWorld Toolkit/Post Processing/Post Processing Guide", false, 13)]
+        [MenuItem("VRWorld Toolkit/Post Processing/Post Processing Guide", false, 2)]
         private static void PostProcessingGuide()
         {
             Application.OpenURL("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Post-Processing");

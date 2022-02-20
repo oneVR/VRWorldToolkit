@@ -22,7 +22,7 @@ namespace VRWorldToolkit.Editor
     public class DisableOnBuildManager : UnityEditor.Editor
     {
         // Disable On Build
-        [MenuItem("VRWorld Toolkit/On Build Functions/Disable On Build/Setup", false, 2)]
+        [MenuItem("VRWorld Toolkit/On Build Functions/Disable On Build/Setup", false, 13)]
         private static void DisableOnBuildSetup()
         {
             if (EditorUtility.DisplayDialog("Setup Disable On Build", "This setup will add a new tag DisableOnBuild. Assigning this tag to a GameObject will disable it before a build happens.", "Setup", "Cancel"))
@@ -37,7 +37,7 @@ namespace VRWorldToolkit.Editor
             return !Helper.TagExists("DisableOnBuild");
         }
 
-        [MenuItem("VRWorld Toolkit/On Build Functions/Disable On Build/Disable Objects", false, 13)]
+        [MenuItem("VRWorld Toolkit/On Build Functions/Disable On Build/Disable Objects", false, 24)]
         private static void DisableDisableObjectsLoop()
         {
             ToggleObjectsUsingTag("DisableOnBuild", false, true);
@@ -49,7 +49,7 @@ namespace VRWorldToolkit.Editor
             return Helper.TagExists("DisableOnBuild");
         }
 
-        [MenuItem("VRWorld Toolkit/On Build Functions/Disable On Build/Enable Objects", false, 14)]
+        [MenuItem("VRWorld Toolkit/On Build Functions/Disable On Build/Enable Objects", false, 25)]
         private static void EnableDisableObjectsLoop()
         {
             ToggleObjectsUsingTag("DisableOnBuild", true, true);
