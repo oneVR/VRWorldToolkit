@@ -55,17 +55,17 @@ namespace VRWorldToolkit.Editor
         static Texture GetDebuggerIcon(MessageType infoType)
         {
             if (!badFPS)
-                badFPS = Resources.Load<Texture>("DebuggerIcons/Bad_FPS_Icon");
+                badFPS = Resources.Load<Texture>("VRWorldToolkit/DebuggerIcons/Bad_FPS_Icon");
             if (!goodFPS)
-                goodFPS = Resources.Load<Texture>("DebuggerIcons/Good_FPS_Icon");
+                goodFPS = Resources.Load<Texture>("VRWorldToolkit/DebuggerIcons/Good_FPS_Icon");
             if (!tips)
-                tips = Resources.Load<Texture>("DebuggerIcons/Performance_Tips");
+                tips = Resources.Load<Texture>("VRWorldToolkit/DebuggerIcons/Performance_Tips");
             if (!info)
-                info = Resources.Load<Texture>("DebuggerIcons/Performance_Info");
+                info = Resources.Load<Texture>("VRWorldToolkit/DebuggerIcons/Performance_Info");
             if (!error)
-                error = Resources.Load<Texture>("DebuggerIcons/Error_Icon");
+                error = Resources.Load<Texture>("VRWorldToolkit/DebuggerIcons/Error_Icon");
             if (!warning)
-                warning = Resources.Load<Texture>("DebuggerIcons/Warning_Icon");
+                warning = Resources.Load<Texture>("VRWorldToolkit/DebuggerIcons/Warning_Icon");
 
             switch (infoType)
             {

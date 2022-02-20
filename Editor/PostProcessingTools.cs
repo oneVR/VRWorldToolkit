@@ -133,7 +133,7 @@ namespace VRWorldToolkit.Editor
                 AssetDatabase.CreateFolder("Assets", "Post Processing");
             if (AssetDatabase.LoadAssetAtPath("Assets/Post Processing/SilentProfile.asset", typeof(PostProcessProfile)) == null)
             {
-                var path = AssetDatabase.GetAssetPath(Resources.Load("PostProcessing/SilentProfile"));
+                var path = AssetDatabase.GetAssetPath(Resources.Load("VRWorldToolkit/PostProcessing/SilentProfile"));
 
                 if (path != null)
                 {

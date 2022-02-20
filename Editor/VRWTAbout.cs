@@ -24,7 +24,7 @@ namespace VRWorldToolkit.Editor
             {
                 normal =
                 {
-                    background = Resources.Load("SplashTextures/VRWTSplashLogo") as Texture2D,
+                    background = Resources.Load("VRWorldToolkit/SplashTextures/VRWTSplashLogo") as Texture2D,
                     textColor = Color.white,
                 },
                 fixedHeight = 140
@@ -36,9 +36,9 @@ namespace VRWorldToolkit.Editor
                 richText = true
             };
 
-            iconTwitter = Resources.Load("SplashTextures/IconTwitter") as Texture2D;
-            iconDiscord = Resources.Load("SplashTextures/IconDiscord") as Texture2D;
-            iconGithub = Resources.Load("SplashTextures/IconGithub") as Texture2D;
+            iconTwitter = Resources.Load("VRWorldToolkit/SplashTextures/IconTwitter") as Texture2D;
+            iconDiscord = Resources.Load("VRWorldToolkit/SplashTextures/IconDiscord") as Texture2D;
+            iconGithub = Resources.Load("VRWorldToolkit/SplashTextures/IconGithub") as Texture2D;
         }
 
         private void OnGUI()
