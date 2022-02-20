@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace VRWorldToolkit
+namespace VRWorldToolkit.Editor
 {
     public class VRWTAbout : EditorWindow
     {

@@ -1,22 +1,16 @@
-﻿#if VRC_SDK_VRCSDK3
+﻿#if !VRWT_DISABLE_EDITORS
 using VRC.SDKBase;
-#endif
-#if VRC_SDK_VRCSDK2
-using VRCSDK2;
-#endif
 using UnityEditor;
 using UnityEngine;
-using VRWorldToolkit.DataStructures;
 
-#if (VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3) && !VRWT_DISABLE_EDITORS
-namespace VRWorldToolkit
+namespace VRWorldToolkit.Editor
 {
     /// <summary>
     /// Custom editor for VRC_MirrorReflection with added quick actions
     /// </summary>
     [CustomEditor(typeof(VRC_MirrorReflection), true, isFallback = false)]
     [CanEditMultipleObjects]
-    public class CustomMirrorEditor : Editor
+    public class CustomMirrorEditor : UnityEditor.Editor
     {
         private bool showExplanations;
         private SerializedProperty mirrorMask;

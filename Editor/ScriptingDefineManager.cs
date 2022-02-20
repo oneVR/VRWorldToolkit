@@ -1,10 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace VRWorldToolkit
+namespace VRWorldToolkit.Editor
 {
     public class ScriptingDefineManager : MonoBehaviour
     {

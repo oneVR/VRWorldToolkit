@@ -6,9 +6,8 @@ using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
-using VRWorldToolkit.DataStructures;
 
-namespace VRWorldToolkit
+namespace VRWorldToolkit.Editor
 {
     public class BuildReportTreeView : TreeView
     {

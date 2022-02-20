@@ -3,37 +3,13 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-#if UNITY_POST_PROCESSING_STACK_V2
 using UnityEngine.Rendering.PostProcessing;
-#endif
-#if VRC_SDK_VRCSDK3
 using VRC.SDKBase;
-#endif
-#if VRC_SDK_VRCSDK2
-using VRCSDK2;
-#endif
 
-#if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
-namespace VRWorldToolkit
+namespace VRWorldToolkit.Editor
 {
     public class PostProcessingTools : MonoBehaviour
     {
-        [MenuItem("VRWorld Toolkit/Post Processing/Import Post Processing", false, 1)]
-        private static void PostProcessingInstall()
-        {
-            Helper.ImportPackage("com.unity.postprocessing@3.0.3");
-        }
-
-        [MenuItem("VRWorld Toolkit/Post Processing/Import Post Processing", true)]
-        private static bool PostProcessingInstallValidation()
-        {
-#if UNITY_POST_PROCESSING_STACK_V2
-            return false;
-#else
-            return true;
-#endif
-        }
-
         [MenuItem("VRWorld Toolkit/Post Processing/Setup Post Processing", false, 12)]
         private static void PostProcessingSetup()
         {
@@ -74,11 +50,7 @@ namespace VRWorldToolkit
         [MenuItem("VRWorld Toolkit/Post Processing/Setup Post Processing", true)]
         private static bool PostProcessingSetupValidation()
         {
-#if UNITY_POST_PROCESSING_STACK_V2
             return !(Helper.BuildPlatform() is RuntimePlatform.Android);
-#else
-            return false;
-#endif
         }
 
         [MenuItem("VRWorld Toolkit/Post Processing/Post Processing Guide", false, 13)]
@@ -87,7 +59,6 @@ namespace VRWorldToolkit
             Application.OpenURL("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Post-Processing");
         }
 
-#if UNITY_POST_PROCESSING_STACK_V2
         private static void SetupBasicPostProcessing()
         {
             GameObject camera = null;
@@ -194,7 +165,5 @@ namespace VRWorldToolkit
             if (!profileFound)
                 EditorUtility.DisplayDialog("Default profile not found!", "Default Post Processing Profile was not found during setup, so it was automatically not set in the Post Processing Volume.\n\nCreate your profile to finish the setup.", "Ok");
         }
-#endif
     }
 }
-#endif
