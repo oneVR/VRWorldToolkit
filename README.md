@@ -19,7 +19,7 @@ To report problems, you can either join my [Discord server](https://discord.com/
 ## Setup
 
 ### Requirements
-* Unity 2019.4.29f1
+* Unity 2019.4.31f1
 * Latest VRChat SDK [SDK2 / SDK3 Worlds or Avatars](https://vrchat.com/home/download)
 
 ### Getting Started
