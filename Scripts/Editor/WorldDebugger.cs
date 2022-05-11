@@ -2036,11 +2036,14 @@ namespace VRWorldToolkit
 
                             var textureImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(lightmaps[i].lightmapColor)) as TextureImporter;
 
-                            var platformSettings = textureImporter.GetPlatformTextureSettings("Android");
-
-                            if (!platformSettings.overridden)
+                            if (textureImporter != null)
                             {
-                                androidCompressionGroup.AddSingleMessage(new SingleMessage(lightmap.name).SetAssetPath(textureImporter.assetPath));
+                                var platformSettings = textureImporter.GetPlatformTextureSettings("Android");
+
+                                if (!platformSettings.overridden)
+                                {
+                                    androidCompressionGroup.AddSingleMessage(new SingleMessage(lightmap.name).SetAssetPath(textureImporter.assetPath));
+                                }
                             }
                         }
                     }
