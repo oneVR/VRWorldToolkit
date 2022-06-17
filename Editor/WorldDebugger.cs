@@ -620,7 +620,7 @@ namespace VRWorldToolkit.Editor
 
         [SerializeField] private int tab;
 
-        [MenuItem("VRWorld Toolkit/World Debugger", false, 20)]
+        [MenuItem("VRWorld Toolkit/World Debugger", false, 25)]
         public static void ShowWindow()
         {
             var window = GetWindow(typeof(WorldDebugger));
