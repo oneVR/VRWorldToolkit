@@ -6,6 +6,9 @@
 	"unity": "2019.4",
 	"documentationUrl": "https://github.com/oneVR/VRWorldToolkit",
 	"licensesUrl": "https://github.com/oneVR/VRWorldToolkit/blob/master/LICENSE",
+	"dependencies": {
+		"com.unity.postprocessing": "3.1.1"
+	},
 	"vpmDependencies": {
 		"com.vrchat.base" : "3.1.x"
 	},
