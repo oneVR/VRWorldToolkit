@@ -34,9 +34,9 @@ namespace VRWorldToolkit.Editor
 
             EditorGUILayout.BeginHorizontal();
 
-            if (GUILayout.Button("Show only players")) MirrorLayerChange(262656);
+            if (GUILayout.Button("Show only Players")) MirrorLayerChange(262656);
 
-            if (GUILayout.Button("Show players/world")) MirrorLayerChange(262657);
+            if (GUILayout.Button("Show Players/World")) MirrorLayerChange(264705);
 
             EditorGUILayout.EndHorizontal();
 
@@ -60,13 +60,14 @@ namespace VRWorldToolkit.Editor
                     EditorGUILayout.HelpBox("PlayerLocal is only meant to be seen in first-person view and should not be enabled on mirrors.", MessageType.Error);
             }
 
-            showExplanations = EditorGUILayout.Foldout(showExplanations, "VRChat specific layer explanations");
+            showExplanations = EditorGUILayout.Foldout(showExplanations, "VRChat Specific Layer Explanations");
 
             if (showExplanations)
             {
-                GUILayout.Label("<b>Player:</b>\nThis layer is used for other players than yourself", Styles.RichTextWrap);
-                GUILayout.Label("<b>PlayerLocal:</b>\nThis layer is only used for first-person view and should not be enabled in mirrors", Styles.RichTextWrap);
-                GUILayout.Label("<b>MirrorReflection:</b>\nThis layer is used for your own mirror version", Styles.RichTextWrap);
+                GUILayout.Label("<b>Player:</b>\nThis layer is used to show players other than yourself.", Styles.RichTextWrap);
+                GUILayout.Label("<b>PlayerLocal:</b>\nThis layer is only used for first-person view and should not be enabled in mirrors.", Styles.RichTextWrap);
+                GUILayout.Label("<b>Environment:</b>\nThis layer is used for static meshes and objects in the world. Shares the same properties as the Default layer.", Styles.RichTextWrap);
+                GUILayout.Label("<b>MirrorReflection:</b>\nThis layer is used to fully show your own self in the mirror.", Styles.RichTextWrap);
             }
 
             serializedObject.ApplyModifiedProperties();
