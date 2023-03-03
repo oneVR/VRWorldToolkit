@@ -60,7 +60,7 @@ namespace VRWorldToolkit.Editor
                     EditorGUILayout.HelpBox("PlayerLocal is only meant to be seen in first-person view and should not be enabled on mirrors.", MessageType.Error);
             }
 
-            showExplanations = EditorGUILayout.Foldout(showExplanations, "VRChat Specific Layer Explanations");
+            showExplanations = EditorGUILayout.Foldout(showExplanations, "VRChat Specific Layer Descriptions");
 
             if (showExplanations)
             {
