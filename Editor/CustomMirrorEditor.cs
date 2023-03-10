@@ -50,22 +50,28 @@ namespace VRWorldToolkit.Editor
                     EditorGUILayout.HelpBox("No baked light probes were found in lighting data. Dynamic objects such as players and pickups will not appear lit in mirrors without baked light probes.", MessageType.Warning);
 
                 if (mirrorMask.intValue == ~0)
-                    EditorGUILayout.HelpBox("This mirror has it's Reflect Layers set to Everything. This can lead to degraded performance in populated instances!\nYou should consider disabling unnecessary Reflect Layers to save on performance. Perhaps you can use the Quick-Set Reflect Layer Utility above?", MessageType.Error);
+                    EditorGUILayout.HelpBox("This mirror has it's Reflect Layers set to Everything. This can lead to degraded performance in populated instances!\nConsider disabling unnecessary Reflect Layers to save on performance. Perhaps you should use the Quick-Set Reflect Layer Utility above?", MessageType.Error);
 
                 if (Helper.LayerIncludedInMask(LayerMask.NameToLayer("UiMenu"), mirrorMask.intValue))
                     EditorGUILayout.HelpBox("Having UiMenu enabled on mirrors causes Nameplates to be rendered twice. It should never be enabled on mirrors.", MessageType.Warning);
                 
                 if (Helper.LayerIncludedInMask(LayerMask.NameToLayer("reserved2"), mirrorMask.intValue))
-                    EditorGUILayout.HelpBox("Having reserved2 enabled on mirrors causes the VRChat HUD, Main Menu and Tooltips to be rendered twice, causing a noticeable performance drop in populated instances.", MessageType.Warning);
+                    EditorGUILayout.HelpBox("Having reserved2 enabled on mirrors causes the VRChat HUD, Main Menu and Tooltips to be rendered twice, causing a noticeable performance drop in populated instances. It should never be enabled on mirrors.", MessageType.Warning);
 
                 if (!Helper.LayerIncludedInMask(LayerMask.NameToLayer("MirrorReflection"), mirrorMask.intValue))
                     EditorGUILayout.HelpBox("Having the MirrorReflection layer disabled will stop the player from seeing themselves in the mirror.", MessageType.Warning);
 
                 if (Helper.LayerIncludedInMask(LayerMask.NameToLayer("PlayerLocal"), mirrorMask.intValue))
-                    EditorGUILayout.HelpBox("PlayerLocal is only meant to be seen in first-person view and will not render in mirrors. Use MirrorReflection instead.", MessageType.Error);
+                    EditorGUILayout.HelpBox("PlayerLocal is only meant to be seen in first-person view and will never render in mirrors. Use MirrorReflection instead.", MessageType.Error);
                 
                 if (Helper.LayerIncludedInMask(LayerMask.NameToLayer("Water"), mirrorMask.intValue))
                     EditorGUILayout.HelpBox("Objects that are in the Water layer are never rendered in mirrors!", MessageType.Error);
+                
+                if (mirrorMask.intValue == 262656)
+                    EditorGUILayout.HelpBox("This Mirror is properly set to show only Players.", MessageType.Info);
+                
+                if (mirrorMask.intValue == 264705)
+                    EditorGUILayout.HelpBox("This Mirror is properly set to show both Players and the World.", MessageType.Info);
             }
 
             showExplanations = EditorGUILayout.Foldout(showExplanations, "VRChat Specific Layer Descriptions");
