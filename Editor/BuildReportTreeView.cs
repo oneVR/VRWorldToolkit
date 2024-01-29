@@ -451,6 +451,7 @@ namespace VRWorldToolkit.Editor
             // Create the menu items
             menu.AddItem(new GUIContent("Copy Name"), false, ReplaceClipboard, clickedItem.displayName + clickedItem.extension);
             menu.AddItem(new GUIContent("Copy Path"), false, ReplaceClipboard, clickedItem.path);
+            menu.AddItem(new GUIContent("Select in Assets"), false, SelectAssetsInProjectWindow);
 
             // Show the menu
             menu.ShowAsContext();
@@ -460,6 +461,31 @@ namespace VRWorldToolkit.Editor
             {
                 EditorGUIUtility.systemCopyBuffer = (string) input;
             }
+        }
+        
+        /// <summary>
+        /// Selects assets in the Project window based on the currently selected BuildReportItems.
+        /// This is useful for quickly selecting a batch of assets to modify their import settings or other properties in bulk.
+        /// </summary>
+        private void SelectAssetsInProjectWindow()
+        {
+            // Retrieve the IDs of currently selected items
+            var selectedItems = GetSelection();
+            var assetPaths = new List<string>();
+
+            // Iterate over each selected item and collect their asset paths
+            foreach (var itemId in selectedItems)
+            {
+                var item = FindItem(itemId, rootItem) as BuildReportItem;
+                if (item != null && !string.IsNullOrEmpty(item.path))
+                {
+                    assetPaths.Add(item.path);
+                }
+            }
+
+            // Load and select the assets in the Project window
+            var assets = assetPaths.Select(AssetDatabase.LoadAssetAtPath<UnityEngine.Object>).ToArray();
+            Selection.objects = assets;
         }
 
         /// <summary>
