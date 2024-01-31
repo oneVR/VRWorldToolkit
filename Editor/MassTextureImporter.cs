@@ -109,6 +109,11 @@ namespace VRWorldToolkit.Editor
         public DontOverrideWhen DontOverrideCrunchWhen { get; private set; } = DontOverrideWhen.AlreadyEnabled;
         public OverrideWhenSize OverrideCrunchCompressionSizeWhen { get; private set; } = OverrideWhenSize.BiggerThan;
 
+        // Texture Compression Format
+        public bool DontChangeCompressionQuality { get; private set; } = true;
+        public TextureImporterCompression TextureCompressionQuality { get; private set; } = TextureImporterCompression.Compressed;
+        public bool ignoreNoneCompression { get; private set; } = false;
+
         // Ignores
         public bool IgnoreCubemaps { get; private set; } = true;
         public OverrideWhenSize OverrideCubemapSettingsWhen { get; private set; } = OverrideWhenSize.SmallerThan;
@@ -174,6 +179,17 @@ namespace VRWorldToolkit.Editor
             using (new EditorGUI.IndentLevelScope())
             {
                 DontOverrideCrunchWhen = (DontOverrideWhen) EditorGUILayout.EnumPopup("Don't Override When", DontOverrideCrunchWhen);
+            }
+
+            GUILayout.Label("Texture Compression Quality", Styles.BoldWrap);
+            DontChangeCompressionQuality = EditorGUILayout.Toggle("Dont Change", DontChangeCompressionQuality);
+            using (new EditorGUI.DisabledScope(DontChangeCompressionQuality))
+            {
+                using (new EditorGUI.IndentLevelScope())
+                {
+                    TextureCompressionQuality = (TextureImporterCompression) EditorGUILayout.EnumPopup("Compression Quality", TextureCompressionQuality);
+                    ignoreNoneCompression = EditorGUILayout.Toggle("Ignore Uncompressed", ignoreNoneCompression);
+                }
             }
 
             GUILayout.Label("Ignore", Styles.BoldWrap);
@@ -303,6 +319,13 @@ namespace VRWorldToolkit.Editor
                             }
                         }
                     }
+
+                    if (!DontChangeCompressionQuality)
+                    {
+                        if (!(ignoreNoneCompression && importer.textureCompression == TextureImporterCompression.Uncompressed))
+                        {
+                            importer.textureCompression = TextureCompressionQuality;
+                        }                    }
 
                     importer.SaveAndReimport();
                     current++;
