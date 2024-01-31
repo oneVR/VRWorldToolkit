@@ -3,9 +3,8 @@ using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
-using VRWorldToolkit.DataStructures;
 
-namespace VRWorldToolkit
+namespace VRWorldToolkit.Editor
 {
     public class TextureDetails
     {

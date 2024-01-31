@@ -1,0 +1,20 @@
+{
+    "name": "VRWorldToolkit.Editor",
+    "references": [
+        "GUID:e82e209be578ee94c94cfc45c20bfb14",
+        "GUID:d60799ab2a985554ea1a39cd38695018",
+        "GUID:290dd5870d0ead646bcb6ea5c6a60af5",
+        "GUID:a1653399f63795746b1857281d1e400d"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

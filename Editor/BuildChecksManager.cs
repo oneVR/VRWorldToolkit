@@ -1,19 +1,11 @@
-﻿#if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
-using UnityEngine;
-using VRC.SDKBase.Editor.BuildPipeline;
-#if VRC_SDK_VRCSDK3
-using VRC.SDKBase;
-#endif
-#if VRC_SDK_VRCSDK2
-using VRCSDK2;
-#endif
-#if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
-using VRC.Core;
-#endif
+﻿using System.Linq;
 using UnityEditor;
-using System.Linq;
+using UnityEngine;
+using VRC.Core;
+using VRC.SDKBase;
+using VRC.SDKBase.Editor.BuildPipeline;
 
-namespace VRWorldToolkit
+namespace VRWorldToolkit.Editor
 {
     public class BuildChecksManager : IVRCSDKBuildRequestedCallback
     {
@@ -79,4 +71,3 @@ namespace VRWorldToolkit
         }
     }
 }
-#endif

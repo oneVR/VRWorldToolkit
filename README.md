@@ -19,7 +19,7 @@ To report problems, you can either join my [Discord server](https://discord.com/
 ## Setup
 
 ### Requirements
-* Unity 2019.4.29f1
+* Unity 2019.4.31f1
 * Latest VRChat SDK [SDK2 / SDK3 Worlds or Avatars](https://vrchat.com/home/download)
 
 ### Getting Started
@@ -79,9 +79,6 @@ Includes additions to:
 * VRC Avatar Pedestal
   * Adds a feature to mass copy and set IDs to pedestals while having multiple selected
   * Draws outlines to where the pedestal image will appear in-game when you select the GameObject with the pedestal component on it
-
-### Useful Links
-Quick access to commonly used links related to VRChat content creation.
 
 ## Special Thanks to
 

@@ -1,9 +1,5 @@
-﻿#if VRC_SDK_VRCSDK3
+﻿#if !VRWT_DISABLE_EDITORS
 using VRC.SDKBase;
-#endif
-#if VRC_SDK_VRCSDK2
-using VRCSDK2;
-#endif
 using UnityEditor;
 using UnityEngine;
 using System.Linq;
@@ -11,18 +7,16 @@ using UnityEngine.SceneManagement;
 using UnityEditor.SceneManagement;
 using System.Text.RegularExpressions;
 using System;
-using VRWorldToolkit.DataStructures;
 using Object = UnityEngine.Object;
 
-#if (VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3) && !VRWT_DISABLE_EDITORS
-namespace VRWorldToolkit
+namespace VRWorldToolkit.Editor
 {
     /// <summary>
     /// Custom editor addition for drawing avatar pedestal bounds
     /// </summary>
     [CustomEditor(typeof(VRC_AvatarPedestal), true, isFallback = false)]
     [CanEditMultipleObjects]
-    public class CustomAvatarPedestalEditor : Editor
+    public class CustomAvatarPedestalEditor : UnityEditor.Editor
     {
         private const float INNER_BOUND = 1.5f;
         private const float OUTER_BOUND = 2f;
