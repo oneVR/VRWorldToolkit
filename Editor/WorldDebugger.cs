@@ -846,9 +846,9 @@ namespace VRWorldToolkit.Editor
         {
             return () =>
             {
-                if (EditorUtility.DisplayDialog("Change lightmap size?", "This operation will change your lightmap size from " + LightmapEditorSettings.maxAtlasSize + " to " + newSize + ".\n\nDo you want to continue?", "Yes", "Cancel"))
+                if (EditorUtility.DisplayDialog("Change lightmap size?", "This operation will change your lightmap size from " + Lightmapping.lightingSettings.lightmapMaxSize + " to " + newSize + ".\n\nDo you want to continue?", "Yes", "Cancel"))
                 {
-                    LightmapEditorSettings.maxAtlasSize = newSize;
+                    Lightmapping.lightingSettings.lightmapMaxSize = newSize;
                 }
             };
         }
@@ -865,7 +865,7 @@ namespace VRWorldToolkit.Editor
 
                         settings.overridden = true;
 
-                        settings.format = TextureImporterFormat.ASTC_RGB_4x4;
+                        settings.format = TextureImporterFormat.ASTC_4x4;
 
                         item.SetPlatformTextureSettings(settings);
 
@@ -885,7 +885,7 @@ namespace VRWorldToolkit.Editor
 
                     settings.overridden = true;
 
-                    settings.format = TextureImporterFormat.ASTC_RGB_4x4;
+                    settings.format = TextureImporterFormat.ASTC_4x4;
 
                     textureImporter.SetPlatformTextureSettings(settings);
 
@@ -1827,7 +1827,7 @@ namespace VRWorldToolkit.Editor
                     lighting.AddMessageGroup(new MessageGroup(DarkEnvironmentLighting, MessageType.Tips));
                 }
 
-                if (RenderSettings.defaultReflectionMode.Equals(DefaultReflectionMode.Custom) && !RenderSettings.customReflection)
+                if (RenderSettings.defaultReflectionMode.Equals(DefaultReflectionMode.Custom) && !RenderSettings.customReflectionTexture)
                 {
                     lighting.AddMessageGroup(new MessageGroup(CustomEnvironmentReflectionsNull, MessageType.Error).AddSingleMessage(new SingleMessage(SetEnviromentReflections(DefaultReflectionMode.Skybox))));
                 }
@@ -1964,7 +1964,7 @@ namespace VRWorldToolkit.Editor
                 if (bakedLighting)
                 {
                     // Count lightmaps and suggest to use bigger lightmaps if needed
-                    var lightMapSize = LightmapEditorSettings.maxAtlasSize;
+                    var lightMapSize = Lightmapping.lightingSettings.lightmapMaxSize;
                     if (lightMapSize < 2048 && LightmapSettings.lightmaps.Length >= 4)
                     {
                         if (LightmapSettings.lightmaps[0] != null)
@@ -1978,7 +1978,7 @@ namespace VRWorldToolkit.Editor
                         }
                     }
 
-                    if (LightmapEditorSettings.lightmapper.Equals(LightmapEditorSettings.Lightmapper.ProgressiveGPU) && lightMapSize == 4096 && SystemInfo.graphicsMemorySize < 12000)
+                    if (Lightmapping.lightingSettings.lightmapper.Equals(LightingSettings.Lightmapper.ProgressiveGPU) && lightMapSize == 4096 && SystemInfo.graphicsMemorySize < 12000)
                     {
                         lighting.AddMessageGroup(new MessageGroup(ConsiderSmallerLightmaps, MessageType.Warning).AddSingleMessage(new SingleMessage(lightMapSize.ToString()).SetAutoFix(SetLightmapSize(2048))));
                     }
