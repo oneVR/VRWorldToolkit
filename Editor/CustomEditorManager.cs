@@ -1,8 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-#if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
-namespace VRWorldToolkit
+namespace VRWorldToolkit.Editor
 {
     public class CustomEditorManager : MonoBehaviour
     {
@@ -39,4 +38,3 @@ namespace VRWorldToolkit
         }
     }
 }
-#endif

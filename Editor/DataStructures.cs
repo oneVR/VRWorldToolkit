@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace VRWorldToolkit.DataStructures
+namespace VRWorldToolkit.Editor
 {
     public static class Styles
     {

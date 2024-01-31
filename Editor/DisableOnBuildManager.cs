@@ -1,5 +1,4 @@
-﻿#if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
-using VRC.SDKBase.Editor.BuildPipeline;
+﻿using VRC.SDKBase.Editor.BuildPipeline;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -7,7 +6,7 @@ using UnityEngine.SceneManagement;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 
-namespace VRWorldToolkit
+namespace VRWorldToolkit.Editor
 {
     public class DisableOnBuildCallback : IVRCSDKBuildRequestedCallback, IProcessSceneWithReport
     {
@@ -28,25 +27,25 @@ namespace VRWorldToolkit
         }
     }
 
-    public class DisableOnBuildManager : Editor
+    public class DisableOnBuildManager : UnityEditor.Editor
     {
         // Disable On Build
-        [MenuItem("VRWorld Toolkit/On Build Functions/Disable On Build/Setup", false, 2)]
+        [MenuItem("VRWorld Toolkit/On Build Functions/Disable On Build/Setup", false, 13)]
         private static void DisableOnBuildSetup()
         {
             if (EditorUtility.DisplayDialog("Setup Disable On Build", "This setup will add a new tag DisableOnBuild. Assigning this tag to a GameObject will disable it before a build happens.", "Setup", "Cancel"))
             {
-                TagHelper.AddTag("DisableOnBuild");
+                Helper.AddTag("DisableOnBuild");
             }
         }
 
         [MenuItem("VRWorld Toolkit/On Build Functions/Disable On Build/Setup", true)]
         private static bool DisableOnBuildSetupValidate()
         {
-            return !TagHelper.TagExists("DisableOnBuild");
+            return !Helper.TagExists("DisableOnBuild");
         }
 
-        [MenuItem("VRWorld Toolkit/On Build Functions/Disable On Build/Disable Objects", false, 13)]
+        [MenuItem("VRWorld Toolkit/On Build Functions/Disable On Build/Disable Objects", false, 24)]
         private static void DisableDisableObjectsLoop()
         {
             ToggleObjectsUsingTag("DisableOnBuild", false, true);
@@ -55,10 +54,10 @@ namespace VRWorldToolkit
         [MenuItem("VRWorld Toolkit/On Build Functions/Disable On Build/Disable Objects", true)]
         private static bool DisableDisableObjectsValidate()
         {
-            return TagHelper.TagExists("DisableOnBuild");
+            return Helper.TagExists("DisableOnBuild");
         }
 
-        [MenuItem("VRWorld Toolkit/On Build Functions/Disable On Build/Enable Objects", false, 14)]
+        [MenuItem("VRWorld Toolkit/On Build Functions/Disable On Build/Enable Objects", false, 25)]
         private static void EnableDisableObjectsLoop()
         {
             ToggleObjectsUsingTag("DisableOnBuild", true, true);
@@ -67,7 +66,7 @@ namespace VRWorldToolkit
         [MenuItem("VRWorld Toolkit/On Build Functions/Disable On Build/Enable Objects", true)]
         private static bool EnableObjectsLoopValidate()
         {
-            return TagHelper.TagExists("DisableOnBuild");
+            return Helper.TagExists("DisableOnBuild");
         }
 
         // Enable On Build
@@ -76,14 +75,14 @@ namespace VRWorldToolkit
         {
             if (EditorUtility.DisplayDialog("Setup Enable On Build", "This setup will add a new tag EnableOnBuild. Assigning this tag to a GameObject will enable it before a build happens.", "Setup", "Cancel"))
             {
-                TagHelper.AddTag("EnableOnBuild");
+                Helper.AddTag("EnableOnBuild");
             }
         }
 
         [MenuItem("VRWorld Toolkit/On Build Functions/Enable On Build/Setup", true)]
         private static bool EnableOnBuildSetupValidate()
         {
-            return !TagHelper.TagExists("EnableOnBuild");
+            return !Helper.TagExists("EnableOnBuild");
         }
 
         [MenuItem("VRWorld Toolkit/On Build Functions/Enable On Build/Disable Objects", false, 24)]
@@ -95,7 +94,7 @@ namespace VRWorldToolkit
         [MenuItem("VRWorld Toolkit/On Build Functions/Enable On Build/Disable Objects", true)]
         private static bool DisableEnableObjectsValidate()
         {
-            return TagHelper.TagExists("EnableOnBuild");
+            return Helper.TagExists("EnableOnBuild");
         }
 
         [MenuItem("VRWorld Toolkit/On Build Functions/Enable On Build/Enable Objects", false, 25)]
@@ -107,12 +106,12 @@ namespace VRWorldToolkit
         [MenuItem("VRWorld Toolkit/On Build Functions/Enable On Build/Enable Objects", true)]
         private static bool EnableEnableObjectsLoopValidate()
         {
-            return TagHelper.TagExists("EnableOnBuild");
+            return Helper.TagExists("EnableOnBuild");
         }
 
         public static void ToggleObjectsUsingTag(string tag, bool active, bool markSceneDirty)
         {
-            if (!TagHelper.TagExists(tag)) return;
+            if (!Helper.TagExists(tag)) return;
 
             var toggledGameObjectCount = 0;
             var allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
@@ -137,4 +136,3 @@ namespace VRWorldToolkit
         }
     }
 }
-#endif

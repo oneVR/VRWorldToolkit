@@ -1,23 +1,14 @@
-﻿#if VRC_SDK_VRCSDK3
-using VRC.SDKBase;
-#endif
-#if VRC_SDK_VRCSDK2
-using VRCSDK2;
-#endif
-#if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
+﻿using VRC.SDKBase;
 using VRC.Core;
-#endif
-using System;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace VRWorldToolkit
+namespace VRWorldToolkit.Editor
 {
     public class QuickFunctions : EditorWindow
     {
-#if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
         [MenuItem("VRWorld Toolkit/Quick Functions/Copy World ID", false, 15)]
         public static void CopyWorldID()
         {
@@ -59,7 +50,7 @@ namespace VRWorldToolkit
         {
             return !UpdateLayers.AreLayersSetup() || !UpdateLayers.IsCollisionLayerMatrixSetup();
         }
-#endif
+
         [MenuItem("VRWorld Toolkit/Quick Functions/Remove Missing Scripts from Scene", false, 17)]
         private static void FindAndRemoveMissingScripts()
         {

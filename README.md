@@ -80,9 +80,6 @@ Includes additions to:
   * Adds a feature to mass copy and set IDs to pedestals while having multiple selected
   * Draws outlines to where the pedestal image will appear in-game when you select the GameObject with the pedestal component on it
 
-### Useful Links
-Quick access to commonly used links related to VRChat content creation.
-
 ## Special Thanks to
 
 * [Pumkin](https://github.com/rurre/PumkinsAvatarTools) - For helping me a lot to get started and creating the original Disable On Upload feature that got me started on this project

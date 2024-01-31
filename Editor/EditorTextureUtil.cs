@@ -2,18 +2,17 @@
 using UnityEngine;
 using UnityEngine.Assertions;
 
-/// <summary>
-/// <see cref="UnityEditor.TextureUtil"/> Accessor
-/// </summary>
-/// <author>Seibe TAKAHASHI</author>
-/// <remarks>
-/// (c) 2017 Seibe TAKAHASHI.
-/// This code is released under the MIT License.
-/// http://opensource.org/licenses/mit-license.php
-/// </remarks>
-
-namespace VRWorldToolkit
+namespace VRWorldToolkit.Editor
 {
+    /// <summary>
+    /// <see cref="UnityEditor.TextureUtil"/> Accessor
+    /// </summary>
+    /// <author>Seibe TAKAHASHI</author>
+    /// <remarks>
+    /// (c) 2017 Seibe TAKAHASHI.
+    /// This code is released under the MIT License.
+    /// http://opensource.org/licenses/mit-license.php
+    /// </remarks>
     public static class EditorTextureUtil
     {
         private static readonly System.Type cType;
