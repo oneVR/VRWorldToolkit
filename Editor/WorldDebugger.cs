@@ -1,4 +1,8 @@
-﻿using System;
+﻿#if VRC_SDK_VRCSDK3
+#define VRWT_IS_VRC
+#endif
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -20,11 +24,15 @@ using UnityEngine.Assertions;
 using UnityEngine.Networking;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
+#if UNITY_POST_PROCESSING_STACK_V2
 using UnityEngine.Rendering.PostProcessing;
+#endif
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+#if VRWT_IS_VRC
 using VRC.Core;
 using VRC.SDKBase;
+#endif
 using Object = UnityEngine.Object;
 using Debug = UnityEngine.Debug;
 
@@ -663,6 +671,7 @@ namespace VRWorldToolkit.Editor
             };
         }
 
+#if VRWT_IS_VRC
         public static Action RemoveBadPipelineManagers(PipelineManager[] pipelineManagers)
         {
             return () =>
@@ -676,6 +685,7 @@ namespace VRWorldToolkit.Editor
                 }
             };
         }
+#endif
 
         public static Action SetLegacyBlendShapeNormals(ModelImporter importer)
         {
@@ -1056,6 +1066,7 @@ namespace VRWorldToolkit.Editor
             });
         }
 
+#if VRWT_IS_VRC
         public static Action FixSpawns(VRC_SceneDescriptor descriptor)
         {
             return () =>
@@ -1083,6 +1094,7 @@ namespace VRWorldToolkit.Editor
                 PrefabUtility.RecordPrefabInstancePropertyModifications(descriptor);
             };
         }
+#endif
 
         public static Action SanitizeBuildPath()
         {
@@ -1094,6 +1106,7 @@ namespace VRWorldToolkit.Editor
             };
         }
 
+#if VRWT_IS_VRC
         public static Action FixVRCProjectSettings(VRCProjectSettings settings)
         {
             return () =>
@@ -1150,12 +1163,14 @@ namespace VRWorldToolkit.Editor
                 setupLayersToSet.Invoke(null, null);
             };
         }
+#endif
 
         public static Action SetErrorPause(bool enabled)
         {
             return () => { ConsoleFlagUtil.SetConsoleErrorPause(enabled); };
         }
 
+#if VRWT_IS_VRC
         public static Action SetVRChatLayers()
         {
             return UpdateLayers.SetupEditorLayers;
@@ -1165,12 +1180,14 @@ namespace VRWorldToolkit.Editor
         {
             return UpdateLayers.SetupCollisionLayerMatrix;
         }
+#endif
 
         public static Action SetFutureProofPublish(bool state)
         {
             return () => { EditorPrefs.SetBool("futureProofPublish", state); };
         }
 
+#if VRWT_IS_VRC
         public static Action SetReferenceCamera(VRC_SceneDescriptor descriptor, Camera camera)
         {
             return () =>
@@ -1198,6 +1215,7 @@ namespace VRWorldToolkit.Editor
                 }
             };
         }
+#endif
 
         public enum RemovePpEffect
         {
@@ -1206,6 +1224,7 @@ namespace VRWorldToolkit.Editor
             BloomDirt = 2
         }
 
+#if UNITY_POST_PROCESSING_STACK_V2
         public static Action DisablePostProcessEffect(PostProcessProfile postprocessProfile, RemovePpEffect effect)
         {
             return () =>
@@ -1235,6 +1254,7 @@ namespace VRWorldToolkit.Editor
         {
             return () => { postProcessLayer.Init(resources); };
         }
+#endif
 
         #endregion
 
@@ -1523,6 +1543,7 @@ namespace VRWorldToolkit.Editor
                 // Cache repeatedly used values
                 var androidBuildPlatform = Helper.BuildPlatform() == RuntimePlatform.Android;
 
+#if VRWT_IS_VRC
                 // Get Descriptors
                 var descriptors = FindObjectsOfType(typeof(VRC_SceneDescriptor)) as VRC_SceneDescriptor[];
                 var pipelines = FindObjectsOfType(typeof(PipelineManager)) as PipelineManager[];
@@ -1562,6 +1583,7 @@ namespace VRWorldToolkit.Editor
                 {
                     general.AddMessageGroup(new MessageGroup(WorldDescriptorOff, MessageType.Tips).AddSingleMessage(new SingleMessage(descriptorRemoteness.ToString()).SetSelectObject(Array.ConvertAll(descriptors, s => s.gameObject))));
                 }
+#endif
 
                 var lastVRCPath = $"{PlayerSettings.productName}/{PlayerSettings.companyName}";
                 if (!string.IsNullOrEmpty(lastVRCPath))
@@ -1573,6 +1595,7 @@ namespace VRWorldToolkit.Editor
                     }
                 }
 
+#if VRWT_IS_VRC
                 var vrcProjectSettings = Resources.Load<VRCProjectSettings>("VRCProjectSettings");
                 if (vrcProjectSettings)
                 {
@@ -1597,6 +1620,7 @@ namespace VRWorldToolkit.Editor
                 {
                     general.AddMessageGroup(new MessageGroup(VRCProjectSettingsMissing, MessageType.Error).SetDocumentation("https://docs.vrchat.com/docs/updating-the-sdk"));
                 }
+#endif
 
                 if (buildReportWindows != null && buildReportWindows.summary.result == BuildResult.Failed || buildReportQuest != null && buildReportQuest.summary.result == BuildResult.Failed)
                 {
@@ -1620,6 +1644,8 @@ namespace VRWorldToolkit.Editor
                     general.AddMessageGroup(new MessageGroup(ErrorPauseWarning, MessageType.Error).AddSingleMessage(new SingleMessage(SetErrorPause(false))));
                 }
 
+// TODO STUB NOVRC: Reference Camera may be obtained from the tagged Main Camera of the scene in non-VRC projects.
+#if VRWT_IS_VRC
                 // Check reference camera for possible problems
                 if (sceneDescriptor.ReferenceCamera != null)
                 {
@@ -1655,7 +1681,9 @@ namespace VRWorldToolkit.Editor
                 {
                     general.AddMessageGroup(new MessageGroup(NoReferenceCameraSetGeneral, MessageType.Tips).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject)));
                 }
+#endif
 
+#if VRWT_IS_VRC
 #if UNITY_EDITOR_WIN
                 // Check for problems with Build & Test
                 var commandPath = Registry.ClassesRoot.OpenSubKey(@"VRChat\shell\open\command");
@@ -1728,6 +1756,7 @@ namespace VRWorldToolkit.Editor
                 {
                     general.AddMessageGroup(new MessageGroup(NoSpawnPointSet, MessageType.Error).AddSingleMessage(new SingleMessage(sceneDescriptor.gameObject).SetAutoFix(FixSpawns(sceneDescriptor))));
                 }
+#endif
 
                 // Optimization Checks
 
@@ -1789,7 +1818,8 @@ namespace VRWorldToolkit.Editor
                         }
                     }
                 }
-
+        
+#if VRWT_IS_VRC
                 // Get active mirrors in the world and complain about them
                 var mirrors = FindObjectsOfType(typeof(VRC_MirrorReflection)) as VRC_MirrorReflection[];
 
@@ -1806,6 +1836,7 @@ namespace VRWorldToolkit.Editor
 
                     optimization.AddMessageGroup(activeCamerasMessage);
                 }
+#endif
 
                 // Lighting Checks
 
@@ -2095,6 +2126,7 @@ namespace VRWorldToolkit.Editor
                 }
 
                 // Post Processing Checks
+#if UNITY_POST_PROCESSING_STACK_V2
                 var postProcessVolumes = FindObjectsOfType(typeof(PostProcessVolume)) as PostProcessVolume[];
                 PostProcessLayer mainPostProcessLayer = null;
 
@@ -2296,6 +2328,7 @@ namespace VRWorldToolkit.Editor
                         postProcessing.AddMessageGroup(new MessageGroup(NoProblemsFoundInPp, MessageType.Info));
                     }
                 }
+#endif
 
                 // GameObject checks
 
@@ -2519,6 +2552,7 @@ namespace VRWorldToolkit.Editor
                             textMeshStatic.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject));
                         }
 
+#if VRWT_IS_VRC
                         if (gameObject.GetComponent<VRC_MirrorReflection>())
                         {
                             var mirrorMask = gameObject.GetComponent<VRC_MirrorReflection>().m_ReflectLayers;
@@ -2528,6 +2562,7 @@ namespace VRWorldToolkit.Editor
                                 mirrorsDefaultLayers.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject));
                             }
                         }
+#endif
                     }
 
                     var selectable = gameObject.GetComponent<Selectable>();
@@ -2836,6 +2871,7 @@ namespace VRWorldToolkit.Editor
 
                 switch (projectType)
                 {
+                    case ProjectType.Generic:
                     case ProjectType.World:
                         CheckScene();
                         break;
@@ -2975,8 +3011,6 @@ namespace VRWorldToolkit.Editor
                     ProjectTypeNotDetected();
                     break;
                 case ProjectType.Generic:
-                    ProjectTypeNotSupportedYet();
-                    break;
                 case ProjectType.World:
                     if (EditorApplication.isPlaying)
                     {
