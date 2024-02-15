@@ -10,7 +10,6 @@
 		"com.unity.postprocessing": "3.1.1"
 	},
 	"vpmDependencies": {
-		"com.vrchat.base" : "^3.2.x"
 	},
 	"url" : "https://github.com/oneVR/VRWorldToolkit.git#vpm",
 	"author": {
