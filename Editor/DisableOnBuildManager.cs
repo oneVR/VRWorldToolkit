@@ -1,4 +1,5 @@
-﻿using VRC.SDKBase.Editor.BuildPipeline;
+﻿#if VRC_SDK_VRCSDK3
+using VRC.SDKBase.Editor.BuildPipeline;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -136,3 +137,4 @@ namespace VRWorldToolkit.Editor
         }
     }
 }
+#endif

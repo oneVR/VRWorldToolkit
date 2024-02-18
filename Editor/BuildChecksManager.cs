@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿#if VRC_SDK_VRCSDK3
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using VRC.Core;
@@ -71,3 +72,4 @@ namespace VRWorldToolkit.Editor
         }
     }
 }
+#endif

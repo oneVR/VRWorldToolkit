@@ -1,15 +1,21 @@
-﻿using System.IO;
+﻿
+using System.IO;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+#if UNITY_POST_PROCESSING_STACK_V2
 using UnityEngine.Rendering.PostProcessing;
+#endif
+#if VRC_SDK_VRCSDK3
 using VRC.SDKBase;
+#endif
 
 namespace VRWorldToolkit.Editor
 {
     public class PostProcessingTools : MonoBehaviour
     {
+#if VRC_SDK_VRCSDK3
         [MenuItem("VRWorld Toolkit/Post Processing/Setup Post Processing", false, 1)]
         private static void PostProcessingSetup()
         {
@@ -52,6 +58,7 @@ namespace VRWorldToolkit.Editor
         {
             return !(Helper.BuildPlatform() is RuntimePlatform.Android);
         }
+#endif
 
         [MenuItem("VRWorld Toolkit/Post Processing/Post Processing Guide", false, 2)]
         private static void PostProcessingGuide()
@@ -81,6 +88,7 @@ namespace VRWorldToolkit.Editor
             }
         }
 
+#if VRC_SDK_VRCSDK3
         private static void SetupWorldPostProcessing(VRC_SceneDescriptor[] descriptors)
         {
             if (EditorUtility.DisplayDialog("Setup Post Processing?", "This will setup your scenes Reference Camera and make a new global volume using the included example Post Processing Profile.", "OK", "Cancel"))
@@ -116,9 +124,11 @@ namespace VRWorldToolkit.Editor
                 }
             }
         }
+#endif
 
         public static void SetupPostProcessingGenerics(GameObject camera)
         {
+#if UNITY_POST_PROCESSING_STACK_V2
             //Use PostProcessing layer if it exists otherwise use Water
             var layer = LayerMask.NameToLayer("PostProcessing") > -1 ? "PostProcessing" : "Water";
 
@@ -164,6 +174,7 @@ namespace VRWorldToolkit.Editor
             // Notify the user if the default profile was not found during setup
             if (!profileFound)
                 EditorUtility.DisplayDialog("Default profile not found!", "Default Post Processing Profile was not found during setup, so it was automatically not set in the Post Processing Volume.\n\nCreate your profile to finish the setup.", "Ok");
+#endif
         }
     }
 }

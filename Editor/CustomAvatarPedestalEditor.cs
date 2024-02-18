@@ -1,4 +1,5 @@
-﻿#if !VRWT_DISABLE_EDITORS
+﻿#if VRC_SDK_VRCSDK3
+#if !VRWT_DISABLE_EDITORS
 using VRC.SDKBase;
 using UnityEditor;
 using UnityEngine;
@@ -122,4 +123,5 @@ namespace VRWorldToolkit.Editor
         }
     }
 }
+#endif
 #endif
