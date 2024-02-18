@@ -1,6 +1,6 @@
 # VRWorld Toolkit
 
-<img src="https://user-images.githubusercontent.com/4764355/114099005-d2a86880-98ca-11eb-8de1-f77360503d6d.png">
+<img src="https://github.com/oneVR/VRWorldToolkit/assets/4764355/0672bef5-0aa4-42b4-b388-1a47bc1ba998">
 
 <div align="center">
 
@@ -46,7 +46,7 @@ A more rare issue is also caused by having a `Bloom.cs` script or just `Bloom` c
 
 ## Main features
 
-<img align="right" width="400" margin="20" src="https://user-images.githubusercontent.com/4764355/114107922-9bda4e80-98da-11eb-8024-ad2bde3c5b6b.png">
+<img align="right" width="400" margin="20" src="https://github.com/oneVR/VRWorldToolkit/assets/4764355/52c0c25c-c3e9-4b73-8e88-b4e10c884040">
 
 ### World Debugger
 Goes through the scene and checks for common issues, and makes suggestions on what to improve. Includes over 90 different tips, warnings, errors, and general messages!
