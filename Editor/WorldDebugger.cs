@@ -863,7 +863,7 @@ namespace VRWorldToolkit.Editor
             };
         }
 
-        public static Action SetLightmapOverrideForQuest(TextureImporter[] textureImporters)
+        public static Action SetLightmapOverrideForAndroid(TextureImporter[] textureImporters)
         {
             return () =>
             {
@@ -885,7 +885,7 @@ namespace VRWorldToolkit.Editor
             };
         }
 
-        public static Action SetLightmapOverrideForQuest(TextureImporter textureImporter, string lightmapName)
+        public static Action SetLightmapOverrideForAndroid(TextureImporter textureImporter, string lightmapName)
         {
             return () =>
             {
@@ -1426,7 +1426,7 @@ namespace VRWorldToolkit.Editor
 
         private const string VignetteWarning = "Only use Post Processing Vignette in small amounts. A powerful vignette can cause sickness in VR.";
 
-        private const string QuestBakedLightingWarning = "Realtime lighting for Quest content should be avoided and instead have a properly baked lighting setup for optimal performance.";
+        private const string AndroidBakedLightingWarning = "Realtime lighting for Android content should be avoided and instead have a properly baked lighting setup for optimal performance.";
 
         private const string AmbientModeSetToCustom = "The current scene's Environment Lighting setting is broken. This will override all light probes in the scene with black ambient light. Please change it to something else.";
 
@@ -1440,9 +1440,9 @@ namespace VRWorldToolkit.Editor
         private const string BakeryLightUnityLightCombined = "You have {0} Bakery lights that have an active Unity Light component on it.";
         private const string BakeryLightUnityLightInfo = "These will not get baked with Bakery and will keep acting as realtime lights even if set to baked.";
 
-        private const string QuestLightmapCompressionOverride = "Lightmap \"{0}\" does not have a platform-specific override set for Android.";
-        private const string QuestLightmapCompressionOverrideCombined = "No platform-specific override set on {0} lightmaps for Android.";
-        private const string QuestLightmapCompressionOverrideInfo = "Without setting a proper platform-specific override when building for Android, lightmaps can show noticeable banding. Suggested format \"ASTC 4x4 block\".";
+        private const string AndroidLightmapCompressionOverride = "Lightmap \"{0}\" does not have a platform-specific override set for Android.";
+        private const string AndroidLightmapCompressionOverrideCombined = "No platform-specific override set on {0} lightmaps for Android.";
+        private const string AndroidLightmapCompressionOverrideInfo = "Without setting a proper platform-specific override when building for Android, lightmaps can show noticeable banding. Suggested format \"ASTC 4x4 block\".";
 
         private const string MissingShaderWarning = "The material \"{0}\" found in the scene has a missing or broken shader.";
         private const string MissingShaderWarningCombined = "Found {0} materials in the current scene that have missing or broken shaders.";
@@ -1459,7 +1459,7 @@ namespace VRWorldToolkit.Editor
         private const string MaterialWithGrabPassShader = "A material ({0}) in the scene has an active GrabPass due to shader \"{1}\".";
         private const string MaterialWithGrabPassShaderCombined = "Found {0} materials in the scene using a GrabPass.";
         private const string MaterialWithGrabPassShaderInfoPC = "A GrabPass will halt the rendering to copy the screen's contents into a texture for the shader to read. This has a notable effect on performance.";
-        private const string MaterialWithGrabPassShaderInfoQuest = "Please change the shader for this material. When a shader uses a GrabPass on Quest, it will cause painful visual artifacts to occur, as they are not supported.";
+        private const string MaterialWithGrabPassShaderInfoAndroid = "Please change the shader for this material. When a shader uses a GrabPass on Android, it will cause painful visual artifacts to occur, as they are not supported.";
 
         private const string ShrnmDirectionalModeBakeryError = "SH or RNM directional mode detected in Bakery. Using SH directional mode is not supported in VRChat by default. It requires the usage of VRC Bakery Adapter by Merlin for it to function in-game.";
 
@@ -1471,7 +1471,7 @@ namespace VRWorldToolkit.Editor
 
         private const string MaterialWithNonWhitelistedShader = "Material \"{0}\" is using an unsupported shader \"{1}\".";
         private const string MaterialWithNonWhitelistedShaderCombined = "Found {0} materials with unsupported shaders.";
-        private const string MaterialWithNonWhitelistedShaderInfo = "Unsupported shaders can cause problems on the Quest platform if not appropriately used.";
+        private const string MaterialWithNonWhitelistedShaderInfo = "Unsupported shaders can cause problems on the Android platform if not appropriately used.";
 
         private const string UIElementWithNavigationNotNone = "The UI Element \"{0}\" does not have its Navigation set to None.";
         private const string UIElementWithNavigationNotNoneCombined = "Found {0} UI Elements with their Navigation not set to None.";
@@ -1489,9 +1489,9 @@ namespace VRWorldToolkit.Editor
         private const string TextMeshLightmapStaticCombined = "Found {0} Text Meshes marked as lightmap static.";
         private const string TextMeshLightmapStaticInfo = "This will cause warnings as the mesh has no normals.";
 
-        private const string UnsupportedCompressionFormatQuest = "Texture {0} using compression format {1} that is not supported on Quest.";
-        private const string UnsupportedCompressionFormatQuestCombined = "Found {0} textures with compression format not supported on Quest.";
-        private const string UnsupportedCompressionFormatQuestInfo = "These will appear fine in editor but black in game.";
+        private const string UnsupportedCompressionFormatAndroid = "Texture {0} using compression format {1} that is not supported on Android.";
+        private const string UnsupportedCompressionFormatAndroidCombined = "Found {0} textures with compression format not supported on Android.";
+        private const string UnsupportedCompressionFormatAndroidInfo = "These will appear fine in editor but black in game.";
 
         private const string HeyYouFoundABug = "Hey, you found a bug! Please send it my way so I can fix it! Check About VRWorld Toolkit to find all the ways to contact me. \"{0}\" on line {1}.";
 
@@ -1622,7 +1622,7 @@ namespace VRWorldToolkit.Editor
                 }
 #endif
 
-                if (buildReportWindows != null && buildReportWindows.summary.result == BuildResult.Failed || buildReportQuest != null && buildReportQuest.summary.result == BuildResult.Failed)
+                if (buildReportWindows != null && buildReportWindows.summary.result == BuildResult.Failed || buildReportAndroid != null && buildReportAndroid.summary.result == BuildResult.Failed)
                 {
                     general.AddMessageGroup(new MessageGroup(LastBuildFailed, MessageType.Error).SetDocumentation("https://github.com/oneVR/VRWorldToolkit/wiki/Fixing-Build-Problems"));
                 }
@@ -1968,7 +1968,7 @@ namespace VRWorldToolkit.Editor
                     {
                         var lightmaps = LightmapSettings.lightmaps;
 
-                        var androidCompressionGroup = lighting.AddMessageGroup(new MessageGroup(QuestLightmapCompressionOverride, QuestLightmapCompressionOverrideCombined, QuestLightmapCompressionOverrideInfo, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2019.4/Documentation/Manual/class-TextureImporter.html"));
+                        var androidCompressionGroup = lighting.AddMessageGroup(new MessageGroup(AndroidLightmapCompressionOverride, AndroidLightmapCompressionOverrideCombined, AndroidLightmapCompressionOverrideInfo, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2019.4/Documentation/Manual/class-TextureImporter.html"));
 
                         for (var i = 0; i < lightmaps.Length; i++)
                         {
@@ -2088,7 +2088,7 @@ namespace VRWorldToolkit.Editor
                 }
                 else
                 {
-                    lighting.AddMessageGroup(new MessageGroup(androidBuildPlatform ? QuestBakedLightingWarning : LightsNotBaked, androidBuildPlatform ? MessageType.Warning : MessageType.Tips)
+                    lighting.AddMessageGroup(new MessageGroup(androidBuildPlatform ? AndroidBakedLightingWarning : LightsNotBaked, androidBuildPlatform ? MessageType.Warning : MessageType.Tips)
                         .SetDocumentation("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Light-Baking"));
                 }
 
@@ -2348,12 +2348,12 @@ namespace VRWorldToolkit.Editor
 
                 var mirrorsDefaultLayers = optimization.AddMessageGroup(new MessageGroup(MirrorWithDefaultLayers, MirrorWithDefaultLayersCombined, MirrorWithDefaultLayersInfo, MessageType.Tips));
                 var legacyBlendShapeIssues = general.AddMessageGroup(new MessageGroup(LegacyBlendShapeIssues, LegacyBlendShapeIssuesCombined, LegacyBlendShapeIssuesInfo, MessageType.Warning));
-                var grabPassShaders = general.AddMessageGroup(new MessageGroup(MaterialWithGrabPassShader, MaterialWithGrabPassShaderCombined, androidBuildPlatform ? MaterialWithGrabPassShaderInfoPC : MaterialWithGrabPassShaderInfoQuest, androidBuildPlatform ? MessageType.Error : MessageType.Info));
+                var grabPassShaders = general.AddMessageGroup(new MessageGroup(MaterialWithGrabPassShader, MaterialWithGrabPassShaderCombined, androidBuildPlatform ? MaterialWithGrabPassShaderInfoPC : MaterialWithGrabPassShaderInfoAndroid, androidBuildPlatform ? MessageType.Error : MessageType.Info));
                 var materialWithNonWhitelistedShader = general.AddMessageGroup(new MessageGroup(MaterialWithNonWhitelistedShader, MaterialWithNonWhitelistedShaderCombined, MaterialWithNonWhitelistedShaderInfo, MessageType.Warning).SetDocumentation("https://docs.vrchat.com/docs/quest-content-limitations#shaders"));
                 var uiElementNavigation = general.AddMessageGroup(new MessageGroup(UIElementWithNavigationNotNone, UIElementWithNavigationNotNoneCombined, UIElementWithNavigationNotNoneInfo, MessageType.Tips));
                 var scrollRectScrollSensitivity = general.AddMessageGroup(new MessageGroup(ScrollRectWithScrollSensitivityNotZero, ScrollRectWithScrollSensitivityNotZeroCombined, ScrollRectWithScrollSensitivityNotZeroInfo, MessageType.Tips));
                 var textMeshStatic = general.AddMessageGroup(new MessageGroup(TextMeshLightmapStatic, TextMeshLightmapStaticCombined, TextMeshLightmapStaticInfo, MessageType.Warning));
-                var unsupportedCompressionFormatQuest = general.AddMessageGroup(new MessageGroup(UnsupportedCompressionFormatQuest, UnsupportedCompressionFormatQuestCombined, UnsupportedCompressionFormatQuestInfo, MessageType.Error).SetDocumentation("https://docs.unity3d.com/2019.4/Documentation/Manual/class-TextureImporterOverride.html"));
+                var unsupportedCompressionFormatAndroid = general.AddMessageGroup(new MessageGroup(UnsupportedCompressionFormatAndroid, UnsupportedCompressionFormatAndroidCombined, UnsupportedCompressionFormatAndroidInfo, MessageType.Error).SetDocumentation("https://docs.unity3d.com/2019.4/Documentation/Manual/class-TextureImporterOverride.html"));
 
                 var allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
                 for (var i = 0; i < allGameObjects.Length; i++)
@@ -2529,9 +2529,9 @@ namespace VRWorldToolkit.Editor
                                             }
 
                                             var platformTextureSettings = textureImporter.GetPlatformTextureSettings("Android");
-                                            if (platformTextureSettings.overridden && Validation.UnsupportedCompressionFormatsQuest.Contains(platformTextureSettings.format))
+                                            if (platformTextureSettings.overridden && Validation.UnsupportedCompressionFormatsAndroid.Contains(platformTextureSettings.format))
                                             {
-                                                unsupportedCompressionFormatQuest.AddSingleMessage(new SingleMessage(texture.name, platformTextureSettings.format.ToString()).SetAssetPath(assetPath));
+                                                unsupportedCompressionFormatAndroid.AddSingleMessage(new SingleMessage(texture.name, platformTextureSettings.format.ToString()).SetAssetPath(assetPath));
                                             }
 
                                             if (!textureImporter.crunchedCompression && !unCrunchedTextures.Contains(texture) && !textureImporter.textureCompression.Equals(TextureImporterCompression.Uncompressed) && EditorTextureUtil.GetStorageMemorySize(texture) > 500000)
@@ -2672,10 +2672,10 @@ namespace VRWorldToolkit.Editor
 
         private const string LastBuildReportPath = "Assets/_LastBuild/LastBuild.buildreport";
         private const string WindowsBuildReportPath = "Assets/_LastBuild/LastWindowsBuild.buildreport";
-        private const string QuestBuildReportPath = "Assets/_LastBuild/LastQuestBuild.buildreport";
+        private const string AndroidBuildReportPath = "Assets/_LastBuild/LastAndroidBuild.buildreport";
 
         [SerializeField] private BuildReport buildReportWindows;
-        [SerializeField] private BuildReport buildReportQuest;
+        [SerializeField] private BuildReport buildReportAndroid;
 
         [SerializeField] private TreeViewState treeViewState;
         [SerializeField] private MultiColumnHeaderState multiColumnHeaderState;
@@ -2712,10 +2712,10 @@ namespace VRWorldToolkit.Editor
 
                         break;
                     case BuildTarget.Android:
-                        if (File.GetLastWriteTime(LastBuildReportPath) > File.GetLastWriteTime(QuestBuildReportPath))
+                        if (File.GetLastWriteTime(LastBuildReportPath) > File.GetLastWriteTime(AndroidBuildReportPath))
                         {
-                            AssetDatabase.CopyAsset(LastBuildReportPath, QuestBuildReportPath);
-                            buildReportQuest = (BuildReport)AssetDatabase.LoadAssetAtPath(QuestBuildReportPath, typeof(BuildReport));
+                            AssetDatabase.CopyAsset(LastBuildReportPath, AndroidBuildReportPath);
+                            buildReportAndroid = (BuildReport)AssetDatabase.LoadAssetAtPath(AndroidBuildReportPath, typeof(BuildReport));
                             newBuildSet = true;
                         }
 
@@ -2728,9 +2728,9 @@ namespace VRWorldToolkit.Editor
                 buildReportWindows = (BuildReport)AssetDatabase.LoadAssetAtPath(WindowsBuildReportPath, typeof(BuildReport));
             }
 
-            if (buildReportQuest is null && File.Exists(QuestBuildReportPath))
+            if (buildReportAndroid is null && File.Exists(AndroidBuildReportPath))
             {
-                buildReportQuest = (BuildReport)AssetDatabase.LoadAssetAtPath(QuestBuildReportPath, typeof(BuildReport));
+                buildReportAndroid = (BuildReport)AssetDatabase.LoadAssetAtPath(AndroidBuildReportPath, typeof(BuildReport));
             }
 
             if (buildReportInitDone)
@@ -2746,16 +2746,16 @@ namespace VRWorldToolkit.Editor
                             selectedBuildReport = 0;
                             break;
                         case RuntimePlatform.Android:
-                            report = buildReportQuest;
+                            report = buildReportAndroid;
                             selectedBuildReport = 1;
                             break;
                     }
                 }
                 else
                 {
-                    if (selectedBuildReport == 1 && buildReportQuest != null)
+                    if (selectedBuildReport == 1 && buildReportAndroid != null)
                     {
-                        report = buildReportQuest;
+                        report = buildReportAndroid;
                     }
                     else
                     {
@@ -2833,9 +2833,9 @@ namespace VRWorldToolkit.Editor
                 }
 
                 BuildReport report;
-                if (selectedBuildReport == 1 && buildReportQuest != null)
+                if (selectedBuildReport == 1 && buildReportAndroid != null)
                 {
-                    report = buildReportQuest;
+                    report = buildReportAndroid;
                 }
                 else
                 {
@@ -2895,12 +2895,12 @@ namespace VRWorldToolkit.Editor
         private enum BuildReportType
         {
             Windows = 0,
-            Quest = 1
+            Android = 1
         }
 
         private static readonly string[] BuildReportToolbar =
         {
-            "Windows", "Quest"
+            "Windows", "Android"
         };
 
         private static readonly string[] MainToolbar =
@@ -2958,9 +2958,9 @@ namespace VRWorldToolkit.Editor
                     DrawOverview(buildReportWindows, "Windows");
                 }
 
-                if (buildReportQuest)
+                if (buildReportAndroid)
                 {
-                    DrawOverview(buildReportQuest, "Quest");
+                    DrawOverview(buildReportAndroid, "Android");
                 }
             }
 
@@ -3067,7 +3067,7 @@ namespace VRWorldToolkit.Editor
 
                 GUILayout.BeginHorizontal(EditorStyles.toolbar);
 
-                if (buildReportWindows && buildReportQuest)
+                if (buildReportWindows && buildReportAndroid)
                 {
                     EditorGUI.BeginChangeCheck();
 
@@ -3080,8 +3080,8 @@ namespace VRWorldToolkit.Editor
                             case BuildReportType.Windows:
                                 buildReportTreeView.SetReport(buildReportWindows);
                                 break;
-                            case BuildReportType.Quest:
-                                buildReportTreeView.SetReport(buildReportQuest);
+                            case BuildReportType.Android:
+                                buildReportTreeView.SetReport(buildReportAndroid);
                                 break;
                         }
                     }
@@ -3109,9 +3109,9 @@ namespace VRWorldToolkit.Editor
                         {
                             buildReportTreeView.SetReport(buildReportWindows);
                         }
-                        else if (buildReportQuest != null)
+                        else if (buildReportAndroid != null)
                         {
-                            buildReportTreeView.SetReport(buildReportQuest);
+                            buildReportTreeView.SetReport(buildReportAndroid);
                         }
                     }
                 }
