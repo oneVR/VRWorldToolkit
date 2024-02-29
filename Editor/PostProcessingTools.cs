@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿
+using System.IO;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -9,32 +10,13 @@ using UnityEngine.Rendering.PostProcessing;
 #if VRC_SDK_VRCSDK3
 using VRC.SDKBase;
 #endif
-#if VRC_SDK_VRCSDK2
-using VRCSDK2;
-#endif
 
-#if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
-namespace VRWorldToolkit
+namespace VRWorldToolkit.Editor
 {
     public class PostProcessingTools : MonoBehaviour
     {
-        [MenuItem("VRWorld Toolkit/Post Processing/Import Post Processing", false, 1)]
-        private static void PostProcessingInstall()
-        {
-            Helper.ImportPackage("com.unity.postprocessing@3.0.3");
-        }
-
-        [MenuItem("VRWorld Toolkit/Post Processing/Import Post Processing", true)]
-        private static bool PostProcessingInstallValidation()
-        {
-#if UNITY_POST_PROCESSING_STACK_V2
-            return false;
-#else
-            return true;
-#endif
-        }
-
-        [MenuItem("VRWorld Toolkit/Post Processing/Setup Post Processing", false, 12)]
+#if VRC_SDK_VRCSDK3
+        [MenuItem("VRWorld Toolkit/Post Processing/Setup Post Processing", false, 1)]
         private static void PostProcessingSetup()
         {
 #if UNITY_POST_PROCESSING_STACK_V2
@@ -74,20 +56,16 @@ namespace VRWorldToolkit
         [MenuItem("VRWorld Toolkit/Post Processing/Setup Post Processing", true)]
         private static bool PostProcessingSetupValidation()
         {
-#if UNITY_POST_PROCESSING_STACK_V2
             return !(Helper.BuildPlatform() is RuntimePlatform.Android);
-#else
-            return false;
-#endif
         }
+#endif
 
-        [MenuItem("VRWorld Toolkit/Post Processing/Post Processing Guide", false, 13)]
+        [MenuItem("VRWorld Toolkit/Post Processing/Post Processing Guide", false, 2)]
         private static void PostProcessingGuide()
         {
             Application.OpenURL("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Post-Processing");
         }
 
-#if UNITY_POST_PROCESSING_STACK_V2
         private static void SetupBasicPostProcessing()
         {
             GameObject camera = null;
@@ -110,6 +88,7 @@ namespace VRWorldToolkit
             }
         }
 
+#if VRC_SDK_VRCSDK3
         private static void SetupWorldPostProcessing(VRC_SceneDescriptor[] descriptors)
         {
             if (EditorUtility.DisplayDialog("Setup Post Processing?", "This will setup your scenes Reference Camera and make a new global volume using the included example Post Processing Profile.", "OK", "Cancel"))
@@ -145,9 +124,11 @@ namespace VRWorldToolkit
                 }
             }
         }
+#endif
 
         public static void SetupPostProcessingGenerics(GameObject camera)
         {
+#if UNITY_POST_PROCESSING_STACK_V2
             //Use PostProcessing layer if it exists otherwise use Water
             var layer = LayerMask.NameToLayer("PostProcessing") > -1 ? "PostProcessing" : "Water";
 
@@ -162,7 +143,7 @@ namespace VRWorldToolkit
                 AssetDatabase.CreateFolder("Assets", "Post Processing");
             if (AssetDatabase.LoadAssetAtPath("Assets/Post Processing/SilentProfile.asset", typeof(PostProcessProfile)) == null)
             {
-                var path = AssetDatabase.GetAssetPath(Resources.Load("PostProcessing/SilentProfile"));
+                var path = AssetDatabase.GetAssetPath(Resources.Load("VRWorldToolkit/PostProcessing/SilentProfile"));
 
                 if (path != null)
                 {
@@ -193,8 +174,7 @@ namespace VRWorldToolkit
             // Notify the user if the default profile was not found during setup
             if (!profileFound)
                 EditorUtility.DisplayDialog("Default profile not found!", "Default Post Processing Profile was not found during setup, so it was automatically not set in the Post Processing Volume.\n\nCreate your profile to finish the setup.", "Ok");
-        }
 #endif
+        }
     }
 }
-#endif

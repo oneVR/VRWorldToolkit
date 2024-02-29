@@ -1,11 +1,11 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace VRWorldToolkit
+namespace VRWorldToolkit.Editor
 {
     public class VRWTAbout : EditorWindow
     {
-        [MenuItem("VRWorld Toolkit/About VRWorld Toolkit", false, 41)]
+        [MenuItem("VRWorld Toolkit/About VRWorld Toolkit", false, 40)]
         public static void ShowWindow()
         {
             var window = (VRWTAbout) GetWindow(typeof(VRWTAbout), true, "VRWorld Toolkit");
@@ -24,7 +24,7 @@ namespace VRWorldToolkit
             {
                 normal =
                 {
-                    background = Resources.Load("SplashTextures/VRWTSplashLogo") as Texture2D,
+                    background = Resources.Load("VRWorldToolkit/SplashTextures/VRWTSplashLogo") as Texture2D,
                     textColor = Color.white,
                 },
                 fixedHeight = 140
@@ -36,9 +36,9 @@ namespace VRWorldToolkit
                 richText = true
             };
 
-            iconTwitter = Resources.Load("SplashTextures/IconTwitter") as Texture2D;
-            iconDiscord = Resources.Load("SplashTextures/IconDiscord") as Texture2D;
-            iconGithub = Resources.Load("SplashTextures/IconGithub") as Texture2D;
+            iconTwitter = Resources.Load("VRWorldToolkit/SplashTextures/IconTwitter") as Texture2D;
+            iconDiscord = Resources.Load("VRWorldToolkit/SplashTextures/IconDiscord") as Texture2D;
+            iconGithub = Resources.Load("VRWorldToolkit/SplashTextures/IconGithub") as Texture2D;
         }
 
         private void OnGUI()

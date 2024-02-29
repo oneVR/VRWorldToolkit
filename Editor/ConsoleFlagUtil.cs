@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Reflection;
-using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace VRWorldToolkit
+namespace VRWorldToolkit.Editor
 {
     /// <summary>
     /// Utility for setting and getting console error pause flag with reflection

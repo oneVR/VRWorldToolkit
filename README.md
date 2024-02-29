@@ -1,6 +1,6 @@
 # VRWorld Toolkit
 
-<img src="https://user-images.githubusercontent.com/4764355/114099005-d2a86880-98ca-11eb-8de1-f77360503d6d.png">
+<img src="https://github.com/oneVR/VRWorldToolkit/assets/4764355/0672bef5-0aa4-42b4-b388-1a47bc1ba998">
 
 <div align="center">
 
@@ -19,15 +19,15 @@ To report problems, you can either join my [Discord server](https://discord.com/
 ## Setup
 
 ### Requirements
-* Unity 2019.4.31f1
-* Latest VRChat SDK [SDK2 / SDK3 Worlds or Avatars](https://vrchat.com/home/download)
+* Unity 2022.3.x
 
 ### Getting Started
 * Import the latest release from [here](https://github.com/oneVR/VRWorldToolkit/releases) into your Unity project
 *  After, if everything went well, you will see the VRWorld Toolkit dropdown appear at the top bar if not check [Troubleshooting](#troubleshooting)
 
 ### Troubleshooting
-First, make sure you are running the latest SDK (SDK2 / SDK3 Worlds or Avatars) if not [update](https://docs.vrchat.com/docs/updating-the-sdk). This project is kept up to date, supporting the latest SDK versions. Support for older versions is not guaranteed.
+> [!IMPORTANT]  
+> First, if you are working on a VRChat project make sure you are running the latest SDK (SDK2 / SDK3 Worlds or Avatars) if not [update](https://creators.vrchat.com/sdk/updating-the-sdk/). This project is kept up to date, supporting the latest SDK versions. Support for older versions is not guaranteed.
 
 Start by opening the Unity Console either by using `Ctrl + Shift + C` or from `Window > General > Console`. Afterward, make sure red errors are enabled from the top right corner of the window. Finally, press `Clear` in the top left corner, which will narrow the view down to only compilation stopping errors.
 
@@ -46,7 +46,7 @@ A more rare issue is also caused by having a `Bloom.cs` script or just `Bloom` c
 
 ## Main features
 
-<img align="right" width="400" margin="20" src="https://user-images.githubusercontent.com/4764355/114107922-9bda4e80-98da-11eb-8024-ad2bde3c5b6b.png">
+<img align="right" width="400" margin="20" src="https://github.com/oneVR/VRWorldToolkit/assets/4764355/52c0c25c-c3e9-4b73-8e88-b4e10c884040">
 
 ### World Debugger
 Goes through the scene and checks for common issues, and makes suggestions on what to improve. Includes over 90 different tips, warnings, errors, and general messages!
@@ -79,9 +79,6 @@ Includes additions to:
 * VRC Avatar Pedestal
   * Adds a feature to mass copy and set IDs to pedestals while having multiple selected
   * Draws outlines to where the pedestal image will appear in-game when you select the GameObject with the pedestal component on it
-
-### Useful Links
-Quick access to commonly used links related to VRChat content creation.
 
 ## Special Thanks to
 

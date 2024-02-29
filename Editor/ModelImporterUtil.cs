@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine.Assertions;
 
-namespace VRWorldToolkit
+namespace VRWorldToolkit.Editor
 {
     /// <summary>
     /// Utility for setting and getting internal model importer values

@@ -1,36 +1,23 @@
-﻿using Microsoft.Win32;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Win32;
 using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 
-namespace VRWorldToolkit
+namespace VRWorldToolkit.Editor
 {
     public static class Helper
     {
-        public static string ReturnPlural(int counter)
-        {
-            return counter > 1 ? "s" : "";
-        }
-
-        public static bool CheckNameSpace(string namespaceName)
-        {
-            return (from assembly in AppDomain.CurrentDomain.GetAssemblies()
-                from type in assembly.GetTypes()
-                where type.Namespace == namespaceName
-                select type).Any();
-        }
-
         public static float GetBrightness(Color color)
         {
-            var num = ((float) color.r);
-            var num2 = ((float) color.g);
-            var num3 = ((float) color.b);
+            var num = color.r;
+            var num2 = color.g;
+            var num3 = color.b;
             var num4 = num;
             var num5 = num;
             if (num2 > num4)
@@ -42,17 +29,6 @@ namespace VRWorldToolkit
             if (num3 < num5)
                 num5 = num3;
             return (num4 + num5) / 2;
-        }
-
-        public static string Truncate(string text, int length)
-        {
-            if (text.Length > length)
-            {
-                text = text.Substring(0, length);
-                text += "...";
-            }
-
-            return text;
         }
 
         public static int[] GetAllLayerNumbersFromMask(LayerMask layerMask)
@@ -77,27 +53,6 @@ namespace VRWorldToolkit
             camera.tag = "MainCamera";
 
             return camera;
-        }
-
-        private static AddRequest packageManagerRequest;
-
-        public static void ImportPackage(string package)
-        {
-            packageManagerRequest = Client.Add(package);
-            EditorApplication.update += PackageImportProgress;
-        }
-
-        private static void PackageImportProgress()
-        {
-            if (packageManagerRequest.IsCompleted)
-            {
-                if (packageManagerRequest.Status == StatusCode.Success)
-                    Debug.Log("Installed: " + packageManagerRequest.Result.packageId);
-                else if (packageManagerRequest.Status >= StatusCode.Failure)
-                    Debug.Log(packageManagerRequest.Error.message);
-
-                EditorApplication.update -= PackageImportProgress;
-            }
         }
 
         public static string GetAllLayersFromMask(LayerMask layerMask)
@@ -178,11 +133,11 @@ namespace VRWorldToolkit
                 const string commonPath = "\\SteamApps\\common";
                 const string executablePath = "\\VRChat.exe";
 
-                var steamPath = (string) steamKey.GetValue("InstallPath");
+                var steamPath = (string)steamKey.GetValue("InstallPath");
 
                 var configFile = Path.Combine(steamPath, "config", "config.vdf");
 
-                var folders = new List<string> {steamPath + commonPath};
+                var folders = new List<string> { steamPath + commonPath };
 
                 var configText = File.ReadAllText(configFile);
 
@@ -202,12 +157,54 @@ namespace VRWorldToolkit
                     }
                     catch (DirectoryNotFoundException)
                     {
-                        //continue
                     }
                 }
             }
 
             return null;
+        }
+
+        public static void AddTag(string tag)
+        {
+            UnityEngine.Object[] asset = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset");
+            if ((asset != null) && (asset.Length > 0))
+            {
+                var so = new SerializedObject(asset[0]);
+                var tags = so.FindProperty("tags");
+
+                for (var i = 0; i < tags.arraySize; ++i)
+                {
+                    if (tags.GetArrayElementAtIndex(i).stringValue == tag)
+                    {
+                        return;
+                    }
+                }
+
+                tags.InsertArrayElementAtIndex(tags.arraySize);
+                tags.GetArrayElementAtIndex(tags.arraySize - 1).stringValue = tag;
+                so.ApplyModifiedProperties();
+                so.Update();
+            }
+        }
+
+        public static bool TagExists(string tag)
+        {
+            UnityEngine.Object[] asset = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset");
+            if ((asset != null) && (asset.Length > 0))
+            {
+                var so = new SerializedObject(asset[0]);
+                var tags = so.FindProperty("tags");
+
+                for (var i = 0; i < tags.arraySize; ++i)
+                {
+                    if (tags.GetArrayElementAtIndex(i).stringValue == tag)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }

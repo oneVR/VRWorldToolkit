@@ -1,22 +1,17 @@
 ﻿#if VRC_SDK_VRCSDK3
+#if !VRWT_DISABLE_EDITORS
 using VRC.SDKBase;
-#endif
-#if VRC_SDK_VRCSDK2
-using VRCSDK2;
-#endif
 using UnityEditor;
 using UnityEngine;
-using VRWorldToolkit.DataStructures;
 
-#if (VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3) && !VRWT_DISABLE_EDITORS
-namespace VRWorldToolkit
+namespace VRWorldToolkit.Editor
 {
     /// <summary>
     /// Custom editor for VRC_MirrorReflection with added quick actions
     /// </summary>
     [CustomEditor(typeof(VRC_MirrorReflection), true, isFallback = false)]
     [CanEditMultipleObjects]
-    public class CustomMirrorEditor : Editor
+    public class CustomMirrorEditor : UnityEditor.Editor
     {
         private bool showExplanations;
         private SerializedProperty mirrorMask;
@@ -40,9 +35,9 @@ namespace VRWorldToolkit
 
             EditorGUILayout.BeginHorizontal();
 
-            if (GUILayout.Button("Show only players")) MirrorLayerChange(262656);
+            if (GUILayout.Button("Show only Players")) MirrorLayerChange(262656);
 
-            if (GUILayout.Button("Show players/world")) MirrorLayerChange(262657);
+            if (GUILayout.Button("Show Players/World")) MirrorLayerChange(264705);
 
             EditorGUILayout.EndHorizontal();
 
@@ -66,13 +61,14 @@ namespace VRWorldToolkit
                     EditorGUILayout.HelpBox("PlayerLocal is only meant to be seen in first-person view and should not be enabled on mirrors.", MessageType.Error);
             }
 
-            showExplanations = EditorGUILayout.Foldout(showExplanations, "VRChat specific layer explanations");
+            showExplanations = EditorGUILayout.Foldout(showExplanations, "VRChat Specific Layer Descriptions");
 
             if (showExplanations)
             {
-                GUILayout.Label("<b>Player:</b>\nThis layer is used for other players than yourself", Styles.RichTextWrap);
-                GUILayout.Label("<b>PlayerLocal:</b>\nThis layer is only used for first-person view and should not be enabled in mirrors", Styles.RichTextWrap);
-                GUILayout.Label("<b>MirrorReflection:</b>\nThis layer is used for your own mirror version", Styles.RichTextWrap);
+                GUILayout.Label("<b>Player:</b>\nThis layer is used to show players other than yourself.", Styles.RichTextWrap);
+                GUILayout.Label("<b>PlayerLocal:</b>\nThis layer is only used for first-person view and should not be enabled in mirrors.", Styles.RichTextWrap);
+                GUILayout.Label("<b>Environment:</b>\nThis layer is used for static meshes and objects in the world. Shares the same properties as the Default layer.", Styles.RichTextWrap);
+                GUILayout.Label("<b>MirrorReflection:</b>\nThis layer is used to fully show your own self in the mirror.", Styles.RichTextWrap);
             }
 
             serializedObject.ApplyModifiedProperties();
@@ -88,4 +84,5 @@ namespace VRWorldToolkit
         }
     }
 }
+#endif
 #endif

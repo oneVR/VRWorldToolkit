@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace VRWorldToolkit.DataStructures
+namespace VRWorldToolkit.Editor
 {
     public static class Styles
     {
@@ -123,7 +123,7 @@ namespace VRWorldToolkit.DataStructures
         /// Sourced from Unity documentation at:
         /// https://docs.unity3d.com/2018.4/Documentation/Manual/class-TextureImporterOverride.html
         /// </summary>
-        public static readonly TextureImporterFormat[] UnsupportedCompressionFormatsQuest =
+        public static readonly TextureImporterFormat[] UnsupportedCompressionFormatsAndroid =
         {
             TextureImporterFormat.DXT1,
             TextureImporterFormat.DXT5,
