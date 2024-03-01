@@ -101,7 +101,7 @@ namespace VRWorldToolkit.Editor
     {
         /// <summary>
         /// Sourced from the whitelist included in the VRCSDK
-        /// https://docs.vrchat.com/docs/quest-content-limitations
+        /// https://creators.vrchat.com/platforms/android/quest-content-limitations/
         /// </summary>
         public static readonly string[] WorldShaderWhiteList =
         {
@@ -121,7 +121,7 @@ namespace VRWorldToolkit.Editor
 
         /// <summary>
         /// Sourced from Unity documentation at:
-        /// https://docs.unity3d.com/2018.4/Documentation/Manual/class-TextureImporterOverride.html
+        /// https://docs.unity3d.com/2022.3/Documentation/Manual/class-TextureImporterOverride.html
         /// </summary>
         public static readonly TextureImporterFormat[] UnsupportedCompressionFormatsAndroid =
         {

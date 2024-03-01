@@ -1618,7 +1618,7 @@ namespace VRWorldToolkit.Editor
                 }
                 else
                 {
-                    general.AddMessageGroup(new MessageGroup(VRCProjectSettingsMissing, MessageType.Error).SetDocumentation("https://docs.vrchat.com/docs/updating-the-sdk"));
+                    general.AddMessageGroup(new MessageGroup(VRCProjectSettingsMissing, MessageType.Error).SetDocumentation("https://creators.vrchat.com/sdk/updating-the-sdk/"));
                 }
 #endif
 
@@ -1769,7 +1769,7 @@ namespace VRWorldToolkit.Editor
 
                     if (occlusionAreas.Length == 0)
                     {
-                        optimization.AddMessageGroup(new MessageGroup(NoOcclusionAreas, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2019.4/Documentation/Manual/class-OcclusionArea.html"));
+                        optimization.AddMessageGroup(new MessageGroup(NoOcclusionAreas, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2022.3/Documentation/Manual/class-OcclusionArea.html"));
                     }
                     else
                     {
@@ -1968,7 +1968,7 @@ namespace VRWorldToolkit.Editor
                     {
                         var lightmaps = LightmapSettings.lightmaps;
 
-                        var androidCompressionGroup = lighting.AddMessageGroup(new MessageGroup(AndroidLightmapCompressionOverride, AndroidLightmapCompressionOverrideCombined, AndroidLightmapCompressionOverrideInfo, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2019.4/Documentation/Manual/class-TextureImporter.html"));
+                        var androidCompressionGroup = lighting.AddMessageGroup(new MessageGroup(AndroidLightmapCompressionOverride, AndroidLightmapCompressionOverrideCombined, AndroidLightmapCompressionOverrideInfo, MessageType.Tips).SetDocumentation("https://docs.unity3d.com/2022.3/Documentation/Manual/class-TextureImporter.html"));
 
                         for (var i = 0; i < lightmaps.Length; i++)
                         {
@@ -2064,7 +2064,7 @@ namespace VRWorldToolkit.Editor
                     // Since the scene has baked lights complain if there's no lightprobes
                     else if (probes == null && probeCounter == 0)
                     {
-                        lighting.AddMessageGroup(new MessageGroup(NoLightProbes, MessageType.Info).SetDocumentation("https://docs.unity3d.com/2019.4/Documentation/Manual/LightProbes.html"));
+                        lighting.AddMessageGroup(new MessageGroup(NoLightProbes, MessageType.Info).SetDocumentation("https://docs.unity3d.com/2022.3/Documentation/Manual/LightProbes.html"));
                     }
 
                     // Check lighting data asset size if it exists
@@ -2349,11 +2349,11 @@ namespace VRWorldToolkit.Editor
                 var mirrorsDefaultLayers = optimization.AddMessageGroup(new MessageGroup(MirrorWithDefaultLayers, MirrorWithDefaultLayersCombined, MirrorWithDefaultLayersInfo, MessageType.Tips));
                 var legacyBlendShapeIssues = general.AddMessageGroup(new MessageGroup(LegacyBlendShapeIssues, LegacyBlendShapeIssuesCombined, LegacyBlendShapeIssuesInfo, MessageType.Warning));
                 var grabPassShaders = general.AddMessageGroup(new MessageGroup(MaterialWithGrabPassShader, MaterialWithGrabPassShaderCombined, androidBuildPlatform ? MaterialWithGrabPassShaderInfoPC : MaterialWithGrabPassShaderInfoAndroid, androidBuildPlatform ? MessageType.Error : MessageType.Info));
-                var materialWithNonWhitelistedShader = general.AddMessageGroup(new MessageGroup(MaterialWithNonWhitelistedShader, MaterialWithNonWhitelistedShaderCombined, MaterialWithNonWhitelistedShaderInfo, MessageType.Warning).SetDocumentation("https://docs.vrchat.com/docs/quest-content-limitations#shaders"));
+                var materialWithNonWhitelistedShader = general.AddMessageGroup(new MessageGroup(MaterialWithNonWhitelistedShader, MaterialWithNonWhitelistedShaderCombined, MaterialWithNonWhitelistedShaderInfo, MessageType.Warning).SetDocumentation("https://creators.vrchat.com/platforms/android/quest-content-limitations/#shaders"));
                 var uiElementNavigation = general.AddMessageGroup(new MessageGroup(UIElementWithNavigationNotNone, UIElementWithNavigationNotNoneCombined, UIElementWithNavigationNotNoneInfo, MessageType.Tips));
                 var scrollRectScrollSensitivity = general.AddMessageGroup(new MessageGroup(ScrollRectWithScrollSensitivityNotZero, ScrollRectWithScrollSensitivityNotZeroCombined, ScrollRectWithScrollSensitivityNotZeroInfo, MessageType.Tips));
                 var textMeshStatic = general.AddMessageGroup(new MessageGroup(TextMeshLightmapStatic, TextMeshLightmapStaticCombined, TextMeshLightmapStaticInfo, MessageType.Warning));
-                var unsupportedCompressionFormatAndroid = general.AddMessageGroup(new MessageGroup(UnsupportedCompressionFormatAndroid, UnsupportedCompressionFormatAndroidCombined, UnsupportedCompressionFormatAndroidInfo, MessageType.Error).SetDocumentation("https://docs.unity3d.com/2019.4/Documentation/Manual/class-TextureImporterOverride.html"));
+                var unsupportedCompressionFormatAndroid = general.AddMessageGroup(new MessageGroup(UnsupportedCompressionFormatAndroid, UnsupportedCompressionFormatAndroidCombined, UnsupportedCompressionFormatAndroidInfo, MessageType.Error).SetDocumentation("https://docs.unity3d.com/2022.3/Documentation/Manual/class-TextureImporterOverride.html"));
 
                 var allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
                 for (var i = 0; i < allGameObjects.Length; i++)
@@ -2633,7 +2633,7 @@ namespace VRWorldToolkit.Editor
                         noUVGroup.AddSingleMessage(new SingleMessage(Path.GetFileName(AssetDatabase.GetAssetPath(modelImporter))).SetAutoFix(SetGenerateLightmapUV(modelImporter)).SetAssetPath(modelImporter.assetPath));
                     }
 
-                    lighting.AddMessageGroup(noUVGroup.SetGroupAutoFix(SetGenerateLightmapUV(importers)).SetDocumentation("https://docs.unity3d.com/2019.4/Documentation/Manual/LightingGiUvs-GeneratingLightmappingUVs.html"));
+                    lighting.AddMessageGroup(noUVGroup.SetGroupAutoFix(SetGenerateLightmapUV(importers)).SetDocumentation("https://docs.unity3d.com/2022.3/Documentation/Manual/LightingGiUvs-GeneratingLightmappingUVs.html"));
                 }
 
                 var missingShadersCount = missingShaders.Count;
