@@ -44,11 +44,11 @@ namespace VRWorldToolkit.Editor
             {
             }
 
-            public BuildListAsset(string assetType, string fullPath, int size)
+            public BuildListAsset(Type assetType, string fullPath, ulong size)
             {
-                AssetType = assetType;
+                AssetType = assetType.Name;
                 FullPath = fullPath;
-                Size = size;
+                Size = (int)size;
             }
         }
 
@@ -77,42 +77,18 @@ namespace VRWorldToolkit.Editor
         {
             var root = new TreeViewItem {id = -1, depth = -1};
 
-            var serializedReport = new SerializedObject(report);
+            var packedAssets = report.packedAssets;
 
             var bl = new List<BuildListAsset>();
 
-            var appendices = serializedReport.FindProperty("m_Appendices");
-
-            for (var i = 0; i < appendices.arraySize; i++)
+            for (var i = 0; i < packedAssets.Length; i++)
             {
-                var appendix = appendices.GetArrayElementAtIndex(i);
-
-                if (appendix.objectReferenceValue.GetType() != typeof(PackedAssets)) continue;
-
-                var serializedAppendix = new SerializedObject(appendix.objectReferenceValue);
-
-                if (serializedAppendix.FindProperty("m_ShortPath") is null) continue;
-
-                var contents = serializedAppendix.FindProperty("m_Contents");
-
-                for (var j = 0; j < contents.arraySize; j++)
+                var packedAssetInfos = packedAssets[i].contents;
+                for (int j = 0; j < packedAssetInfos.Length; j++)
                 {
-                    var entry = contents.GetArrayElementAtIndex(j);
-
-                    var fullPath = entry.FindPropertyRelative("buildTimeAssetPath").stringValue;
-
-                    var assetImporter = AssetImporter.GetAtPath(fullPath);
-
-                    var type = assetImporter != null ? assetImporter.GetType().Name : "Unknown";
-
-                    if (type.EndsWith("Importer"))
-                    {
-                        type = type.Remove(type.Length - 8);
-                    }
-
-                    var byteSize = entry.FindPropertyRelative("packedSize").intValue;
-
-                    var asset = new BuildListAsset(type, fullPath, byteSize);
+                    var packedAssetInfo = packedAssetInfos[j];
+                    
+                    var asset = new BuildListAsset(packedAssetInfo.type, packedAssetInfo.sourceAssetPath, packedAssetInfo.packedSize);
 
                     bl.Add(asset);
                 }
