@@ -201,7 +201,17 @@ namespace VRWorldToolkit.Editor
                             break;
                     }
 
-                    if (GUILayout.Button(name + " -  " + EditorUtility.FormatBytes((long)item.Size) + " - " + ((double) item.Size / totalSize).ToString("P"), EditorStyles.label))
+                    var rect = GUILayoutUtility.GetRect(GUIContent.none, EditorStyles.label);
+                    var barGraphRect = rect;
+
+                    barGraphRect.width *= (float)((double)item.Size / totalSize);
+                    EditorGUI.DrawRect(barGraphRect, new Color(0.28f, 0.37f, 0.51f, 0.6f));
+                    EditorGUIUtility.AddCursorRect(rect, MouseCursor.Link);
+                    
+                    GUI.Label(rect , name + " - " + EditorUtility.FormatBytes((long)item.Size), EditorStyles.label);
+                    GUI.Label(rect, ((double)item.Size / totalSize).ToString("P"), Styles.BuildReportStatsLabel);
+
+                    if (GUI.Button(rect, GUIContent.none, GUIStyle.none))
                     {
                         searchString = item.Name;
                     }

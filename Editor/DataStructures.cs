@@ -15,6 +15,7 @@ namespace VRWorldToolkit.Editor
         public static GUIStyle TreeViewLabel { get; internal set; }
         public static GUIStyle TreeViewLabelSelected { get; internal set; }
         public static GUIStyle CenteredLabel { get; internal set; }
+        public static GUIStyle BuildReportStatsLabel { get; internal set; }
         public static GUIStyle Center { get; internal set; }
 
         static Styles()
@@ -88,6 +89,11 @@ namespace VRWorldToolkit.Editor
                 {
                     textColor = new Color(0.33f, 0.33f, 0.33f),
                 }
+            };
+            
+            BuildReportStatsLabel = new GUIStyle("Label")
+            {
+                alignment = TextAnchor.MiddleRight,
             };
 
             Center = new GUIStyle()
