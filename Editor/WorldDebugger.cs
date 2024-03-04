@@ -2779,6 +2779,8 @@ namespace VRWorldToolkit.Editor
         [NonSerialized] private bool initDone;
         [NonSerialized] private bool buildReportInitDone;
 
+        [SerializeField] private bool firstRefresh = true;
+
         [SerializeField] private MessageCategoryList masterList;
 
         [SerializeField] private MessageCategory general;
@@ -2882,7 +2884,11 @@ namespace VRWorldToolkit.Editor
 
                 CheckTime.Stop();
 
-                if (CheckTime.ElapsedMilliseconds >= 500)
+                if (firstRefresh)
+                {
+                    firstRefresh = false;
+                } 
+                else if (CheckTime.ElapsedMilliseconds >= 500)
                 {
                     autoRecheck = false;
                 }
@@ -2924,6 +2930,10 @@ namespace VRWorldToolkit.Editor
         }
 
         private ProjectType projectType = ProjectType.NotDetected;
+        
+        // This is used to delay when the first scene check happens since for some reason
+        // doing it too early in Unity 2022 causes noticeable lag especially in bigger scenes
+        private static readonly Stopwatch InitializationDelayTimer = new();
 
         private void OnGUI()
         {
@@ -2932,7 +2942,19 @@ namespace VRWorldToolkit.Editor
             if (current.type == EventType.Layout)
             {
                 InitWhenNeeded();
-                Refresh();
+                if (!firstRefresh)
+                {
+                    Refresh();
+                }
+                else
+                {
+                    InitializationDelayTimer.Start();
+                    if (InitializationDelayTimer.ElapsedMilliseconds  >= 500)
+                    {
+                        InitializationDelayTimer.Stop();
+                        Refresh();
+                    }
+                }   
             }
 
             DrawBuildReportOverviews(current);
@@ -3021,6 +3043,14 @@ namespace VRWorldToolkit.Editor
 
                         EditorGUILayout.LabelField("The editor is currently in play mode.", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
                         EditorGUILayout.LabelField("Stop it to see the messages.", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
+
+                        GUILayout.FlexibleSpace();
+                    }
+                    else if (firstRefresh)
+                    {
+                        GUILayout.FlexibleSpace();
+
+                        EditorGUILayout.LabelField("Loading...", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
 
                         GUILayout.FlexibleSpace();
                     }
