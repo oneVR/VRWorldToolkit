@@ -1,14 +1,15 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 using UnityEngine;
 
 namespace VRWorldToolkit.Editor
 {
-    public class VRWTAbout : EditorWindow
+    public class About : EditorWindow
     {
         [MenuItem("VRWorld Toolkit/About VRWorld Toolkit", false, 40)]
         public static void ShowWindow()
         {
-            var window = (VRWTAbout) GetWindow(typeof(VRWTAbout), true, "VRWorld Toolkit");
+            var window = (About) GetWindow(typeof(About), true, "VRWorld Toolkit");
             window.minSize = new Vector2(600, 380);
             window.maxSize = new Vector2(600, 380);
             window.Show();
@@ -17,6 +18,8 @@ namespace VRWorldToolkit.Editor
         private static GUIStyle header, text;
 
         private static Texture iconTwitter, iconDiscord, iconGithub;
+
+        [NonSerialized] private int clickCounter;
 
         public void OnEnable()
         {
@@ -30,12 +33,6 @@ namespace VRWorldToolkit.Editor
                 fixedHeight = 140
             };
 
-            text = new GUIStyle("Label")
-            {
-                wordWrap = true,
-                richText = true
-            };
-
             iconTwitter = Resources.Load("VRWorldToolkit/SplashTextures/IconTwitter") as Texture2D;
             iconDiscord = Resources.Load("VRWorldToolkit/SplashTextures/IconDiscord") as Texture2D;
             iconGithub = Resources.Load("VRWorldToolkit/SplashTextures/IconGithub") as Texture2D;
@@ -44,14 +41,26 @@ namespace VRWorldToolkit.Editor
         private void OnGUI()
         {
             // Header Image
-            GUILayout.Box("", header);
+            if (GUILayout.Button("", header))
+            {
+                clickCounter++;
+                if (clickCounter >= 10)
+                {
+                    Debug.Log("Toggled benchmark mode for VRWorld Toolkit");
+#if VRWT_BENCHMARK
+                    ScriptingDefineManager.RemoveScriptingDefine("VRWT_BENCHMARK");
+#else
+                    ScriptingDefineManager.AddScriptingDefine("VRWT_BENCHMARK");
+#endif
+                }
+            };
 
             // Information Texts
             GUILayout.Label("Welcome to VRWorld Toolkit!", EditorStyles.boldLabel);
 
-            GUILayout.Label("VRWorld Toolkit is a project aimed at helping people get into world building faster without spending time combing different documentations for all the smaller mistakes you can make while making your first world. Even for experienced world builders, it helps make tedious steps like setting up post-processing faster and allows you not to forget the dozen little things you need to remember while building worlds.", text);
+            GUILayout.Label("VRWorld Toolkit is a project aimed at helping people get into world building faster without spending time combing different documentations for all the smaller mistakes you can make while making your first world. Even for experienced world builders, it helps make tedious steps like setting up post-processing faster and allows you not to forget the dozen little things you need to remember while building worlds.", Styles.RichTextWrap);
 
-            GUILayout.Label("If you have suggestions, found problems with the included tools, or want to check my social channels, you can click on the buttons below. Feedback is always welcome, so I know what to improve!", text);
+            GUILayout.Label("If you have suggestions, found problems with the included tools, or want to check my social channels, you can click on the buttons below. Feedback is always welcome, so I know what to improve!", Styles.RichTextWrap);
 
             GUILayout.FlexibleSpace();
 
