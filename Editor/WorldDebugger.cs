@@ -1548,6 +1548,8 @@ namespace VRWorldToolkit.Editor
                 var descriptors = FindObjectsOfType(typeof(VRC_SceneDescriptor)) as VRC_SceneDescriptor[];
                 var pipelines = FindObjectsOfType(typeof(PipelineManager)) as PipelineManager[];
 
+                var cameraMain = Camera.main;
+
                 // Check if a descriptor exists
                 if (descriptors.Length == 0)
                 {
@@ -2131,17 +2133,21 @@ namespace VRWorldToolkit.Editor
                 PostProcessLayer mainPostProcessLayer = null;
 
                 // Attempt to find the main post process layer
-                if (sceneDescriptor.ReferenceCamera != null && sceneDescriptor.ReferenceCamera.gameObject.GetComponent(typeof(PostProcessLayer)))
+                if (sceneDescriptor.ReferenceCamera != null)
                 {
-                    mainPostProcessLayer = sceneDescriptor.ReferenceCamera.gameObject.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
-                }
-                else
-                {
-                    if (Camera.main != null)
+                    var postProcessLayer = sceneDescriptor.ReferenceCamera.gameObject.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
+                    if (postProcessLayer)
                     {
-                        if (Camera.main.gameObject.GetComponent(typeof(PostProcessLayer)))
+                        mainPostProcessLayer = postProcessLayer;
+                    }
+                    else
+                    {
+                        if (cameraMain != null)
                         {
-                            mainPostProcessLayer = Camera.main.gameObject.GetComponent(typeof(PostProcessLayer)) as PostProcessLayer;
+                            if (postProcessLayer)
+                            {
+                                mainPostProcessLayer = postProcessLayer;
+                            }
                         }
                     }
                 }
@@ -2151,9 +2157,7 @@ namespace VRWorldToolkit.Editor
                 {
                     var resourcesInfo = typeof(PostProcessLayer).GetField("m_Resources", BindingFlags.NonPublic | BindingFlags.Instance);
 
-                    var postProcessResources = resourcesInfo.GetValue(mainPostProcessLayer) as PostProcessResources;
-
-                    if (postProcessResources is null)
+                    if (resourcesInfo.GetValue(mainPostProcessLayer) is not PostProcessResources postProcessResources)
                     {
                         var singleMessage = new SingleMessage(mainPostProcessLayer.gameObject.name).SetSelectObject(mainPostProcessLayer.gameObject);
 
@@ -2184,9 +2188,9 @@ namespace VRWorldToolkit.Editor
                     {
                         var noReferenceCameraMessage = new SingleMessage(sceneDescriptor.gameObject);
 
-                        if (Camera.main && Camera.main.GetComponent<PostProcessLayer>())
+                        if (cameraMain && cameraMain.GetComponent<PostProcessLayer>())
                         {
-                            noReferenceCameraMessage.SetAutoFix(SetReferenceCamera(sceneDescriptor, Camera.main));
+                            noReferenceCameraMessage.SetAutoFix(SetReferenceCamera(sceneDescriptor, cameraMain));
                         }
 
                         postProcessing.AddMessageGroup(new MessageGroup(NoReferenceCameraSetPp, MessageType.Warning).AddSingleMessage(noReferenceCameraMessage));
@@ -2425,8 +2429,7 @@ namespace VRWorldToolkit.Editor
                         {
                             var material = renderer.sharedMaterials[l];
 
-                            if (material == null || checkedMaterials.Contains(material))
-                                continue;
+                            if (checkedMaterials.Contains(material) || material == null) continue;
 
                             checkedMaterials.Add(material);
 
@@ -2482,9 +2485,8 @@ namespace VRWorldToolkit.Editor
                                 }
                             }
 
-                            if (checkedShaders.ContainsKey(shader))
+                            if (checkedShaders.TryGetValue(shader, out var checkedShader))
                             {
-                                var checkedShader = checkedShaders[shader];
                                 if (checkedShader.IncludesGrabPass)
                                 {
                                     var grabPassActive = false;
@@ -2553,9 +2555,10 @@ namespace VRWorldToolkit.Editor
                         }
 
 #if VRWT_IS_VRC
-                        if (gameObject.GetComponent<VRC_MirrorReflection>())
+                        var mirror = gameObject.GetComponent<VRC_MirrorReflection>();
+                        if (mirror != null)
                         {
-                            var mirrorMask = gameObject.GetComponent<VRC_MirrorReflection>().m_ReflectLayers;
+                            var mirrorMask = mirror.m_ReflectLayers;
 
                             if (mirrorMask.value == -1025)
                             {
@@ -2855,11 +2858,11 @@ namespace VRWorldToolkit.Editor
             }
         }
 
-        private static readonly Stopwatch CheckTime = new Stopwatch();
+        private static readonly Stopwatch CheckTime = new();
 
         private void Refresh()
         {
-            if (!EditorApplication.isPlaying && recheck && autoRecheck && tab == 0)
+            if (tab == 0 && recheck && autoRecheck && !EditorApplication.isPlaying)
             {
                 // Check for bloat in occlusion cache
                 if (occlusionCacheFiles == 0 && Directory.Exists("Library/Occlusion/"))
