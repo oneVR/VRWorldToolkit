@@ -1994,7 +1994,7 @@ namespace VRWorldToolkit.Editor
                 var probes = LightmapSettings.lightProbes;
 
                 // If the scene has baked lights complain about stuff important to baked lighting missing
-                if (bakedLighting)
+                if (bakedLighting && Lightmapping.lightingDataAsset != null)
                 {
                     // Count lightmaps and suggest to use bigger lightmaps if needed
                     var lightMapSize = Lightmapping.lightingSettings.lightmapMaxSize;
