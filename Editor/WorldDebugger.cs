@@ -1387,6 +1387,8 @@ namespace VRWorldToolkit.Editor
 
         private const string PostProcessingImportedButNotSetup = "The current project has Post Processing imported, but you have not set it up yet.";
 
+        private const string PostProcessingGenericProjectNotice = "Post Processing checks are not currently implemented for projects without the VRChat worlds SDK, as they were written with VRChat content creation in mind.";
+
         private const string PostProcessingDisabledInSceneView = "Post-processing is disabled in the scene view. You will not be able to preview any post-processing effects without enabling it first.";
 
         private const string PostProcessingNoResourcesSet = "The Post Process Layer on \"{0}\" does not have its resources field set properly. This causes post-processing to error out. This can be fixed by recreating the Post Processing Layer on the GameObject.";
@@ -2128,7 +2130,7 @@ namespace VRWorldToolkit.Editor
                 }
 
                 // Post Processing Checks
-#if UNITY_POST_PROCESSING_STACK_V2
+#if UNITY_POST_PROCESSING_STACK_V2 && VRWT_IS_VRC
                 var postProcessVolumes = FindObjectsOfType(typeof(PostProcessVolume)) as PostProcessVolume[];
                 PostProcessLayer mainPostProcessLayer = null;
 
@@ -2332,6 +2334,8 @@ namespace VRWorldToolkit.Editor
                         postProcessing.AddMessageGroup(new MessageGroup(NoProblemsFoundInPp, MessageType.Info));
                     }
                 }
+#else
+                postProcessing.AddMessageGroup(new MessageGroup(PostProcessingGenericProjectNotice, MessageType.Info));
 #endif
 
                 // GameObject checks
@@ -2808,7 +2812,13 @@ namespace VRWorldToolkit.Editor
 
                 postProcessing = masterList.CreateOrGetCategory("Post Processing");
 
+#if UDON
                 projectType = ProjectType.World;
+#elif VRWT_IS_VRC
+                projectType = ProjectType.Avatar;
+#else
+                projectType = ProjectType.Generic;
+#endif
 
                 initDone = true;
 #if VRWT_BENCHMARK
