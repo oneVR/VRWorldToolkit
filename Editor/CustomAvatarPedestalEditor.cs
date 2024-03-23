@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 using UnityEditor.SceneManagement;
 using System.Text.RegularExpressions;
 using System;
+using UnityEngine.Networking;
 using Object = UnityEngine.Object;
 
 namespace VRWorldToolkit.Editor
@@ -87,6 +88,19 @@ namespace VRWorldToolkit.Editor
             if (GUILayout.Button("Copy selected IDs"))
             {
                 EditorGUIUtility.systemCopyBuffer = string.Join("\n", pedestals.Select(x => x.blueprintId));
+            }
+            
+            if (pedestals.Length == 1 && GUILayout.Button("Open on website"))
+            {
+                var blueprintID = UnityWebRequest.EscapeURL(pedestals[0].blueprintId);
+                if (Regex.IsMatch(blueprintID, AVATAR_ID_REGEX))
+                {
+                    Application.OpenURL("https://vrchat.com/home/avatar/" + blueprintID);
+                }
+                else
+                {
+                    EditorUtility.DisplayDialog("Warning", "Avatar ID in invalid format.", "Ok");
+                }
             }
         }
 
