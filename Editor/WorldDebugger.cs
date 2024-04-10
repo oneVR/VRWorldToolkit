@@ -1105,66 +1105,7 @@ namespace VRWorldToolkit.Editor
                 EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
             };
         }
-
-#if VRWT_IS_VRC
-        public static Action FixVRCProjectSettings(VRCProjectSettings settings)
-        {
-            return () =>
-            {
-                // TODO: Cleaner solution to storing these
-                var newLayers = new[] { "Default", "TransparentFX", "Ignore Raycast", "", "Water", "UI", "", "", "Interactive", "Player", "PlayerLocal", "Environment", "UiMenu", "Pickup", "PickupNoEnvironment", "StereoLeft", "StereoRight", "Walkthrough", "MirrorReflection", "reserved2", "reserved3", "reserved4" };
-
-                var newCollisionArr = new[]
-                {
-                    true, true, true, true, true, false, true, true, true, true, true, true, false, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
-                    true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
-                    true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false, false, true, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-                    false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
-                    true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, false, false, true, false, false, false, false, false, false, true,
-                    true, true, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, false, false, true, false, false, false, false, false, false, true, true, true, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, false, true,
-                    true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false, false, true, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, false, true, true, true, false,
-                    false, true, false, true, true, true, true, true, false, false, false, false, true, true, true, true, true, true, true, true, true, true, false, false, false, true, false, false, true, true, false, false, false, false, false, true, false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
-                    false, true, true, true, false, false, true, false, true, false, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, false, true, true, true, false, false, true, false, true, false, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false,
-                    false, true, true, true, true, true, false, true, true, true, false, false, true, false, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true,
-                    true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, true, true, true, true,
-                    true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, false, false, true, false, true, true, false, false, true, true, true, true, true, false,
-                    true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false, true, true, true, true,
-                    true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false, true, true,
-                    true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false,
-                    true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true,
-                    false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true
-                };
-
-                var so = new SerializedObject(settings);
-
-                var layersSerializedProperty = so.FindProperty("layers");
-
-                layersSerializedProperty.arraySize = newLayers.Length;
-                for (var i = 0; i < newLayers.Length; i++)
-                {
-                    layersSerializedProperty.GetArrayElementAtIndex(i).stringValue = newLayers[i];
-                }
-
-                so.FindProperty("numLayers").intValue = 22;
-
-                var collisionArr = so.FindProperty("layerCollisionArr");
-
-                collisionArr.arraySize = newCollisionArr.Length;
-                for (var i = 0; i < newCollisionArr.Length; i++)
-                {
-                    collisionArr.GetArrayElementAtIndex(i).boolValue = newCollisionArr[i];
-                }
-
-                so.ApplyModifiedProperties();
-
-                var systemType = Assembly.Load("VRCCore-Editor").GetType("UpdateLayers");
-                var setupLayersToSet = systemType.GetMethod("SetupLayersToSet", BindingFlags.Static | BindingFlags.NonPublic);
-                Assert.IsNotNull(setupLayersToSet);
-                setupLayersToSet.Invoke(null, null);
-            };
-        }
-#endif
-
+        
         public static Action SetErrorPause(bool enabled)
         {
             return () => { ConsoleFlagUtil.SetConsoleErrorPause(enabled); };
@@ -1271,10 +1212,6 @@ namespace VRWorldToolkit.Editor
         private const string WorldDescriptorOff = "Scene Descriptor is {0} units far from the zero point in Unity. It is usually good practice if possible to keep it as close as possible to the absolute zero point to avoid floating-point errors.";
 
         private const string DifferingSanitizedBuildPath = "The last build path differs from the one seen by the VRCSDK. This can happen with certain characters that get stripped from the path only during Build & Publish. The build path is created using the Company and Product name in the projects Player Settings.";
-
-        private const string ImproperlySetupVRCProjectSettings = "Improperly setup VRCProjectSettings detected. This will cause the Control Panel Builder tab to appear empty.";
-
-        private const string VRCProjectSettingsMissing = "VRCProjectSettings not found. The SDK needs it, and missing it will cause the SDK to error out. To fix the problem, reimport the SDK.";
 
         private const string LastBuildFailed = "Last build failed! Check the Console for compile errors to find the cause. If the error script is in the SDK, try reimporting it. Otherwise, remove or update the problem asset.";
 
@@ -1600,29 +1537,14 @@ namespace VRWorldToolkit.Editor
                 }
 
 #if VRWT_IS_VRC
-                var vrcProjectSettings = Resources.Load<VRCProjectSettings>("VRCProjectSettings");
-                if (vrcProjectSettings)
+                if (!UpdateLayers.AreLayersSetup())
                 {
-                    if (vrcProjectSettings.layers is null || vrcProjectSettings.layers.Length == 0 || vrcProjectSettings.layerCollisionArr is null || vrcProjectSettings.layerCollisionArr.Length == 0)
-                    {
-                        general.AddMessageGroup(new MessageGroup(ImproperlySetupVRCProjectSettings, MessageType.Error).SetGroupAutoFix(FixVRCProjectSettings(vrcProjectSettings)));
-                    }
-                    else
-                    {
-                        if (!UpdateLayers.AreLayersSetup())
-                        {
-                            general.AddMessageGroup(new MessageGroup(LayersNotSetup, MessageType.Error).SetGroupAutoFix(SetVRChatLayers()));
-                        }
-
-                        if (!UpdateLayers.IsCollisionLayerMatrixSetup())
-                        {
-                            general.AddMessageGroup(new MessageGroup(CollisionMatrixNotSetup, MessageType.Error).SetGroupAutoFix(SetVRChatCollisionMatrix()));
-                        }
-                    }
+                    general.AddMessageGroup(new MessageGroup(LayersNotSetup, MessageType.Error).SetGroupAutoFix(SetVRChatLayers()));
                 }
-                else
+
+                if (!UpdateLayers.IsCollisionLayerMatrixSetup())
                 {
-                    general.AddMessageGroup(new MessageGroup(VRCProjectSettingsMissing, MessageType.Error).SetDocumentation("https://creators.vrchat.com/sdk/updating-the-sdk/"));
+                    general.AddMessageGroup(new MessageGroup(CollisionMatrixNotSetup, MessageType.Error).SetGroupAutoFix(SetVRChatCollisionMatrix()));
                 }
 #endif
 
