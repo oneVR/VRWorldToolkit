@@ -120,15 +120,40 @@ namespace VRWorldToolkit.Editor
                     0,
                     AssetDatabase.GetCachedIcon(asset.FullPath),
                     asset.AssetType,
-                    asset.FullPath == "" ? "Unknown" : Path.GetFileName(asset.FullPath),
+                    GetFileName(asset.FullPath),
                     asset.FullPath,
-                    Path.GetExtension(asset.FullPath),
+                    GetFileExtension(asset.FullPath),
                     asset.Size,
                     asset.Percentage)
                 );
             }
 
             return root;
+            
+            static string GetFileName(string path)
+            {
+                if (string.IsNullOrEmpty(path))
+                {
+                    return "Unknown";
+                }
+            
+                if (path.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
+                {
+                    return path;
+                }
+            
+                return Path.GetFileName(path);
+            }
+
+            static string GetFileExtension(string path)
+            {
+                if (string.IsNullOrEmpty(path) || path.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
+                {
+                    return "Unknown";
+                }
+
+                return Path.GetExtension(path);
+            }
         }
 
         public void SetReport(BuildReport newReport)
