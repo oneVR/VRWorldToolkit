@@ -1,6 +1,6 @@
 {
 	"name": "dev.onevr.vrworldtoolkit",
-	"version": "3.0.1",
+	"version": "3.1.0",
 	"displayName": "VRWorld Toolkit",
 	"description": "VRWorld Toolkit is a Unity Editor extension made to make VRChat world creation more accessible and lower the entry-level to make a good performing world.",
 	"unity": "2022.3",
