@@ -1290,8 +1290,10 @@ namespace VRWorldToolkit.Editor
         private const string NoLightmapUV = "The model found in the scene \"{0}\" is set to be lightmapped, but does not have Lightmap UVs.";
         private const string NoLightmapUVCombined = "The current scene has {0} models set to be lightmapped that do not have Lightmap UVs.";
         private const string NoLightmapUVInfo = "This can cause issues when baking lighting if the main UV is not suitable for lightmapping. You can enable generating Lightmap UVs in the model's import settings.";
-
+        
         private const string LightsNotBaked = "The current scene is using realtime lighting. Consider baked lighting for improved performance.";
+        
+        private const string NoLightingSettingsAsset = "The current scene is using baked lighting but does not have a Lighting Settings Asset.";
 
         private const string ConsiderLargerLightmaps = "Possibly unoptimized lighting setup detected with a high amount of separate lightmaps compared to the currently set Lightmap Size.\nConsider increasing Lightmap Size from {0} to 2048 or larger and adjusting the individual Scale In Lightmap value on mesh renderers to fit things on a smaller amount of lightmaps.";
 
@@ -1301,7 +1303,9 @@ namespace VRWorldToolkit.Editor
         private const string NonBakedBakedLightCombined = "The scene contains {0} baked/mixed lights that have not been baked!";
         private const string NonBakedBakedLightInfo = "Baked lights that have not been baked yet function as realtime lights in-game.";
 
-        private const string LightingDataAssetInfo = "The current scene's lighting data asset takes up {0} MB of the world's size. This contains the scene's light probe data and realtime GI data.";
+        private const string LightingDataAssetInfo = "The current scene's lighting data asset takes up {0} MB of the world's size. It contains the lighting information for the scene, such as light probe data and realtime GI data.";
+        
+        private const string NoLightingDataAsset = "You appear to are using baked lighting but your scene does not have a Lighting Data Asset currently. Bake your lights to generate one.";
 
         private const string NoLightProbes = "No light probes found in the current scene. Without light probes, baked lights are not able to affect dynamic objects such as players and pickups.";
 
@@ -1313,7 +1317,7 @@ namespace VRWorldToolkit.Editor
 
         private const string OverlappingLightProbes = "Light Probe Group \"{0}\" has {1} overlapping light probes.";
         private const string OverlappingLightProbesCombined = "Found {0} Light Probe Groups with overlapping light probes.";
-        private const string OverlappingLightProbesInfo = "These can cause a slowdown in the editor and will not get baked because Unity will skip any extra overlapping probes.";
+        private const string OverlappingLightProbesInfo = "These will not get baked because Unity will skip any extra overlapping probes and can cause an unnecessary slowdown in the editor.";
 
         private const string NoReflectionProbes = "The current scene has no active reflection probes. Reflection probes are needed to have proper reflections on reflective materials.";
 
@@ -1798,6 +1802,7 @@ namespace VRWorldToolkit.Editor
                 // bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryDirectLight)) as BakeryDirectLight[], s => s.gameObject));
                 bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryPointLight)) as BakeryPointLight[], s => s.gameObject));
                 bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakerySkyLight)) as BakerySkyLight[], s => s.gameObject));
+                bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryDirectLight)) as BakeryDirectLight[], s => s.gameObject));
 
                 var bakerySettings = ftRenderLightmap.FindRenderSettingsStorage();
 
@@ -1915,47 +1920,52 @@ namespace VRWorldToolkit.Editor
                     }
                 }
 
-                var probes = LightmapSettings.lightProbes;
-
                 // If the scene has baked lights complain about stuff important to baked lighting missing
-                if (bakedLighting && Lightmapping.lightingDataAsset != null)
+                if (bakedLighting)
                 {
-                    // Count lightmaps and suggest to use bigger lightmaps if needed
-                    var lightMapSize = Lightmapping.lightingSettings.lightmapMaxSize;
-                    if (lightMapSize < 2048 && LightmapSettings.lightmaps.Length >= 4)
+                    if (Lightmapping.TryGetLightingSettings(out var lightingSettings))
                     {
-                        if (LightmapSettings.lightmaps[0] != null)
+                        // Count lightmaps and suggest to use bigger lightmaps if needed
+                        var lightMapSize = lightingSettings.lightmapMaxSize;
+                        if (lightMapSize < 2048 && LightmapSettings.lightmaps.Length >= 4)
                         {
-                            var lightmap = LightmapSettings.lightmaps[0];
-
-                            if (lightmap.lightmapColor != null && lightmap.lightmapColor.height != 4096)
+                            if (LightmapSettings.lightmaps[0] != null)
                             {
-                                lighting.AddMessageGroup(new MessageGroup(ConsiderLargerLightmaps, MessageType.Tips).AddSingleMessage(new SingleMessage(lightMapSize.ToString())));
+                                var lightmap = LightmapSettings.lightmaps[0];
+
+                                if (lightmap.lightmapColor != null && lightmap.lightmapColor.height != 4096)
+                                {
+                                    lighting.AddMessageGroup(new MessageGroup(ConsiderLargerLightmaps, MessageType.Tips).AddSingleMessage(new SingleMessage(lightMapSize.ToString())));
+                                }
                             }
                         }
-                    }
 
-                    if (Lightmapping.lightingSettings.lightmapper.Equals(LightingSettings.Lightmapper.ProgressiveGPU) && lightMapSize == 4096 && SystemInfo.graphicsMemorySize < 12000)
+                        if (lightingSettings.lightmapper.Equals(LightingSettings.Lightmapper.ProgressiveGPU) && lightMapSize == 4096 && SystemInfo.graphicsMemorySize < 12000)
+                        {
+                            lighting.AddMessageGroup(new MessageGroup(ConsiderSmallerLightmaps, MessageType.Warning).AddSingleMessage(new SingleMessage(lightMapSize.ToString()).SetAutoFix(SetLightmapSize(2048))));
+                        }
+                    }
+                    else
                     {
-                        lighting.AddMessageGroup(new MessageGroup(ConsiderSmallerLightmaps, MessageType.Warning).AddSingleMessage(new SingleMessage(lightMapSize.ToString()).SetAutoFix(SetLightmapSize(2048))));
+                        lighting.AddMessageGroup(new MessageGroup(NoLightingSettingsAsset, MessageType.Info).SetDocumentation("https://docs.unity3d.com/2022.3/Documentation/Manual/class-LightingSettings.html"));
                     }
-
+                    
                     // Count how many light probes the scene has
                     long probeCounter = 0;
+                    var probes = LightmapSettings.lightProbes;
                     long bakedProbes = probes != null ? probes.count : 0;
-
-                    var lightprobegroups = FindObjectsOfType<LightProbeGroup>();
-
+                    
                     var overlappingLightProbesGroup = new MessageGroup(OverlappingLightProbes, OverlappingLightProbesCombined, OverlappingLightProbesInfo, MessageType.Info);
-
-                    for (var i = 0; i < lightprobegroups.Length; i++)
+                    
+                    var lightProbeGroups = FindObjectsOfType<LightProbeGroup>();
+                    for (var i = 0; i < lightProbeGroups.Length; i++)
                     {
-                        if (lightprobegroups[i].probePositions.GroupBy(p => p).Any(g => g.Count() > 1))
+                        if (lightProbeGroups[i].probePositions.GroupBy(p => p).Any(g => g.Count() > 1))
                         {
-                            overlappingLightProbesGroup.AddSingleMessage(new SingleMessage(lightprobegroups[i].name, (lightprobegroups[i].probePositions.Length - lightprobegroups[i].probePositions.Distinct().ToArray().Length).ToString()).SetSelectObject(lightprobegroups[i].gameObject).SetAutoFix(RemoveOverlappingLightProbes(lightprobegroups[i])));
+                            overlappingLightProbesGroup.AddSingleMessage(new SingleMessage(lightProbeGroups[i].name, (lightProbeGroups[i].probePositions.Length - lightProbeGroups[i].probePositions.Distinct().ToArray().Length).ToString()).SetSelectObject(lightProbeGroups[i].gameObject).SetAutoFix(RemoveOverlappingLightProbes(lightProbeGroups[i])));
                         }
 
-                        probeCounter += lightprobegroups[i].probePositions.Length;
+                        probeCounter += lightProbeGroups[i].probePositions.Length;
                     }
 
                     if (probeCounter > 0)
@@ -1975,30 +1985,33 @@ namespace VRWorldToolkit.Editor
                                 lighting.AddMessageGroup(new MessageGroup(LightProbeCount, MessageType.Info).AddSingleMessage(new SingleMessage(probeCounter.ToString("n0"))));
                             }
                         }
-                    }
-
-                    if (overlappingLightProbesGroup.GetTotalCount() > 0)
-                    {
-                        if (overlappingLightProbesGroup.GetTotalCount() > 1)
+                        
+                        if (overlappingLightProbesGroup.GetTotalCount() > 0)
                         {
-                            overlappingLightProbesGroup.SetGroupAutoFix(RemoveOverlappingLightProbes(lightprobegroups));
+                            if (overlappingLightProbesGroup.GetTotalCount() > 1)
+                            {
+                                overlappingLightProbesGroup.SetGroupAutoFix(RemoveOverlappingLightProbes(lightProbeGroups));
+                            }
+
+                            lighting.AddMessageGroup(overlappingLightProbesGroup);
                         }
 
-                        lighting.AddMessageGroup(overlappingLightProbesGroup);
+                        if (Lightmapping.lightingDataAsset != null)
+                        {
+                            // Check lighting data asset size
+                            var pathTo = AssetDatabase.GetAssetPath(Lightmapping.lightingDataAsset);
+                            var length = new FileInfo(pathTo).Length;
+                            lighting.AddMessageGroup(new MessageGroup(LightingDataAssetInfo, MessageType.Info).AddSingleMessage(new SingleMessage((length / 1024.0f / 1024.0f).ToString("F2"))).SetDocumentation("https://docs.unity3d.com/2022.3/Documentation/Manual/LightmapSnapshot.html"));
+                        }
+                        else
+                        {
+                            lighting.AddMessageGroup(new MessageGroup(NoLightingDataAsset, MessageType.Info).SetDocumentation("https://docs.unity3d.com/2022.3/Documentation/Manual/LightmapSnapshot.html"));
+                        }
                     }
-
-                    // Since the scene has baked lights complain if there's no lightprobes
-                    else if (probes == null && probeCounter == 0)
+                    // Since the scene has baked lights complain if there's no light probes
+                    else
                     {
                         lighting.AddMessageGroup(new MessageGroup(NoLightProbes, MessageType.Info).SetDocumentation("https://docs.unity3d.com/2022.3/Documentation/Manual/LightProbes.html"));
-                    }
-
-                    // Check lighting data asset size if it exists
-                    if (Lightmapping.lightingDataAsset != null)
-                    {
-                        var pathTo = AssetDatabase.GetAssetPath(Lightmapping.lightingDataAsset);
-                        var length = new FileInfo(pathTo).Length;
-                        lighting.AddMessageGroup(new MessageGroup(LightingDataAssetInfo, MessageType.Info).AddSingleMessage(new SingleMessage((length / 1024.0f / 1024.0f).ToString("F2"))));
                     }
 
                     if (nonBakedLights.Count != 0)
@@ -2014,19 +2027,18 @@ namespace VRWorldToolkit.Editor
                 }
                 else
                 {
-                    lighting.AddMessageGroup(new MessageGroup(androidBuildPlatform ? AndroidBakedLightingWarning : LightsNotBaked, androidBuildPlatform ? MessageType.Warning : MessageType.Tips)
-                        .SetDocumentation("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Light-Baking"));
+                    lighting.AddMessageGroup(new MessageGroup(androidBuildPlatform ? AndroidBakedLightingWarning : LightsNotBaked, androidBuildPlatform ? MessageType.Warning : MessageType.Tips).SetDocumentation("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Light-Baking"));
                 }
 
                 // ReflectionProbes
-                var reflectionprobes = FindObjectsOfType<ReflectionProbe>();
-                var unbakedprobes = new List<GameObject>();
-                var reflectionProbeCount = reflectionprobes.Count();
-                for (var i = 0; i < reflectionprobes.Length; i++)
+                var reflectionProbes = FindObjectsOfType<ReflectionProbe>();
+                var unbakedProbes = new List<GameObject>();
+                var reflectionProbeCount = reflectionProbes.Count();
+                for (var i = 0; i < reflectionProbes.Length; i++)
                 {
-                    if (!reflectionprobes[i].bakedTexture && reflectionprobes[i].mode == ReflectionProbeMode.Baked)
+                    if (!reflectionProbes[i].bakedTexture && reflectionProbes[i].mode == ReflectionProbeMode.Baked)
                     {
-                        unbakedprobes.Add(reflectionprobes[i].gameObject);
+                        unbakedProbes.Add(reflectionProbes[i].gameObject);
                     }
                 }
 
@@ -2038,11 +2050,11 @@ namespace VRWorldToolkit.Editor
                 {
                     lighting.AddMessageGroup(new MessageGroup(ReflectionProbeCountText, MessageType.Info).AddSingleMessage(new SingleMessage(reflectionProbeCount.ToString())));
 
-                    if (unbakedprobes.Count > 0)
+                    if (unbakedProbes.Count > 0)
                     {
                         var probesUnbakedGroup = new MessageGroup(ReflectionProbesSomeUnbaked, ReflectionProbesSomeUnbakedCombined, MessageType.Warning);
 
-                        foreach (var item in unbakedprobes)
+                        foreach (var item in unbakedProbes)
                         {
                             probesUnbakedGroup.AddSingleMessage(new SingleMessage(item.name).SetSelectObject(item));
                         }
