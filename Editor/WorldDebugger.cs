@@ -1466,8 +1466,8 @@ namespace VRWorldToolkit.Editor
 
         private class CheckedShaderProperties
         {
-            public bool IncludesGrabPass = false;
-            public readonly List<string> GrabPassLightModeTags = new List<string>();
+            public bool IncludesGrabPass;
+            public readonly List<string> GrabPassLightModeTags = new();
         }
 
         private void CheckScene()
@@ -1624,7 +1624,6 @@ namespace VRWorldToolkit.Editor
                 if (sceneDescriptor.spawns != null && sceneDescriptor.spawns.Length > 0)
                 {
                     var spawns = sceneDescriptor.spawns.Where(s => s != null).ToArray();
-
                     var spawnsLength = sceneDescriptor.spawns.Length;
                     var emptySpawns = spawnsLength != spawns.Length;
 
@@ -1638,11 +1637,9 @@ namespace VRWorldToolkit.Editor
                     var colliderUnderSpawnTrigger = general.AddMessageGroup(new MessageGroup(ColliderUnderSpawnIsTrigger, ColliderUnderSpawnIsTriggerCombined, ColliderUnderSpawnIsTriggerInfo, MessageType.Error));
                     var respawnHeightAboveCollider = general.AddMessageGroup(new MessageGroup(RespawnHeightAboveCollider, RespawnHeightAboveColliderCombined, RespawnHeightAboveColliderInfo, MessageType.Error));
 
-                    for (var i = 0; i < sceneDescriptor.spawns.Length; i++)
+                    for (var i = 0; i < spawns.Length; i++)
                     {
-                        if (sceneDescriptor.spawns[i] == null) continue;
-
-                        var spawn = sceneDescriptor.spawns[i];
+                        var spawn = spawns[i];
 
                         if (spawn.position.y < sceneDescriptor.RespawnHeightY)
                         {
@@ -1786,11 +1783,9 @@ namespace VRWorldToolkit.Editor
 
 #if BAKERY_INCLUDED
                 var bakeryLights = new List<GameObject>();
-                // TODO: Investigate whether or not these should be included
-                // bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryDirectLight)) as BakeryDirectLight[], s => s.gameObject));
+                bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryDirectLight)) as BakeryDirectLight[], s => s.gameObject));
                 bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryPointLight)) as BakeryPointLight[], s => s.gameObject));
                 bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakerySkyLight)) as BakerySkyLight[], s => s.gameObject));
-                bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryDirectLight)) as BakeryDirectLight[], s => s.gameObject));
 
                 var bakerySettings = ftRenderLightmap.FindRenderSettingsStorage();
 
