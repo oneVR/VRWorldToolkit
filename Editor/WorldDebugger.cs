@@ -1121,14 +1121,7 @@ namespace VRWorldToolkit.Editor
         {
             return UpdateLayers.SetupCollisionLayerMatrix;
         }
-#endif
 
-        public static Action SetFutureProofPublish(bool state)
-        {
-            return () => { EditorPrefs.SetBool("futureProofPublish", state); };
-        }
-
-#if VRWT_IS_VRC
         public static Action SetReferenceCamera(VRC_SceneDescriptor descriptor, Camera camera)
         {
             return () =>
@@ -1561,11 +1554,6 @@ namespace VRWorldToolkit.Editor
                 if (SceneManager.sceneCount > 1)
                 {
                     general.AddMessageGroup(new MessageGroup(MultipleScenesLoaded, MessageType.Error));
-                }
-
-                if (EditorPrefs.GetBool("futureProofPublish", true))
-                {
-                    general.AddMessageGroup(new MessageGroup(FutureProofPublishEnabled, MessageType.Error).SetGroupAutoFix(SetFutureProofPublish(false)));
                 }
 
                 // Check if console has error pause on
