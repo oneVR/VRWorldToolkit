@@ -1,7 +1,13 @@
 ﻿#if VRC_SDK_VRCSDK3
+#define VRWT_IS_VRC
+#endif
+
+#if VRWT_IS_VRC
 using VRC.SDKBase;
 using VRC.Core;
 #endif
+
+using System;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -11,7 +17,7 @@ namespace VRWorldToolkit.Editor
 {
     public class QuickFunctions : EditorWindow
     {
-#if VRC_SDK_VRCSDK3
+#if VRWT_IS_VRC
         [MenuItem("VRWorld Toolkit/Quick Functions/Copy World ID", false, 15)]
         public static void CopyWorldID()
         {
@@ -39,8 +45,21 @@ namespace VRWorldToolkit.Editor
 
             return false;
         }
+        
+        [MenuItem("VRWorld Toolkit/Quick Functions/Open VRChat Worlds Build Folder", false, 16)]
+        public static void OpenBuildFolder()
+        {
+#if UNITY_EDITOR_WIN
+            var userProfilePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            var localLowPath = System.IO.Path.Combine(userProfilePath, "AppData", "LocalLow", "VRChat", "VRChat", "Worlds");
 
-        [MenuItem("VRWorld Toolkit/Quick Functions/Setup Layers and Collision Matrix", false, 16)]
+            System.Diagnostics.Process.Start("explorer.exe", localLowPath.Replace("/", "\\"));
+#else
+            EditorUtility.DisplayDialog("Info", "This function is only supported while using the Unity Editor on Windows at this time. No action was taken.", "Ok");
+#endif
+        }
+
+        [MenuItem("VRWorld Toolkit/Quick Functions/Setup Layers and Collision Matrix", false, 17)]
         public static void SetupLayersCollisionMatrix()
         {
             if (!UpdateLayers.AreLayersSetup()) UpdateLayers.SetupEditorLayers();
@@ -55,7 +74,7 @@ namespace VRWorldToolkit.Editor
         }
 #endif
 
-        [MenuItem("VRWorld Toolkit/Quick Functions/Remove Missing Scripts from Scene", false, 17)]
+        [MenuItem("VRWorld Toolkit/Quick Functions/Remove Missing Scripts from Scene", false, 18)]
         private static void FindAndRemoveMissingScripts()
         {
             if (EditorUtility.DisplayDialog("Remove Missing Scripts", "Running this will go through all GameObjects in the open scene and remove any components with missing scripts. This action can't be reversed!\n\nAre you sure you want to continue?", "Continue", "Cancel"))
