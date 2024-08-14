@@ -103,6 +103,8 @@ namespace VRWorldToolkit.Editor
         {
 #if UNITY_ANDROID
             return RuntimePlatform.Android;
+#elif UNITY_IOS
+            return RuntimePlatform.IPhonePlayer;
 #else
             return RuntimePlatform.WindowsPlayer;
 #endif

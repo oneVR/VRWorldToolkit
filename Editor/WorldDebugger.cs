@@ -1545,7 +1545,7 @@ namespace VRWorldToolkit.Editor
                 }
 #endif
 
-                if (buildReportWindows != null && buildReportWindows.summary.result == BuildResult.Failed || buildReportAndroid != null && buildReportAndroid.summary.result == BuildResult.Failed)
+                if ((buildReportWindows != null && buildReportWindows.summary.result == BuildResult.Failed) || (buildReportAndroid != null && buildReportAndroid.summary.result == BuildResult.Failed) || (buildReportiOS != null && buildReportiOS.summary.result == BuildResult.Failed) )
                 {
                     general.AddMessageGroup(new MessageGroup(LastBuildFailed, MessageType.Error).SetDocumentation("https://github.com/oneVR/VRWorldToolkit/wiki/Fixing-Build-Problems"));
                 }
@@ -2597,9 +2597,11 @@ namespace VRWorldToolkit.Editor
         private const string LastBuildReportPath = "Assets/_LastBuild/LastBuild.buildreport";
         private const string WindowsBuildReportPath = "Assets/_LastBuild/LastWindowsBuild.buildreport";
         private const string AndroidBuildReportPath = "Assets/_LastBuild/LastAndroidBuild.buildreport";
+        private const string iOSBuildReportPath = "Assets/_LastBuild/LastiOSBuild.buildreport";
 
         [SerializeField] private BuildReport buildReportWindows;
         [SerializeField] private BuildReport buildReportAndroid;
+        [SerializeField] private BuildReport buildReportiOS;
 
         [SerializeField] private TreeViewState treeViewState;
         [SerializeField] private MultiColumnHeaderState multiColumnHeaderState;
@@ -2644,6 +2646,15 @@ namespace VRWorldToolkit.Editor
                         }
 
                         break;
+                    case BuildTarget.iOS:
+                        if (File.GetLastWriteTime(LastBuildReportPath) > File.GetLastWriteTime(iOSBuildReportPath))
+                        {
+                            AssetDatabase.CopyAsset(LastBuildReportPath, iOSBuildReportPath);
+                            buildReportiOS = (BuildReport)AssetDatabase.LoadAssetAtPath(iOSBuildReportPath, typeof(BuildReport));
+                            newBuildSet = true;
+                        }
+
+                        break;
                 }
             }
 
@@ -2656,6 +2667,11 @@ namespace VRWorldToolkit.Editor
             {
                 buildReportAndroid = (BuildReport)AssetDatabase.LoadAssetAtPath(AndroidBuildReportPath, typeof(BuildReport));
             }
+            
+            if (buildReportiOS is null && File.Exists(iOSBuildReportPath))
+            {
+                buildReportiOS = (BuildReport)AssetDatabase.LoadAssetAtPath(iOSBuildReportPath, typeof(BuildReport));
+            }
 
             if (buildReportInitDone)
             {
@@ -2667,23 +2683,31 @@ namespace VRWorldToolkit.Editor
                     {
                         case RuntimePlatform.WindowsPlayer:
                             report = buildReportWindows;
-                            selectedBuildReport = 0;
+                            selectedBuildReport = BuildReportType.Windows;
                             break;
                         case RuntimePlatform.Android:
                             report = buildReportAndroid;
-                            selectedBuildReport = 1;
+                            selectedBuildReport = BuildReportType.Android;
+                            break;
+                        case RuntimePlatform.IPhonePlayer:
+                            report = buildReportiOS;
+                            selectedBuildReport = BuildReportType.iOS;
                             break;
                     }
                 }
                 else
                 {
-                    if (selectedBuildReport == 1 && buildReportAndroid != null)
+                    if (selectedBuildReport == BuildReportType.iOS && buildReportiOS != null)
+                    {
+                        report = buildReportiOS;
+                    }
+                    else if (selectedBuildReport == BuildReportType.Android && buildReportAndroid != null)
                     {
                         report = buildReportAndroid;
                     }
                     else
                     {
-                        selectedBuildReport = 0;
+                        selectedBuildReport = BuildReportType.Windows;
                         report = buildReportWindows;
                     }
                 }
@@ -2765,13 +2789,17 @@ namespace VRWorldToolkit.Editor
                 }
 
                 BuildReport report;
-                if (selectedBuildReport == 1 && buildReportAndroid != null)
+                if (selectedBuildReport == BuildReportType.iOS && buildReportiOS != null)
+                {
+                    report = buildReportiOS;
+                }
+                else if (selectedBuildReport == BuildReportType.Android && buildReportAndroid != null)
                 {
                     report = buildReportAndroid;
                 }
                 else
                 {
-                    selectedBuildReport = 0;
+                    selectedBuildReport = BuildReportType.Windows;
                     report = buildReportWindows;
                 }
 
@@ -2827,27 +2855,7 @@ namespace VRWorldToolkit.Editor
                 recheck = false;
             }
         }
-
-        private enum BuildReportType
-        {
-            Windows = 0,
-            Android = 1
-        }
-
-        private static readonly string[] BuildReportToolbar =
-        {
-            "Windows", "Android"
-        };
-
-        private static readonly string[] MainToolbar =
-        {
-            "Messages", "Build Report"
-        };
-
-        [SerializeField] private int selectedBuildReport;
-        [SerializeField] private bool overallStatsFoldout;
-        [SerializeField] private bool buildReportMessagesFoldout;
-
+        
         private enum ProjectType
         {
             NotDetected,
@@ -2857,6 +2865,27 @@ namespace VRWorldToolkit.Editor
         }
 
         private ProjectType projectType = ProjectType.NotDetected;
+
+        private static readonly string[] MainToolbar =
+        {
+            "Messages", "Build Report"
+        };
+
+        private enum BuildReportType
+        {
+            Windows = 0,
+            Android = 1,
+            iOS = 2
+        }
+        
+        private static readonly string[] BuildReportSelectionDropdown =
+        {
+            "Windows", "Android", "iOS"
+        };
+        
+        [SerializeField] private BuildReportType selectedBuildReport;
+        [SerializeField] private bool overallStatsFoldout;
+        [SerializeField] private bool buildReportMessagesFoldout;
         
         // This is used to delay when the first scene check happens since for some reason
         // doing it too early in Unity 2022 causes noticeable lag especially in bigger scenes
@@ -2907,27 +2936,39 @@ namespace VRWorldToolkit.Editor
             {
                 if (buildReportWindows)
                 {
-                    DrawOverview(buildReportWindows, "Windows");
+                    DrawOverview(buildReportWindows, BuildReportType.Windows);
                 }
 
                 if (buildReportAndroid)
                 {
-                    DrawOverview(buildReportAndroid, "Android");
+                    DrawOverview(buildReportAndroid, BuildReportType.Android);
+                }
+                
+                if (buildReportiOS)
+                {
+                    DrawOverview(buildReportiOS, BuildReportType.iOS);
                 }
             }
 
-            void DrawOverview(BuildReport report, string platform)
+            void DrawOverview(BuildReport report, BuildReportType type)
             {
                 using (var verticalScope = new EditorGUILayout.VerticalScope())
                 {
-                    GUILayout.Label($"Last found {platform} build:", EditorStyles.boldLabel);
+                    GUILayout.Label($"Last {type.ToString()} build:", EditorStyles.boldLabel);
 
                     using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
                     {
                         GUILayout.Label("<b>Build size:</b> " + EditorUtility.FormatBytes((long)report.summary.totalSize), Styles.LabelRichText);
 
-                        GUILayout.Label("<b>Build done:</b> " + report.summary.buildEndedAt.ToLocalTime(), Styles.LabelRichText);
+                        var currentCulture = CultureInfo.CurrentCulture;
+                        var dateTimeFormat = currentCulture.DateTimeFormat;
+                        
+                        GUILayout.Label("<b>Build date:</b> " + report.summary.buildEndedAt.ToString(dateTimeFormat.ShortDatePattern), Styles.LabelRichText);
+                        
+                        GUILayout.Label("<b>Build time:</b> " + report.summary.buildEndedAt.ToString(dateTimeFormat.ShortTimePattern), Styles.LabelRichText);
 
+                        GUILayout.Label("<b>Build duration:</b> " + (report.summary.buildEndedAt - report.summary.buildStartedAt).ToString(@"hh\:mm\:ss"), Styles.LabelRichText);
+                        
                         GUILayout.Label("<b>Errors during build:</b> " + report.summary.totalErrors, Styles.LabelRichText);
 
                         GUILayout.Label("<b>Warnings during build:</b> " + report.summary.totalWarnings, Styles.LabelRichText);
@@ -2935,23 +2976,45 @@ namespace VRWorldToolkit.Editor
                         GUILayout.Label("<b>Build result:</b> " + report.summary.result, Styles.LabelRichText);
                     }
 
-                    if (current.type == EventType.ContextClick && verticalScope.rect.Contains(current.mousePosition))
+                    switch (current.type)
                     {
-                        var path = report.summary.outputPath;
-                        var menu = new GenericMenu();
-
-                        if (File.Exists(path))
+                        case EventType.MouseUp when verticalScope.rect.Contains(current.mousePosition):
+                            tab = 1;
+                            selectedBuildReport = type;
+                            switch (type)
+                            {
+                                case BuildReportType.Windows:
+                                    buildReportTreeView.SetReport(buildReportWindows);
+                                    break;
+                                case BuildReportType.Android:
+                                    buildReportTreeView.SetReport(buildReportAndroid);
+                                    break;
+                                case BuildReportType.iOS:
+                                    buildReportTreeView.SetReport(buildReportiOS);
+                                    break;
+                            }
+                            break;
+                        case EventType.ContextClick when verticalScope.rect.Contains(current.mousePosition):
                         {
-                            menu.AddItem(new GUIContent("Show in Explorer"), false, () => EditorUtility.RevealInFinder(report.summary.outputPath));
-                        }
-                        else
-                        {
-                            menu.AddDisabledItem(new GUIContent("Show in Explorer"));
-                        }
+                            var path = report.summary.outputPath;
+                            var menu = new GenericMenu();
 
-                        menu.ShowAsContext();
+                            if (File.Exists(path))
+                            {
+                                menu.AddItem(new GUIContent("Show in Explorer"), false, () => EditorUtility.RevealInFinder(report.summary.outputPath));
+                            }
+                            else
+                            {
+                                menu.AddDisabledItem(new GUIContent("Show in Explorer"));
+                            }
+
+                            menu.ShowAsContext();
+                            break;
+                        }
                     }
                 }
+
+                EditorGUIUtility.AddCursorRect(GUILayoutUtility.GetLastRect(), MouseCursor.Link);
             }
         }
 
@@ -3026,34 +3089,34 @@ namespace VRWorldToolkit.Editor
                 GUILayout.BeginVertical();
 
                 GUILayout.BeginHorizontal(EditorStyles.toolbar);
+                
+                EditorGUI.BeginChangeCheck();
 
-                if (buildReportWindows && buildReportAndroid)
+                selectedBuildReport = (BuildReportType)EditorGUILayout.Popup((int)selectedBuildReport, BuildReportSelectionDropdown, EditorStyles.toolbarPopup);
+
+                if (EditorGUI.EndChangeCheck())
                 {
-                    EditorGUI.BeginChangeCheck();
-
-                    selectedBuildReport = GUILayout.Toolbar(selectedBuildReport, BuildReportToolbar, EditorStyles.toolbarButton);
-
-                    if (EditorGUI.EndChangeCheck())
+                    switch (selectedBuildReport)
                     {
-                        switch ((BuildReportType)selectedBuildReport)
-                        {
-                            case BuildReportType.Windows:
-                                buildReportTreeView.SetReport(buildReportWindows);
-                                break;
-                            case BuildReportType.Android:
-                                buildReportTreeView.SetReport(buildReportAndroid);
-                                break;
-                        }
+                        case BuildReportType.Windows:
+                            buildReportTreeView.SetReport(buildReportWindows);
+                            break;
+                        case BuildReportType.Android:
+                            buildReportTreeView.SetReport(buildReportAndroid);
+                            break;
+                        case BuildReportType.iOS:
+                            buildReportTreeView.SetReport(buildReportiOS);
+                            break;
                     }
-
-                    GUILayout.Space(10);
                 }
+                
+                GUILayout.Space(10);
+                
+                GUILayout.FlexibleSpace();
 
                 overallStatsFoldout = GUILayout.Toggle(overallStatsFoldout, "Stats", EditorStyles.toolbarButton);
 
                 buildReportMessagesFoldout = GUILayout.Toggle(buildReportMessagesFoldout, "Messages", EditorStyles.toolbarButton);
-
-                GUILayout.Space(10);
 
                 if (GUILayout.Button("Refresh", EditorStyles.toolbarButton))
                 {
@@ -3073,12 +3136,18 @@ namespace VRWorldToolkit.Editor
                         {
                             buildReportTreeView.SetReport(buildReportAndroid);
                         }
+                        else if (buildReportiOS != null)
+                        {
+                            buildReportTreeView.SetReport(buildReportiOS);
+                        }
                     }
                 }
-
-                GUILayout.FlexibleSpace();
+                
+                GUILayout.Space(5);
 
                 buildReportTreeView.searchString = searchField.OnToolbarGUI(buildReportTreeView.searchString);
+                
+                GUILayout.Space(5);
 
                 GUILayout.EndHorizontal();
 
@@ -3111,7 +3180,7 @@ namespace VRWorldToolkit.Editor
                         }
                         else
                         {
-                            EditorGUILayout.LabelField($"Last {BuildReportToolbar[selectedBuildReport]} Build Failed", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true), GUILayout.Height(40));
+                            EditorGUILayout.LabelField($"Last {selectedBuildReport.ToString()} Build Failed", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true), GUILayout.Height(40));
                         }
 
                         GUILayout.FlexibleSpace();
