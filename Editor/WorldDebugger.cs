@@ -2985,18 +2985,6 @@ namespace VRWorldToolkit.Editor
                         case EventType.MouseUp when verticalScope.rect.Contains(current.mousePosition):
                             tab = 1;
                             selectedBuildReport = type;
-                            switch (type)
-                            {
-                                case BuildReportType.Windows:
-                                    buildReportTreeView.SetReport(buildReportWindows);
-                                    break;
-                                case BuildReportType.Android:
-                                    buildReportTreeView.SetReport(buildReportAndroid);
-                                    break;
-                                case BuildReportType.iOS:
-                                    buildReportTreeView.SetReport(buildReportiOS);
-                                    break;
-                            }
                             break;
                         case EventType.ContextClick when verticalScope.rect.Contains(current.mousePosition):
                         {
