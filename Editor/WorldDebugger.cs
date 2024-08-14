@@ -1321,6 +1321,8 @@ namespace VRWorldToolkit.Editor
 
         private const string PostProcessingImportedButNotSetup = "The current project has Post Processing imported, but you have not set it up yet.";
 
+        private const string PostProcessingNotSupported = "Post Processing is not supported in VRChat when building for the currently selected platform.";
+
         private const string PostProcessingGenericProjectNotice = "Post Processing checks are not currently implemented for projects without the VRChat worlds SDK, as they were written with VRChat content creation in mind.";
 
         private const string PostProcessingDisabledInSceneView = "Post-processing is disabled in the scene view. You will not be able to preview any post-processing effects without enabling it first.";
@@ -2251,6 +2253,8 @@ namespace VRWorldToolkit.Editor
                         postProcessing.AddMessageGroup(new MessageGroup(NoProblemsFoundInPp, MessageType.Info));
                     }
                 }
+#elif VRWT_IS_VRC && (UNITY_IOS || UNITY_ANDROID)
+                postProcessing.AddMessageGroup(new MessageGroup(PostProcessingNotSupported, MessageType.Info));
 #else
                 postProcessing.AddMessageGroup(new MessageGroup(PostProcessingGenericProjectNotice, MessageType.Info));
 #endif
