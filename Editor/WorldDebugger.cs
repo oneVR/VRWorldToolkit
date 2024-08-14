@@ -2980,29 +2980,10 @@ namespace VRWorldToolkit.Editor
                         GUILayout.Label("<b>Build result:</b> " + report.summary.result, Styles.LabelRichText);
                     }
 
-                    switch (current.type)
+                    if (current.type == EventType.MouseUp && verticalScope.rect.Contains(current.mousePosition))
                     {
-                        case EventType.MouseUp when verticalScope.rect.Contains(current.mousePosition):
-                            tab = 1;
-                            selectedBuildReport = type;
-                            break;
-                        case EventType.ContextClick when verticalScope.rect.Contains(current.mousePosition):
-                        {
-                            var path = report.summary.outputPath;
-                            var menu = new GenericMenu();
-
-                            if (File.Exists(path))
-                            {
-                                menu.AddItem(new GUIContent("Show in Explorer"), false, () => EditorUtility.RevealInFinder(report.summary.outputPath));
-                            }
-                            else
-                            {
-                                menu.AddDisabledItem(new GUIContent("Show in Explorer"));
-                            }
-
-                            menu.ShowAsContext();
-                            break;
-                        }
+                        tab = 1;
+                        selectedBuildReport = type;
                     }
                 }
 
