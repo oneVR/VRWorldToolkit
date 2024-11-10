@@ -1402,7 +1402,7 @@ namespace VRWorldToolkit.Editor
         private const string MaterialWithGrabPassShaderInfoAndroid = "Please change the shader for this material. When a shader uses a GrabPass on Android, it will cause painful visual artifacts to occur, as they are not supported.";
 
 #if BAKERY_INCLUDED && VRWT_IS_VRC
-        private const string ShrnmDirectionalModeBakeryError = "SH or RNM directional mode detected in Bakery. These directional modes are not supported in VRChat by default, it's highly recommended to use Mono SH instead. Otherwise the usage of UdonBakeryAdapter by z3y is needed for it to function in-game.";
+        private const string ShrnmDirectionalModeBakeryError = "SH or RNM directional mode detected in Bakery. These directional modes are not supported in VRChat by default, it's highly recommended to use Mono SH instead. Otherwise the usage of UdonBakeryAdapter by z3y is needed for compatibility with VRChat.";
 #endif
 
         private const string BuildANDTestBrokenError = "VRChat link association has not been set up, and the VRChat client path has not been set in the VRCSDK settings. Without one of these settings set, Build & Test will not function.";
