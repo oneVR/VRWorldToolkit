@@ -1419,10 +1419,6 @@ namespace VRWorldToolkit.Editor
         private const string ScrollRectWithScrollSensitivityNotZeroCombined = "Found {0} ScrollRect components with their Scroll Sensitivity not set to 0.";
         private const string ScrollRectWithScrollSensitivityNotZeroInfo = "Setting Scroll Sensitivity not set to 0 on ScrollRect components can stop accidental interactions with them while trying to walk around.";
 
-        private const string NullTriggerReceiver = "Null receiver found on trigger {0}.";
-        private const string NullTriggerReceiverCombined = "Found {0} null receivers in scene triggers.";
-        private const string NullTriggerReceiverInfo = "This causes the trigger to target itself, which can sometimes be intentional.";
-
         private const string TextMeshLightmapStatic = "Text Mesh \"{0}\" marked as lightmap static.";
         private const string TextMeshLightmapStaticCombined = "Found {0} Text Meshes marked as lightmap static.";
         private const string TextMeshLightmapStaticInfo = "This will cause warnings as the mesh has no normals.";
@@ -1432,8 +1428,6 @@ namespace VRWorldToolkit.Editor
         private const string UnsupportedCompressionFormatAndroidInfo = "These will appear fine in editor but black in game.";
 
         private const string HeyYouFoundABug = "Hey, you found a bug! Please send it my way so I can fix it! Check About VRWorld Toolkit to find all the ways to contact me. \"{0}\" on line {1}.";
-
-        private const string FutureProofPublishEnabled = "Future Proof Publish is currently enabled. This is a legacy feature that has no planned functions as of right now. Having it enabled will increase upload times and sometimes cause uploading to fail.";
 
         #endregion
 
