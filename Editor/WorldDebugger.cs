@@ -1370,6 +1370,7 @@ namespace VRWorldToolkit.Editor
 
         private const string NoProblemsFoundInPp = "No problems were found in your post-processing setup. In some cases where post-processing is working in the editor but not in-game, some imported assets may be causing it not to function correctly.";
 
+#if BAKERY_INCLUDED && VRWT_IS_VRC
         private const string BakeryLightNotSetEditorOnly = "Your Bakery light named \"{0}\" is not set to be EditorOnly.";
         private const string BakeryLightNotSetEditorOnlyCombined = "You have {0} Bakery lights are not set to be EditorOnly.";
         private const string BakeryLightNotSetEditorOnlyInfo = "This causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
@@ -1377,6 +1378,7 @@ namespace VRWorldToolkit.Editor
         private const string BakeryLightUnityLight = "Your Bakery light named \"{0}\" has an active Unity Light component on it.";
         private const string BakeryLightUnityLightCombined = "You have {0} Bakery lights that have an active Unity Light component on it.";
         private const string BakeryLightUnityLightInfo = "These will not get baked with Bakery and will keep acting as realtime lights even if set to baked.";
+#endif
 
         private const string AndroidLightmapCompressionOverride = "Lightmap \"{0}\" does not have a platform-specific override set for Android.";
         private const string AndroidLightmapCompressionOverrideCombined = "No platform-specific override set on {0} lightmaps for Android.";
@@ -1399,7 +1401,9 @@ namespace VRWorldToolkit.Editor
         private const string MaterialWithGrabPassShaderInfoPC = "A GrabPass will halt the rendering to copy the screen's contents into a texture for the shader to read. This has a notable effect on performance.";
         private const string MaterialWithGrabPassShaderInfoAndroid = "Please change the shader for this material. When a shader uses a GrabPass on Android, it will cause painful visual artifacts to occur, as they are not supported.";
 
-        private const string ShrnmDirectionalModeBakeryError = "SH or RNM directional mode detected in Bakery. Using SH directional mode is not supported in VRChat by default. It requires the usage of VRC Bakery Adapter by Merlin for it to function in-game.";
+#if BAKERY_INCLUDED && VRWT_IS_VRC
+        private const string ShrnmDirectionalModeBakeryError = "SH or RNM directional mode detected in Bakery. These directional modes are not supported in VRChat by default, it's highly recommended to use Mono SH instead. Otherwise the usage of UdonBakeryAdapter by z3y is needed for it to function in-game.";
+#endif
 
         private const string BuildANDTestBrokenError = "VRChat link association has not been set up, and the VRChat client path has not been set in the VRCSDK settings. Without one of these settings set, Build & Test will not function.";
 
@@ -1777,7 +1781,7 @@ namespace VRWorldToolkit.Editor
                 var bakedLighting = false;
                 var xatlasUnwrapper = false;
 
-#if BAKERY_INCLUDED
+#if BAKERY_INCLUDED && VRWT_IS_VRC
                 var bakeryLights = new List<GameObject>();
                 bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryDirectLight)) as BakeryDirectLight[], s => s.gameObject));
                 bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryPointLight)) as BakeryPointLight[], s => s.gameObject));
@@ -1789,16 +1793,16 @@ namespace VRWorldToolkit.Editor
                 {
                     case ftRenderLightmap.RenderDirMode.RNM:
                     case ftRenderLightmap.RenderDirMode.SH:
-                        const string className = "Merlin.VRCBakeryAdapter";
+                        const string className = "UdonBakeryAdapter";
 
                         if (Helper.GetTypeFromName(className) is null)
                         {
-                            lighting.AddMessageGroup(new MessageGroup(ShrnmDirectionalModeBakeryError, MessageType.Error).SetDocumentation("https://github.com/Merlin-san/VRC-Bakery-Adapter"));
+                            lighting.AddMessageGroup(new MessageGroup(ShrnmDirectionalModeBakeryError, MessageType.Error).SetDocumentation("https://github.com/z3y/UdonBakeryAdapter"));
                         }
 
                         break;
                 }
-
+                
                 if (bakerySettings.renderSettingsUnwrapper == 1)
                 {
                     xatlasUnwrapper = true;
@@ -1846,7 +1850,7 @@ namespace VRWorldToolkit.Editor
                             unityLightGroup.AddSingleMessage(new SingleMessage(item.name).SetAutoFix(DisableComponent(item.GetComponent<Light>())).SetSelectObject(item));
                         }
 
-                        lighting.AddMessageGroup(unityLightGroup.SetGroupAutoFix(DisableComponent(Array.ConvertAll(unityLightOnBakeryLight.ToArray(), s => s.GetComponent<Light>()))));
+                        lighting.AddMessageGroup(unityLightGroup.SetGroupAutoFix(DisableComponent(Array.ConvertAll<GameObject, Behaviour>(unityLightOnBakeryLight.ToArray(), s => s.GetComponent<Light>()))));
                     }
                 }
 #endif
