@@ -8,6 +8,7 @@ using VRC.Core;
 #endif
 
 using System;
+using System.IO;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -51,9 +52,15 @@ namespace VRWorldToolkit.Editor
         {
 #if UNITY_EDITOR_WIN
             var userProfilePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            var localLowPath = System.IO.Path.Combine(userProfilePath, "AppData", "LocalLow", "VRChat", "VRChat", "Worlds");
+            var localLowPath = Path.Combine(userProfilePath, "AppData", "LocalLow", "VRChat", "VRChat", "Worlds");
 
-            System.Diagnostics.Process.Start("explorer.exe", localLowPath.Replace("/", "\\"));
+            if (Directory.Exists(localLowPath)) {
+                System.Diagnostics.Process.Start("explorer.exe", localLowPath.Replace("/", "\\"));
+            }
+            else
+            {
+                EditorUtility.DisplayDialog("Folder Not Found", "The VRChat worlds build folder does not exist. It's possible you haven't made a build using the VRChat SDK yet.", "Ok");
+            }
 #else
             EditorUtility.DisplayDialog("Info", "This function is only supported while using the Unity Editor on Windows at this time. No action was taken.", "Ok");
 #endif
