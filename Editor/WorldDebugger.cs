@@ -2965,9 +2965,9 @@ namespace VRWorldToolkit.Editor
                         var currentCulture = CultureInfo.CurrentCulture;
                         var dateTimeFormat = currentCulture.DateTimeFormat;
                         
-                        GUILayout.Label("<b>Build date:</b> " + report.summary.buildEndedAt.ToString(dateTimeFormat.ShortDatePattern), Styles.LabelRichText);
+                        GUILayout.Label("<b>Build date:</b> " + report.summary.buildEndedAt.ToLocalTime().ToString(dateTimeFormat.ShortDatePattern), Styles.LabelRichText);
                         
-                        GUILayout.Label("<b>Build time:</b> " + report.summary.buildEndedAt.ToString(dateTimeFormat.ShortTimePattern), Styles.LabelRichText);
+                        GUILayout.Label("<b>Build time:</b> " + report.summary.buildEndedAt.ToLocalTime().ToString(dateTimeFormat.ShortTimePattern), Styles.LabelRichText);
 
                         GUILayout.Label("<b>Build duration:</b> " + (report.summary.buildEndedAt - report.summary.buildStartedAt).ToString(@"hh\:mm\:ss"), Styles.LabelRichText);
                         
