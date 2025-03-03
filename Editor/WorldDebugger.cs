@@ -1378,7 +1378,7 @@ namespace VRWorldToolkit.Editor
         private const string BakeryLightUnityLightCombined = "You have {0} Bakery lights that have an active Unity Light component on it.";
         private const string BakeryLightUnityLightInfo = "These will not get baked with Bakery and will keep acting as realtime lights even if set to baked.";
 
-        private const string ShrnmDirectionalModeBakeryError = "SH or RNM directional mode detected in Bakery. These directional modes are not supported in VRChat by default, it's highly recommended to use Mono SH instead. Otherwise the usage of UdonBakeryAdapter by z3y is needed for compatibility with VRChat.";
+        private const string ShrnmDirectionalModeBakeryError = "SH or RNM directional mode detected in Bakery. These directional modes are not supported in VRChat by default, it's highly recommended to use Mono SH instead. Otherwise the usage of an extension such as UdonBakeryAdapter by z3y is needed for compatibility with VRChat.";
 #endif
 
         private const string AndroidLightmapCompressionOverride = "Lightmap \"{0}\" does not have a platform-specific override set for Android.";
@@ -1790,9 +1790,10 @@ namespace VRWorldToolkit.Editor
                 {
                     case ftRenderLightmap.RenderDirMode.RNM:
                     case ftRenderLightmap.RenderDirMode.SH:
-                        const string className = "UdonBakeryAdapter";
+                        const string merlinBakeryAdapter = "Merlin.VRCBakeryAdapter";
+                        const string udonBakeryAdapter = "UdonBakeryAdapter";
 
-                        if (Helper.GetTypeFromName(className) is null)
+                        if (Helper.GetTypeFromName(merlinBakeryAdapter) is null && Helper.GetTypeFromName(udonBakeryAdapter) is null)
                         {
                             lighting.AddMessageGroup(new MessageGroup(ShrnmDirectionalModeBakeryError, MessageType.Error).SetDocumentation("https://github.com/z3y/UdonBakeryAdapter"));
                         }
