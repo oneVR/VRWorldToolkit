@@ -1,5 +1,15 @@
 ﻿#if VRC_SDK_VRCSDK3
 #define VRWT_IS_VRC
+using VRC.Core;
+using VRC.SDKBase;
+#endif
+
+#if UNITY_EDITOR_WIN
+using Microsoft.Win32;
+#endif
+
+#if UNITY_POST_PROCESSING_STACK_V2
+using UnityEngine.Rendering.PostProcessing;
 #endif
 
 using System;
@@ -12,27 +22,16 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-#if UNITY_EDITOR_WIN
-using Microsoft.Win32;
-#endif
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEditor.IMGUI.Controls;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.Networking;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
-#if UNITY_POST_PROCESSING_STACK_V2
-using UnityEngine.Rendering.PostProcessing;
-#endif
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-#if VRWT_IS_VRC
-using VRC.Core;
-using VRC.SDKBase;
-#endif
 using Object = UnityEngine.Object;
 using Debug = UnityEngine.Debug;
 
