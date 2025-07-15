@@ -2884,6 +2884,7 @@ namespace VRWorldToolkit.Editor
         };
         
         [SerializeField] private BuildReportType selectedBuildReport;
+        [SerializeField] private BuildReportType previousSelectedBuildReport;
         [SerializeField] private bool overallStatsFoldout;
         [SerializeField] private bool buildReportMessagesFoldout;
         
@@ -3058,12 +3059,10 @@ namespace VRWorldToolkit.Editor
                 GUILayout.BeginVertical();
 
                 GUILayout.BeginHorizontal(EditorStyles.toolbar);
-                
-                EditorGUI.BeginChangeCheck();
 
                 selectedBuildReport = (BuildReportType)EditorGUILayout.Popup((int)selectedBuildReport, BuildReportSelectionDropdown, EditorStyles.toolbarPopup);
 
-                if (EditorGUI.EndChangeCheck())
+                if (selectedBuildReport != previousSelectedBuildReport)
                 {
                     switch (selectedBuildReport)
                     {
@@ -3077,6 +3076,8 @@ namespace VRWorldToolkit.Editor
                             buildReportTreeView.SetReport(buildReportiOS);
                             break;
                     }
+                    
+                    previousSelectedBuildReport = selectedBuildReport;
                 }
                 
                 GUILayout.Space(10);
