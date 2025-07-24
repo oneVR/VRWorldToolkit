@@ -851,6 +851,41 @@ namespace VRWorldToolkit.Editor
             };
         }
 
+        public static Action SetParticleSystemAllowRoll(ParticleSystemRenderer particleSystemRenderer, bool allowRoll)
+        {
+            return () =>
+            {
+                if (EditorUtility.DisplayDialog("Change Particle System Allow Roll?", "This operation will change the Allow Roll on Particle System \"" + particleSystemRenderer.gameObject.name + "\" to " + allowRoll + ".\n\nDo you want to continue?", "Yes", "Cancel"))
+                {
+                    Undo.RegisterCompleteObjectUndo(particleSystemRenderer, "Particle System Allow Roll Change");
+
+                    particleSystemRenderer.allowRoll = allowRoll;
+
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(particleSystemRenderer);
+                }
+            };
+        }
+
+        public static Action SetParticleSystemAllowRoll(ParticleSystemRenderer[] particleSystemRenderers, bool allowRoll)
+        {
+            return () =>
+            {
+                if (EditorUtility.DisplayDialog("Change Particle System Allow Roll?", "This operation will change " + particleSystemRenderers.Length + " Particle Systems Allow Roll to " + allowRoll + ".\n\nDo you want to continue?", "Yes", "Cancel"))
+                {
+                    Undo.RegisterCompleteObjectUndo(particleSystemRenderers.ToArray<Object>(), "Mass Particle System Allow Roll Change");
+
+                    for (var i = 0; i < particleSystemRenderers.Length; i++)
+                    {
+                        var particleSystemRenderer = particleSystemRenderers[i];
+
+                        particleSystemRenderer.allowRoll = allowRoll;
+
+                        PrefabUtility.RecordPrefabInstancePropertyModifications(particleSystemRenderer);
+                    }
+                }
+            };
+        }
+
         public static Action SetLightmapSize(int newSize)
         {
             return () =>
@@ -1419,6 +1454,10 @@ namespace VRWorldToolkit.Editor
         private const string ScrollRectWithScrollSensitivityNotZero = "The ScrollRect component \"{0}\" does not have its Scroll Sensitivity set to 0.";
         private const string ScrollRectWithScrollSensitivityNotZeroCombined = "Found {0} ScrollRect components with their Scroll Sensitivity not set to 0.";
         private const string ScrollRectWithScrollSensitivityNotZeroInfo = "Setting Scroll Sensitivity not set to 0 on ScrollRect components can stop accidental interactions with them while trying to walk around.";
+
+        private const string ParticlesWithAllowRoll = "The Particle System \"{0}\" has Allow Roll set to true.";
+        private const string ParticlesWithAllowRollCombined = "Found {0} Particle Systems with Allow Roll set to true.";
+        private const string ParticlesWithAllowRollInfo = "This causes the particles to rotate unexpectly in VR. It is recommended to disable Allow Roll on Particle Systems.";
 
         private const string TextMeshLightmapStatic = "Text Mesh \"{0}\" marked as lightmap static.";
         private const string TextMeshLightmapStaticCombined = "Found {0} Text Meshes marked as lightmap static.";
@@ -2267,6 +2306,7 @@ namespace VRWorldToolkit.Editor
                 var selectablesNotNone = new List<Selectable>();
                 var scrollRectsScrollSensitivityNotZero = new List<ScrollRect>();
                 var legacyBlendShapes = new List<ModelImporter>();
+                var particleSysAllowRoll = new List<ParticleSystemRenderer>();
 
                 var checkedMaterials = new List<Material>();
                 var checkedShaders = new Dictionary<Shader, CheckedShaderProperties>();
@@ -2279,6 +2319,7 @@ namespace VRWorldToolkit.Editor
                 var scrollRectScrollSensitivity = general.AddMessageGroup(new MessageGroup(ScrollRectWithScrollSensitivityNotZero, ScrollRectWithScrollSensitivityNotZeroCombined, ScrollRectWithScrollSensitivityNotZeroInfo, MessageType.Tips));
                 var textMeshStatic = general.AddMessageGroup(new MessageGroup(TextMeshLightmapStatic, TextMeshLightmapStaticCombined, TextMeshLightmapStaticInfo, MessageType.Warning));
                 var unsupportedCompressionFormatAndroid = general.AddMessageGroup(new MessageGroup(UnsupportedCompressionFormatAndroid, UnsupportedCompressionFormatAndroidCombined, UnsupportedCompressionFormatAndroidInfo, MessageType.Error).SetDocumentation("https://docs.unity3d.com/2022.3/Documentation/Manual/class-TextureImporterOverride.html"));
+                var particlesAllowRoll = general.AddMessageGroup(new MessageGroup(ParticlesWithAllowRoll, ParticlesWithAllowRollCombined, ParticlesWithAllowRollInfo, MessageType.Tips));
 
                 var allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
                 for (var i = 0; i < allGameObjects.Length; i++)
@@ -2510,6 +2551,21 @@ namespace VRWorldToolkit.Editor
                             scrollRectsScrollSensitivityNotZero.Add(scrollRect);
                         }
                     }
+
+                    // Check for 'Allow Roll' on particle systems.
+                    // It's not necessary to change this for non-VR projects
+#if VRWT_IS_VRC
+                    var particleSysRenderer = gameObject.GetComponent<ParticleSystemRenderer>();
+                    if (particleSysRenderer)
+                    {
+                        if (particleSysRenderer.allowRoll)
+                        {
+                            particlesAllowRoll.AddSingleMessage(new SingleMessage(gameObject.name).SetSelectObject(gameObject).SetAutoFix(SetParticleSystemAllowRoll(particleSysRenderer, false)));
+
+                            particleSysAllowRoll.Add(particleSysRenderer);
+                        }
+                    }
+#endif
                 }
 
                 if (legacyBlendShapes.Count > 1)
@@ -2525,6 +2581,11 @@ namespace VRWorldToolkit.Editor
                 if (scrollRectsScrollSensitivityNotZero.Count > 1)
                 {
                     scrollRectScrollSensitivity.SetGroupAutoFix(SetScrollRectScrollSensitivity(scrollRectsScrollSensitivityNotZero.ToArray(), 0));
+                }
+
+                if (particleSysAllowRoll.Count > 1)
+                {
+                    particlesAllowRoll.SetGroupAutoFix(SetParticleSystemAllowRoll(particleSysAllowRoll.ToArray(), false));
                 }
 
                 // If more than 10% of shaders used in scene are toon shaders to leave room for people using them for avatar displays
