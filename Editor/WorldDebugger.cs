@@ -1818,78 +1818,75 @@ namespace VRWorldToolkit.Editor
                 var xatlasUnwrapper = false;
 
 #if BAKERY_INCLUDED && VRWT_IS_VRC
-                var bakeryLights = new List<GameObject>();
-                bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryDirectLight)) as BakeryDirectLight[], s => s.gameObject));
-                bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryPointLight)) as BakeryPointLight[], s => s.gameObject));
-                bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakerySkyLight)) as BakerySkyLight[], s => s.gameObject));
+    if (Helper.GetTypeFromName("ftRenderLightmap") != null)
+    {
+        var bakeryLights = BakeryCompat.GetBakeryLights().Distinct().ToList();
 
-                var bakerySettings = ftRenderLightmap.FindRenderSettingsStorage();
+        var (bakerySettingsStorageObject, ftRenderLightmapType) = BakeryCompat.TryGetSettings();
+        
+        if (BakeryCompat.IsRenderDirRNMOrSH(bakerySettingsStorageObject, ftRenderLightmapType))
+        {
+            const string merlinBakeryAdapter = "Merlin.VRCBakeryAdapter";
+            const string udonBakeryAdapter = "UdonBakeryAdapter";
 
-                switch ((ftRenderLightmap.RenderDirMode) bakerySettings.renderSettingsRenderDirMode)
+            if (Helper.GetTypeFromName(merlinBakeryAdapter) is null &&
+                Helper.GetTypeFromName(udonBakeryAdapter) is null)
+            {
+                lighting.AddMessageGroup(new MessageGroup(ShrnmDirectionalModeBakeryError, MessageType.Error).SetDocumentation("https://github.com/z3y/UdonBakeryAdapter"));
+            }
+        }
+
+        if (BakeryCompat.UsesXatlas(bakerySettingsStorageObject))
+        {
+            xatlasUnwrapper = true;
+        }
+
+        if (bakeryLights.Count > 0)
+        {
+            var notEditorOnly = new List<GameObject>();
+            var unityLightOnBakeryLight = new List<GameObject>();
+
+            bakedLighting = true;
+
+            foreach (var gameObject in bakeryLights)
+            {
+                if (!gameObject.CompareTag("EditorOnly"))
                 {
-                    case ftRenderLightmap.RenderDirMode.RNM:
-                    case ftRenderLightmap.RenderDirMode.SH:
-                        const string merlinBakeryAdapter = "Merlin.VRCBakeryAdapter";
-                        const string udonBakeryAdapter = "UdonBakeryAdapter";
-
-                        if (Helper.GetTypeFromName(merlinBakeryAdapter) is null && Helper.GetTypeFromName(udonBakeryAdapter) is null)
-                        {
-                            lighting.AddMessageGroup(new MessageGroup(ShrnmDirectionalModeBakeryError, MessageType.Error).SetDocumentation("https://github.com/z3y/UdonBakeryAdapter"));
-                        }
-
-                        break;
+                    notEditorOnly.Add(gameObject);
                 }
-                
-                if (bakerySettings.renderSettingsUnwrapper == 1)
+
+                var light = gameObject.GetComponent<Light>();
+                if (light != null && !light.bakingOutput.isBaked && light.enabled)
                 {
-                    xatlasUnwrapper = true;
+                    unityLightOnBakeryLight.Add(gameObject);
                 }
+            }
 
-                if (bakeryLights.Count > 0)
+            if (notEditorOnly.Count > 0)
+            {
+                var notEditorOnlyGroup = new MessageGroup(BakeryLightNotSetEditorOnly, BakeryLightNotSetEditorOnlyCombined, BakeryLightNotSetEditorOnlyInfo, MessageType.Warning);
+
+                foreach (var item in notEditorOnly)
                 {
-                    var notEditorOnly = new List<GameObject>();
-                    var unityLightOnBakeryLight = new List<GameObject>();
-
-                    bakedLighting = true;
-
-                    for (var i = 0; i < bakeryLights.Count; i++)
-                    {
-                        if (!bakeryLights[i].CompareTag("EditorOnly"))
-                        {
-                            notEditorOnly.Add(bakeryLights[i]);
-                        }
-
-                        if (!bakeryLights[i].GetComponent<Light>()) continue;
-
-                        var light = bakeryLights[i].GetComponent<Light>();
-                        if (!light.bakingOutput.isBaked && light.enabled)
-                        {
-                            unityLightOnBakeryLight.Add(bakeryLights[i]);
-                        }
-                    }
-
-                    if (notEditorOnly.Count > 0)
-                    {
-                        var notEditorOnlyGroup = new MessageGroup(BakeryLightNotSetEditorOnly, BakeryLightNotSetEditorOnlyCombined, BakeryLightNotSetEditorOnlyInfo, MessageType.Warning);
-                        foreach (var item in notEditorOnly)
-                        {
-                            notEditorOnlyGroup.AddSingleMessage(new SingleMessage(item.name).SetAutoFix(SetGameObjectTag(item, "EditorOnly")).SetSelectObject(item));
-                        }
-
-                        lighting.AddMessageGroup(notEditorOnlyGroup.SetGroupAutoFix(SetGameObjectTag(notEditorOnly.ToArray(), "EditorOnly")));
-                    }
-
-                    if (unityLightOnBakeryLight.Count > 0)
-                    {
-                        var unityLightGroup = new MessageGroup(BakeryLightUnityLight, BakeryLightUnityLightCombined, BakeryLightUnityLightInfo, MessageType.Warning);
-                        foreach (var item in unityLightOnBakeryLight)
-                        {
-                            unityLightGroup.AddSingleMessage(new SingleMessage(item.name).SetAutoFix(DisableComponent(item.GetComponent<Light>())).SetSelectObject(item));
-                        }
-
-                        lighting.AddMessageGroup(unityLightGroup.SetGroupAutoFix(DisableComponent(Array.ConvertAll<GameObject, Behaviour>(unityLightOnBakeryLight.ToArray(), s => s.GetComponent<Light>()))));
-                    }
+                    notEditorOnlyGroup.AddSingleMessage(new SingleMessage(item.name).SetAutoFix(SetGameObjectTag(item, "EditorOnly")).SetSelectObject(item));
                 }
+
+                lighting.AddMessageGroup(notEditorOnlyGroup.SetGroupAutoFix(SetGameObjectTag(notEditorOnly.ToArray(), "EditorOnly")));
+            }
+
+            if (unityLightOnBakeryLight.Count > 0)
+            {
+                var unityLightGroup = new MessageGroup(BakeryLightUnityLight, BakeryLightUnityLightCombined, BakeryLightUnityLightInfo, MessageType.Warning);
+
+                foreach (var item in unityLightOnBakeryLight)
+                {
+                    unityLightGroup.AddSingleMessage(new SingleMessage(item.name).SetAutoFix(DisableComponent(item.GetComponent<Light>())).SetSelectObject(item));
+                }
+
+                lighting.AddMessageGroup(unityLightGroup.SetGroupAutoFix(DisableComponent(Array.ConvertAll(unityLightOnBakeryLight.ToArray(), s => (Behaviour)s.GetComponent<Light>()))));
+            }
+        }
+    }
 #endif
 
                 // Get lights in scene

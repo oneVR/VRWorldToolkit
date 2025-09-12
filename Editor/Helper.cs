@@ -110,20 +110,22 @@ namespace VRWorldToolkit.Editor
 #endif
         }
 
+        private static readonly Dictionary<string, Type> Cache = new();
+
         public static Type GetTypeFromName(string typeName)
         {
+            if (Cache.TryGetValue(typeName, out var t)) return t;
+            
             var type = Type.GetType(typeName);
             if (type != null) return type;
-            foreach (var a in AppDomain.CurrentDomain.GetAssemblies())
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                type = a.GetType(typeName);
-                if (type != null)
-                {
-                    return type;
-                }
+                type = assembly.GetType(typeName);
+                if (type != null) break;
             }
-
-            return null;
+            
+            Cache[typeName] = type;
+            return type;
         }
 
         public static string GetSteamVrcExecutablePath()
