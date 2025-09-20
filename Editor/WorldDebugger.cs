@@ -1381,8 +1381,10 @@ namespace VRWorldToolkit.Editor
         private const string NoProfileSetCombined = "Found {0} Post Processing Volumes with no profile set.";
 
         private const string NoMatchingLayersFound = "No enabled Post Processing Volumes found with matching layers to the main Post Processing Layer. Layers currently set to: {0}";
+        
+        private const string TonemapperMissing = "No Tonemapper was found on any Post Processing Volumes. Without a Tonemapper set for your Post Processing, the colors in the scene will be distorted. If you aren't sure which to select, try Neutral or ACES.";
 
-        private const string TonemapperMissing = "No global Tonemapper found. When there is no Tonemapper set, the colors in the scene will be distorted. Ideally, use Neutral or ACES.";
+        private const string GlobalTonemapperMissing = "No global Post Processing Volume with a Tonemapper was found. Consider a global Post Processing Volume with a Tonemapper as a fallback for cases in which users are outside areas covered by your current Post Processing Volumes to avoid color distortion.";
 
         private const string TooHighBloomIntensity = "Do not raise the Bloom intensity too high! It is best to use a low Bloom intensity, between 0.01 to 0.3.";
 
@@ -2209,6 +2211,8 @@ namespace VRWorldToolkit.Editor
 
                                 var noTonemapper = true;
 
+                                var noGlobalTonemapper = true;
+
                                 // Go trough the profile settings and see if any bad one's are used
                                 foreach (var postProcessVolume in matchingVolumes)
                                 {
@@ -2233,18 +2237,25 @@ namespace VRWorldToolkit.Editor
                                     {
                                         postProcessing.AddMessageGroup(new MessageGroup(VignetteWarning, MessageType.Warning).AddSingleMessage(new SingleMessage(postProcessVolume.gameObject)));
                                     }
-
-                                    if (postProcessVolume.isGlobal)
+                                    
+                                    var colorGrading = postProcessProfile.GetSetting<ColorGrading>();
+                                    if (colorGrading && colorGrading.enabled && colorGrading.active)
                                     {
-                                        var colorGrading = postProcessProfile.GetSetting<ColorGrading>();
-                                        if (colorGrading && colorGrading.enabled && colorGrading.active)
+                                        if (colorGrading.tonemapper.overrideState && colorGrading.tonemapper.value != Tonemapper.None)
                                         {
-                                            if (colorGrading.tonemapper.overrideState && colorGrading.tonemapper.value != Tonemapper.None)
+                                            if (postProcessVolume.isGlobal)
+                                            {
+                                                noGlobalTonemapper = false;
+                                            }
+                                            else
                                             {
                                                 noTonemapper = false;
                                             }
                                         }
+                                    }
 
+                                    if (postProcessVolume.isGlobal)
+                                    {
                                         var bloom = postProcessProfile.GetSetting<Bloom>();
                                         if (bloom && bloom.enabled && bloom.active)
                                         {
@@ -2274,7 +2285,11 @@ namespace VRWorldToolkit.Editor
 
                                 if (noTonemapper)
                                 {
-                                    postProcessing.AddMessageGroup(new MessageGroup(TonemapperMissing, MessageType.Tips).SetDocumentation("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Post-Processing#colour-grading"));
+                                    postProcessing.AddMessageGroup(new MessageGroup(TonemapperMissing, MessageType.Warning).SetDocumentation("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Post-Processing#colour-grading"));
+                                }
+                                else if (noGlobalTonemapper)
+                                {
+                                    postProcessing.AddMessageGroup(new MessageGroup(GlobalTonemapperMissing, MessageType.Tips).SetDocumentation("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Post-Processing#colour-grading"));
                                 }
                             }
                         }
