@@ -30,7 +30,7 @@ namespace VRWorldToolkit.Editor
             if (ftRenderLightmap == null) return (null, null);
 
             var method = ftRenderLightmap.GetMethod("FindRenderSettingsStorage", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-            var renderSettingsStorage = method?.Invoke(null, null);
+            var renderSettingsStorage = method?.Invoke(null, new object[method?.GetParameters()?.Length ?? 0]);
             return (renderSettingsStorage, ftRenderLightmap);
         }
 
