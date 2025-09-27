@@ -460,8 +460,9 @@ namespace VRWorldToolkit.Editor
             var menu = new GenericMenu();
 
             // Create the menu items
-            menu.AddItem(new GUIContent("Copy Name"), false, ReplaceClipboard, clickedItem.displayName + clickedItem.extension);
+            menu.AddItem(new GUIContent("Copy Name"), false, ReplaceClipboard, Path.GetFileName(clickedItem.path));
             menu.AddItem(new GUIContent("Copy Path"), false, ReplaceClipboard, clickedItem.path);
+            menu.AddItem(new GUIContent("Reveal in Explorer"), false, () => EditorUtility.RevealInFinder(clickedItem.path));
             menu.AddItem(new GUIContent("Select in Assets"), false, SelectAssetsInProjectWindow);
 
             // Show the menu
