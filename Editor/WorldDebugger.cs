@@ -1510,7 +1510,7 @@ namespace VRWorldToolkit.Editor
 
         private void CheckScene()
         {
-            masterList.ClearCategories();
+            mainList.ClearCategories();
 
             try
             {
@@ -2799,7 +2799,7 @@ namespace VRWorldToolkit.Editor
 
         [SerializeField] private bool firstRefresh = true;
 
-        [SerializeField] private MessageCategoryList masterList;
+        [SerializeField] private MessageCategoryList mainList;
 
         [SerializeField] private MessageCategory general;
         [SerializeField] private MessageCategory optimization;
@@ -2815,16 +2815,16 @@ namespace VRWorldToolkit.Editor
 #endif
                 RefreshBuild();
 
-                if (masterList is null)
-                    masterList = new MessageCategoryList();
+                if (mainList is null)
+                    mainList = new MessageCategoryList();
 
-                general = masterList.CreateOrGetCategory("General");
+                general = mainList.CreateOrGetCategory("General");
 
-                optimization = masterList.CreateOrGetCategory("Optimization");
+                optimization = mainList.CreateOrGetCategory("Optimization");
 
-                lighting = masterList.CreateOrGetCategory("Lighting");
+                lighting = mainList.CreateOrGetCategory("Lighting");
 
-                postProcessing = masterList.CreateOrGetCategory("Post Processing");
+                postProcessing = mainList.CreateOrGetCategory("Post Processing");
 
 #if UDON
                 projectType = ProjectType.World;
@@ -3095,9 +3095,9 @@ namespace VRWorldToolkit.Editor
                             autoRecheck = true;
                         }
 
-                        masterList.DrawTabSelector();
+                        mainList.DrawTabSelector();
 
-                        masterList.DrawMessages();
+                        mainList.DrawMessages();
                     }
 
                     break;
