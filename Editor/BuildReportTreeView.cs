@@ -23,12 +23,15 @@ namespace VRWorldToolkit.Editor
             Extension,
             Percentage,
         }
+        
+        private readonly MultiColumnHeader header;
 
-        public BuildReportTreeView(TreeViewState state, MultiColumnHeader multiColumnHeader, BuildReport report) : base(state, multiColumnHeader)
+        public BuildReportTreeView(TreeViewState state, MultiColumnHeader header, BuildReport report) : base(state, header)
         {
+            this.header = header;
             showBorder = true;
             showAlternatingRowBackgrounds = true;
-            multiColumnHeader.sortingChanged += OnSortingChanged;
+            this.header.sortingChanged += OnSortingChanged;
 
             SetReport(report);
         }
@@ -515,43 +518,35 @@ namespace VRWorldToolkit.Editor
             return textureTreeViewItem.displayName.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0 ||
                    textureTreeViewItem.assetType.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0;
         }
-
-        /// <summary>
-        /// Handle TreeView columns sorting changes
-        /// </summary>
-        private void OnSortingChanged(MultiColumnHeader multiColumnHeader)
+        
+        protected override IList<TreeViewItem> BuildRows(TreeViewItem root)
         {
-            if (!(multiColumnHeader.sortedColumnIndex > -1)) return;
+            var rows = base.BuildRows(root);
 
-            // Get TreeView items
-            var items = rootItem.children.Cast<BuildReportItem>();
+            var sortedColumn = header.sortedColumnIndex;
+            if (sortedColumn < 0) return rows;
 
-            // Sort items by sorted column
-            switch (multiColumnHeader.sortedColumnIndex)
+            var isSortedAscending = header.IsSortedAscending(sortedColumn);
+
+            var items = rows.Cast<BuildReportItem>();
+
+            Func<BuildReportItem, object> selector = sortedColumn switch
             {
-                case 2:
-                    items = items.OrderBy(x => x.displayName);
-                    break;
-                case 3:
-                    items = items.OrderBy(x => x.extension);
-                    break;
-                case 1:
-                case 4:
-                    items = items.OrderBy(x => x.size);
-                    break;
-            }
+                1 => i => i.size,
+                2 => i => i.displayName,
+                3 => i => i.extension,
+                4 => i => i.size,
+                _ => i => i.displayName
+            };
 
-            // Reverse list if not sorted ascending
-            if (!multiColumnHeader.IsSortedAscending(multiColumnHeader.sortedColumnIndex))
-            {
-                items = items.Reverse();
-            }
+            items = isSortedAscending ? items.OrderBy(selector) : items.OrderByDescending(selector);
 
-            // Cast collection back to a list
-            rootItem.children = items.Cast<TreeViewItem>().ToList();
-
-            // Build rows again with the new sorting
-            BuildRows(rootItem);
+            return items.Cast<TreeViewItem>().ToList();
+        }
+        
+        private void OnSortingChanged(MultiColumnHeader _)
+        {
+            Reload();
         }
     }
 }
