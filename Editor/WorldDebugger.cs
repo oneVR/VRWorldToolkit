@@ -2247,10 +2247,8 @@ namespace VRWorldToolkit.Editor
                                             {
                                                 noGlobalTonemapper = false;
                                             }
-                                            else
-                                            {
-                                                noTonemapper = false;
-                                            }
+
+                                            noTonemapper = false;
                                         }
                                     }
 
