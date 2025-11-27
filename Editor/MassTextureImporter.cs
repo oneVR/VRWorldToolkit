@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -8,20 +9,11 @@ namespace VRWorldToolkit.Editor
 {
     public class TextureDetails
     {
-        private int? uncrunchedCount;
-        private int? normalMaps;
+        private readonly Dictionary<Texture, TextureImporter> textureList = new();
         private int? cubemaps;
+        private int? normalMaps;
         private long? storageSize;
-
-        private readonly Dictionary<Texture, TextureImporter> textureList = new Dictionary<Texture, TextureImporter>();
-
-        public void AddTexture(TextureImporter textureImporter, Texture texture)
-        {
-            if (!textureList.ContainsKey(texture) && textureImporter != null)
-            {
-                textureList.Add(texture, textureImporter);
-            }
-        }
+        private int? uncrunchedCount;
 
         public int TextureCount => textureList.Count;
 
@@ -29,12 +21,9 @@ namespace VRWorldToolkit.Editor
         {
             get
             {
-                if (uncrunchedCount is null)
-                {
-                    uncrunchedCount = textureList.Count(x => !x.Value.crunchedCompression);
-                }
+                if (uncrunchedCount is null) uncrunchedCount = textureList.Count(x => !x.Value.crunchedCompression);
 
-                return (int) uncrunchedCount;
+                return (int)uncrunchedCount;
             }
         }
 
@@ -43,11 +32,9 @@ namespace VRWorldToolkit.Editor
             get
             {
                 if (normalMaps is null)
-                {
                     normalMaps = textureList.Count(x => x.Value.textureType == TextureImporterType.NormalMap);
-                }
 
-                return (int) normalMaps;
+                return (int)normalMaps;
             }
         }
 
@@ -56,11 +43,9 @@ namespace VRWorldToolkit.Editor
             get
             {
                 if (cubemaps is null)
-                {
                     cubemaps = textureList.Count(x => x.Value.textureShape == TextureImporterShape.TextureCube);
-                }
 
-                return (int) cubemaps;
+                return (int)cubemaps;
             }
         }
 
@@ -69,17 +54,20 @@ namespace VRWorldToolkit.Editor
             get
             {
                 if (storageSize is null)
-                {
                     storageSize = textureList.Sum(x => EditorTextureUtil.GetStorageMemorySize(x.Key));
-                }
 
-                return (long) storageSize;
+                return (long)storageSize;
             }
         }
 
         public IEnumerable<TextureImporter> GetImporters
         {
             get { return textureList.Select(x => x.Value).ToArray(); }
+        }
+
+        public void AddTexture(TextureImporter textureImporter, Texture texture)
+        {
+            if (!textureList.ContainsKey(texture) && textureImporter != null) textureList.Add(texture, textureImporter);
         }
 
         public void ResetStats()
@@ -91,37 +79,12 @@ namespace VRWorldToolkit.Editor
 
     public class ImporterSettingsManager
     {
-        // Mip Maps
-        public bool DontChangeMipMaps { get; private set; }
-        public bool StreamingMipMap { get; private set; } = true;
-        public bool GenerateMipMaps { get; private set; } = true;
-        public bool DontChangeAniso { get; private set; } = true;
-        public int AnisoLevel { get; private set; } = 1;
-        public OverrideWhenSize OverrideAnisoWhen { get; private set; }
-
-        // Max Texture Size
-        public int MaxTextureSize { get; private set; } = 2048;
-        public OverrideWhenSize OverrideMaxTextureSizeWhen { get; private set; } = OverrideWhenSize.BiggerThan;
-
-        // Crunch compression
-        public bool CrunchCompression { get; private set; } = true;
-        public int CompressionQuality { get; private set; } = 80;
-        public DontOverrideWhen DontOverrideCrunchWhen { get; private set; } = DontOverrideWhen.AlreadyEnabled;
-        public OverrideWhenSize OverrideCrunchCompressionSizeWhen { get; private set; } = OverrideWhenSize.BiggerThan;
-
-        // Texture Compression Format
-        public bool DontChangeCompressionQuality { get; private set; } = true;
-        public TextureImporterCompression TextureCompressionQuality { get; private set; } = TextureImporterCompression.Compressed;
-        public bool ignoreNoneCompression { get; private set; } = false;
-
-        // Ignores
-        public bool IgnoreCubemaps { get; private set; } = true;
-        public OverrideWhenSize OverrideCubemapSettingsWhen { get; private set; } = OverrideWhenSize.SmallerThan;
-        public int CubemapSize { get; private set; } = 512;
-        public bool IgnoreNormalMaps { get; private set; } = true;
-
-        private readonly string[] maxTextureNames = {"32", "64", "128", "256", "512", "1024", "2048", "4096", "8192"};
-        private readonly int[] maxTextureSizes = {32, 64, 128, 256, 512, 1024, 2048, 4096, 8192};
+        public enum DontOverrideWhen
+        {
+            Never,
+            AlreadyDisabled,
+            AlreadyEnabled
+        }
 
         public enum OverrideWhenSize
         {
@@ -130,12 +93,46 @@ namespace VRWorldToolkit.Editor
             BiggerThan
         }
 
-        public enum DontOverrideWhen
-        {
-            Never,
-            AlreadyDisabled,
-            AlreadyEnabled
-        }
+        private readonly string[] maxTextureNames = { "32", "64", "128", "256", "512", "1024", "2048", "4096", "8192" };
+
+        private readonly int[] maxTextureSizes = { 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192 };
+
+        // Mip Maps
+        public bool DontChangeMipMaps { get; private set; }
+        public bool StreamingMipMap { get; private set; } = true;
+        public bool GenerateMipMaps { get; private set; } = true;
+        public bool DontChangeAniso { get; private set; } = true;
+        public int AnisoLevel { get; private set; } = 1;
+        public OverrideWhenSize OverrideAnisoWhen { get; private set; }
+
+        // Max Texture Size (default)
+        public int MaxTextureSize { get; private set; } = 2048;
+        public OverrideWhenSize OverrideMaxTextureSizeWhen { get; private set; } = OverrideWhenSize.BiggerThan;
+
+        // Crunch compression (default)
+        public bool CrunchCompression { get; private set; } = true;
+        public int CompressionQuality { get; private set; } = 80;
+        public DontOverrideWhen DontOverrideCrunchWhen { get; private set; } = DontOverrideWhen.AlreadyEnabled;
+        public OverrideWhenSize OverrideCrunchCompressionSizeWhen { get; private set; } = OverrideWhenSize.BiggerThan;
+
+        // Texture Compression Format (default)
+        public bool DontChangeCompressionQuality { get; private set; } = true;
+
+        public TextureImporterCompression TextureCompressionQuality { get; private set; } =
+            TextureImporterCompression.Compressed;
+
+        public bool ignoreNoneCompression { get; private set; }
+
+        // Ignores
+        public bool IgnoreCubemaps { get; private set; } = true;
+        public OverrideWhenSize OverrideCubemapSettingsWhen { get; private set; } = OverrideWhenSize.SmallerThan;
+        public int CubemapSize { get; private set; } = 512;
+        public bool IgnoreNormalMaps { get; private set; } = true;
+
+        // PC = Standalone
+        public PlatformOverrideSettings StandaloneSettings { get; } = new();
+        public PlatformOverrideSettings AndroidSettings { get; } = new();
+        public PlatformOverrideSettings iOSSettings { get; } = new();
 
         public void DrawSettings()
         {
@@ -154,40 +151,45 @@ namespace VRWorldToolkit.Editor
                 AnisoLevel = EditorGUILayout.IntSlider("Aniso Level", AnisoLevel, 0, 16);
                 using (new EditorGUI.IndentLevelScope())
                 {
-                    OverrideAnisoWhen = (OverrideWhenSize) EditorGUILayout.EnumPopup("Override When", OverrideAnisoWhen);
+                    OverrideAnisoWhen = (OverrideWhenSize)EditorGUILayout.EnumPopup("Override When", OverrideAnisoWhen);
                 }
             }
 
-            GUILayout.Label("Size", Styles.BoldWrap);
+            GUILayout.Label("Size (Default)", Styles.BoldWrap);
             MaxTextureSize = EditorGUILayout.IntPopup("Max Size", MaxTextureSize, maxTextureNames, maxTextureSizes);
             using (new EditorGUI.IndentLevelScope())
             {
-                OverrideMaxTextureSizeWhen = (OverrideWhenSize) EditorGUILayout.EnumPopup("Override When", OverrideMaxTextureSizeWhen);
+                OverrideMaxTextureSizeWhen =
+                    (OverrideWhenSize)EditorGUILayout.EnumPopup("Override When", OverrideMaxTextureSizeWhen);
             }
 
-            GUILayout.Label("Crunch Compression", Styles.BoldWrap);
+            GUILayout.Label("Crunch Compression (Default)", Styles.BoldWrap);
             CrunchCompression = EditorGUILayout.Toggle("Use Crunch Compression", CrunchCompression);
             using (new EditorGUI.DisabledScope(!CrunchCompression))
             {
-                CompressionQuality = EditorGUILayout.IntSlider(CompressionQuality, 1, 100);
+                CompressionQuality = EditorGUILayout.IntSlider("Quality", CompressionQuality, 1, 100);
                 using (new EditorGUI.IndentLevelScope())
                 {
-                    OverrideCrunchCompressionSizeWhen = (OverrideWhenSize) EditorGUILayout.EnumPopup("Override When", OverrideCrunchCompressionSizeWhen);
+                    OverrideCrunchCompressionSizeWhen =
+                        (OverrideWhenSize)EditorGUILayout.EnumPopup("Override When", OverrideCrunchCompressionSizeWhen);
                 }
             }
 
             using (new EditorGUI.IndentLevelScope())
             {
-                DontOverrideCrunchWhen = (DontOverrideWhen) EditorGUILayout.EnumPopup("Don't Override When", DontOverrideCrunchWhen);
+                DontOverrideCrunchWhen =
+                    (DontOverrideWhen)EditorGUILayout.EnumPopup("Don't Override When", DontOverrideCrunchWhen);
             }
 
-            GUILayout.Label("Texture Compression Quality", Styles.BoldWrap);
+            GUILayout.Label("Texture Compression Quality (Default)", Styles.BoldWrap);
             DontChangeCompressionQuality = EditorGUILayout.Toggle("Dont Change", DontChangeCompressionQuality);
             using (new EditorGUI.DisabledScope(DontChangeCompressionQuality))
             {
                 using (new EditorGUI.IndentLevelScope())
                 {
-                    TextureCompressionQuality = (TextureImporterCompression) EditorGUILayout.EnumPopup("Compression Quality", TextureCompressionQuality);
+                    TextureCompressionQuality =
+                        (TextureImporterCompression)EditorGUILayout.EnumPopup("Compression Quality",
+                            TextureCompressionQuality);
                     ignoreNoneCompression = EditorGUILayout.Toggle("Ignore Uncompressed", ignoreNoneCompression);
                 }
             }
@@ -198,15 +200,45 @@ namespace VRWorldToolkit.Editor
             {
                 using (new EditorGUI.DisabledScope(!IgnoreCubemaps))
                 {
-                    OverrideCubemapSettingsWhen = (OverrideWhenSize) EditorGUILayout.EnumPopup("Ignore When", OverrideCubemapSettingsWhen);
+                    OverrideCubemapSettingsWhen =
+                        (OverrideWhenSize)EditorGUILayout.EnumPopup("Ignore When", OverrideCubemapSettingsWhen);
                     using (new EditorGUI.DisabledScope(OverrideCubemapSettingsWhen == OverrideWhenSize.Always))
                     {
-                        CubemapSize = EditorGUILayout.IntPopup("Ignore Size", CubemapSize, maxTextureNames, maxTextureSizes);
+                        CubemapSize = EditorGUILayout.IntPopup("Ignore Size", CubemapSize, maxTextureNames,
+                            maxTextureSizes);
                     }
                 }
             }
 
             IgnoreNormalMaps = EditorGUILayout.Toggle("Normal maps", IgnoreNormalMaps);
+
+            GUILayout.Space(5);
+            GUILayout.Label("Per-Platform Overrides", Styles.BoldWrap);
+
+            DrawPlatformSettings("PC (Standalone)", StandaloneSettings);
+            DrawPlatformSettings("Android", AndroidSettings);
+            DrawPlatformSettings("iOS", iOSSettings);
+        }
+
+        private void DrawPlatformSettings(string label, PlatformOverrideSettings settings)
+        {
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                settings.Enabled = EditorGUILayout.ToggleLeft(label + " Override", settings.Enabled);
+                using (new EditorGUI.DisabledScope(!settings.Enabled))
+                using (new EditorGUI.IndentLevelScope())
+                {
+                    settings.MaxTextureSize = EditorGUILayout.IntPopup("Max Size", settings.MaxTextureSize,
+                        maxTextureNames, maxTextureSizes);
+                    settings.CrunchCompression =
+                        EditorGUILayout.Toggle("Use Crunch Compression", settings.CrunchCompression);
+                    using (new EditorGUI.DisabledScope(!settings.CrunchCompression))
+                    {
+                        settings.CompressionQuality =
+                            EditorGUILayout.IntSlider("Quality", settings.CompressionQuality, 1, 100);
+                    }
+                }
+            }
         }
 
         public void ProcessTextures(TextureDetails details)
@@ -220,7 +252,8 @@ namespace VRWorldToolkit.Editor
                 var current = 1;
                 foreach (var importer in importers)
                 {
-                    EditorUtility.DisplayProgressBar("Applying New Settings", importer.assetPath, (float) current / count);
+                    EditorUtility.DisplayProgressBar("Applying New Settings", importer.assetPath,
+                        (float)current / count);
 
                     if (IgnoreNormalMaps && importer.textureType == TextureImporterType.NormalMap)
                         continue;
@@ -258,17 +291,12 @@ namespace VRWorldToolkit.Editor
                                 importer.anisoLevel = AnisoLevel;
                                 break;
                             case OverrideWhenSize.SmallerThan:
-                                if (oldAnisoLevel < newAnisoLevel)
-                                {
-                                    importer.anisoLevel = newAnisoLevel;
-                                }
+                                if (oldAnisoLevel < newAnisoLevel) importer.anisoLevel = newAnisoLevel;
 
                                 break;
                             case OverrideWhenSize.BiggerThan:
                                 if (oldAnisoLevel > newAnisoLevel)
-                                {
-                                    importer.maxTextureSize = newAnisoLevel;
-                                }
+                                    importer.maxTextureSize = newAnisoLevel; // existing behaviour
 
                                 break;
                         }
@@ -277,7 +305,6 @@ namespace VRWorldToolkit.Editor
                     var skipCrunchCompression = false;
 
                     if (DontOverrideCrunchWhen != DontOverrideWhen.Never)
-                    {
                         switch (DontOverrideCrunchWhen)
                         {
                             case DontOverrideWhen.AlreadyDisabled:
@@ -287,7 +314,6 @@ namespace VRWorldToolkit.Editor
                                 if (importer.crunchedCompression) skipCrunchCompression = true;
                                 break;
                         }
-                    }
 
                     if (!skipCrunchCompression)
                     {
@@ -296,7 +322,6 @@ namespace VRWorldToolkit.Editor
                         importer.crunchedCompression = CrunchCompression;
 
                         if (importer.crunchedCompression)
-                        {
                             switch (OverrideMaxTextureSizeWhen)
                             {
                                 case OverrideWhenSize.Always:
@@ -304,28 +329,25 @@ namespace VRWorldToolkit.Editor
                                     break;
                                 case OverrideWhenSize.SmallerThan:
                                     if (oldMaxTextureSize < newMaxTextureSize)
-                                    {
                                         importer.maxTextureSize = newMaxTextureSize;
-                                    }
 
                                     break;
                                 case OverrideWhenSize.BiggerThan:
                                     if (oldMaxTextureSize > newMaxTextureSize)
-                                    {
                                         importer.maxTextureSize = newMaxTextureSize;
-                                    }
 
                                     break;
                             }
-                        }
                     }
 
                     if (!DontChangeCompressionQuality)
-                    {
-                        if (!(ignoreNoneCompression && importer.textureCompression == TextureImporterCompression.Uncompressed))
-                        {
+                        if (!(ignoreNoneCompression &&
+                              importer.textureCompression == TextureImporterCompression.Uncompressed))
                             importer.textureCompression = TextureCompressionQuality;
-                        }                    }
+
+                    ApplyPlatformSettings(importer, "Standalone", StandaloneSettings, MaxTextureSize);
+                    ApplyPlatformSettings(importer, "Android", AndroidSettings, MaxTextureSize);
+                    ApplyPlatformSettings(importer, "iPhone", iOSSettings, MaxTextureSize);
 
                     importer.SaveAndReimport();
                     current++;
@@ -338,24 +360,45 @@ namespace VRWorldToolkit.Editor
                 AssetDatabase.StopAssetEditing();
             }
         }
+
+        private static void ApplyPlatformSettings(TextureImporter importer, string platformName,
+            PlatformOverrideSettings settings, int fallbackMaxSize)
+        {
+            if (!settings.Enabled)
+                return;
+
+            var pts = importer.GetPlatformTextureSettings(platformName);
+            if (pts == null) pts = new TextureImporterPlatformSettings();
+
+            pts.name = platformName;
+            pts.overridden = true;
+
+            pts.maxTextureSize = settings.MaxTextureSize > 0 ? settings.MaxTextureSize : fallbackMaxSize;
+            pts.crunchedCompression = settings.CrunchCompression;
+            if (settings.CrunchCompression) pts.compressionQuality = settings.CompressionQuality;
+
+            importer.SetPlatformTextureSettings(pts);
+        }
+
+        // Per-platform overrides
+        [Serializable]
+        public class PlatformOverrideSettings
+        {
+            public bool Enabled;
+            public int MaxTextureSize = 2048;
+            public bool CrunchCompression = true;
+            public int CompressionQuality = 80;
+        }
     }
+
 
     public class MassTextureImporter : EditorWindow
     {
-        [MenuItem("VRWorld Toolkit/Quick Functions/Mass Texture Importer", false, 4)]
-        public static void ShowWindow()
-        {
-            var window = GetWindow(typeof(MassTextureImporter));
-            window.titleContent = new GUIContent("Mass Texture Importer");
-            window.minSize = new Vector2(400, 530);
-            window.Show();
-        }
+        private TextureDetails details = new();
 
-        private TextureDetails details = new TextureDetails();
+        private ImporterSettingsManager importerSettingsManager = new();
 
         private Vector2 scrollPos;
-
-        private ImporterSettingsManager importerSettingsManager = new ImporterSettingsManager();
 
         private void OnGUI()
         {
@@ -366,7 +409,8 @@ namespace VRWorldToolkit.Editor
                 {
                     GUILayout.Label("<b>Texture Count:</b> " + details.TextureCount, Styles.LabelRichText);
                     GUILayout.Label("<b>Uncrunched Count:</b> " + details.UncrunchedCount, Styles.LabelRichText);
-                    GUILayout.Label("<b>Storage Size:</b> " + EditorUtility.FormatBytes(details.StorageSize), Styles.LabelRichText);
+                    GUILayout.Label("<b>Storage Size:</b> " + EditorUtility.FormatBytes(details.StorageSize),
+                        Styles.LabelRichText);
                 }
 
                 using (new EditorGUILayout.VerticalScope())
@@ -385,30 +429,31 @@ namespace VRWorldToolkit.Editor
             using (new EditorGUILayout.HorizontalScope())
             {
                 if (GUILayout.Button("Scene", GUILayout.Width(70), GUILayout.Height(20)))
-                {
                     details = GetAllTexturesFromScene();
-                }
 
                 if (GUILayout.Button("Assets", GUILayout.Width(70), GUILayout.Height(20)))
-                {
                     details = GetAllTexturesFromAssets();
-                }
 
                 GUILayout.FlexibleSpace();
 
                 if (GUILayout.Button("Revert", GUILayout.Width(70), GUILayout.Height(20)))
-                {
                     importerSettingsManager = new ImporterSettingsManager();
-                }
 
                 if (GUILayout.Button("Apply", GUILayout.Width(70), GUILayout.Height(20)))
-                {
-                    if (EditorUtility.DisplayDialog("Process Importers?", $"About to process Texture Import settings on {details.TextureCount} textures, this can take a while depending on the amount and size of them.\n\nDo you want to continue?", "Ok", "Cancel"))
-                    {
+                    if (EditorUtility.DisplayDialog("Process Importers?",
+                            $"About to process Texture Import settings on {details.TextureCount} textures, this can take a while depending on the amount and size of them.\n\nDo you want to continue?",
+                            "Ok", "Cancel"))
                         importerSettingsManager.ProcessTextures(details);
-                    }
-                }
             }
+        }
+
+        [MenuItem("VRWorld Toolkit/Quick Functions/Mass Texture Importer", false, 4)]
+        public static void ShowWindow()
+        {
+            var window = GetWindow(typeof(MassTextureImporter));
+            window.titleContent = new GUIContent("Mass Texture Importer");
+            window.minSize = new Vector2(400, 530);
+            window.Show();
         }
 
         private static TextureDetails GetAllTexturesFromScene()
@@ -422,12 +467,11 @@ namespace VRWorldToolkit.Editor
             {
                 var gameObject = allGameObjects[i] as GameObject;
 
-                if (gameObject.hideFlags != HideFlags.None || EditorUtility.IsPersistent(gameObject.transform.root.gameObject)) continue;
+                if (gameObject.hideFlags != HideFlags.None ||
+                    EditorUtility.IsPersistent(gameObject.transform.root.gameObject)) continue;
 
-                if (EditorUtility.DisplayCancelableProgressBar("Getting All Textures from Scene", gameObject.name, (float) i / allGameObjectsLength))
-                {
-                    break;
-                }
+                if (EditorUtility.DisplayCancelableProgressBar("Getting All Textures from Scene", gameObject.name,
+                        (float)i / allGameObjectsLength)) break;
 
                 var renderers = gameObject.GetComponents<Renderer>();
                 for (var j = 0; j < renderers.Length; j++)
@@ -445,19 +489,15 @@ namespace VRWorldToolkit.Editor
                         var shader = material.shader;
 
                         for (var l = 0; l < ShaderUtil.GetPropertyCount(shader); l++)
-                        {
                             if (ShaderUtil.GetPropertyType(shader, l) == ShaderUtil.ShaderPropertyType.TexEnv)
                             {
                                 var texture = material.GetTexture(ShaderUtil.GetPropertyName(shader, l));
 
-                                var textureImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(texture)) as TextureImporter;
+                                var textureImporter =
+                                    AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(texture)) as TextureImporter;
 
-                                if (textureImporter != null)
-                                {
-                                    details.AddTexture(textureImporter, texture);
-                                }
+                                if (textureImporter != null) details.AddTexture(textureImporter, texture);
                             }
-                        }
                     }
                 }
             }
@@ -470,17 +510,15 @@ namespace VRWorldToolkit.Editor
         {
             var details = new TextureDetails();
 
-            var assetGuidStrings = AssetDatabase.FindAssets("t:texture2D", new[] {"Assets"});
+            var assetGuidStrings = AssetDatabase.FindAssets("t:texture2D", new[] { "Assets" });
 
             var assetsLength = assetGuidStrings.Length;
             for (var i = 0; i < assetsLength; i++)
             {
                 var path = AssetDatabase.GUIDToAssetPath(assetGuidStrings[i]);
 
-                if (EditorUtility.DisplayCancelableProgressBar("Getting All Textures from Assets", Path.GetFileName(path), (float) i / assetsLength))
-                {
-                    break;
-                }
+                if (EditorUtility.DisplayCancelableProgressBar("Getting All Textures from Assets",
+                        Path.GetFileName(path), (float)i / assetsLength)) break;
 
                 var texture = AssetDatabase.LoadAssetAtPath<Texture>(path);
                 var textureImporter = AssetImporter.GetAtPath(path) as TextureImporter;
