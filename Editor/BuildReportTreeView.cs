@@ -320,8 +320,8 @@ namespace VRWorldToolkit.Editor
                 },
                 new MultiColumnHeaderState.Column
                 {
-                    headerContent = new GUIContent("Size", "Uncompressed size of asset"),
-                    contextMenuText = "Size",
+                    headerContent = new GUIContent("USize", "Uncompressed size of the asset. Unity compresses assets during the build process, so this value will not match the size of the asset within the build."),
+                    contextMenuText = "USize",
                     headerTextAlignment = TextAlignment.Left,
                     sortedAscending = true,
                     sortingArrowAlignment = TextAlignment.Right,
