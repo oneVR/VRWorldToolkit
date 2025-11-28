@@ -401,9 +401,8 @@ namespace VRWorldToolkit.Editor
     public class MassTextureImporter : EditorWindow
     {
         private TextureDetails details = new();
-
         private ImporterSettingsManager importerSettingsManager = new();
-
+        private bool settingsChanged;
         private Vector2 scrollPos;
 
         private void OnGUI()
@@ -429,7 +428,11 @@ namespace VRWorldToolkit.Editor
             using (var scrollView = new EditorGUILayout.ScrollViewScope(scrollPos))
             {
                 scrollPos = scrollView.scrollPosition;
-                importerSettingsManager.DrawSettings();
+                using (var check = new EditorGUI.ChangeCheckScope())
+                {
+                    importerSettingsManager.DrawSettings();
+                    if (check.changed) settingsChanged = true;
+                }
             }
 
             GUILayout.Space(5);
@@ -445,8 +448,14 @@ namespace VRWorldToolkit.Editor
 
                 GUILayout.FlexibleSpace();
 
-                if (GUILayout.Button("Revert", GUILayout.Width(70), GUILayout.Height(20)))
-                    importerSettingsManager = new ImporterSettingsManager();
+                using (new EditorGUI.DisabledScope(!settingsChanged))
+                {
+                    if (GUILayout.Button("Default", GUILayout.Width(70), GUILayout.Height(20)))
+                    {
+                        importerSettingsManager = new ImporterSettingsManager();
+                        settingsChanged = false;
+                    }
+                }
 
                 if (GUILayout.Button("Apply", GUILayout.Width(70), GUILayout.Height(20)))
                     if (EditorUtility.DisplayDialog("Process Importers?",
