@@ -136,6 +136,7 @@ namespace VRWorldToolkit.Editor
 
         public void DrawSettings()
         {
+            GUILayout.Space(5);
             GUILayout.Label("Mip Maps", Styles.BoldWrap);
             DontChangeMipMaps = EditorGUILayout.Toggle("Don't Change", DontChangeMipMaps);
             using (new EditorGUI.DisabledScope(DontChangeMipMaps))
@@ -144,6 +145,7 @@ namespace VRWorldToolkit.Editor
                 GenerateMipMaps = EditorGUILayout.Toggle("Generate Mip Maps", GenerateMipMaps);
             }
 
+            GUILayout.Space(5);
             GUILayout.Label("Aniso Level", Styles.BoldWrap);
             DontChangeAniso = EditorGUILayout.Toggle("Don't Change", DontChangeAniso);
             using (new EditorGUI.DisabledScope(DontChangeAniso))
@@ -155,6 +157,7 @@ namespace VRWorldToolkit.Editor
                 }
             }
 
+            GUILayout.Space(5);
             GUILayout.Label("Size (Default)", Styles.BoldWrap);
             MaxTextureSize = EditorGUILayout.IntPopup("Max Size", MaxTextureSize, maxTextureNames, maxTextureSizes);
             using (new EditorGUI.IndentLevelScope())
@@ -163,6 +166,7 @@ namespace VRWorldToolkit.Editor
                     (OverrideWhenSize)EditorGUILayout.EnumPopup("Override When", OverrideMaxTextureSizeWhen);
             }
 
+            GUILayout.Space(5);
             GUILayout.Label("Crunch Compression (Default)", Styles.BoldWrap);
             CrunchCompression = EditorGUILayout.Toggle("Use Crunch Compression", CrunchCompression);
             using (new EditorGUI.DisabledScope(!CrunchCompression))
@@ -181,6 +185,7 @@ namespace VRWorldToolkit.Editor
                     (DontOverrideWhen)EditorGUILayout.EnumPopup("Don't Override When", DontOverrideCrunchWhen);
             }
 
+            GUILayout.Space(5);
             GUILayout.Label("Texture Compression Quality (Default)", Styles.BoldWrap);
             DontChangeCompressionQuality = EditorGUILayout.Toggle("Dont Change", DontChangeCompressionQuality);
             using (new EditorGUI.DisabledScope(DontChangeCompressionQuality))
@@ -194,6 +199,7 @@ namespace VRWorldToolkit.Editor
                 }
             }
 
+            GUILayout.Space(5);
             GUILayout.Label("Ignore", Styles.BoldWrap);
             IgnoreCubemaps = EditorGUILayout.Toggle("Cubemaps", IgnoreCubemaps);
             using (new EditorGUI.IndentLevelScope())
@@ -420,10 +426,13 @@ namespace VRWorldToolkit.Editor
                 }
             }
 
-            importerSettingsManager.DrawSettings();
+            using (var scrollView = new EditorGUILayout.ScrollViewScope(scrollPos))
+            {
+                scrollPos = scrollView.scrollPosition;
+                importerSettingsManager.DrawSettings();
+            }
 
             GUILayout.Space(5);
-
             GUILayout.Label("Get textures from:");
 
             using (new EditorGUILayout.HorizontalScope())
