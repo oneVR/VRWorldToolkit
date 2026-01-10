@@ -138,85 +138,81 @@ namespace VRWorldToolkit.Editor
         {
             GUILayout.Space(5);
             GUILayout.Label("Mip Maps", Styles.BoldWrap);
-            DontChangeMipMaps = EditorGUILayout.Toggle("Don't Change", DontChangeMipMaps);
-            using (new EditorGUI.DisabledScope(DontChangeMipMaps))
+            using (new EditorGUI.IndentLevelScope())
             {
-                StreamingMipMap = EditorGUILayout.Toggle("Streaming Mip Maps", StreamingMipMap);
-                GenerateMipMaps = EditorGUILayout.Toggle("Generate Mip Maps", GenerateMipMaps);
+                DontChangeMipMaps = EditorGUILayout.Toggle("Don't Change", DontChangeMipMaps);
+                using (new EditorGUI.DisabledScope(DontChangeMipMaps))
+                {
+                    StreamingMipMap = EditorGUILayout.Toggle("Streaming Mip Maps", StreamingMipMap);
+                    GenerateMipMaps = EditorGUILayout.Toggle("Generate Mip Maps", GenerateMipMaps);
+                }
             }
 
             GUILayout.Space(5);
             GUILayout.Label("Aniso Level", Styles.BoldWrap);
-            DontChangeAniso = EditorGUILayout.Toggle("Don't Change", DontChangeAniso);
-            using (new EditorGUI.DisabledScope(DontChangeAniso))
+            using (new EditorGUI.IndentLevelScope())
             {
-                AnisoLevel = EditorGUILayout.IntSlider("Aniso Level", AnisoLevel, 0, 16);
-                using (new EditorGUI.IndentLevelScope())
+                DontChangeAniso = EditorGUILayout.Toggle("Don't Change", DontChangeAniso);
+                using (new EditorGUI.DisabledScope(DontChangeAniso))
                 {
-                    OverrideAnisoWhen = (OverrideWhenSize)EditorGUILayout.EnumPopup("Override When", OverrideAnisoWhen);
+                    AnisoLevel = EditorGUILayout.IntSlider("Aniso Level", AnisoLevel, 0, 16);
+                    using (new EditorGUI.IndentLevelScope())
+                    {
+                        OverrideAnisoWhen = (OverrideWhenSize)EditorGUILayout.EnumPopup("Override When", OverrideAnisoWhen);
+                    }
                 }
             }
 
             GUILayout.Space(5);
             GUILayout.Label("Size (Default)", Styles.BoldWrap);
-            MaxTextureSize = EditorGUILayout.IntPopup("Max Size", MaxTextureSize, maxTextureNames, maxTextureSizes);
             using (new EditorGUI.IndentLevelScope())
             {
-                OverrideMaxTextureSizeWhen =
-                    (OverrideWhenSize)EditorGUILayout.EnumPopup("Override When", OverrideMaxTextureSizeWhen);
+                MaxTextureSize = EditorGUILayout.IntPopup("Max Size", MaxTextureSize, maxTextureNames, maxTextureSizes);
+                using (new EditorGUI.IndentLevelScope())
+                {
+                    OverrideMaxTextureSizeWhen =
+                        (OverrideWhenSize)EditorGUILayout.EnumPopup("Override When", OverrideMaxTextureSizeWhen);
+                }
             }
 
             GUILayout.Space(5);
             GUILayout.Label("Crunch Compression (Default)", Styles.BoldWrap);
-            CrunchCompression = EditorGUILayout.Toggle("Use Crunch Compression", CrunchCompression);
-            using (new EditorGUI.DisabledScope(!CrunchCompression))
-            {
-                CompressionQuality = EditorGUILayout.IntSlider("Quality", CompressionQuality, 1, 100);
-                using (new EditorGUI.IndentLevelScope())
-                {
-                    OverrideCrunchCompressionSizeWhen =
-                        (OverrideWhenSize)EditorGUILayout.EnumPopup("Override When", OverrideCrunchCompressionSizeWhen);
-                }
-            }
-
             using (new EditorGUI.IndentLevelScope())
             {
-                DontOverrideCrunchWhen =
-                    (DontOverrideWhen)EditorGUILayout.EnumPopup("Don't Override When", DontOverrideCrunchWhen);
+                CrunchCompression = EditorGUILayout.Toggle("Use Crunch Compression", CrunchCompression);
+                using (new EditorGUI.DisabledScope(!CrunchCompression))
+                {
+                    CompressionQuality = EditorGUILayout.IntSlider("Quality", CompressionQuality, 1, 100);
+                    using (new EditorGUI.IndentLevelScope())
+                    {
+                        OverrideCrunchCompressionSizeWhen =
+                            (OverrideWhenSize)EditorGUILayout.EnumPopup("Override When", OverrideCrunchCompressionSizeWhen);
+                    }
+                }
+
+                using (new EditorGUI.IndentLevelScope())
+                {
+                    DontOverrideCrunchWhen =
+                        (DontOverrideWhen)EditorGUILayout.EnumPopup("Don't Override When", DontOverrideCrunchWhen);
+                }
             }
 
             GUILayout.Space(5);
             GUILayout.Label("Texture Compression Quality (Default)", Styles.BoldWrap);
-            DontChangeCompressionQuality = EditorGUILayout.Toggle("Dont Change", DontChangeCompressionQuality);
-            using (new EditorGUI.DisabledScope(DontChangeCompressionQuality))
-            {
-                using (new EditorGUI.IndentLevelScope())
-                {
-                    TextureCompressionQuality =
-                        (TextureImporterCompression)EditorGUILayout.EnumPopup("Compression Quality",
-                            TextureCompressionQuality);
-                    ignoreNoneCompression = EditorGUILayout.Toggle("Ignore Uncompressed", ignoreNoneCompression);
-                }
-            }
-
-            GUILayout.Space(5);
-            GUILayout.Label("Ignore", Styles.BoldWrap);
-            IgnoreCubemaps = EditorGUILayout.Toggle("Cubemaps", IgnoreCubemaps);
             using (new EditorGUI.IndentLevelScope())
             {
-                using (new EditorGUI.DisabledScope(!IgnoreCubemaps))
+                DontChangeCompressionQuality = EditorGUILayout.Toggle("Dont Change", DontChangeCompressionQuality);
+                using (new EditorGUI.DisabledScope(DontChangeCompressionQuality))
                 {
-                    OverrideCubemapSettingsWhen =
-                        (OverrideWhenSize)EditorGUILayout.EnumPopup("Ignore When", OverrideCubemapSettingsWhen);
-                    using (new EditorGUI.DisabledScope(OverrideCubemapSettingsWhen == OverrideWhenSize.Always))
+                    using (new EditorGUI.IndentLevelScope())
                     {
-                        CubemapSize = EditorGUILayout.IntPopup("Ignore Size", CubemapSize, maxTextureNames,
-                            maxTextureSizes);
+                        TextureCompressionQuality =
+                            (TextureImporterCompression)EditorGUILayout.EnumPopup("Compression Quality",
+                                TextureCompressionQuality);
+                        ignoreNoneCompression = EditorGUILayout.Toggle("Ignore Uncompressed", ignoreNoneCompression);
                     }
                 }
             }
-
-            IgnoreNormalMaps = EditorGUILayout.Toggle("Normal maps", IgnoreNormalMaps);
 
             GUILayout.Space(5);
             GUILayout.Label("Per-Platform Overrides", Styles.BoldWrap);
@@ -224,6 +220,28 @@ namespace VRWorldToolkit.Editor
             DrawPlatformSettings("PC (Standalone)", StandaloneSettings);
             DrawPlatformSettings("Android", AndroidSettings);
             DrawPlatformSettings("iOS", iOSSettings);
+
+            GUILayout.Space(5);
+            GUILayout.Label("Ignore Textures", Styles.BoldWrap);
+            using (new EditorGUI.IndentLevelScope())
+            {
+                IgnoreCubemaps = EditorGUILayout.Toggle("Cubemaps", IgnoreCubemaps);
+                using (new EditorGUI.IndentLevelScope())
+                {
+                    using (new EditorGUI.DisabledScope(!IgnoreCubemaps))
+                    {
+                        OverrideCubemapSettingsWhen =
+                            (OverrideWhenSize)EditorGUILayout.EnumPopup("Ignore When", OverrideCubemapSettingsWhen);
+                        using (new EditorGUI.DisabledScope(OverrideCubemapSettingsWhen == OverrideWhenSize.Always))
+                        {
+                            CubemapSize = EditorGUILayout.IntPopup("Ignore Size", CubemapSize, maxTextureNames,
+                                maxTextureSizes);
+                        }
+                    }
+                }
+
+                IgnoreNormalMaps = EditorGUILayout.Toggle("Normal maps", IgnoreNormalMaps);
+            }
         }
 
         private void DrawPlatformSettings(string label, PlatformOverrideSettings settings)
