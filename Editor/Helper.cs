@@ -5,8 +5,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 using UnityEditor;
-using UnityEditor.PackageManager;
-using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 
 namespace VRWorldToolkit.Editor
