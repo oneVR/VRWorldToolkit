@@ -1246,7 +1246,7 @@ namespace VRWorldToolkit.Editor
 
         private const string NullSpawnPoint = "Null spawn point set Scene Descriptor. Spawning into a null spawn point will cause you to get thrown back to your homeworld.";
 
-        private const string ReferenceCameraClearFlagsNotSkybox = "The current reference camera's clear flags are not set to Skybox. This can cause rendering problems in-game.";
+        private const string ReferenceCameraClearFlagsNotSkyboxOrColor = "The current reference camera's clear flags are not set to Skybox or Solid Color. This can cause rendering problems in-game.";
 
         private const string ReferenceCameraClippingPlaneRatio = "Too high of a ratio between reference camera's near ({0}) and far ({1}) clip values can cause rendering issues in-game.";
 
@@ -1608,9 +1608,9 @@ namespace VRWorldToolkit.Editor
                     var camera = sceneDescriptor.ReferenceCamera.GetComponent<Camera>();
                     if (camera != null)
                     {
-                        if (camera.clearFlags != CameraClearFlags.Skybox)
+                        if (camera.clearFlags != CameraClearFlags.Skybox && camera.clearFlags != CameraClearFlags.SolidColor)
                         {
-                            general.AddMessageGroup(new MessageGroup(ReferenceCameraClearFlagsNotSkybox, MessageType.Warning).AddSingleMessage(new SingleMessage(sceneDescriptor.ReferenceCamera)));
+                            general.AddMessageGroup(new MessageGroup(ReferenceCameraClearFlagsNotSkyboxOrColor, MessageType.Warning).AddSingleMessage(new SingleMessage(sceneDescriptor.ReferenceCamera)));
                         }
 
                         // TODO: Investigate better sanity value
