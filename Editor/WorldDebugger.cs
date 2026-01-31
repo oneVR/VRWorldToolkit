@@ -1165,24 +1165,6 @@ namespace VRWorldToolkit.Editor
                 PrefabUtility.RecordPrefabInstancePropertyModifications(descriptor);
             };
         }
-
-        public static Action SetVRCInstallPath()
-        {
-            return () =>
-            {
-                var clientPath = Helper.GetSteamVrcExecutablePath();
-
-                if (clientPath != null)
-                {
-                    SDKClientUtilities.SetVRCInstallPath(clientPath);
-                }
-                else if (EditorUtility.DisplayDialog("VRChat Executable Path Not Found", "Could not find the VRChat executable path automatically.\n\nPress Ok to locate it manually.", "Ok", "Cancel"))
-                {
-                    var newPath = EditorUtility.OpenFilePanel("Locate VRChat.exe", Application.dataPath, "exe");
-                    SDKClientUtilities.SetVRCInstallPath(newPath);
-                }
-            };
-        }
 #endif
 
         public enum RemovePpEffect
@@ -1438,12 +1420,6 @@ namespace VRWorldToolkit.Editor
         private const string MaterialWithGrabPassShaderCombined = "Found {0} materials in the scene using a GrabPass.";
         private const string MaterialWithGrabPassShaderInfoPC = "A GrabPass will halt the rendering to copy the screen's contents into a texture for the shader to read. This has a notable effect on performance.";
         private const string MaterialWithGrabPassShaderInfoAndroid = "Please change the shader for this material. When a shader uses a GrabPass on Android, it will cause painful visual artifacts to occur, as they are not supported.";
-        
-        private const string BuildANDTestBrokenError = "VRChat link association has not been set up, and the VRChat client path has not been set in the VRCSDK settings. Without one of these settings set, Build & Test will not function.";
-
-        private const string BuildANDTestForceNonVRError = "VRChat client path has not been set to point directly to the VRChat executable in the VRCSDK settings. The Force Non-VR setting for Build & Test will not work.";
-
-        private const string BuildANDTestNoExecutableFound = "Current client path set in the VRCSDK settings does not contain the VRChat executable. This will cause problems with Build & Test functionality.";
 
         private const string MaterialWithNonWhitelistedShader = "Material \"{0}\" is using an unsupported shader \"{1}\".";
         private const string MaterialWithNonWhitelistedShaderCombined = "Found {0} materials with unsupported shaders.";
@@ -1640,24 +1616,6 @@ namespace VRWorldToolkit.Editor
 #endif
 
 #if VRWT_IS_VRC
-#if UNITY_EDITOR_WIN
-                // Check for problems with Build & Test
-                var commandPath = Registry.ClassesRoot.OpenSubKey(@"VRChat\shell\open\command");
-                var savedVRCInstallPath = SDKClientUtilities.GetSavedVRCInstallPath();
-                if (commandPath is null && savedVRCInstallPath == "\\VRChat.exe")
-                {
-                    general.AddMessageGroup(new MessageGroup(BuildANDTestBrokenError, MessageType.Error).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
-                }
-                else if (savedVRCInstallPath == "\\VRChat.exe")
-                {
-                    general.AddMessageGroup(new MessageGroup(BuildANDTestForceNonVRError, MessageType.Warning).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
-                }
-                else if (!File.Exists(savedVRCInstallPath))
-                {
-                    general.AddMessageGroup(new MessageGroup(BuildANDTestNoExecutableFound, MessageType.Error).AddSingleMessage(new SingleMessage(SetVRCInstallPath())));
-                }
-#endif
-
                 // Get spawn points for any possible problems
                 if (sceneDescriptor.spawns != null && sceneDescriptor.spawns.Length > 0)
                 {

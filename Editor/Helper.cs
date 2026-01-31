@@ -126,46 +126,6 @@ namespace VRWorldToolkit.Editor
             return type;
         }
 
-        public static string GetSteamVrcExecutablePath()
-        {
-            var steamKey = Registry.LocalMachine.OpenSubKey("Software\\Valve\\Steam") ?? Registry.LocalMachine.OpenSubKey("Software\\Wow6432Node\\Valve\\Steam");
-
-            if (steamKey != null)
-            {
-                const string commonPath = "\\SteamApps\\common";
-                const string executablePath = "\\VRChat.exe";
-
-                var steamPath = (string)steamKey.GetValue("InstallPath");
-
-                var configFile = Path.Combine(steamPath, "config", "config.vdf");
-
-                var folders = new List<string> { steamPath + commonPath };
-
-                var configText = File.ReadAllText(configFile);
-
-                folders.AddRange(Regex.Matches(configText, "(?<=BaseInstallFolder.*\".+?\").+?(?=\")").Cast<Match>().Select(x => x.Value + commonPath));
-
-                foreach (var folder in folders)
-                {
-                    try
-                    {
-                        var matches = Directory.GetDirectories(folder, "VRChat");
-                        if (matches.Length >= 1)
-                        {
-                            var finalPath = matches[0] + executablePath;
-
-                            if (File.Exists(finalPath)) return finalPath;
-                        }
-                    }
-                    catch (DirectoryNotFoundException)
-                    {
-                    }
-                }
-            }
-
-            return null;
-        }
-
         public static void AddTag(string tag)
         {
             UnityEngine.Object[] asset = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset");
