@@ -2,267 +2,777 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEditor;
+using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
 namespace VRWorldToolkit.Editor
 {
+    public enum OverrideCondition
+    {
+        Always,
+        Smaller,
+        Bigger
+    }
+
+    public enum DontOverrideWhen
+    {
+        Never,
+        AlreadyDisabled,
+        AlreadyEnabled
+    }
+
+    [Flags]
+    public enum TextureTypeFilter
+    {
+        [InspectorName("Default")] Default = 1 << 0,
+        [InspectorName("Normal map")] NormalMap = 1 << 1,
+        [InspectorName("Editor GUI and Legacy GUI")] GUI = 1 << 2,
+        [InspectorName("Cookie")] Cookie = 1 << 4,
+        [InspectorName("Lightmap")] Lightmap = 1 << 6,
+        [InspectorName("Cursor")] Cursor = 1 << 7,
+        [InspectorName("Sprite (2D and UI)")] Sprite = 1 << 8,
+        [InspectorName("Single Channel")] SingleChannel = 1 << 10,
+        [InspectorName("Shadowmask")] Shadowmask = 1 << 11,
+        [InspectorName("Directional Lightmap")] DirectionalLightmap = 1 << 12,
+    }
+
+    [Flags]
+    public enum TextureShapeFilter
+    {
+        [InspectorName("2D")] Texture2D = 1 << 1,
+        [InspectorName("Cube")] TextureCube = 1 << 2,
+        [InspectorName("2D Array")] Texture2DArray = 1 << 3,
+        [InspectorName("3D")] Texture3D = 1 << 4,
+    }
+
+    public enum TextureCompressionMode
+    {
+        None = 0,
+        [InspectorName("Low Quality")] LowQuality = 1,
+        [InspectorName("Normal Quality")] NormalQuality = 2,
+        [InspectorName("High Quality")] HighQuality = 3
+    }
+
+    public static class MassTextureImporterExtensions
+    {
+        public static TextureCompressionMode ToTextureCompressionMode(this TextureImporterCompression compression)
+        {
+            return compression switch
+            {
+                TextureImporterCompression.Uncompressed => TextureCompressionMode.None,
+                TextureImporterCompression.CompressedLQ => TextureCompressionMode.LowQuality,
+                TextureImporterCompression.Compressed => TextureCompressionMode.NormalQuality,
+                TextureImporterCompression.CompressedHQ => TextureCompressionMode.HighQuality,
+                _ => TextureCompressionMode.NormalQuality
+            };
+        }
+
+        public static TextureImporterCompression ToTextureImporterCompression(this TextureCompressionMode mode)
+        {
+            return mode switch
+            {
+                TextureCompressionMode.None => TextureImporterCompression.Uncompressed,
+                TextureCompressionMode.LowQuality => TextureImporterCompression.CompressedLQ,
+                TextureCompressionMode.NormalQuality => TextureImporterCompression.Compressed,
+                TextureCompressionMode.HighQuality => TextureImporterCompression.CompressedHQ,
+                _ => TextureImporterCompression.Compressed
+            };
+        }
+
+        public static string GetDisplayName(this TextureImporterType type)
+        {
+            return type switch
+            {
+                TextureImporterType.Default => "Default",
+                TextureImporterType.NormalMap => "Normal map",
+                TextureImporterType.GUI => "Editor GUI and Legacy GUI",
+                TextureImporterType.Cookie => "Cookie",
+                TextureImporterType.Lightmap => "Lightmap",
+                TextureImporterType.Cursor => "Cursor",
+                TextureImporterType.Sprite => "Sprite (2D and UI)",
+                TextureImporterType.SingleChannel => "Single Channel",
+                TextureImporterType.Shadowmask => "Shadowmask",
+                TextureImporterType.DirectionalLightmap => "Directional Lightmap",
+                _ => type.ToString()
+            };
+        }
+
+        public static string GetDisplayName(this TextureImporterShape shape)
+        {
+            return shape switch
+            {
+                TextureImporterShape.Texture2D => "2D",
+                TextureImporterShape.TextureCube => "Cube",
+                TextureImporterShape.Texture2DArray => "2D Array",
+                TextureImporterShape.Texture3D => "3D",
+                _ => shape.ToString()
+            };
+        }
+    }
+
+    public abstract class PlatformConfig
+    {
+        public abstract string DisplayName { get; }
+        public abstract string PlatformKey { get; }
+        public abstract string IconName { get; }
+        public abstract int DefaultFormat { get; }
+        public abstract int DrawFormatSelector(int currentFormat);
+        public abstract bool SupportsCrunch(int format);
+        public abstract bool SupportsCompressorQuality(int format);
+    }
+
+    public class StandalonePlatformConfig : PlatformConfig
+    {
+        public override string DisplayName => "Windows, Mac, Linux";
+        public override string PlatformKey => "Standalone";
+        public override string IconName => "BuildSettings.Standalone";
+        public override int DefaultFormat => (int)TextureImporterFormat.DXT5Crunched;
+
+        public override int DrawFormatSelector(int currentFormat)
+            => Selectors.WindowsFormatIntPopup(currentFormat);
+
+        public override bool SupportsCrunch(int format)
+            => format == (int)TextureImporterFormat.DXT1Crunched ||
+                format == (int)TextureImporterFormat.DXT5Crunched;
+
+        public override bool SupportsCompressorQuality(int format)
+            => format == (int)TextureImporterFormat.BC7 ||
+                format == (int)TextureImporterFormat.BC6H;
+    }
+
+    public class AndroidPlatformConfig : PlatformConfig
+    {
+        public override string DisplayName => "Android";
+        public override string PlatformKey => "Android";
+        public override string IconName => "BuildSettings.Android";
+        public override int DefaultFormat => (int)TextureImporterFormat.ASTC_6x6;
+
+        public override int DrawFormatSelector(int currentFormat)
+            => Selectors.MobileFormatIntPopup(currentFormat);
+
+        public override bool SupportsCrunch(int format)
+            => format == (int)TextureImporterFormat.ETC_RGB4Crunched ||
+                format == (int)TextureImporterFormat.ETC2_RGBA8Crunched;
+
+        public override bool SupportsCompressorQuality(int format)
+            => format == (int)TextureImporterFormat.ASTC_12x12 ||
+                format == (int)TextureImporterFormat.ASTC_10x10 ||
+                format == (int)TextureImporterFormat.ASTC_8x8 ||
+                format == (int)TextureImporterFormat.ASTC_6x6 ||
+                format == (int)TextureImporterFormat.ASTC_5x5 ||
+                format == (int)TextureImporterFormat.ASTC_4x4 ||
+                format == (int)TextureImporterFormat.ETC2_RGBA8 ||
+                format == (int)TextureImporterFormat.ETC2_RGB4_PUNCHTHROUGH_ALPHA ||
+                format == (int)TextureImporterFormat.ETC2_RGB4;
+    }
+
+    public class iOSPlatformConfig : PlatformConfig
+    {
+        public override string DisplayName => "iOS";
+        public override string PlatformKey => "iPhone";
+        public override string IconName => "BuildSettings.iPhone";
+        public override int DefaultFormat => (int)TextureImporterFormat.ASTC_6x6;
+
+        public override int DrawFormatSelector(int currentFormat)
+            => Selectors.MobileFormatIntPopup(currentFormat);
+
+        public override bool SupportsCrunch(int format)
+            => format == (int)TextureImporterFormat.ETC_RGB4Crunched ||
+                format == (int)TextureImporterFormat.ETC2_RGBA8Crunched;
+
+        public override bool SupportsCompressorQuality(int format)
+            => format == (int)TextureImporterFormat.ASTC_12x12 ||
+                format == (int)TextureImporterFormat.ASTC_10x10 ||
+                format == (int)TextureImporterFormat.ASTC_8x8 ||
+                format == (int)TextureImporterFormat.ASTC_6x6 ||
+                format == (int)TextureImporterFormat.ASTC_5x5 ||
+                format == (int)TextureImporterFormat.ASTC_4x4 ||
+                format == (int)TextureImporterFormat.ETC2_RGBA8 ||
+                format == (int)TextureImporterFormat.ETC2_RGB4_PUNCHTHROUGH_ALPHA ||
+                format == (int)TextureImporterFormat.ETC2_RGB4;
+    }
+
+    public class PlatformTabManager
+    {
+        private int _selectedIndex;
+        private readonly List<Tab> _tabs = new();
+        private bool _iconsInitialized;
+
+        private struct Tab
+        {
+            public string Label;
+            public string IconName;
+            public GUIContent Icon;
+            public Action DrawContent;
+        }
+
+        public int SelectedIndex => _selectedIndex;
+
+        public void AddTab(string label, string iconName, Action drawContent)
+        {
+            _tabs.Add(new Tab
+            {
+                Label = label,
+                IconName = iconName,
+                Icon = null,
+                DrawContent = drawContent
+            });
+        }
+
+        public void AddDefaultTab(Action drawContent)
+        {
+            _tabs.Insert(0, new Tab
+            {
+                Label = "Default",
+                IconName = null,
+                Icon = null,
+                DrawContent = drawContent
+            });
+        }
+
+        private void InitializeIconsIfNeeded()
+        {
+            if (_iconsInitialized) return;
+
+            for (int i = 0; i < _tabs.Count; i++)
+            {
+                var tab = _tabs[i];
+
+                if (string.IsNullOrEmpty(tab.IconName))
+                {
+                    tab.Icon = new GUIContent(tab.Label);
+                }
+                else
+                {
+                    var iconContent = EditorGUIUtility.IconContent(tab.IconName + ".Small");
+                    tab.Icon = iconContent?.image != null
+                        ? new GUIContent(iconContent.image, tab.Label)
+                        : new GUIContent(tab.Label);
+                }
+
+                _tabs[i] = tab;
+            }
+
+            _iconsInitialized = true;
+        }
+
+        public void DrawTabs(Func<int, bool> isHighlighted = null)
+        {
+            InitializeIconsIfNeeded();
+
+            EditorGUILayout.BeginHorizontal();
+
+            for (int i = 0; i < _tabs.Count; i++)
+            {
+                DrawTab(i, isHighlighted?.Invoke(i) ?? false);
+            }
+
+            EditorGUILayout.EndHorizontal();
+
+            _tabs[_selectedIndex].DrawContent?.Invoke();
+        }
+
+        private void DrawTab(int index, bool highlight)
+        {
+            bool isSelected = _selectedIndex == index;
+
+            if (isSelected)
+                GUI.backgroundColor = new Color(0.6f, 0.8f, 1f);
+
+            if (GUILayout.Toggle(isSelected, _tabs[index].Icon, Styles.PlatformSelector))
+                _selectedIndex = index;
+
+            if (highlight)
+            {
+                var rect = GUILayoutUtility.GetLastRect();
+                rect.width = 3;
+                EditorGUI.DrawRect(rect, new Color(0.2f, 0.6f, 1f, 1f));
+            }
+
+            GUI.backgroundColor = Color.white;
+        }
+    }
+
+    [Serializable]
+    public class PlatformOverrideSettings
+    {
+        public bool Enabled;
+        public int MaxTextureSize = 2048;
+        public OverrideCondition MaxSizeCondition = OverrideCondition.Bigger;
+        public int Format;
+        public bool UseCrunchCompression = true;
+        public int CrunchQuality = 80;
+        public TextureCompressionQuality TextureCompressionQuality = TextureCompressionQuality.Normal;
+
+        private readonly PlatformConfig _config;
+
+        public PlatformConfig Config => _config;
+        public string DisplayName => _config.DisplayName;
+        public string PlatformKey => _config.PlatformKey;
+        public bool IsCrunchedFormat => _config.SupportsCrunch(Format);
+        public bool HasCompressionQuality => _config.SupportsCompressorQuality(Format);
+
+        public PlatformOverrideSettings(PlatformConfig config)
+        {
+            _config = config;
+            Format = config.DefaultFormat;
+        }
+
+        public void DrawSettings()
+        {
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                Enabled = EditorGUILayout.ToggleLeft($"Override for {DisplayName}", Enabled);
+
+                using (new EditorGUI.DisabledScope(!Enabled))
+                using (new EditorGUI.IndentLevelScope())
+                {
+                    MaxTextureSize = Selectors.MaxSizeIntPopup(MaxTextureSize);
+                    using (new EditorGUI.IndentLevelScope())
+                    {
+                        MaxSizeCondition = (OverrideCondition)EditorGUILayout.EnumPopup("Override When", MaxSizeCondition);
+                    }
+
+                    Format = _config.DrawFormatSelector(Format);
+
+                    if (IsCrunchedFormat)
+                    {
+                        UseCrunchCompression = EditorGUILayout.Toggle("Use Crunch Compression", UseCrunchCompression);
+                        CrunchQuality = EditorGUILayout.IntSlider("Compressor Quality", CrunchQuality, 1, 100);
+                    }
+
+                    if (HasCompressionQuality)
+                    {
+                        TextureCompressionQuality = (TextureCompressionQuality)EditorGUILayout.EnumPopup("Compressor Quality", TextureCompressionQuality);
+                    }
+                }
+            }
+        }
+
+        public void ApplyTo(TextureImporter importer)
+        {
+            if (!Enabled) return;
+
+            var settings = importer.GetPlatformTextureSettings(PlatformKey) ?? new TextureImporterPlatformSettings();
+
+            settings.name = PlatformKey;
+            settings.overridden = true;
+            settings.format = (TextureImporterFormat)Format;
+
+            switch (MaxSizeCondition)
+            {
+                case OverrideCondition.Always:
+                    settings.maxTextureSize = MaxTextureSize;
+                    break;
+                case OverrideCondition.Smaller when settings.maxTextureSize < MaxTextureSize:
+                    settings.maxTextureSize = MaxTextureSize;
+                    break;
+                case OverrideCondition.Bigger when settings.maxTextureSize > MaxTextureSize:
+                    settings.maxTextureSize = MaxTextureSize;
+                    break;
+            }
+
+            if (IsCrunchedFormat)
+            {
+                settings.crunchedCompression = UseCrunchCompression;
+                if (UseCrunchCompression)
+                {
+                    settings.compressionQuality = CrunchQuality;
+                }
+            }
+
+            if (HasCompressionQuality)
+            {
+                settings.compressionQuality = (int)TextureCompressionQuality;
+            }
+
+            importer.SetPlatformTextureSettings(settings);
+        }
+    }
+
+    [Serializable]
+    public class DefaultPlatformSettings
+    {
+        public bool ChangeMipMaps;
+        public bool GenerateMipMaps = true;
+        public bool StreamingMipMaps = true;
+
+        public bool ChangeAniso;
+        public int AnisoLevel = 1;
+        public OverrideCondition AnisoCondition = OverrideCondition.Always;
+
+        public bool ChangeMaxSize = true;
+        public int MaxTextureSize = 2048;
+        public OverrideCondition MaxSizeCondition = OverrideCondition.Bigger;
+
+        public bool ChangeCompression = true;
+        public TextureCompressionMode Compression = TextureCompressionMode.NormalQuality;
+        public bool IgnoreUncompressed;
+
+        public bool ChangeCrunch = true;
+        public bool UseCrunch = true;
+        public int CrunchQuality = 80;
+        public OverrideCondition CrunchQualityCondition = OverrideCondition.Bigger;
+        public DontOverrideWhen SkipCrunchWhen = DontOverrideWhen.AlreadyEnabled;
+
+        public void DrawSettings()
+        {
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                ChangeMaxSize = EditorGUILayout.Toggle("Change Max Size", ChangeMaxSize);
+                using (new EditorGUI.DisabledScope(!ChangeMaxSize))
+                using (new EditorGUI.IndentLevelScope())
+                {
+                    MaxTextureSize = Selectors.MaxSizeIntPopup(MaxTextureSize);
+                    using (new EditorGUI.IndentLevelScope())
+                    {
+                        MaxSizeCondition = (OverrideCondition)EditorGUILayout.EnumPopup("Override When", MaxSizeCondition);
+                    }
+                }
+
+                EditorGUILayout.Space();
+
+                ChangeCompression = EditorGUILayout.Toggle("Change Compression", ChangeCompression);
+                using (new EditorGUI.DisabledScope(!ChangeCompression))
+                using (new EditorGUI.IndentLevelScope())
+                {
+                    Compression = (TextureCompressionMode)EditorGUILayout.EnumPopup("Compression", Compression);
+                    IgnoreUncompressed = EditorGUILayout.Toggle("Ignore Uncompressed", IgnoreUncompressed);
+                }
+
+                EditorGUILayout.Space();
+
+                using (new EditorGUI.DisabledScope(Compression == TextureCompressionMode.None))
+                {
+                    ChangeCrunch = EditorGUILayout.Toggle("Change Crunch Compression", ChangeCrunch);
+                    using (new EditorGUI.DisabledScope(!ChangeCrunch))
+                    using (new EditorGUI.IndentLevelScope())
+                    {
+                        UseCrunch = EditorGUILayout.Toggle("Use Crunch Compression", UseCrunch);
+                        CrunchQuality = EditorGUILayout.IntSlider("Quality", CrunchQuality, 1, 100);
+                        using (new EditorGUI.IndentLevelScope())
+                        {
+                            CrunchQualityCondition = (OverrideCondition)EditorGUILayout.EnumPopup("Override When", CrunchQualityCondition);
+                        }
+                        SkipCrunchWhen = (DontOverrideWhen)EditorGUILayout.EnumPopup("Don't Override When", SkipCrunchWhen);
+                    }
+                }
+            }
+        }
+
+        public void ApplyTo(TextureImporter importer)
+        {
+            if (ChangeMipMaps)
+            {
+                importer.mipmapEnabled = GenerateMipMaps;
+                if (GenerateMipMaps)
+                {
+                    importer.streamingMipmaps = StreamingMipMaps;
+                }
+            }
+
+            if (ChangeAniso)
+            {
+                switch (AnisoCondition)
+                {
+                    case OverrideCondition.Always:
+                        importer.anisoLevel = AnisoLevel;
+                        break;
+                    case OverrideCondition.Smaller when importer.anisoLevel < AnisoLevel:
+                        importer.anisoLevel = AnisoLevel;
+                        break;
+                    case OverrideCondition.Bigger when importer.anisoLevel > AnisoLevel:
+                        importer.anisoLevel = AnisoLevel;
+                        break;
+                }
+            }
+
+            if (ChangeMaxSize)
+            {
+                switch (MaxSizeCondition)
+                {
+                    case OverrideCondition.Always:
+                        importer.maxTextureSize = MaxTextureSize;
+                        break;
+                    case OverrideCondition.Smaller when importer.maxTextureSize < MaxTextureSize:
+                        importer.maxTextureSize = MaxTextureSize;
+                        break;
+                    case OverrideCondition.Bigger when importer.maxTextureSize > MaxTextureSize:
+                        importer.maxTextureSize = MaxTextureSize;
+                        break;
+                }
+            }
+
+            if (ChangeCompression)
+            {
+                if (!(IgnoreUncompressed && importer.textureCompression == TextureImporterCompression.Uncompressed))
+                {
+                    importer.textureCompression = Compression.ToTextureImporterCompression();
+                }
+            }
+
+            if (ChangeCrunch && importer.textureCompression != TextureImporterCompression.Uncompressed)
+            {
+                bool shouldSkip = SkipCrunchWhen switch
+                {
+                    DontOverrideWhen.AlreadyDisabled => !importer.crunchedCompression,
+                    DontOverrideWhen.AlreadyEnabled => importer.crunchedCompression,
+                    _ => false
+                };
+
+                if (!shouldSkip)
+                {
+                    importer.crunchedCompression = UseCrunch;
+
+                    if (UseCrunch)
+                    {
+                        switch (CrunchQualityCondition)
+                        {
+                            case OverrideCondition.Always:
+                                importer.compressionQuality = CrunchQuality;
+                                break;
+                            case OverrideCondition.Smaller when importer.compressionQuality < CrunchQuality:
+                                importer.compressionQuality = CrunchQuality;
+                                break;
+                            case OverrideCondition.Bigger when importer.compressionQuality > CrunchQuality:
+                                importer.compressionQuality = CrunchQuality;
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public class TextureDetails
     {
-        private readonly Dictionary<Texture, TextureImporter> textureList = new();
-        private int? cubemaps;
-        private int? normalMaps;
-        private long? storageSize;
-        private int? uncrunchedCount;
+        public readonly Dictionary<Texture, TextureImporter> TextureList = new();
 
-        public int TextureCount => textureList.Count;
-
-        public int UncrunchedCount
-        {
-            get
-            {
-                if (uncrunchedCount is null) uncrunchedCount = textureList.Count(x => !x.Value.crunchedCompression);
-
-                return (int)uncrunchedCount;
-            }
-        }
-
-        public int NormalMaps
-        {
-            get
-            {
-                if (normalMaps is null)
-                    normalMaps = textureList.Count(x => x.Value.textureType == TextureImporterType.NormalMap);
-
-                return (int)normalMaps;
-            }
-        }
-
-        public int Cubemaps
-        {
-            get
-            {
-                if (cubemaps is null)
-                    cubemaps = textureList.Count(x => x.Value.textureShape == TextureImporterShape.TextureCube);
-
-                return (int)cubemaps;
-            }
-        }
-
-        public long StorageSize
-        {
-            get
-            {
-                if (storageSize is null)
-                    storageSize = textureList.Sum(x => EditorTextureUtil.GetStorageMemorySize(x.Key));
-
-                return (long)storageSize;
-            }
-        }
-
-        public IEnumerable<TextureImporter> GetImporters
-        {
-            get { return textureList.Select(x => x.Value).ToArray(); }
-        }
+        public IEnumerable<TextureImporter> GetImporters => TextureList.Values;
 
         public void AddTexture(TextureImporter textureImporter, Texture texture)
         {
-            if (!textureList.ContainsKey(texture) && textureImporter != null) textureList.Add(texture, textureImporter);
-        }
-
-        public void ResetStats()
-        {
-            uncrunchedCount = null;
-            storageSize = null;
+            if (texture != null && textureImporter != null && !TextureList.ContainsKey(texture))
+            {
+                TextureList.Add(texture, textureImporter);
+            }
         }
     }
 
     public class ImporterSettingsManager
     {
-        public enum DontOverrideWhen
+        public TextureTypeFilter TypeFilter = TextureTypeFilter.Default;
+        public TextureShapeFilter ShapeFilter = TextureShapeFilter.Texture2D;
+
+        private string _nameFilter;
+        private Regex _nameRegex;
+        private bool _nameRegexValid = true;
+
+        private string _pathFilter;
+        private Regex _pathRegex;
+        private bool _pathRegexValid = true;
+
+        public DefaultPlatformSettings DefaultSettings { get; } = new();
+
+        private readonly Dictionary<string, PlatformOverrideSettings> _platformSettings;
+        private readonly PlatformTabManager _tabController;
+
+        public int MaxTextureSize => DefaultSettings.MaxTextureSize;
+        public OverrideCondition OverrideMaxTextureSizeWhen => DefaultSettings.MaxSizeCondition;
+
+        public ImporterSettingsManager()
         {
-            Never,
-            AlreadyDisabled,
-            AlreadyEnabled
+            _platformSettings = new Dictionary<string, PlatformOverrideSettings>
+            {
+                ["Standalone"] = new PlatformOverrideSettings(new StandalonePlatformConfig()),
+                ["Android"] = new PlatformOverrideSettings(new AndroidPlatformConfig()),
+                ["iPhone"] = new PlatformOverrideSettings(new iOSPlatformConfig())
+            };
+
+            _tabController = new PlatformTabManager();
+            _tabController.AddDefaultTab(() => DefaultSettings.DrawSettings());
+
+            foreach (var item in _platformSettings)
+            {
+                var settings = item.Value;
+                _tabController.AddTab(
+                    settings.DisplayName,
+                    settings.Config.IconName,
+                    () => settings.DrawSettings()
+                );
+            }
         }
 
-        public enum OverrideWhenSize
+        public PlatformOverrideSettings GetPlatformSettings(string platformKey)
+            => _platformSettings.TryGetValue(platformKey, out var settings) ? settings : null;
+
+        public static TextureTypeFilter ToTypeFilter(TextureImporterType type)
+            => (TextureTypeFilter)(1 << (int)type);
+
+        public static TextureShapeFilter ToShapeFilter(TextureImporterShape shape)
+            => (TextureShapeFilter)(1 << (int)shape);
+
+        public bool MatchesFilters(TextureImporter importer)
         {
-            Always,
-            SmallerThan,
-            BiggerThan
+            if (!string.IsNullOrEmpty(_nameFilter) && _nameRegex != null)
+            {
+                if (!_nameRegex.IsMatch(Path.GetFileName(importer.assetPath)))
+                    return false;
+            }
+
+            if (!string.IsNullOrEmpty(_pathFilter) && _pathRegex != null)
+            {
+                if (!_pathRegex.IsMatch(importer.assetPath))
+                    return false;
+            }
+
+            if ((TypeFilter & ToTypeFilter(importer.textureType)) == 0)
+                return false;
+
+            if ((ShapeFilter & ToShapeFilter(importer.textureShape)) == 0)
+                return false;
+
+            return true;
         }
 
-        private readonly string[] maxTextureNames = { "32", "64", "128", "256", "512", "1024", "2048", "4096", "8192" };
+        private void CompileNameRegex()
+        {
+            if (string.IsNullOrEmpty(_nameFilter))
+            {
+                _nameRegex = null;
+                _nameRegexValid = true;
+                return;
+            }
 
-        private readonly int[] maxTextureSizes = { 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192 };
+            try
+            {
+                _nameRegex = new Regex(_nameFilter, RegexOptions.IgnoreCase);
+                _nameRegexValid = true;
+            }
+            catch (ArgumentException)
+            {
+                _nameRegex = null;
+                _nameRegexValid = false;
+            }
+        }
 
-        // Mip Maps
-        public bool DontChangeMipMaps { get; private set; }
-        public bool StreamingMipMap { get; private set; } = true;
-        public bool GenerateMipMaps { get; private set; } = true;
-        public bool DontChangeAniso { get; private set; } = true;
-        public int AnisoLevel { get; private set; } = 1;
-        public OverrideWhenSize OverrideAnisoWhen { get; private set; }
+        private void CompilePathRegex()
+        {
+            if (string.IsNullOrEmpty(_pathFilter))
+            {
+                _pathRegex = null;
+                _pathRegexValid = true;
+                return;
+            }
 
-        // Max Texture Size (default)
-        public int MaxTextureSize { get; private set; } = 2048;
-        public OverrideWhenSize OverrideMaxTextureSizeWhen { get; private set; } = OverrideWhenSize.BiggerThan;
-
-        // Crunch compression (default)
-        public bool CrunchCompression { get; private set; } = true;
-        public int CompressionQuality { get; private set; } = 80;
-        public DontOverrideWhen DontOverrideCrunchWhen { get; private set; } = DontOverrideWhen.AlreadyEnabled;
-        public OverrideWhenSize OverrideCrunchCompressionSizeWhen { get; private set; } = OverrideWhenSize.BiggerThan;
-
-        // Texture Compression Format (default)
-        public bool DontChangeCompressionQuality { get; private set; } = true;
-
-        public TextureImporterCompression TextureCompressionQuality { get; private set; } =
-            TextureImporterCompression.Compressed;
-
-        public bool ignoreNoneCompression { get; private set; }
-
-        // Ignores
-        public bool IgnoreCubemaps { get; private set; } = true;
-        public OverrideWhenSize OverrideCubemapSettingsWhen { get; private set; } = OverrideWhenSize.SmallerThan;
-        public int CubemapSize { get; private set; } = 512;
-        public bool IgnoreNormalMaps { get; private set; } = true;
-
-        // PC = Standalone
-        public PlatformOverrideSettings StandaloneSettings { get; } = new();
-        public PlatformOverrideSettings AndroidSettings { get; } = new();
-        public PlatformOverrideSettings iOSSettings { get; } = new();
+            try
+            {
+                _pathRegex = new Regex(_pathFilter, RegexOptions.IgnoreCase);
+                _pathRegexValid = true;
+            }
+            catch (ArgumentException)
+            {
+                _pathRegex = null;
+                _pathRegexValid = false;
+            }
+        }
 
         public void DrawSettings()
         {
-            GUILayout.Space(5);
-            GUILayout.Label("Mip Maps", Styles.BoldWrap);
+            EditorGUIUtility.labelWidth = 150f;
+
+            DrawFilters();
+            EditorGUILayout.Space();
+            DrawMipMapSettings();
+            EditorGUILayout.Space();
+            DrawAnisoSettings();
+            EditorGUILayout.Space();
+            DrawPlatformTabs();
+        }
+
+        private void DrawFilters()
+        {
+            GUILayout.Label("Filters", Styles.BoldWrap);
             using (new EditorGUI.IndentLevelScope())
             {
-                DontChangeMipMaps = EditorGUILayout.Toggle("Don't Change", DontChangeMipMaps);
-                using (new EditorGUI.DisabledScope(DontChangeMipMaps))
-                {
-                    StreamingMipMap = EditorGUILayout.Toggle("Streaming Mip Maps", StreamingMipMap);
-                    GenerateMipMaps = EditorGUILayout.Toggle("Generate Mip Maps", GenerateMipMaps);
-                }
-            }
+                TypeFilter = (TextureTypeFilter)EditorGUILayout.EnumFlagsField("Texture Type", TypeFilter);
+                ShapeFilter = (TextureShapeFilter)EditorGUILayout.EnumFlagsField("Texture Shape", ShapeFilter);
 
-            GUILayout.Space(5);
-            GUILayout.Label("Aniso Level", Styles.BoldWrap);
-            using (new EditorGUI.IndentLevelScope())
-            {
-                DontChangeAniso = EditorGUILayout.Toggle("Don't Change", DontChangeAniso);
-                using (new EditorGUI.DisabledScope(DontChangeAniso))
+                using (var check = new EditorGUI.ChangeCheckScope())
                 {
-                    AnisoLevel = EditorGUILayout.IntSlider("Aniso Level", AnisoLevel, 0, 16);
-                    using (new EditorGUI.IndentLevelScope())
-                    {
-                        OverrideAnisoWhen = (OverrideWhenSize)EditorGUILayout.EnumPopup("Override When", OverrideAnisoWhen);
-                    }
-                }
-            }
-
-            GUILayout.Space(5);
-            GUILayout.Label("Size (Default)", Styles.BoldWrap);
-            using (new EditorGUI.IndentLevelScope())
-            {
-                MaxTextureSize = EditorGUILayout.IntPopup("Max Size", MaxTextureSize, maxTextureNames, maxTextureSizes);
-                using (new EditorGUI.IndentLevelScope())
-                {
-                    OverrideMaxTextureSizeWhen =
-                        (OverrideWhenSize)EditorGUILayout.EnumPopup("Override When", OverrideMaxTextureSizeWhen);
-                }
-            }
-
-            GUILayout.Space(5);
-            GUILayout.Label("Crunch Compression (Default)", Styles.BoldWrap);
-            using (new EditorGUI.IndentLevelScope())
-            {
-                CrunchCompression = EditorGUILayout.Toggle("Use Crunch Compression", CrunchCompression);
-                using (new EditorGUI.DisabledScope(!CrunchCompression))
-                {
-                    CompressionQuality = EditorGUILayout.IntSlider("Quality", CompressionQuality, 1, 100);
-                    using (new EditorGUI.IndentLevelScope())
-                    {
-                        OverrideCrunchCompressionSizeWhen =
-                            (OverrideWhenSize)EditorGUILayout.EnumPopup("Override When", OverrideCrunchCompressionSizeWhen);
-                    }
+                    _nameFilter = EditorGUILayout.TextField("Name Regex:", _nameFilter);
+                    if (check.changed) CompileNameRegex();
                 }
 
-                using (new EditorGUI.IndentLevelScope())
+                if (!_nameRegexValid && !string.IsNullOrEmpty(_nameFilter))
                 {
-                    DontOverrideCrunchWhen =
-                        (DontOverrideWhen)EditorGUILayout.EnumPopup("Don't Override When", DontOverrideCrunchWhen);
-                }
-            }
-
-            GUILayout.Space(5);
-            GUILayout.Label("Texture Compression Quality (Default)", Styles.BoldWrap);
-            using (new EditorGUI.IndentLevelScope())
-            {
-                DontChangeCompressionQuality = EditorGUILayout.Toggle("Dont Change", DontChangeCompressionQuality);
-                using (new EditorGUI.DisabledScope(DontChangeCompressionQuality))
-                {
-                    using (new EditorGUI.IndentLevelScope())
-                    {
-                        TextureCompressionQuality =
-                            (TextureImporterCompression)EditorGUILayout.EnumPopup("Compression Quality",
-                                TextureCompressionQuality);
-                        ignoreNoneCompression = EditorGUILayout.Toggle("Ignore Uncompressed", ignoreNoneCompression);
-                    }
-                }
-            }
-
-            GUILayout.Space(5);
-            GUILayout.Label("Per-Platform Overrides", Styles.BoldWrap);
-
-            DrawPlatformSettings("PC (Standalone)", StandaloneSettings);
-            DrawPlatformSettings("Android", AndroidSettings);
-            DrawPlatformSettings("iOS", iOSSettings);
-
-            GUILayout.Space(5);
-            GUILayout.Label("Ignore Textures", Styles.BoldWrap);
-            using (new EditorGUI.IndentLevelScope())
-            {
-                IgnoreCubemaps = EditorGUILayout.Toggle("Cubemaps", IgnoreCubemaps);
-                using (new EditorGUI.IndentLevelScope())
-                {
-                    using (new EditorGUI.DisabledScope(!IgnoreCubemaps))
-                    {
-                        OverrideCubemapSettingsWhen =
-                            (OverrideWhenSize)EditorGUILayout.EnumPopup("Ignore When", OverrideCubemapSettingsWhen);
-                        using (new EditorGUI.DisabledScope(OverrideCubemapSettingsWhen == OverrideWhenSize.Always))
-                        {
-                            CubemapSize = EditorGUILayout.IntPopup("Ignore Size", CubemapSize, maxTextureNames,
-                                maxTextureSizes);
-                        }
-                    }
+                    EditorGUILayout.Space();
+                    EditorGUILayout.HelpBox("Invalid regex pattern for name", MessageType.Error);
+                    EditorGUILayout.Space();
                 }
 
-                IgnoreNormalMaps = EditorGUILayout.Toggle("Normal maps", IgnoreNormalMaps);
+                using (var check = new EditorGUI.ChangeCheckScope())
+                {
+                    _pathFilter = EditorGUILayout.TextField("Path Regex:", _pathFilter);
+                    if (check.changed) CompilePathRegex();
+                }
+
+                if (!_pathRegexValid && !string.IsNullOrEmpty(_pathFilter))
+                {
+                    EditorGUILayout.Space();
+                    EditorGUILayout.HelpBox("Invalid regex pattern for path", MessageType.Error);
+                    EditorGUILayout.Space();
+                }
             }
         }
 
-        private void DrawPlatformSettings(string label, PlatformOverrideSettings settings)
+        private void DrawMipMapSettings()
         {
-            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            DefaultSettings.ChangeMipMaps = EditorGUILayout.Toggle("Change Mip Maps", DefaultSettings.ChangeMipMaps);
+            using (new EditorGUI.IndentLevelScope())
+            using (new EditorGUI.DisabledScope(!DefaultSettings.ChangeMipMaps))
             {
-                settings.Enabled = EditorGUILayout.ToggleLeft(label + " Override", settings.Enabled);
-                using (new EditorGUI.DisabledScope(!settings.Enabled))
-                using (new EditorGUI.IndentLevelScope())
+                DefaultSettings.GenerateMipMaps = EditorGUILayout.Toggle("Generate Mip Maps", DefaultSettings.GenerateMipMaps);
+                using (new EditorGUI.DisabledScope(!DefaultSettings.GenerateMipMaps))
                 {
-                    settings.MaxTextureSize = EditorGUILayout.IntPopup("Max Size", settings.MaxTextureSize,
-                        maxTextureNames, maxTextureSizes);
-                    settings.CrunchCompression =
-                        EditorGUILayout.Toggle("Use Crunch Compression", settings.CrunchCompression);
-                    using (new EditorGUI.DisabledScope(!settings.CrunchCompression))
-                    {
-                        settings.CompressionQuality =
-                            EditorGUILayout.IntSlider("Quality", settings.CompressionQuality, 1, 100);
-                    }
+                    DefaultSettings.StreamingMipMaps = EditorGUILayout.Toggle("Streaming Mip Maps", DefaultSettings.StreamingMipMaps);
                 }
             }
+        }
+
+        private void DrawAnisoSettings()
+        {
+            DefaultSettings.ChangeAniso = EditorGUILayout.Toggle("Change Aniso Level", DefaultSettings.ChangeAniso);
+            using (new EditorGUI.IndentLevelScope())
+            using (new EditorGUI.DisabledScope(!DefaultSettings.ChangeAniso))
+            {
+                DefaultSettings.AnisoLevel = EditorGUILayout.IntSlider("Aniso Level", DefaultSettings.AnisoLevel, 0, 16);
+                using (new EditorGUI.IndentLevelScope())
+                {
+                    DefaultSettings.AnisoCondition = (OverrideCondition)EditorGUILayout.EnumPopup("Override When", DefaultSettings.AnisoCondition);
+                }
+            }
+        }
+
+        private void DrawPlatformTabs()
+        {
+            EditorGUIUtility.labelWidth = 180f;
+            _tabController.DrawTabs(index =>
+            {
+                if (index == 0) return false;
+
+                string platformKey = index switch
+                {
+                    1 => "Standalone",
+                    2 => "Android",
+                    3 => "iPhone",
+                    _ => null
+                };
+
+                return platformKey != null && _platformSettings.TryGetValue(platformKey, out var settings) && settings.Enabled;
+            });
         }
 
         public void ProcessTextures(TextureDetails details)
@@ -271,269 +781,351 @@ namespace VRWorldToolkit.Editor
             {
                 AssetDatabase.StartAssetEditing();
 
-                var importers = details.GetImporters;
-                var count = details.TextureCount;
-                var current = 1;
-                foreach (var importer in importers)
+                var importers = details.GetImporters.ToList();
+                int count = importers.Count;
+
+                for (int i = 0; i < count; i++)
                 {
-                    EditorUtility.DisplayProgressBar("Applying New Settings", importer.assetPath,
-                        (float)current / count);
+                    var importer = importers[i];
+                    if (importer == null) continue;
 
-                    if (IgnoreNormalMaps && importer.textureType == TextureImporterType.NormalMap)
-                        continue;
+                    EditorUtility.DisplayProgressBar("Applying New Settings", importer.assetPath, (float)i / count);
 
-                    if (IgnoreCubemaps && importer.textureShape == TextureImporterShape.TextureCube)
+                    if (!MatchesFilters(importer)) continue;
+
+                    DefaultSettings.ApplyTo(importer);
+
+                    foreach (var platform in _platformSettings.Values)
                     {
-                        var oldMaxTextureSize = importer.maxTextureSize;
-                        var newMaxTextureSize = MaxTextureSize;
-
-                        switch (OverrideCubemapSettingsWhen)
-                        {
-                            case OverrideWhenSize.SmallerThan:
-                                if (oldMaxTextureSize > newMaxTextureSize) continue;
-                                break;
-                            case OverrideWhenSize.BiggerThan:
-                                if (oldMaxTextureSize < newMaxTextureSize) continue;
-                                break;
-                        }
+                        platform.ApplyTo(importer);
                     }
-
-                    if (!DontChangeMipMaps)
-                    {
-                        importer.mipmapEnabled = GenerateMipMaps;
-                        importer.streamingMipmaps = StreamingMipMap;
-                    }
-
-                    if (!DontChangeAniso)
-                    {
-                        var oldAnisoLevel = importer.anisoLevel;
-                        var newAnisoLevel = AnisoLevel;
-
-                        switch (OverrideAnisoWhen)
-                        {
-                            case OverrideWhenSize.Always:
-                                importer.anisoLevel = AnisoLevel;
-                                break;
-                            case OverrideWhenSize.SmallerThan:
-                                if (oldAnisoLevel < newAnisoLevel) importer.anisoLevel = newAnisoLevel;
-
-                                break;
-                            case OverrideWhenSize.BiggerThan:
-                                if (oldAnisoLevel > newAnisoLevel)
-                                    importer.maxTextureSize = newAnisoLevel; // existing behaviour
-
-                                break;
-                        }
-                    }
-
-                    var skipCrunchCompression = false;
-
-                    if (DontOverrideCrunchWhen != DontOverrideWhen.Never)
-                        switch (DontOverrideCrunchWhen)
-                        {
-                            case DontOverrideWhen.AlreadyDisabled:
-                                if (!importer.crunchedCompression) skipCrunchCompression = true;
-                                break;
-                            case DontOverrideWhen.AlreadyEnabled:
-                                if (importer.crunchedCompression) skipCrunchCompression = true;
-                                break;
-                        }
-
-                    if (!skipCrunchCompression)
-                    {
-                        var oldMaxTextureSize = importer.maxTextureSize;
-                        var newMaxTextureSize = MaxTextureSize;
-                        importer.crunchedCompression = CrunchCompression;
-
-                        if (importer.crunchedCompression)
-                            switch (OverrideMaxTextureSizeWhen)
-                            {
-                                case OverrideWhenSize.Always:
-                                    importer.maxTextureSize = newMaxTextureSize;
-                                    break;
-                                case OverrideWhenSize.SmallerThan:
-                                    if (oldMaxTextureSize < newMaxTextureSize)
-                                        importer.maxTextureSize = newMaxTextureSize;
-
-                                    break;
-                                case OverrideWhenSize.BiggerThan:
-                                    if (oldMaxTextureSize > newMaxTextureSize)
-                                        importer.maxTextureSize = newMaxTextureSize;
-
-                                    break;
-                            }
-                    }
-
-                    if (!DontChangeCompressionQuality)
-                        if (!(ignoreNoneCompression &&
-                              importer.textureCompression == TextureImporterCompression.Uncompressed))
-                            importer.textureCompression = TextureCompressionQuality;
-
-                    ApplyPlatformSettings(importer, "Standalone", StandaloneSettings, MaxTextureSize);
-                    ApplyPlatformSettings(importer, "Android", AndroidSettings, MaxTextureSize);
-                    ApplyPlatformSettings(importer, "iPhone", iOSSettings, MaxTextureSize);
 
                     importer.SaveAndReimport();
-                    current++;
                 }
             }
             finally
             {
                 EditorUtility.ClearProgressBar();
-                details.ResetStats();
                 AssetDatabase.StopAssetEditing();
             }
         }
+    }
 
-        private static void ApplyPlatformSettings(TextureImporter importer, string platformName,
-            PlatformOverrideSettings settings, int fallbackMaxSize)
+    public class TextureStats
+    {
+        private readonly Dictionary<Texture, TextureImporter> _textures;
+        private readonly Func<TextureImporter, bool> _filterPredicate;
+
+        private long? _totalSize;
+        private long? _filteredSize;
+        private int? _uncrunchedCount;
+        private int? _filteredUncrunchedCount;
+        private int? _filteredCount;
+
+        public TextureStats(Dictionary<Texture, TextureImporter> textures, Func<TextureImporter, bool> filterPredicate)
         {
-            if (!settings.Enabled)
-                return;
-
-            var pts = importer.GetPlatformTextureSettings(platformName);
-            if (pts == null) pts = new TextureImporterPlatformSettings();
-
-            pts.name = platformName;
-            pts.overridden = true;
-
-            pts.maxTextureSize = settings.MaxTextureSize > 0 ? settings.MaxTextureSize : fallbackMaxSize;
-            pts.crunchedCompression = settings.CrunchCompression;
-            if (settings.CrunchCompression) pts.compressionQuality = settings.CompressionQuality;
-
-            importer.SetPlatformTextureSettings(pts);
+            _textures = textures;
+            _filterPredicate = filterPredicate;
         }
 
-        // Per-platform overrides
-        [Serializable]
-        public class PlatformOverrideSettings
+        public int TotalCount => _textures.Count;
+        public int FilteredCount => _filteredCount ??= _textures.Count(x => _filterPredicate(x.Value));
+        public long TotalSize => _totalSize ??= _textures.Sum(x => EditorTextureUtil.GetStorageMemorySize(x.Key));
+
+        public long FilteredSize => _filteredSize ??= _textures
+            .Where(x => _filterPredicate(x.Value))
+            .Sum(x => EditorTextureUtil.GetStorageMemorySize(x.Key));
+
+        public int UncrunchedCount => _uncrunchedCount ??= _textures.Count(x => !x.Value.crunchedCompression);
+
+        public int FilteredUncrunchedCount => _filteredUncrunchedCount ??=
+            _textures.Count(x => !x.Value.crunchedCompression && _filterPredicate(x.Value));
+
+        public void InvalidateFiltered()
         {
-            public bool Enabled;
-            public int MaxTextureSize = 2048;
-            public bool CrunchCompression = true;
-            public int CompressionQuality = 80;
+            _filteredSize = null;
+            _filteredCount = null;
+            _filteredUncrunchedCount = null;
+        }
+
+        public void InvalidateAll()
+        {
+            _totalSize = null;
+            _uncrunchedCount = null;
+            InvalidateFiltered();
         }
     }
 
-
     public class MassTextureImporter : EditorWindow
     {
-        private TextureDetails details = new();
-        private ImporterSettingsManager importerSettingsManager = new();
-        private bool settingsChanged;
-        private Vector2 scrollPos;
+        private TextureStats _stats;
+        private TextureDetails _details;
+        private ImporterSettingsManager _settingsManager;
+        private bool _settingsChanged;
+        private Vector2 _scrollPos;
+
+        private TextureTreeView _textureTreeView;
+        private SearchField _searchField;
+
+        [NonSerialized] private bool initDone;
+        [SerializeField] private TreeViewState _treeViewState;
+        [SerializeField] private MultiColumnHeaderState _multiColumnHeaderState;
+        [SerializeField] private MultiColumnHeader _multiColumnHeader;
+
+        private const float SettingsPanelWidth = 450f;
+        private const float MinWindowWidth = 1650f;
+        private const float MinWindowHeight = 650f;
+
+        [MenuItem("VRWorld Toolkit/Quick Functions/Mass Texture Importer", false, 4)]
+        public static void ShowWindow()
+        {
+            var window = GetWindow<MassTextureImporter>();
+            window.titleContent = new GUIContent("Mass Texture Importer");
+            window.minSize = new Vector2(MinWindowWidth, MinWindowHeight);
+            window.Show();
+        }
+
+        private void OnEnable()
+        {
+            _settingsManager = new ImporterSettingsManager();
+            _details = GetAllTexturesFromScene();
+            _stats = new TextureStats(_details.TextureList, _settingsManager.MatchesFilters);
+        }
+
+        private void OnDisable()
+        {
+            if (_searchField != null && _textureTreeView != null)
+            {
+                _searchField.downOrUpArrowKeyPressed -= _textureTreeView.SetFocusAndEnsureSelectedItem;
+            }
+
+            _textureTreeView?.Cleanup();
+            _details?.TextureList.Clear();
+            _details = null;
+            _stats = null;
+            _textureTreeView = null;
+        }
 
         private void OnGUI()
         {
-            GUILayout.Label("Selected Textures", Styles.BoldWrap);
-            using (new EditorGUILayout.HorizontalScope(EditorStyles.helpBox))
+            InitIfNeeded();
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                DrawSettingsPanel();
+                DrawTextureTreeView();
+            }
+        }
+
+        private void InitIfNeeded()
+        {
+            if (initDone) return;
+
+            bool firstInit = _multiColumnHeaderState == null;
+            var headerState = TextureTreeView.CreateDefaultMultiColumnHeaderState(EditorGUIUtility.currentViewWidth - 121);
+
+            if (MultiColumnHeaderState.CanOverwriteSerializedFields(_multiColumnHeaderState, headerState))
+            {
+                MultiColumnHeaderState.OverwriteSerializedFields(_multiColumnHeaderState, headerState);
+            }
+
+            _multiColumnHeaderState = headerState;
+            _multiColumnHeader = new MultiColumnHeader(headerState);
+
+            if (firstInit)
+            {
+                _multiColumnHeader.ResizeToFit();
+            }
+
+            _treeViewState ??= new TreeViewState();
+
+            _searchField = new SearchField();
+            _textureTreeView = new TextureTreeView(_treeViewState, _multiColumnHeader, _details.TextureList, _settingsManager);
+            _searchField.downOrUpArrowKeyPressed += _textureTreeView.SetFocusAndEnsureSelectedItem;
+
+            initDone = true;
+        }
+
+        private void DrawSettingsPanel()
+        {
+            using (new EditorGUILayout.VerticalScope(GUILayout.Width(SettingsPanelWidth)))
+            {
+                DrawStats();
+
+                using (var scrollView = new EditorGUILayout.ScrollViewScope(_scrollPos))
+                {
+                    _scrollPos = scrollView.scrollPosition;
+
+                    using (var check = new EditorGUI.ChangeCheckScope())
+                    {
+                        _settingsManager.DrawSettings();
+
+                        if (check.changed)
+                        {
+                            _settingsChanged = true;
+                            _textureTreeView.Reload();
+                            _stats.InvalidateFiltered();
+                        }
+                    }
+                }
+
+                DrawButtons();
+            }
+        }
+
+        private void DrawStats()
+        {
+            EditorGUILayout.Space();
+            using (new EditorGUILayout.HorizontalScope())
             {
                 using (new EditorGUILayout.VerticalScope())
                 {
-                    GUILayout.Label("<b>Texture Count:</b> " + details.TextureCount, Styles.LabelRichText);
-                    GUILayout.Label("<b>Uncrunched Count:</b> " + details.UncrunchedCount, Styles.LabelRichText);
-                    GUILayout.Label("<b>Storage Size:</b> " + EditorUtility.FormatBytes(details.StorageSize),
-                        Styles.LabelRichText);
+                    GUILayout.Label("All Textures:", EditorStyles.boldLabel);
+                    using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+                    {
+                        GUILayout.Label($"<b>Texture Count:</b> {_stats.TotalCount}", Styles.LabelRichText);
+                        GUILayout.Label($"<b>Uncrunched Count:</b> {_stats.UncrunchedCount}", Styles.LabelRichText);
+                        GUILayout.Label($"<b>Storage Size:</b> {EditorUtility.FormatBytes(_stats.TotalSize)}", Styles.LabelRichText);
+                    }
                 }
 
                 using (new EditorGUILayout.VerticalScope())
                 {
-                    GUILayout.Label("<b>Normal Maps:</b> " + details.NormalMaps, Styles.LabelRichText);
-                    GUILayout.Label("<b>Cubemaps:</b> " + details.Cubemaps, Styles.LabelRichText);
+                    GUILayout.Label("Filtered Textures:", EditorStyles.boldLabel);
+                    using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+                    {
+                        GUILayout.Label($"<b>Texture Count:</b> {_stats.FilteredCount}", Styles.LabelRichText);
+                        GUILayout.Label($"<b>Uncrunched Count:</b> {_stats.FilteredUncrunchedCount}", Styles.LabelRichText);
+                        GUILayout.Label($"<b>Storage Size:</b> {EditorUtility.FormatBytes(_stats.FilteredSize)}", Styles.LabelRichText);
+                    }
                 }
             }
+        }
 
-            using (var scrollView = new EditorGUILayout.ScrollViewScope(scrollPos))
-            {
-                scrollPos = scrollView.scrollPosition;
-                using (var check = new EditorGUI.ChangeCheckScope())
-                {
-                    importerSettingsManager.DrawSettings();
-                    if (check.changed) settingsChanged = true;
-                }
-            }
-
-            GUILayout.Space(5);
+        private void DrawButtons()
+        {
             GUILayout.Label("Get textures from:");
 
             using (new EditorGUILayout.HorizontalScope())
             {
                 if (GUILayout.Button("Scene", GUILayout.Width(70), GUILayout.Height(20)))
-                    details = GetAllTexturesFromScene();
+                {
+                    _details = GetAllTexturesFromScene();
+                    _textureTreeView.SetTextures(_details.TextureList);
+                    _stats = new TextureStats(_details.TextureList, _settingsManager.MatchesFilters);
+                }
 
                 if (GUILayout.Button("Assets", GUILayout.Width(70), GUILayout.Height(20)))
-                    details = GetAllTexturesFromAssets();
+                {
+                    _details = GetAllTexturesFromAssets();
+                    _textureTreeView.SetTextures(_details.TextureList);
+                    _stats = new TextureStats(_details.TextureList, _settingsManager.MatchesFilters);
+                }
 
                 GUILayout.FlexibleSpace();
 
-                using (new EditorGUI.DisabledScope(!settingsChanged))
+                using (new EditorGUI.DisabledScope(!_settingsChanged))
                 {
                     if (GUILayout.Button("Default", GUILayout.Width(70), GUILayout.Height(20)))
                     {
-                        importerSettingsManager = new ImporterSettingsManager();
-                        settingsChanged = false;
+                        _settingsManager = new ImporterSettingsManager();
+                        _settingsChanged = false;
+                        _textureTreeView.SetSettingsManager(_settingsManager);
                     }
                 }
 
                 if (GUILayout.Button("Apply", GUILayout.Width(70), GUILayout.Height(20)))
-                    if (EditorUtility.DisplayDialog("Process Importers?",
-                            $"About to process Texture Import settings on {details.TextureCount} textures, this can take a while depending on the amount and size of them.\n\nDo you want to continue?",
-                            "Ok", "Cancel"))
-                        importerSettingsManager.ProcessTextures(details);
+                {
+                    bool confirmed = EditorUtility.DisplayDialog("Process Importers?", $"About to process Texture Import settings on {_stats.FilteredCount} textures. This can take a while depending on the amount and size of them.\n\nDo you want to continue?", "Ok", "Cancel");
+
+                    if (confirmed)
+                    {
+                        _settingsManager.ProcessTextures(_details);
+                        _stats.InvalidateAll();
+                        _textureTreeView.RefreshItems();
+                    }
+                }
             }
+            EditorGUILayout.Space();
         }
 
-        [MenuItem("VRWorld Toolkit/Quick Functions/Mass Texture Importer", false, 4)]
-        public static void ShowWindow()
+        private void DrawTextureTreeView()
         {
-            var window = GetWindow(typeof(MassTextureImporter));
-            window.titleContent = new GUIContent("Mass Texture Importer");
-            window.minSize = new Vector2(400, 530);
-            window.Show();
+            using (new EditorGUILayout.VerticalScope(GUILayout.ExpandWidth(true)))
+            {
+                using (new EditorGUILayout.HorizontalScope(EditorStyles.toolbar))
+                {
+                    if (GUILayout.Button("Refresh", EditorStyles.toolbarButton))
+                    {
+                        _textureTreeView.RefreshItems();
+                    }
+
+                    GUILayout.FlexibleSpace();
+
+                    _textureTreeView.searchString = _searchField.OnToolbarGUI(_textureTreeView.searchString, GUILayout.Width(400));
+                }
+
+                var treeViewRect = EditorGUILayout.BeginVertical();
+                _textureTreeView.OnGUI(treeViewRect);
+                GUILayout.FlexibleSpace();
+                EditorGUILayout.EndVertical();
+            }
         }
 
         private static TextureDetails GetAllTexturesFromScene()
         {
             var details = new TextureDetails();
-            var checkedMaterials = new List<Material>();
+            var checkedMaterials = new HashSet<Material>();
 
-            var allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
-            var allGameObjectsLength = allGameObjects.Length;
-            for (var i = 0; i < allGameObjectsLength; i++)
+            var allGameObjects = Resources.FindObjectsOfTypeAll<GameObject>();
+            int totalCount = allGameObjects.Length;
+
+            for (int i = 0; i < totalCount; i++)
             {
-                var gameObject = allGameObjects[i] as GameObject;
+                var gameObject = allGameObjects[i];
 
                 if (gameObject.hideFlags != HideFlags.None ||
-                    EditorUtility.IsPersistent(gameObject.transform.root.gameObject)) continue;
+                    EditorUtility.IsPersistent(gameObject.transform.root.gameObject))
+                {
+                    continue;
+                }
 
-                if (EditorUtility.DisplayCancelableProgressBar("Getting All Textures from Scene", gameObject.name,
-                        (float)i / allGameObjectsLength)) break;
+                if (EditorUtility.DisplayCancelableProgressBar("Getting All Textures from the Scene", gameObject.name, (float)i / totalCount))
+                {
+                    break;
+                }
 
                 var renderers = gameObject.GetComponents<Renderer>();
-                for (var j = 0; j < renderers.Length; j++)
-                {
-                    var renderer = renderers[j];
-                    for (var k = 0; k < renderer.sharedMaterials.Length; k++)
-                    {
-                        var material = renderer.sharedMaterials[k];
 
+                foreach (var renderer in renderers)
+                {
+                    foreach (var material in renderer.sharedMaterials)
+                    {
                         if (material == null || checkedMaterials.Contains(material))
                             continue;
 
                         checkedMaterials.Add(material);
 
                         var shader = material.shader;
+                        int propertyCount = ShaderUtil.GetPropertyCount(shader);
 
-                        for (var l = 0; l < ShaderUtil.GetPropertyCount(shader); l++)
-                            if (ShaderUtil.GetPropertyType(shader, l) == ShaderUtil.ShaderPropertyType.TexEnv)
+                        for (int j = 0; j < propertyCount; j++)
+                        {
+                            if (ShaderUtil.GetPropertyType(shader, j) != ShaderUtil.ShaderPropertyType.TexEnv)
+                                continue;
+
+                            var texture = material.GetTexture(ShaderUtil.GetPropertyName(shader, j));
+                            if (texture == null) continue;
+
+                            var path = AssetDatabase.GetAssetPath(texture);
+                            if (!IsValidTexturePath(path)) continue;
+
+                            var textureImporter = AssetImporter.GetAtPath(path) as TextureImporter;
+                            if (textureImporter != null)
                             {
-                                var texture = material.GetTexture(ShaderUtil.GetPropertyName(shader, l));
-
-                                var textureImporter =
-                                    AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(texture)) as TextureImporter;
-
-                                if (textureImporter != null) details.AddTexture(textureImporter, texture);
+                                details.AddTexture(textureImporter, texture);
                             }
+                        }
                     }
                 }
             }
@@ -542,24 +1134,37 @@ namespace VRWorldToolkit.Editor
             return details;
         }
 
+        private static bool IsValidTexturePath(string path)
+        {
+            if (string.IsNullOrEmpty(path) ||
+                path.StartsWith("Resources/unity_builtin") ||
+                path.StartsWith("Library/") ||
+                 !path.StartsWith("Assets/")) return false;
+            return true;
+        }
+
         private static TextureDetails GetAllTexturesFromAssets()
         {
             var details = new TextureDetails();
+            var assetGuids = AssetDatabase.FindAssets("t:texture2D", new[] { "Assets" });
+            int totalCount = assetGuids.Length;
 
-            var assetGuidStrings = AssetDatabase.FindAssets("t:texture2D", new[] { "Assets" });
-
-            var assetsLength = assetGuidStrings.Length;
-            for (var i = 0; i < assetsLength; i++)
+            for (int i = 0; i < totalCount; i++)
             {
-                var path = AssetDatabase.GUIDToAssetPath(assetGuidStrings[i]);
+                var path = AssetDatabase.GUIDToAssetPath(assetGuids[i]);
 
-                if (EditorUtility.DisplayCancelableProgressBar("Getting All Textures from Assets",
-                        Path.GetFileName(path), (float)i / assetsLength)) break;
+                if (EditorUtility.DisplayCancelableProgressBar("Getting All Textures from Assets", Path.GetFileName(path), (float)i / totalCount))
+                {
+                    break;
+                }
 
                 var texture = AssetDatabase.LoadAssetAtPath<Texture>(path);
                 var textureImporter = AssetImporter.GetAtPath(path) as TextureImporter;
 
-                details.AddTexture(textureImporter, texture);
+                if (textureImporter != null)
+                {
+                    details.AddTexture(textureImporter, texture);
+                }
             }
 
             EditorUtility.ClearProgressBar();

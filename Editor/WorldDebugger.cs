@@ -3072,8 +3072,8 @@ namespace VRWorldToolkit.Editor
                     {
                         GUILayout.FlexibleSpace();
 
-                        EditorGUILayout.LabelField("The editor is currently in play mode.", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
-                        EditorGUILayout.LabelField("Stop it to see the messages.", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
+                        EditorGUILayout.LabelField("The editor is currently in play mode.", Styles.CenteredNoticeLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
+                        EditorGUILayout.LabelField("Stop it to see the messages.", Styles.CenteredNoticeLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
 
                         GUILayout.FlexibleSpace();
                     }
@@ -3081,7 +3081,7 @@ namespace VRWorldToolkit.Editor
                     {
                         GUILayout.FlexibleSpace();
 
-                        EditorGUILayout.LabelField("Loading...", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
+                        EditorGUILayout.LabelField("Loading...", Styles.CenteredNoticeLabel, GUILayout.ExpandWidth(true), GUILayout.Height(20));
 
                         GUILayout.FlexibleSpace();
                     }
@@ -3109,7 +3109,7 @@ namespace VRWorldToolkit.Editor
         {
             GUILayout.FlexibleSpace();
 
-            EditorGUILayout.LabelField($"Current project type not detected.", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true), GUILayout.Height(40));
+            EditorGUILayout.LabelField($"Current project type not detected.", Styles.CenteredNoticeLabel, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true), GUILayout.Height(40));
 
             GUILayout.FlexibleSpace();
         }
@@ -3118,7 +3118,7 @@ namespace VRWorldToolkit.Editor
         {
             GUILayout.FlexibleSpace();
 
-            EditorGUILayout.LabelField($"{projectType} projects\nnot fully supported yet.", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true), GUILayout.Height(40));
+            EditorGUILayout.LabelField($"{projectType} projects\nnot fully supported yet.", Styles.CenteredNoticeLabel, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true), GUILayout.Height(40));
 
             GUILayout.FlexibleSpace();
         }
@@ -3217,11 +3217,11 @@ namespace VRWorldToolkit.Editor
 
                         if (!buildReportTreeView.HasReport)
                         {
-                            EditorGUILayout.LabelField($"No Last Build Found", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true), GUILayout.Height(40));
+                            EditorGUILayout.LabelField($"No Last Build Found", Styles.CenteredNoticeLabel, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true), GUILayout.Height(40));
                         }
                         else
                         {
-                            EditorGUILayout.LabelField($"Last {selectedBuildReport.ToString()} Build Failed", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true), GUILayout.Height(40));
+                            EditorGUILayout.LabelField($"Last {selectedBuildReport.ToString()} Build Failed", Styles.CenteredNoticeLabel, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true), GUILayout.Height(40));
                         }
 
                         GUILayout.FlexibleSpace();

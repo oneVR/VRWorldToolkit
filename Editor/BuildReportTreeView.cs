@@ -403,7 +403,7 @@ namespace VRWorldToolkit.Editor
                 switch (columnIndex)
                 {
                     case TreeColumns.Type:
-                        GUI.Label(rect, buildReportItem.previewIcon, Styles.Center);
+                        GUI.Label(rect, buildReportItem.previewIcon, Styles.TreeViewLabelCenter);
                         break;
                     case TreeColumns.Name:
                         if (args.selected && buildReportItem.path != "")
