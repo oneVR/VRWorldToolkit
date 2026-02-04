@@ -1416,6 +1416,8 @@ namespace VRWorldToolkit.Editor
 
         private const string CollisionMatrixNotSetup = "The project's Collision Matrix is not set up for VRChat yet.";
 
+        private const string VRChatSDKIssue = "There was an issue calling built-in functions in the VRChat SDK. The SDK packages may be corrupted or missing files. Close the project and back it up with VRChat Creator Companion in case of any issues, then go to Manage Project and select \"Reinstall All Packages\" from the more options dropdown next to the Manage Packages title.";
+
         private const string MaterialWithGrabPassShader = "A material ({0}) in the scene has an active GrabPass due to shader \"{1}\".";
         private const string MaterialWithGrabPassShaderCombined = "Found {0} materials in the scene using a GrabPass.";
         private const string MaterialWithGrabPassShaderInfoPC = "A GrabPass will halt the rendering to copy the screen's contents into a texture for the shader to read. This has a notable effect on performance.";
@@ -1548,14 +1550,21 @@ namespace VRWorldToolkit.Editor
                 }
 
 #if VRWT_IS_VRC
-                if (!UpdateLayers.AreLayersSetup())
+                try
                 {
-                    general.AddMessageGroup(new MessageGroup(LayersNotSetup, MessageType.Error).SetGroupAutoFix(SetVRChatLayers()));
-                }
+                    if (!UpdateLayers.AreLayersSetup())
+                    {
+                        general.AddMessageGroup(new MessageGroup(LayersNotSetup, MessageType.Error).SetGroupAutoFix(SetVRChatLayers()));
+                    }
 
-                if (!UpdateLayers.IsCollisionLayerMatrixSetup())
+                    if (!UpdateLayers.IsCollisionLayerMatrixSetup())
+                    {
+                        general.AddMessageGroup(new MessageGroup(CollisionMatrixNotSetup, MessageType.Error).SetGroupAutoFix(SetVRChatCollisionMatrix()));
+                    }
+                }
+                catch (Exception)
                 {
-                    general.AddMessageGroup(new MessageGroup(CollisionMatrixNotSetup, MessageType.Error).SetGroupAutoFix(SetVRChatCollisionMatrix()));
+                    general.AddMessageGroup(new MessageGroup(VRChatSDKIssue, MessageType.Error));
                 }
 #endif
 
