@@ -450,7 +450,7 @@ namespace VRWorldToolkit.Editor
         {
             var hasCompression = _settingsManager.DefaultSettings.ChangeCompression ? _settingsManager.DefaultSettings.Compression : item.Compression;
 
-            if (hasCompression == TextureCompressionMode.None)
+            if (hasCompression == TextureCompressionMode.None || _settingsManager.DefaultSettings.IgnoreUncompressed && item.Compression == TextureCompressionMode.None)
             {
                 GUI.Label(rect, "―", Styles.TreeViewLabelCenter);
                 return;
@@ -490,7 +490,7 @@ namespace VRWorldToolkit.Editor
         {
             var hasCompression = _settingsManager.DefaultSettings.ChangeCompression ? _settingsManager.DefaultSettings.Compression : item.Compression;
 
-            if (hasCompression == TextureCompressionMode.None)
+            if (hasCompression == TextureCompressionMode.None || (_settingsManager.DefaultSettings.IgnoreUncompressed && item.Compression == TextureCompressionMode.None))
             {
                 GUI.Label(rect, "―", style);
                 return;
