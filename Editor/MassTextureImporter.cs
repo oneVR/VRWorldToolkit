@@ -836,10 +836,11 @@ namespace VRWorldToolkit.Editor
             .Where(x => _filterPredicate(x.Value))
             .Sum(x => EditorTextureUtil.GetStorageMemorySize(x.Key));
 
-        public int UncrunchedCount => _uncrunchedCount ??= _textures.Count(x => !x.Value.crunchedCompression);
+        public int UncrunchedCount => _uncrunchedCount ??=
+            _textures.Count(x => !x.Value.crunchedCompression || x.Value.textureCompression == TextureImporterCompression.Uncompressed);
 
         public int FilteredUncrunchedCount => _filteredUncrunchedCount ??=
-            _textures.Count(x => !x.Value.crunchedCompression && _filterPredicate(x.Value));
+            _textures.Count(x => (!x.Value.crunchedCompression || x.Value.textureCompression == TextureImporterCompression.Uncompressed) && _filterPredicate(x.Value));
 
         public void InvalidateFiltered()
         {
