@@ -930,7 +930,7 @@ namespace VRWorldToolkit.Editor
         private const float MinWindowWidth = 1650f;
         private const float MinWindowHeight = 650f;
 
-        [MenuItem("VRWorld Toolkit/Quick Functions/Mass Texture Importer", false, 4)]
+        [MenuItem("VRWorld Toolkit/Mass Texture Importer", false, 26)]
         public static void ShowWindow()
         {
             var window = GetWindow<MassTextureImporter>();

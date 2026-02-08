@@ -19,7 +19,7 @@ namespace VRWorldToolkit.Editor
     public class QuickFunctions : EditorWindow
     {
 #if VRWT_IS_VRC
-        [MenuItem("VRWorld Toolkit/Quick Functions/Copy World ID", false, 15)]
+        [MenuItem("VRWorld Toolkit/Quick Functions/Copy World ID", false, 4)]
         public static void CopyWorldID()
         {
             var descriptors = FindObjectsOfType(typeof(VRC_SceneDescriptor)) as VRC_SceneDescriptor[];
@@ -47,7 +47,7 @@ namespace VRWorldToolkit.Editor
             return false;
         }
         
-        [MenuItem("VRWorld Toolkit/Quick Functions/Open VRChat Worlds Build Folder", false, 16)]
+        [MenuItem("VRWorld Toolkit/Quick Functions/Open VRChat Worlds Build Folder", false, 5)]
         public static void OpenBuildFolder()
         {
 #if UNITY_EDITOR_WIN
@@ -66,7 +66,7 @@ namespace VRWorldToolkit.Editor
 #endif
         }
 
-        [MenuItem("VRWorld Toolkit/Quick Functions/Setup Layers and Collision Matrix", false, 17)]
+        [MenuItem("VRWorld Toolkit/Quick Functions/Setup Layers and Collision Matrix", false, 6)]
         public static void SetupLayersCollisionMatrix()
         {
             if (!UpdateLayers.AreLayersSetup()) UpdateLayers.SetupEditorLayers();
@@ -81,7 +81,7 @@ namespace VRWorldToolkit.Editor
         }
 #endif
 
-        [MenuItem("VRWorld Toolkit/Quick Functions/Remove Missing Scripts from Scene", false, 18)]
+        [MenuItem("VRWorld Toolkit/Quick Functions/Remove Missing Scripts from Scene", false, 7)]
         private static void FindAndRemoveMissingScripts()
         {
             if (EditorUtility.DisplayDialog("Remove Missing Scripts", "Running this will go through all GameObjects in the open scene and remove any components with missing scripts. This action can't be reversed!\n\nAre you sure you want to continue?", "Continue", "Cancel"))
