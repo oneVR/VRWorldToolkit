@@ -823,6 +823,8 @@ namespace VRWorldToolkit.Editor
 
         public void ProcessTextures(TextureDetails details)
         {
+            int changedCount = 0;
+
             try
             {
                 AssetDatabase.StartAssetEditing();
@@ -846,13 +848,18 @@ namespace VRWorldToolkit.Editor
                         changed |= platform.ApplyTo(importer);
                     }
 
-                    if (changed) importer.SaveAndReimport();
+                    if (changed)
+                    {
+                        changedCount++;
+                        importer.SaveAndReimport();
+                    }
                 }
             }
             finally
             {
                 EditorUtility.ClearProgressBar();
                 AssetDatabase.StopAssetEditing();
+                EditorUtility.DisplayDialog("Changes Applied", $"Changes were made to {changedCount} Texture Importers based on the settings.", "Ok");
             }
         }
     }
@@ -1083,7 +1090,7 @@ namespace VRWorldToolkit.Editor
 
                 if (GUILayout.Button("Apply", GUILayout.Width(70), GUILayout.Height(20)))
                 {
-                    bool confirmed = EditorUtility.DisplayDialog("Process Importers?", $"About to process Texture Import settings on {_stats.FilteredCount} textures. This can take a while depending on the amount and size of them.\n\nDo you want to continue?", "Ok", "Cancel");
+                    bool confirmed = EditorUtility.DisplayDialog("Process Importers?", $"About to process Texture Importer settings on {_stats.FilteredCount} textures. This can take a while depending on the number of textures with changes and their original size.\n\nDo you want to continue?", "Ok", "Cancel");
 
                     if (confirmed)
                     {
