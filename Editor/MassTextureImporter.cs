@@ -859,7 +859,7 @@ namespace VRWorldToolkit.Editor
             {
                 EditorUtility.ClearProgressBar();
                 AssetDatabase.StopAssetEditing();
-                EditorUtility.DisplayDialog("Changes Applied", $"Changes were made to {changedCount} Texture Importers based on the settings.", "Ok");
+                EditorUtility.DisplayDialog("Changes Applied", $"Changes applied to {changedCount} Texture Importers.", "Ok");
             }
         }
     }
