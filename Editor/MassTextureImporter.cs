@@ -351,44 +351,68 @@ namespace VRWorldToolkit.Editor
             }
         }
 
-        public void ApplyTo(TextureImporter importer)
+        public bool ApplyTo(TextureImporter importer)
         {
-            if (!Enabled) return;
+            if (!Enabled) return false;
 
             var settings = importer.GetPlatformTextureSettings(PlatformKey) ?? new TextureImporterPlatformSettings();
+            bool changed = false;
+
+            if (!settings.overridden)
+            {
+                settings.overridden = true;
+                changed = true;
+            }
 
             settings.name = PlatformKey;
-            settings.overridden = true;
-            settings.format = (TextureImporterFormat)Format;
 
-            switch (MaxSizeCondition)
+            if (settings.format != (TextureImporterFormat)Format)
             {
-                case OverrideCondition.Always:
-                    settings.maxTextureSize = MaxTextureSize;
-                    break;
-                case OverrideCondition.Smaller when settings.maxTextureSize < MaxTextureSize:
-                    settings.maxTextureSize = MaxTextureSize;
-                    break;
-                case OverrideCondition.Bigger when settings.maxTextureSize > MaxTextureSize:
-                    settings.maxTextureSize = MaxTextureSize;
-                    break;
+                settings.format = (TextureImporterFormat)Format;
+                changed = true;
+            }
+
+            int newMaxSize = MaxSizeCondition switch
+            {
+                OverrideCondition.Always => MaxTextureSize,
+                OverrideCondition.Smaller when settings.maxTextureSize < MaxTextureSize => MaxTextureSize,
+                OverrideCondition.Bigger when settings.maxTextureSize > MaxTextureSize => MaxTextureSize,
+                _ => settings.maxTextureSize
+            };
+
+            if (settings.maxTextureSize != newMaxSize)
+            {
+                settings.maxTextureSize = newMaxSize;
+                changed = true;
             }
 
             if (IsCrunchedFormat)
             {
-                settings.crunchedCompression = UseCrunchCompression;
-                if (UseCrunchCompression)
+                if (settings.crunchedCompression != UseCrunchCompression)
+                {
+                    settings.crunchedCompression = UseCrunchCompression;
+                    changed = true;
+                }
+
+                if (UseCrunchCompression && settings.compressionQuality != CrunchQuality)
                 {
                     settings.compressionQuality = CrunchQuality;
+                    changed = true;
                 }
             }
 
-            if (HasCompressionQuality)
+            if (HasCompressionQuality && settings.compressionQuality != (int)TextureCompressionQuality)
             {
                 settings.compressionQuality = (int)TextureCompressionQuality;
+                changed = true;
             }
 
-            importer.SetPlatformTextureSettings(settings);
+            if (changed)
+            {
+                importer.SetPlatformTextureSettings(settings);
+            }
+
+            return changed;
         }
     }
 
@@ -462,46 +486,56 @@ namespace VRWorldToolkit.Editor
             }
         }
 
-        public void ApplyTo(TextureImporter importer)
+        public bool ApplyTo(TextureImporter importer)
         {
+            bool changed = false;
+
             if (ChangeMipMaps)
             {
-                importer.mipmapEnabled = GenerateMipMaps;
-                if (GenerateMipMaps)
+                if (importer.mipmapEnabled != GenerateMipMaps)
+                {
+                    importer.mipmapEnabled = GenerateMipMaps;
+                    changed = true;
+                }
+
+                if (GenerateMipMaps && importer.streamingMipmaps != StreamingMipMaps)
                 {
                     importer.streamingMipmaps = StreamingMipMaps;
+                    changed = true;
                 }
             }
 
             if (ChangeAniso)
             {
-                switch (AnisoCondition)
+                int newAniso = AnisoCondition switch
                 {
-                    case OverrideCondition.Always:
-                        importer.anisoLevel = AnisoLevel;
-                        break;
-                    case OverrideCondition.Smaller when importer.anisoLevel < AnisoLevel:
-                        importer.anisoLevel = AnisoLevel;
-                        break;
-                    case OverrideCondition.Bigger when importer.anisoLevel > AnisoLevel:
-                        importer.anisoLevel = AnisoLevel;
-                        break;
+                    OverrideCondition.Always => AnisoLevel,
+                    OverrideCondition.Smaller when importer.anisoLevel < AnisoLevel => AnisoLevel,
+                    OverrideCondition.Bigger when importer.anisoLevel > AnisoLevel => AnisoLevel,
+                    _ => importer.anisoLevel
+                };
+
+                if (importer.anisoLevel != newAniso)
+                {
+                    importer.anisoLevel = newAniso;
+                    changed = true;
                 }
             }
 
             if (ChangeMaxSize)
             {
-                switch (MaxSizeCondition)
+                int newMaxSize = MaxSizeCondition switch
                 {
-                    case OverrideCondition.Always:
-                        importer.maxTextureSize = MaxTextureSize;
-                        break;
-                    case OverrideCondition.Smaller when importer.maxTextureSize < MaxTextureSize:
-                        importer.maxTextureSize = MaxTextureSize;
-                        break;
-                    case OverrideCondition.Bigger when importer.maxTextureSize > MaxTextureSize:
-                        importer.maxTextureSize = MaxTextureSize;
-                        break;
+                    OverrideCondition.Always => MaxTextureSize,
+                    OverrideCondition.Smaller when importer.maxTextureSize < MaxTextureSize => MaxTextureSize,
+                    OverrideCondition.Bigger when importer.maxTextureSize > MaxTextureSize => MaxTextureSize,
+                    _ => importer.maxTextureSize
+                };
+
+                if (importer.maxTextureSize != newMaxSize)
+                {
+                    importer.maxTextureSize = newMaxSize;
+                    changed = true;
                 }
             }
 
@@ -509,7 +543,12 @@ namespace VRWorldToolkit.Editor
             {
                 if (!(IgnoreUncompressed && importer.textureCompression == TextureImporterCompression.Uncompressed))
                 {
-                    importer.textureCompression = Compression.ToTextureImporterCompression();
+                    var newCompression = Compression.ToTextureImporterCompression();
+                    if (importer.textureCompression != newCompression)
+                    {
+                        importer.textureCompression = newCompression;
+                        changed = true;
+                    }
                 }
             }
 
@@ -524,25 +563,32 @@ namespace VRWorldToolkit.Editor
 
                 if (!shouldSkip)
                 {
-                    importer.crunchedCompression = UseCrunch;
+                    if (importer.crunchedCompression != UseCrunch)
+                    {
+                        importer.crunchedCompression = UseCrunch;
+                        changed = true;
+                    }
 
                     if (UseCrunch)
                     {
-                        switch (CrunchQualityCondition)
+                        int targetQuality = CrunchQualityCondition switch
                         {
-                            case OverrideCondition.Always:
-                                importer.compressionQuality = CrunchQuality;
-                                break;
-                            case OverrideCondition.Smaller when importer.compressionQuality < CrunchQuality:
-                                importer.compressionQuality = CrunchQuality;
-                                break;
-                            case OverrideCondition.Bigger when importer.compressionQuality > CrunchQuality:
-                                importer.compressionQuality = CrunchQuality;
-                                break;
+                            OverrideCondition.Always => CrunchQuality,
+                            OverrideCondition.Smaller when importer.compressionQuality < CrunchQuality => CrunchQuality,
+                            OverrideCondition.Bigger when importer.compressionQuality > CrunchQuality => CrunchQuality,
+                            _ => importer.compressionQuality
+                        };
+
+                        if (importer.compressionQuality != targetQuality)
+                        {
+                            importer.compressionQuality = targetQuality;
+                            changed = true;
                         }
                     }
                 }
             }
+
+            return changed;
         }
     }
 
@@ -793,14 +839,14 @@ namespace VRWorldToolkit.Editor
 
                     if (!MatchesFilters(importer)) continue;
 
-                    DefaultSettings.ApplyTo(importer);
+                    bool changed = DefaultSettings.ApplyTo(importer);
 
                     foreach (var platform in _platformSettings.Values)
                     {
-                        platform.ApplyTo(importer);
+                        changed |= platform.ApplyTo(importer);
                     }
 
-                    importer.SaveAndReimport();
+                    if (changed) importer.SaveAndReimport();
                 }
             }
             finally
