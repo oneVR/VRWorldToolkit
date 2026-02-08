@@ -650,7 +650,7 @@ namespace VRWorldToolkit.Editor
         private void DrawPlatformFormat(Rect rect, TextureTreeViewItem item, string platform, GUIStyle style)
         {
             var platformSettings = _settingsManager.GetPlatformSettings(platform);
-            if (platformSettings.Enabled)
+            if (platformSettings.Enabled && (TextureImporterFormat)platformSettings.Format != item.GetPlatformFormat(platform))
             {
                 GUI.Label(rect, ((TextureImporterFormat)platformSettings.Format).ToString(), Styles.TreeViewLabelPositive);
                 return;
