@@ -675,7 +675,7 @@ namespace VRWorldToolkit.Editor
 
         private const int WidthSize = 60;
         private const int WidthFormat = 85;
-        private const int MaxWidthFormat = 85;
+        private const int MaxWidthFormat = 250;
         private const int MinWidthFormat = 60;
 
         public static MultiColumnHeaderState CreateDefaultMultiColumnHeaderState(float treeViewWidth)
