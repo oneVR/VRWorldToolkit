@@ -395,7 +395,7 @@ namespace VRWorldToolkit.Editor
     [Serializable]
     public class DefaultPlatformSettings
     {
-        public bool ChangeMipMaps;
+        public bool ChangeMipMaps = true;
         public bool GenerateMipMaps = true;
         public bool StreamingMipMaps = true;
 
@@ -409,7 +409,7 @@ namespace VRWorldToolkit.Editor
 
         public bool ChangeCompression = true;
         public TextureCompressionMode Compression = TextureCompressionMode.NormalQuality;
-        public bool IgnoreUncompressed;
+        public bool IgnoreUncompressed = true;
 
         public bool ChangeCrunch = true;
         public bool UseCrunch = true;
