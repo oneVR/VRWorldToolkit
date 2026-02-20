@@ -694,7 +694,7 @@ namespace VRWorldToolkit.Editor
 
             try
             {
-                _nameRegex = new Regex(_nameFilter, RegexOptions.IgnoreCase);
+                _nameRegex = new Regex(_nameFilter, RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(100));
                 _nameRegexValid = true;
             }
             catch (ArgumentException)
@@ -715,7 +715,7 @@ namespace VRWorldToolkit.Editor
 
             try
             {
-                _pathRegex = new Regex(_pathFilter, RegexOptions.IgnoreCase);
+                _pathRegex = new Regex(_pathFilter, RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(100));
                 _pathRegexValid = true;
             }
             catch (ArgumentException)
