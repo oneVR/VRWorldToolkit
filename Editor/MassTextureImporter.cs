@@ -1162,6 +1162,7 @@ namespace VRWorldToolkit.Editor
                         checkedMaterials.Add(material);
 
                         var shader = material.shader;
+                        if (shader == null) continue;
                         int propertyCount = ShaderUtil.GetPropertyCount(shader);
 
                         for (int j = 0; j < propertyCount; j++)
