@@ -1088,15 +1088,18 @@ namespace VRWorldToolkit.Editor
                     }
                 }
 
-                if (GUILayout.Button("Apply", GUILayout.Width(70), GUILayout.Height(20)))
+                using (new EditorGUI.DisabledScope(_stats.FilteredCount < 1))
                 {
-                    bool confirmed = EditorUtility.DisplayDialog("Process Importers?", $"About to process Texture Importer settings on {_stats.FilteredCount} textures. This can take a while depending on the number of textures with changes and their original size.\n\nDo you want to continue?", "Ok", "Cancel");
-
-                    if (confirmed)
+                    if (GUILayout.Button("Apply", GUILayout.Width(70), GUILayout.Height(20)))
                     {
-                        _settingsManager.ProcessTextures(_details);
-                        _stats.InvalidateAll();
-                        _textureTreeView.RefreshItems();
+                        bool confirmed = EditorUtility.DisplayDialog("Process Importers?", $"About to process Texture Importer settings on {_stats.FilteredCount} textures. This can take a while depending on the number of textures with changes and their original size.\n\nDo you want to continue?", "Ok", "Cancel");
+
+                        if (confirmed)
+                        {
+                            _settingsManager.ProcessTextures(_details);
+                            _stats.InvalidateAll();
+                            _textureTreeView.RefreshItems();
+                        }
                     }
                 }
             }
