@@ -1146,6 +1146,7 @@ namespace VRWorldToolkit.Editor
 
                 if (EditorUtility.DisplayCancelableProgressBar("Getting All Textures from the Scene", gameObject.name, (float)i / totalCount))
                 {
+                    EditorUtility.ClearProgressBar();
                     break;
                 }
 
