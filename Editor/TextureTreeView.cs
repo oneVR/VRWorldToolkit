@@ -63,8 +63,7 @@ namespace VRWorldToolkit.Editor
 
         public int GetPlatformMaxSize(string platform)
         {
-            var settings = GetPlatformSettings(platform);
-            return settings.overridden ? settings.maxTextureSize : MaxTextureSize;
+            return GetPlatformSettings(platform).maxTextureSize;
         }
 
         public TextureImporterFormat GetPlatformFormat(string platform)
