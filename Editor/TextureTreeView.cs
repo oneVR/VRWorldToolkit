@@ -613,9 +613,15 @@ namespace VRWorldToolkit.Editor
         {
             int currentSize = item.GetPlatformMaxSize(platform);
             var platformSettings = _settingsManager.GetPlatformSettings(platform);
-            bool isOverridden = item.IsPlatformOverridden(platform) || platformSettings.Enabled;
+            bool isOverridden = item.IsPlatformOverridden(platform) || platformSettings.Override;
 
-            if (platformSettings.Enabled)
+            if (platformSettings.DisableOverrides)
+            {
+                GUI.Label(rect, $"({currentSize})", Styles.TreeViewLabelRightDimmed);
+                return;
+            }
+            
+            if (platformSettings.Override)
             {
                 int newSize = platformSettings.MaxTextureSize;
 
@@ -650,16 +656,19 @@ namespace VRWorldToolkit.Editor
         private void DrawPlatformFormat(Rect rect, TextureTreeViewItem item, string platform, GUIStyle style)
         {
             var platformSettings = _settingsManager.GetPlatformSettings(platform);
-            if (platformSettings.Enabled && (TextureImporterFormat)platformSettings.Format != item.GetPlatformFormat(platform))
+
+            if (!platformSettings.DisableOverrides && platformSettings.Override && (TextureImporterFormat)platformSettings.Format != item.GetPlatformFormat(platform))
             {
                 GUI.Label(rect, ((TextureImporterFormat)platformSettings.Format).ToString(), Styles.TreeViewLabelPositive);
                 return;
             }
-            if (!item.IsPlatformOverridden(platform))
+
+            if (!item.IsPlatformOverridden(platform) && !platformSettings.Override || platformSettings.DisableOverrides)
             {
                 GUI.Label(rect, "(Automatic)", Styles.TreeViewLabelDimmed);
                 return;
             }
+
             GUI.Label(rect, item.GetPlatformFormat(platform).ToString(), style);
         }
 

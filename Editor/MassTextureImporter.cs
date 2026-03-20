@@ -298,7 +298,8 @@ namespace VRWorldToolkit.Editor
     [Serializable]
     public class PlatformOverrideSettings
     {
-        public bool Enabled;
+        public bool Override;
+        public bool DisableOverrides;
         public int MaxTextureSize = 2048;
         public OverrideCondition MaxSizeCondition = OverrideCondition.Bigger;
         public int Format;
@@ -324,28 +325,32 @@ namespace VRWorldToolkit.Editor
         {
             using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
             {
-                Enabled = EditorGUILayout.ToggleLeft($"Override for {DisplayName}", Enabled);
-
-                using (new EditorGUI.DisabledScope(!Enabled))
-                using (new EditorGUI.IndentLevelScope())
+                DisableOverrides = EditorGUILayout.ToggleLeft($"Disable Overrides for {DisplayName}", DisableOverrides);
+                using (new EditorGUI.DisabledScope(DisableOverrides))
                 {
-                    MaxTextureSize = Selectors.MaxSizeIntPopup(MaxTextureSize);
+                    Override = EditorGUILayout.ToggleLeft($"Override for {DisplayName}", Override);
+
+                    using (new EditorGUI.DisabledScope(!Override))
                     using (new EditorGUI.IndentLevelScope())
                     {
-                        MaxSizeCondition = (OverrideCondition)EditorGUILayout.EnumPopup("Override When", MaxSizeCondition);
-                    }
+                        MaxTextureSize = Selectors.MaxSizeIntPopup(MaxTextureSize);
+                        using (new EditorGUI.IndentLevelScope())
+                        {
+                            MaxSizeCondition = (OverrideCondition)EditorGUILayout.EnumPopup("Override When", MaxSizeCondition);
+                        }
 
-                    Format = _config.DrawFormatSelector(Format);
+                        Format = _config.DrawFormatSelector(Format);
 
-                    if (IsCrunchedFormat)
-                    {
-                        UseCrunchCompression = EditorGUILayout.Toggle("Use Crunch Compression", UseCrunchCompression);
-                        CrunchQuality = EditorGUILayout.IntSlider("Compressor Quality", CrunchQuality, 1, 100);
-                    }
+                        if (IsCrunchedFormat)
+                        {
+                            UseCrunchCompression = EditorGUILayout.Toggle("Use Crunch Compression", UseCrunchCompression);
+                            CrunchQuality = EditorGUILayout.IntSlider("Compressor Quality", CrunchQuality, 1, 100);
+                        }
 
-                    if (HasCompressionQuality)
-                    {
-                        TextureCompressionQuality = (TextureCompressionQuality)EditorGUILayout.EnumPopup("Compressor Quality", TextureCompressionQuality);
+                        if (HasCompressionQuality)
+                        {
+                            TextureCompressionQuality = (TextureCompressionQuality)EditorGUILayout.EnumPopup("Compressor Quality", TextureCompressionQuality);
+                        }
                     }
                 }
             }
@@ -353,10 +358,24 @@ namespace VRWorldToolkit.Editor
 
         public bool ApplyTo(TextureImporter importer)
         {
-            if (!Enabled) return false;
+            if (!Override && !DisableOverrides) return false;
 
             var settings = importer.GetPlatformTextureSettings(PlatformKey) ?? new TextureImporterPlatformSettings();
             bool changed = false;
+
+            if (DisableOverrides)
+            {
+                if (settings.overridden)
+                {
+                    settings.overridden = false;
+                    importer.SetPlatformTextureSettings(settings);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
 
             if (!settings.overridden)
             {
@@ -817,7 +836,7 @@ namespace VRWorldToolkit.Editor
                     _ => null
                 };
 
-                return platformKey != null && _platformSettings.TryGetValue(platformKey, out var settings) && settings.Enabled;
+                return platformKey != null && _platformSettings.TryGetValue(platformKey, out var settings) && settings.Override;
             });
         }
 
