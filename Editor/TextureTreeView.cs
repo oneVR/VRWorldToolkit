@@ -616,7 +616,7 @@ namespace VRWorldToolkit.Editor
 
             if (platformSettings.DisableOverrides)
             {
-                GUI.Label(rect, $"({currentSize})", Styles.TreeViewLabelRightDimmed);
+                GUI.Label(rect, $"({item.Importer.maxTextureSize})", Styles.TreeViewLabelRightDimmed);
                 return;
             }
             
@@ -648,7 +648,7 @@ namespace VRWorldToolkit.Editor
                 }
             }
 
-            string displayText = isOverridden ? currentSize.ToString() : $"({currentSize})";
+            string displayText = isOverridden ? currentSize.ToString() : $"({item.Importer.maxTextureSize})";
             GUI.Label(rect, displayText, isOverridden ? style : Styles.TreeViewLabelRightDimmed);
         }
 
