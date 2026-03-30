@@ -21,8 +21,11 @@ namespace VRWorldToolkit.Editor
         
         private static void OnAddComponent(Component component)
         {
+            if (VRWorldToolkitSettings.GetOrCreateSettings().defaultUdonBehaviourSyncMode == VRWorldToolkitSettings.AssignUdonBehaviourSyncMode.Ignore)
+                return;
+            
             if (component is AbstractUdonBehaviour udonBehaviour)
-                udonBehaviour.SyncMethod = Networking.SyncType.None;
+                udonBehaviour.SyncMethod = GetUdonBehaviourSyncModeFromSettings();
             // Wait a brief moment for any additional UdonBehaviours being added outside UnityEditor.ObjectFactory (like from UdonSharp).
             else
                 CheckForPostAdditionalComponents(component, component.GetComponents<AbstractUdonBehaviour>());
@@ -56,7 +59,7 @@ namespace VRWorldToolkit.Editor
                         continue;
                     
                     if (udonBehaviour)
-                        udonBehaviour.SyncMethod = Networking.SyncType.None;
+                        udonBehaviour.SyncMethod = GetUdonBehaviourSyncModeFromSettings();
                 }
             }
             catch (Exception)
@@ -68,6 +71,21 @@ namespace VRWorldToolkit.Editor
         private static void DelayCalledInspector()
         {
             waitingOnInspectorUpdate = false;
+        }
+
+        private static Networking.SyncType GetUdonBehaviourSyncModeFromSettings()
+        {
+            switch (VRWorldToolkitSettings.GetOrCreateSettings().defaultUdonBehaviourSyncMode)
+            {
+                case VRWorldToolkitSettings.AssignUdonBehaviourSyncMode.Continuous:
+                    return Networking.SyncType.Continuous;
+                case VRWorldToolkitSettings.AssignUdonBehaviourSyncMode.Manual:
+                    return Networking.SyncType.Manual;
+                case VRWorldToolkitSettings.AssignUdonBehaviourSyncMode.None:
+                    return Networking.SyncType.None;
+            }
+
+            return default;
         }
     }
 }
