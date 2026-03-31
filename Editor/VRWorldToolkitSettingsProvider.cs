@@ -14,7 +14,7 @@ namespace VRWorldToolkit.Editor
         [SettingsProvider]
         public static SettingsProvider CreateSettingsProvider()
         {
-            return new VRWorldToolkitSettingsProvider("Project/VRWorldToolkit", SettingsScope.Project);
+            return new VRWorldToolkitSettingsProvider("Project/VRWorld Toolkit", SettingsScope.Project);
         }
 
         public override void OnGUI(string searchContext)

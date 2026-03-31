@@ -15,7 +15,7 @@ namespace VRWorldToolkit.Editor
         {
             VRWorldToolkitSettings settings = CreateInstance<VRWorldToolkitSettings>();
             CheckOrCreateDirectoryPath(defaultSettingsPath);
-            AssetDatabase.CreateAsset(settings, $"{path}VRWorldToolkitSettings.asset");
+            AssetDatabase.CreateAsset(settings, $"{path}VRWorld Toolkit Settings.asset");
             EditorUtility.SetDirty(settings);
             AssetDatabase.SaveAssetIfDirty(settings);
             return settings;
@@ -54,7 +54,7 @@ namespace VRWorldToolkit.Editor
         {
             VRWorldToolkitSettings currentSettingsAsset = null;
             
-            string[] foundAssetGUIDs = AssetDatabase.FindAssets("t:ScriptableObject VRWorldToolkitSettings");
+            string[] foundAssetGUIDs = AssetDatabase.FindAssets("t:ScriptableObject VRWorld Toolkit Settings");
             if (foundAssetGUIDs != null)
             {
                 foreach (string foundAssetGUID in foundAssetGUIDs)
