@@ -1,7 +1,6 @@
-using System.Collections;
+#if VRC_SDK_VRCSDK3 && UDON
 using System.Collections.Generic;
 using UnityEditor;
-using UnityEngine;
 
 namespace VRWorldToolkit.Editor
 {
@@ -35,3 +34,4 @@ namespace VRWorldToolkit.Editor
         }
     }
 }
+#endif

@@ -1,3 +1,4 @@
+#if VRC_SDK_VRCSDK3 && UDON
 using UnityEditor;
 using UnityEngine;
 
@@ -72,3 +73,4 @@ namespace VRWorldToolkit.Editor
         }
     }
 }
+#endif
