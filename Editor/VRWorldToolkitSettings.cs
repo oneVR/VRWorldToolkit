@@ -8,9 +8,9 @@ namespace VRWorldToolkit.Editor
     {
         private const string defaultSettingsPath = "Assets/VRWorldToolkit/";
 
-        public enum AssignUdonBehaviourSyncMode { Ignore, Continuous, Manual, None }
-        [Tooltip("Specifies the Sync Mode to assign by default to newly created UdonBehaviours. Ignore will leave the UdonBehaviour as the VRChat SDK default.")]
-        public AssignUdonBehaviourSyncMode defaultUdonBehaviourSyncMode = AssignUdonBehaviourSyncMode.None;
+        public enum AssignUdonBehaviourSyncMode { DoNotOverride, Continuous, Manual, None }
+        [Tooltip("Specifies the Sync Mode to assign by default to newly created UdonBehaviours. Do Not Override will leave the UdonBehaviour as the VRChat SDK default.")]
+        public AssignUdonBehaviourSyncMode defaultUdonBehaviourSyncMode = AssignUdonBehaviourSyncMode.DoNotOverride;
         
         private static VRWorldToolkitSettings CreateSettings(string path)
         {

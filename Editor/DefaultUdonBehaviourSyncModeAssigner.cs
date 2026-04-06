@@ -21,7 +21,7 @@ namespace VRWorldToolkit.Editor
         
         private static void OnAddComponent(Component component)
         {
-            if (VRWorldToolkitSettings.GetOrCreateSettings().defaultUdonBehaviourSyncMode == VRWorldToolkitSettings.AssignUdonBehaviourSyncMode.Ignore)
+            if (VRWorldToolkitSettings.GetOrCreateSettings().defaultUdonBehaviourSyncMode == VRWorldToolkitSettings.AssignUdonBehaviourSyncMode.DoNotOverride)
                 return;
             
             if (component is AbstractUdonBehaviour udonBehaviour)
