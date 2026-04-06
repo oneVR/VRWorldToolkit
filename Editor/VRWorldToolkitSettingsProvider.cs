@@ -24,6 +24,7 @@ namespace VRWorldToolkit.Editor
             
             SerializedObject serializedObject = new SerializedObject(settingsInstance);
             EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(settingsInstance.defaultUdonBehaviourSyncMode)));
+            serializedObject.ApplyModifiedProperties();
         }
     }
 }
