@@ -5,7 +5,7 @@ namespace VRWorldToolkit.Editor
 {
     public class VRWorldToolkitSettings : ScriptableObject
     {
-        private const string defaultSettingsPath = "Assets/VRWorld Toolkit/";
+        private const string defaultSettingsPath = "Assets/VRWorldToolkit/";
 
         public enum AssignUdonBehaviourSyncMode { Ignore, Continuous, Manual, None }
         [Tooltip("Specifies the Sync Mode to assign by default to newly created UdonBehaviours. Ignore will leave the UdonBehaviour as the VRChat SDK default.")]
@@ -15,7 +15,7 @@ namespace VRWorldToolkit.Editor
         {
             VRWorldToolkitSettings settings = CreateInstance<VRWorldToolkitSettings>();
             CheckOrCreateDirectoryPath(defaultSettingsPath);
-            AssetDatabase.CreateAsset(settings, $"{path}VRWorld Toolkit Settings.asset");
+            AssetDatabase.CreateAsset(settings, $"{path}VRWorldToolkitSettings.asset");
             EditorUtility.SetDirty(settings);
             AssetDatabase.SaveAssetIfDirty(settings);
             return settings;
