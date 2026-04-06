@@ -27,7 +27,8 @@ namespace VRWorldToolkit.Editor
         {
             if (!settingsInstance)
                 settingsInstance = VRWorldToolkitSettings.GetOrCreateSettings();
-            
+
+            EditorGUIUtility.labelWidth = 215f;   
             SerializedObject serializedObject = new SerializedObject(settingsInstance);
             EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(settingsInstance.defaultUdonBehaviourSyncMode)));
             serializedObject.ApplyModifiedProperties();
