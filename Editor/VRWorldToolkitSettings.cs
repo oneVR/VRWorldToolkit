@@ -54,7 +54,7 @@ namespace VRWorldToolkit.Editor
         {
             VRWorldToolkitSettings currentSettingsAsset = null;
             
-            string[] foundAssetGUIDs = AssetDatabase.FindAssets("t:ScriptableObject VRWorld Toolkit Settings");
+            string[] foundAssetGUIDs = AssetDatabase.FindAssets("t:ScriptableObject VRWorldToolkitSettings");
             if (foundAssetGUIDs != null)
             {
                 foreach (string foundAssetGUID in foundAssetGUIDs)
