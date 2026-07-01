@@ -1,6 +1,6 @@
-#if VRC_SDK_VRCSDK3 && UDON
 using UnityEditor;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace VRWorldToolkit.Editor
 {
@@ -11,6 +11,8 @@ namespace VRWorldToolkit.Editor
         public enum AssignUdonBehaviourSyncMode { DoNotOverride, Continuous, Manual, None }
         [Tooltip("Specifies the Sync Mode to assign by default to newly created UdonBehaviours. Do Not Override will leave the UdonBehaviour as the VRChat SDK default.")]
         public AssignUdonBehaviourSyncMode defaultUdonBehaviourSyncMode = AssignUdonBehaviourSyncMode.DoNotOverride;
+
+        public List<int> ignoredWorldDebuggerMessages;
         
         private static VRWorldToolkitSettings CreateSettings(string path)
         {
@@ -73,4 +75,3 @@ namespace VRWorldToolkit.Editor
         }
     }
 }
-#endif

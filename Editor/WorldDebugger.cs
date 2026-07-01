@@ -39,6 +39,8 @@ namespace VRWorldToolkit.Editor
 {
     public class WorldDebugger : EditorWindow
     {
+        [SerializeField] private static VRWorldToolkitSettings settingsInstance;
+
         private static Texture badFPS;
         private static Texture goodFPS;
         private static Texture tips;
@@ -402,6 +404,7 @@ namespace VRWorldToolkit.Editor
             private List<MessageCategory> drawList = new List<MessageCategory>();
 
             [SerializeField] private Vector2 scrollPos;
+            [SerializeField] public bool showIgnored;
 
             public MessageCategory CreateOrGetCategory(string listName)
             {
@@ -425,18 +428,7 @@ namespace VRWorldToolkit.Editor
                 {
                     var item = messageCategory[i];
 
-                    var button = "miniButtonMid";
-
-                    if (messageCategory.First() == item)
-                    {
-                        button = "miniButtonLeft";
-                    }
-                    else if (messageCategory.Last() == item)
-                    {
-                        button = "miniButtonRight";
-                    }
-
-                    item.disabled = GUILayout.Toggle(item.disabled, item.listName, button);
+                    item.disabled = GUILayout.Toggle(item.disabled, item.listName, EditorStyles.toolbarButton);
                 }
 
                 EditorGUILayout.EndHorizontal();
@@ -478,7 +470,7 @@ namespace VRWorldToolkit.Editor
                         {
                             using (new EditorGUILayout.HorizontalScope())
                             {
-                                DrawMessage("No messages found for " + group.listName + ".", MessageType.Info);
+                                DrawMessage("No messages found for " + group.listName + ".", MessageType.Info, false);
                             }
 
                             continue;
@@ -487,6 +479,10 @@ namespace VRWorldToolkit.Editor
                         for (var l = 0; l < group.MessageGroups.Count; l++)
                         {
                             var messageGroup = group.MessageGroups[l];
+
+                            var contains = settingsInstance.ignoredWorldDebuggerMessages.Contains(messageGroup.GetHashCode());
+                            
+                            if (contains && !showIgnored) continue;
 
                             if (messageGroup.MessageList is null || messageGroup.CombinedMessage != null && messageGroup.MessageList.Count == 0) continue;
 
@@ -512,7 +508,30 @@ namespace VRWorldToolkit.Editor
 
                             using (new EditorGUILayout.HorizontalScope())
                             {
-                                DrawMessage(finalMessage, messageGroup.MessageType);
+                                var r = DrawMessage(finalMessage, messageGroup.MessageType, contains);
+
+                                Event e = Event.current;
+                                if (r.Contains(e.mousePosition) && e.type == EventType.ContextClick)
+                                {
+                                    GenericMenu menu = new();
+                                    menu.AddItem(new GUIContent(contains ? "Unignore Message" : "Ignore Message"), false, ToggleIgnoredMessage);
+                                    menu.ShowAsContext();
+
+                                    void ToggleIgnoredMessage()
+                                    {
+                                        if (contains)
+                                        {
+                                            settingsInstance.ignoredWorldDebuggerMessages.Remove(messageGroup.GetHashCode());
+                                        }
+                                        else
+                                        {
+                                            settingsInstance.ignoredWorldDebuggerMessages.Add(messageGroup.GetHashCode());
+                                        }
+
+                                        EditorUtility.SetDirty(settingsInstance);
+                                        AssetDatabase.SaveAssets();
+                                    }
+                                }
 
                                 if (hasButtons)
                                 {
@@ -556,16 +575,18 @@ namespace VRWorldToolkit.Editor
                     GUILayout.FlexibleSpace();
                 }
 
-                void DrawPaddedMessage(string messageText)
+                Rect DrawPaddedMessage(string messageText)
                 {
                     var box = new GUIContent(messageText);
                     GUILayout.Box(box, Styles.HelpBoxPadded, GUILayout.ExpandHeight(true), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 116));
+                    return GUILayoutUtility.GetLastRect();
                 }
 
-                void DrawMessage(string messageText, MessageType type)
+                Rect DrawMessage(string messageText, MessageType type, bool ignored)
                 {
                     var box = new GUIContent(messageText, GetDebuggerIcon(type));
-                    GUILayout.Box(box, Styles.HelpBoxRichText, GUILayout.ExpandHeight(true), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 18));
+                    GUILayout.Box(box, ignored ? Styles.HelpBoxRichTextIgnored : Styles.HelpBoxRichText, GUILayout.ExpandHeight(true), GUILayout.MaxWidth(EditorGUIUtility.currentViewWidth - 18));
+                    return GUILayoutUtility.GetLastRect();
                 }
 
                 void DrawButtons(GameObject[] selectObjects, string infoLink, string assetPath, Action autoFix, bool hasGameObjects)
@@ -2778,6 +2799,8 @@ namespace VRWorldToolkit.Editor
 #if VRWT_BENCHMARK
                 CheckTime.Restart();
 #endif
+                settingsInstance = VRWorldToolkitSettings.GetOrCreateSettings();
+                
                 RefreshBuild();
 
                 if (mainList is null)
@@ -2925,6 +2948,7 @@ namespace VRWorldToolkit.Editor
         [SerializeField] private BuildReportType previousSelectedBuildReport;
         [SerializeField] private bool overallStatsFoldout;
         [SerializeField] private bool buildReportMessagesFoldout;
+        [SerializeField] private bool showIgnored;
         
         // This is used to delay when the first scene check happens since for some reason
         // doing it too early in Unity 2022 causes noticeable lag especially in bigger scenes
@@ -3060,7 +3084,15 @@ namespace VRWorldToolkit.Editor
                             autoRecheck = true;
                         }
 
+                        GUILayout.BeginHorizontal(EditorStyles.toolbar);
+
                         mainList.DrawTabSelector();
+                        
+                        GUILayout.FlexibleSpace();
+
+                        mainList.showIgnored = GUILayout.Toggle(mainList.showIgnored, "Show Ignored", EditorStyles.toolbarButton);
+
+                        GUILayout.EndHorizontal();
 
                         mainList.DrawMessages();
                     }

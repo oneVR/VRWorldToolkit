@@ -1,4 +1,3 @@
-#if VRC_SDK_VRCSDK3 && UDON
 using System.Collections.Generic;
 using UnityEditor;
 
@@ -34,4 +33,3 @@ namespace VRWorldToolkit.Editor
         }
     }
 }
-#endif

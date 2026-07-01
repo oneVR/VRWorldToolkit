@@ -6,6 +6,7 @@ namespace VRWorldToolkit.Editor
     public static class Styles
     {
         public static GUIStyle HelpBoxRichText { get; internal set; }
+        public static GUIStyle HelpBoxRichTextIgnored { get; internal set; }
         public static GUIStyle HelpBoxPadded { get; internal set; }
         public static GUIStyle LabelRichText { get; internal set; }
         public static GUIStyle RichTextWrap { get; internal set; }
@@ -40,6 +41,16 @@ namespace VRWorldToolkit.Editor
             {
                 alignment = TextAnchor.MiddleLeft,
                 richText = true
+            };
+
+            HelpBoxRichTextIgnored = new GUIStyle("HelpBox")
+            {
+                alignment = TextAnchor.MiddleLeft,
+                richText = true,
+                normal =
+                {
+                    textColor = Color.gray,
+                },
             };
 
             HelpBoxPadded = new GUIStyle("HelpBox")
