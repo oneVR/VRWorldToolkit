@@ -2673,61 +2673,19 @@ namespace VRWorldToolkit.Editor
 #if VRWT_BENCHMARK
             CheckTime.Restart();
 #endif
-            if (!Directory.Exists(BuildReportDir))
-                Directory.CreateDirectory(BuildReportDir);
-            if (File.Exists(LastBuild) && (!File.Exists(LastBuildReportPath) || File.GetLastWriteTime(LastBuild) > File.GetLastWriteTime(LastBuildReportPath)))
-            {
-                File.Copy(LastBuild, LastBuildReportPath, true);
-                AssetDatabase.ImportAsset(LastBuildReportPath);
-            }
+            var newBuildSet = BuildReportManager.CheckForNewBuild();
 
-            var newBuildSet = false;
-            if (File.Exists(LastBuildReportPath))
-            {
-                switch (AssetDatabase.LoadAssetAtPath<BuildReport>(LastBuildReportPath).summary.platform)
-                {
-                    case BuildTarget.StandaloneWindows:
-                    case BuildTarget.StandaloneWindows64:
-                        if (File.GetLastWriteTime(LastBuildReportPath) > File.GetLastWriteTime(WindowsBuildReportPath))
-                        {
-                            AssetDatabase.CopyAsset(LastBuildReportPath, WindowsBuildReportPath);
-                            buildReportWindows = (BuildReport)AssetDatabase.LoadAssetAtPath(WindowsBuildReportPath, typeof(BuildReport));
-                            newBuildSet = true;
-                        }
-
-                        break;
-                    case BuildTarget.Android:
-                        if (File.GetLastWriteTime(LastBuildReportPath) > File.GetLastWriteTime(AndroidBuildReportPath))
-                        {
-                            AssetDatabase.CopyAsset(LastBuildReportPath, AndroidBuildReportPath);
-                            buildReportAndroid = (BuildReport)AssetDatabase.LoadAssetAtPath(AndroidBuildReportPath, typeof(BuildReport));
-                            newBuildSet = true;
-                        }
-
-                        break;
-                    case BuildTarget.iOS:
-                        if (File.GetLastWriteTime(LastBuildReportPath) > File.GetLastWriteTime(iOSBuildReportPath))
-                        {
-                            AssetDatabase.CopyAsset(LastBuildReportPath, iOSBuildReportPath);
-                            buildReportiOS = (BuildReport)AssetDatabase.LoadAssetAtPath(iOSBuildReportPath, typeof(BuildReport));
-                            newBuildSet = true;
-                        }
-
-                        break;
-                }
-            }
-
-            if (buildReportWindows is null && File.Exists(WindowsBuildReportPath))
+            if (buildReportWindows == null && File.Exists(WindowsBuildReportPath))
             {
                 buildReportWindows = (BuildReport)AssetDatabase.LoadAssetAtPath(WindowsBuildReportPath, typeof(BuildReport));
             }
 
-            if (buildReportAndroid is null && File.Exists(AndroidBuildReportPath))
+            if (buildReportAndroid == null && File.Exists(AndroidBuildReportPath))
             {
                 buildReportAndroid = (BuildReport)AssetDatabase.LoadAssetAtPath(AndroidBuildReportPath, typeof(BuildReport));
             }
             
-            if (buildReportiOS is null && File.Exists(iOSBuildReportPath))
+            if (buildReportiOS == null && File.Exists(iOSBuildReportPath))
             {
                 buildReportiOS = (BuildReport)AssetDatabase.LoadAssetAtPath(iOSBuildReportPath, typeof(BuildReport));
             }

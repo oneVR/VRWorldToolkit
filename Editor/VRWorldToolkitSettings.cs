@@ -6,6 +6,9 @@ namespace VRWorldToolkit.Editor
 {
     public class VRWorldToolkitSettings : ScriptableObject
     {
+        private static VRWorldToolkitSettings _instance;
+        public static VRWorldToolkitSettings Instance => _instance != null ? _instance : _instance = GetOrCreateSettings();
+
         private const string defaultSettingsPath = "Assets/VRWorldToolkit/";
 
         public enum AssignUdonBehaviourSyncMode { DoNotOverride, Continuous, Manual, None }
@@ -13,6 +16,11 @@ namespace VRWorldToolkit.Editor
         public AssignUdonBehaviourSyncMode defaultUdonBehaviourSyncMode = AssignUdonBehaviourSyncMode.DoNotOverride;
 
         public List<int> ignoredWorldDebuggerMessages;
+
+        public bool alwaysCaptureBuildReport = true;
+        public bool archiveBuildReports = true;
+        public bool rotateArchivedBuildReports = true;
+        [Min(1)] public int maxBuildReportsKept = 30;
         
         private static VRWorldToolkitSettings CreateSettings(string path)
         {

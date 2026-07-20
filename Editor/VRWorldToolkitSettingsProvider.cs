@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEngine;
 
 namespace VRWorldToolkit.Editor
 {
@@ -10,8 +11,6 @@ namespace VRWorldToolkit.Editor
         {
             SettingsService.OpenProjectSettings("Project/VRWorld Toolkit");
         }
-
-        private VRWorldToolkitSettings settingsInstance;
         
         public VRWorldToolkitSettingsProvider(string path, SettingsScope scopes, IEnumerable<string> keywords = null) : base(path, scopes, keywords) {}
 
@@ -23,12 +22,32 @@ namespace VRWorldToolkit.Editor
 
         public override void OnGUI(string searchContext)
         {
-            if (!settingsInstance)
-                settingsInstance = VRWorldToolkitSettings.GetOrCreateSettings();
+            EditorGUIUtility.labelWidth = 215f;
+            var serializedObject = new SerializedObject(VRWorldToolkitSettings.Instance);
+            
+            GUILayout.Label("VRChat", Styles.LabelTitle);
+            EditorGUILayout.HelpBox("The following settings only apply when used with the VRChat SDK.", MessageType.Info, true);
+            
+            GUILayout.Label("Udon", Styles.SubTitle);
+            EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(VRWorldToolkitSettings.Instance.defaultUdonBehaviourSyncMode)));
 
-            EditorGUIUtility.labelWidth = 215f;   
-            SerializedObject serializedObject = new SerializedObject(settingsInstance);
-            EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(settingsInstance.defaultUdonBehaviourSyncMode)));
+            GUILayout.Label("Build Reports", Styles.SubTitle);
+            EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(VRWorldToolkitSettings.Instance.alwaysCaptureBuildReport)));
+            EditorGUILayout.HelpBox("When enabled everytime you build from the VRChat SDK the build report will be captured and archived depending on the settings below.", MessageType.Info, true);
+
+            EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(VRWorldToolkitSettings.Instance.archiveBuildReports)));
+            using (new EditorGUI.IndentLevelScope())
+            {
+                using (new EditorGUI.DisabledScope(!VRWorldToolkitSettings.Instance.archiveBuildReports))
+                {
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(VRWorldToolkitSettings.Instance.rotateArchivedBuildReports)));
+                    using (new EditorGUI.DisabledScope(!VRWorldToolkitSettings.Instance.rotateArchivedBuildReports))
+                    {
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(VRWorldToolkitSettings.Instance.maxBuildReportsKept)));
+                    }
+                }
+            }
+
             serializedObject.ApplyModifiedProperties();
         }
     }

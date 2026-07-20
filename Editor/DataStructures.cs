@@ -9,6 +9,8 @@ namespace VRWorldToolkit.Editor
         public static GUIStyle HelpBoxRichTextIgnored { get; internal set; }
         public static GUIStyle HelpBoxPadded { get; internal set; }
         public static GUIStyle LabelRichText { get; internal set; }
+        public static GUIStyle LabelTitle { get; internal set; }
+        public static GUIStyle SubTitle { get; internal set; }
         public static GUIStyle RichTextWrap { get; internal set; }
         public static GUIStyle BoldWrap { get; internal set; }
         public static GUIStyle RedLabel { get; internal set; }
@@ -43,27 +45,35 @@ namespace VRWorldToolkit.Editor
                 richText = true
             };
 
-            HelpBoxRichTextIgnored = new GUIStyle("HelpBox")
+            HelpBoxRichTextIgnored = new GUIStyle(HelpBoxRichText)
             {
-                alignment = TextAnchor.MiddleLeft,
-                richText = true,
                 normal =
                 {
                     textColor = Color.gray,
                 },
             };
 
-            HelpBoxPadded = new GUIStyle("HelpBox")
+            HelpBoxPadded = new GUIStyle(HelpBoxRichText)
             {
-                margin = new RectOffset(18, 4, 4, 4),
-                alignment = TextAnchor.MiddleLeft,
-                richText = true
+                margin = new RectOffset(18, 4, 4, 4)
             };
 
             LabelRichText = new GUIStyle("Label")
             {
                 richText = true,
                 margin = new RectOffset(5, 5, 0, 0),
+            };
+
+            LabelTitle = new GUIStyle(LabelRichText)
+            {
+                fontSize = EditorStyles.label.fontSize + 5,
+                fontStyle = FontStyle.Bold
+            };
+
+            SubTitle = new GUIStyle(LabelRichText)
+            {
+                fontSize = EditorStyles.label.fontSize + 2,
+                fontStyle = FontStyle.Bold
             };
 
             RichTextWrap = new GUIStyle("Label")
