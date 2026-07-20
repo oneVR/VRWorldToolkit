@@ -39,8 +39,6 @@ namespace VRWorldToolkit.Editor
 {
     public class WorldDebugger : EditorWindow
     {
-        [SerializeField] private static VRWorldToolkitSettings settingsInstance;
-
         private static Texture badFPS;
         private static Texture goodFPS;
         private static Texture tips;
@@ -480,7 +478,7 @@ namespace VRWorldToolkit.Editor
                         {
                             var messageGroup = group.MessageGroups[l];
 
-                            var contains = settingsInstance.ignoredWorldDebuggerMessages.Contains(messageGroup.GetHashCode());
+                            var contains = VRWorldToolkitSettings.Instance.ignoredWorldDebuggerMessages.Contains(messageGroup.GetHashCode());
                             
                             if (contains && !showIgnored) continue;
 
@@ -521,14 +519,14 @@ namespace VRWorldToolkit.Editor
                                     {
                                         if (contains)
                                         {
-                                            settingsInstance.ignoredWorldDebuggerMessages.Remove(messageGroup.GetHashCode());
+                                            VRWorldToolkitSettings.Instance.ignoredWorldDebuggerMessages.Remove(messageGroup.GetHashCode());
                                         }
                                         else
                                         {
-                                            settingsInstance.ignoredWorldDebuggerMessages.Add(messageGroup.GetHashCode());
+                                            VRWorldToolkitSettings.Instance.ignoredWorldDebuggerMessages.Add(messageGroup.GetHashCode());
                                         }
 
-                                        EditorUtility.SetDirty(settingsInstance);
+                                        EditorUtility.SetDirty(VRWorldToolkitSettings.Instance);
                                         AssetDatabase.SaveAssets();
                                     }
                                 }
@@ -2757,8 +2755,6 @@ namespace VRWorldToolkit.Editor
 #if VRWT_BENCHMARK
                 CheckTime.Restart();
 #endif
-                settingsInstance = VRWorldToolkitSettings.GetOrCreateSettings();
-                
                 RefreshBuild();
 
                 if (mainList is null)
