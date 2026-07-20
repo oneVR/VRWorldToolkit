@@ -43,7 +43,7 @@ namespace VRWorldToolkit.Editor
                     EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(VRWorldToolkitSettings.Instance.rotateArchivedBuildReports)));
                     using (new EditorGUI.DisabledScope(!VRWorldToolkitSettings.Instance.rotateArchivedBuildReports))
                     {
-                        EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(VRWorldToolkitSettings.Instance.maxBuildReportsKept)));
+                        EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(VRWorldToolkitSettings.Instance.maxArchivedBuildReports)));
                     }
                 }
             }

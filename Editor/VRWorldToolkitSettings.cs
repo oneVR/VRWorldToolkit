@@ -20,7 +20,7 @@ namespace VRWorldToolkit.Editor
         public bool alwaysCaptureBuildReport = true;
         public bool archiveBuildReports = true;
         public bool rotateArchivedBuildReports = true;
-        [Min(1)] public int maxBuildReportsKept = 30;
+        [Min(1)] public int maxArchivedBuildReports = 30;
         
         private static VRWorldToolkitSettings CreateSettings(string path)
         {

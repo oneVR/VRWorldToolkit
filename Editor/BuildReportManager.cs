@@ -95,9 +95,9 @@ namespace VRWorldToolkit.Editor
                         {
                             var files = Directory.GetFiles(archivePathDirectory, "*.buildreport");
                             Array.Sort(files);
-                            if (files.Length > VRWorldToolkitSettings.Instance.maxBuildReportsKept)
+                            if (files.Length > VRWorldToolkitSettings.Instance.maxArchivedBuildReports)
                             {
-                                var count = files.Length - VRWorldToolkitSettings.Instance.maxBuildReportsKept;
+                                var count = files.Length - VRWorldToolkitSettings.Instance.maxArchivedBuildReports;
                                 for (var i = 0; i < count; i++)
                                 {
                                     AssetDatabase.DeleteAsset(files[i]);
