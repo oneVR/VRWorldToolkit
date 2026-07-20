@@ -9,7 +9,7 @@ namespace VRWorldToolkit.Editor
         private static VRWorldToolkitSettings _instance;
         public static VRWorldToolkitSettings Instance => _instance != null ? _instance : _instance = GetOrCreateSettings();
 
-        private const string defaultSettingsPath = "Assets/VRWorldToolkit/";
+        private const string DefaultSettingsPath = "Assets/VRWorldToolkit/";
 
         public enum AssignUdonBehaviourSyncMode { DoNotOverride, Continuous, Manual, None }
         [Tooltip("Specifies the Sync Mode to assign by default to newly created UdonBehaviours. Do Not Override will leave the UdonBehaviour as the VRChat SDK default.")]
@@ -24,8 +24,8 @@ namespace VRWorldToolkit.Editor
         
         private static VRWorldToolkitSettings CreateSettings(string path)
         {
-            VRWorldToolkitSettings settings = CreateInstance<VRWorldToolkitSettings>();
-            CheckOrCreateDirectoryPath(defaultSettingsPath);
+            var settings = CreateInstance<VRWorldToolkitSettings>();
+            CheckOrCreateDirectoryPath(DefaultSettingsPath);
             AssetDatabase.CreateAsset(settings, $"{path}VRWorldToolkitSettings.asset");
             EditorUtility.SetDirty(settings);
             AssetDatabase.SaveAssetIfDirty(settings);
@@ -41,9 +41,9 @@ namespace VRWorldToolkit.Editor
             if (!path.Contains('/'))
                 return;
             
-            string[] directories = path.Split('/');
-            string pathing = directories[0];
-            for (int i = 1; i < directories.Length; i++)
+            var directories = path.Split('/');
+            var pathing = directories[0];
+            for (var i = 1; i < directories.Length; i++)
             {
                 if (string.IsNullOrWhiteSpace(directories[i]))
                     continue;
@@ -65,10 +65,10 @@ namespace VRWorldToolkit.Editor
         {
             VRWorldToolkitSettings currentSettingsAsset = null;
             
-            string[] foundAssetGUIDs = AssetDatabase.FindAssets("t:ScriptableObject VRWorldToolkitSettings");
+            var foundAssetGUIDs = AssetDatabase.FindAssets("t:ScriptableObject VRWorldToolkitSettings");
             if (foundAssetGUIDs != null)
             {
-                foreach (string foundAssetGUID in foundAssetGUIDs)
+                foreach (var foundAssetGUID in foundAssetGUIDs)
                 {
                     currentSettingsAsset = AssetDatabase.LoadAssetAtPath<VRWorldToolkitSettings>(AssetDatabase.GUIDToAssetPath(foundAssetGUID));
                     if (currentSettingsAsset)
@@ -77,7 +77,7 @@ namespace VRWorldToolkit.Editor
             }
             
             if (!currentSettingsAsset)
-                currentSettingsAsset = CreateSettings(defaultSettingsPath);
+                currentSettingsAsset = CreateSettings(DefaultSettingsPath);
 
             return currentSettingsAsset;
         }
