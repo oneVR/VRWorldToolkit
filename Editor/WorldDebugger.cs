@@ -2971,18 +2971,13 @@ namespace VRWorldToolkit.Editor
             {
                 using (var verticalScope = new EditorGUILayout.VerticalScope())
                 {
-                    GUILayout.Label($"Last {type.ToString()} build:", EditorStyles.boldLabel);
+                    GUILayout.Label($"Latest {type.ToString()} build:", EditorStyles.boldLabel);
 
                     using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
                     {
+                        GUILayout.Label(report.summary.buildEndedAt.ToLocalTime().ToString(CultureInfo.CurrentCulture), Styles.LabelRichText);
+                        
                         GUILayout.Label("<b>Build size:</b> " + EditorUtility.FormatBytes((long)report.summary.totalSize), Styles.LabelRichText);
-
-                        var currentCulture = CultureInfo.CurrentCulture;
-                        var dateTimeFormat = currentCulture.DateTimeFormat;
-                        
-                        GUILayout.Label("<b>Build date:</b> " + report.summary.buildEndedAt.ToLocalTime().ToString(dateTimeFormat.ShortDatePattern), Styles.LabelRichText);
-                        
-                        GUILayout.Label("<b>Build time:</b> " + report.summary.buildEndedAt.ToLocalTime().ToString(dateTimeFormat.ShortTimePattern), Styles.LabelRichText);
 
                         GUILayout.Label("<b>Build duration:</b> " + (report.summary.buildEndedAt - report.summary.buildStartedAt).ToString(@"hh\:mm\:ss"), Styles.LabelRichText);
                         
