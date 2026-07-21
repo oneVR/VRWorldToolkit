@@ -420,7 +420,7 @@ namespace VRWorldToolkit.Editor
                         //EditorGUI.LabelField(rect, buildReportItem.extension, labelStyle);
                         break;
                     case TreeColumns.Size:
-                        EditorGUI.LabelField(rect, EditorUtility.FormatBytes((long)buildReportItem.size), labelStyle);
+                        EditorGUI.LabelField(rect, VRWorldToolkitSettings.Instance.alwaysDisplaySizesInKB ? Helper.BytesToKB(buildReportItem.size) : EditorUtility.FormatBytes((long)buildReportItem.size), labelStyle);
                         break;
                     case TreeColumns.Percentage:
                         EditorGUI.LabelField(rect, buildReportItem.percentage.ToString("P"), labelStyle);

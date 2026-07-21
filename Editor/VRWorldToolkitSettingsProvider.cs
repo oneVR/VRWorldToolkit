@@ -47,6 +47,10 @@ namespace VRWorldToolkit.Editor
                     }
                 }
             }
+            
+            GUILayout.Label("World Debugger", Styles.LabelTitle);
+            EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(VRWorldToolkitSettings.Instance.alwaysDisplaySizesInKB)));
+            
 
             serializedObject.ApplyModifiedProperties();
         }

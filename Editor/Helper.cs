@@ -168,5 +168,10 @@ namespace VRWorldToolkit.Editor
 
             return false;
         }
+
+        public static string BytesToKB(ulong byteCount)
+        {
+            return ((double)byteCount / 1024).ToString("F1") + " KB";
+        }
     }
 }
