@@ -37,8 +37,9 @@ namespace VRWorldToolkit.Editor
             FileName = Path.GetFileName(AssetPath);
             StorageSize = EditorTextureUtil.GetStorageMemorySize(texture);
             Format = importer.GetDefaultPlatformTextureSettings().format;
-            TextureWidth = texture.width;
-            TextureHeight = texture.height;
+            importer.GetSourceTextureWidthAndHeight(out var width, out var height);
+            TextureWidth = width;
+            TextureHeight = height;
             TextureType = importer.textureType;
             TextureShape = importer.textureShape;
             MaxTextureSize = importer.maxTextureSize;
