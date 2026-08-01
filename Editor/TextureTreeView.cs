@@ -26,6 +26,8 @@ namespace VRWorldToolkit.Editor
         public long StorageSize { get; }
         public int TextureWidth { get; }
         public int TextureHeight { get; }
+        public int CurrentWidth { get; }
+        public int CurrentHeight { get; }
 
         private readonly Dictionary<string, TextureImporterPlatformSettings> _platformSettings = new();
 
@@ -40,6 +42,8 @@ namespace VRWorldToolkit.Editor
             importer.GetSourceTextureWidthAndHeight(out var width, out var height);
             TextureWidth = width;
             TextureHeight = height;
+            CurrentWidth = texture.width;
+            CurrentHeight = texture.height;
             TextureType = importer.textureType;
             TextureShape = importer.textureShape;
             MaxTextureSize = importer.maxTextureSize;
@@ -85,7 +89,8 @@ namespace VRWorldToolkit.Editor
             Icon,
             StorageSize,
             Name,
-            TextureSize,
+            OriginalSize,
+            CurrentSize,
             TextureType,
             TextureShape,
             MaxSize,
@@ -198,7 +203,8 @@ namespace VRWorldToolkit.Editor
                 {
                     TreeColumns.StorageSize => itemA.StorageSize.CompareTo(itemB.StorageSize),
                     TreeColumns.Name => string.Compare(itemA.FileName, itemB.FileName, StringComparison.OrdinalIgnoreCase),
-                    TreeColumns.TextureSize => (itemA.TextureWidth * itemA.TextureHeight).CompareTo(itemB.TextureWidth * itemB.TextureHeight),
+                    TreeColumns.OriginalSize => (itemA.TextureWidth * itemA.TextureHeight).CompareTo(itemB.TextureWidth * itemB.TextureHeight),
+                    TreeColumns.CurrentSize => (itemA.TextureWidth * itemA.TextureHeight).CompareTo(itemB.CurrentWidth * itemB.CurrentHeight),
                     TreeColumns.TextureType => itemA.TextureType.CompareTo(itemB.TextureType),
                     TreeColumns.TextureShape => itemA.TextureShape.CompareTo(itemB.TextureShape),
                     TreeColumns.MaxSize => itemA.MaxTextureSize.CompareTo(itemB.MaxTextureSize),
@@ -332,8 +338,12 @@ namespace VRWorldToolkit.Editor
                     GUI.Label(rect, item.FileName, labelStyle);
                     break;
 
-                case TreeColumns.TextureSize:
+                case TreeColumns.OriginalSize:
                     GUI.Label(rect, $"{item.TextureWidth}x{item.TextureHeight}", labelStyleRight);
+                    break;
+                
+                case TreeColumns.CurrentSize:
+                    GUI.Label(rect, $"{item.CurrentWidth}x{item.CurrentHeight}", labelStyleRight);
                     break;
 
                 case TreeColumns.TextureType:
@@ -730,6 +740,18 @@ namespace VRWorldToolkit.Editor
                 new MultiColumnHeaderState.Column
                 {
                     headerContent = new GUIContent("Original Size", "Original texture dimensions"),
+                    headerTextAlignment = TextAlignment.Right,
+                    sortedAscending = false,
+                    sortingArrowAlignment = TextAlignment.Right,
+                    width = 80,
+                    minWidth = 60,
+                    maxWidth = 100,
+                    autoResize = false,
+                    allowToggleVisibility = true
+                },
+                new MultiColumnHeaderState.Column
+                {
+                    headerContent = new GUIContent("Current Size", "Current imported dimensions"),
                     headerTextAlignment = TextAlignment.Right,
                     sortedAscending = false,
                     sortingArrowAlignment = TextAlignment.Right,
