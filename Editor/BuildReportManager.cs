@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
+
+#if VRC_SDK_VRCSDK3
 using VRC.SDK3.Editor;
+#endif
 
 namespace VRWorldToolkit.Editor
 {
