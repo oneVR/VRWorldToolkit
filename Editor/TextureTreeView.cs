@@ -10,7 +10,7 @@ using UnityEngine.Profiling;
 namespace VRWorldToolkit.Editor
 {
 
-    public class TextureTreeViewItem : TreeViewItem
+    public sealed class TextureTreeViewItem : TreeViewItem
     {
         public Texture Texture { get; }
         public TextureImporter Importer { get; }
