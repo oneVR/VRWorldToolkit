@@ -169,5 +169,16 @@ namespace VRWorldToolkit.Editor
         {
             return ((double)byteCount / 1024).ToString("F1") + " KB";
         }
+
+        // This matches the BuildTargetGroup name to VRChat UI
+        public static string GetReadableBuildTargetName(BuildTargetGroup buildTargetGroup)
+        {
+            return buildTargetGroup switch
+            {
+                BuildTargetGroup.Standalone => "Windows",
+                BuildTargetGroup.iOS => "iOS",
+                _ => buildTargetGroup.ToString()
+            };
+        }
     }
 }

@@ -3102,6 +3102,11 @@ namespace VRWorldToolkit.Editor
                 GUILayout.Space(10);
                 
                 GUILayout.FlexibleSpace();
+                
+                if (GUILayout.Button("Comparison", EditorStyles.toolbarButton))
+                {
+                    BuildReportComparison.ShowWindow();
+                }
 
                 overallStatsFoldout = GUILayout.Toggle(overallStatsFoldout, "Stats", EditorStyles.toolbarButton);
 

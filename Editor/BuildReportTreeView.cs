@@ -38,21 +38,10 @@ namespace VRWorldToolkit.Editor
 
         private class BuildListAsset
         {
-            public string AssetType { get; set; }
-            public string FullPath { get; set; }
-            public ulong Size { get; set; }
-            public double Percentage { get; set; }
-
-            public BuildListAsset()
-            {
-            }
-
-            public BuildListAsset(Type assetType, string fullPath, ulong size)
-            {
-                AssetType = assetType.Name;
-                FullPath = fullPath;
-                Size = size;
-            }
+            public string AssetType;
+            public string FullPath;
+            public ulong Size;
+            public double Percentage;
         }
 
         private sealed class BuildReportItem : TreeViewItem
@@ -91,7 +80,12 @@ namespace VRWorldToolkit.Editor
                 {
                     var packedAssetInfo = packedAssetInfos[j];
                     
-                    var asset = new BuildListAsset(packedAssetInfo.type, packedAssetInfo.sourceAssetPath, packedAssetInfo.packedSize);
+                    var asset = new BuildListAsset
+                    { 
+                        AssetType = packedAssetInfo.type.Name,
+                        FullPath = packedAssetInfo.sourceAssetPath,
+                        Size = packedAssetInfo.packedSize
+                    };
 
                     bl.Add(asset);
                 }
@@ -253,52 +247,52 @@ namespace VRWorldToolkit.Editor
 
         public void DrawMessages()
         {
-            if (HasReport && HasMessages())
+            using (new EditorGUILayout.VerticalScope())
             {
-                EditorGUILayout.BeginVertical();
-                scrollPosMessages = EditorGUILayout.BeginScrollView(scrollPosMessages);
-
-                var steps = report.steps;
-
-                for (var i = 0; i < steps.Length; i++)
+                if (HasReport && HasMessages())
                 {
-                    var step = steps[i];
+                    var steps = report.steps;
 
-                    if (step.messages.Length > 0)
+                    scrollPosMessages = EditorGUILayout.BeginScrollView(scrollPosMessages);
+                    for (var i = 0; i < steps.Length; i++)
                     {
-                        GUILayout.Label(step.name, Styles.BoldWrap);
+                        var step = steps[i];
 
-                        for (var j = 0; j < step.messages.Length; j++)
+                        if (step.messages.Length > 0)
                         {
-                            var message = step.messages[j];
+                            GUILayout.Label(step.name, Styles.BoldWrap);
 
-                            var messageType = MessageType.Info;
-
-                            switch (message.type)
+                            for (var j = 0; j < step.messages.Length; j++)
                             {
-                                case LogType.Error:
-                                case LogType.Exception:
-                                    messageType = MessageType.Error;
-                                    break;
-                                case LogType.Assert:
-                                case LogType.Warning:
-                                    messageType = MessageType.Warning;
-                                    break;
+                                var message = step.messages[j];
+
+                                var messageType = MessageType.Info;
+
+                                switch (message.type)
+                                {
+                                    case LogType.Error:
+                                    case LogType.Exception:
+                                        messageType = MessageType.Error;
+                                        break;
+                                    case LogType.Assert:
+                                    case LogType.Warning:
+                                        messageType = MessageType.Warning;
+                                        break;
+                                }
+
+                                EditorGUILayout.HelpBox(message.content, messageType);
                             }
 
-                            EditorGUILayout.HelpBox(message.content, messageType);
+                            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
                         }
-
-                        EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
                     }
-                }
 
-                EditorGUILayout.EndScrollView();
-                EditorGUILayout.EndVertical();
-            }
-            else
-            {
-                EditorGUILayout.HelpBox("No messages to show.", MessageType.Info);
+                    EditorGUILayout.EndScrollView();
+                }
+                else
+                {
+                    EditorGUILayout.HelpBox("No messages to show.", MessageType.Info);
+                }
             }
         }
 
