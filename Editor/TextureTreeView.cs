@@ -751,13 +751,13 @@ namespace VRWorldToolkit.Editor
                 },
                 new MultiColumnHeaderState.Column
                 {
-                    headerContent = new GUIContent("Current Size", "Current imported dimensions"),
+                    headerContent = new GUIContent("Current Platform", "Imported dimensions for the current platform"),
                     headerTextAlignment = TextAlignment.Right,
                     sortedAscending = false,
                     sortingArrowAlignment = TextAlignment.Right,
-                    width = 80,
+                    width = 100,
                     minWidth = 60,
-                    maxWidth = 100,
+                    maxWidth = 120,
                     autoResize = false,
                     allowToggleVisibility = true
                 },
