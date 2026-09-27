@@ -292,6 +292,7 @@ namespace VRWorldToolkit.Editor
                 else
                 {
                     EditorGUILayout.HelpBox("No messages to show.", MessageType.Info);
+                    EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
                 }
             }
         }

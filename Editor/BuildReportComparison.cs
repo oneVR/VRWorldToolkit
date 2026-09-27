@@ -179,14 +179,22 @@ namespace VRWorldToolkit.Editor
                             comparisonTargetTreeView.searchString = newSearch;
                         }
                     }
+
+                    // I should really spend the time to migrate to UI Toolkit instead doing stuff like this
+                    float width = 0;
+                    if (buildReportMessagesFoldout)
+                    {
+                        var available = position.width - EditorStyles.helpBox.padding.horizontal;
+                        width = available / 2f;
+                    }
                     
                     using (new EditorGUILayout.HorizontalScope())
                     {
-                        using (new EditorGUILayout.VerticalScope())
+                        using (new EditorGUILayout.VerticalScope(GUILayout.Width(width)))
                         {
                             DrawSide(comparisonOriginBuildReport, comparisonOriginTreeView);
                         }
-                        using (new EditorGUILayout.VerticalScope())
+                        using (new EditorGUILayout.VerticalScope(GUILayout.Width(width)))
                         {
                             DrawSide(comparisonTargetBuildReport, comparisonTargetTreeView);
                         }
@@ -279,7 +287,6 @@ namespace VRWorldToolkit.Editor
 
                 if (buildReportMessagesFoldout)
                 {
-                    // TODO: Fix layout when one side doesn't have messages
                     reportTreeView.DrawMessages();
                 }
                 else
