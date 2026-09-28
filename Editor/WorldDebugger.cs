@@ -377,21 +377,12 @@ namespace VRWorldToolkit.Editor
 
             public bool IsExpanded(MessageGroup mg)
             {
-                var hash = mg.GetHashCode();
-                return expandedGroups.ContainsKey(hash) && expandedGroups[hash];
+                return expandedGroups.TryGetValue(mg.GetHashCode(), out var expanded) && expanded;
             }
 
             public void SetExpanded(MessageGroup mg, bool expanded)
             {
-                var hash = mg.GetHashCode();
-                if (expandedGroups.ContainsKey(hash))
-                {
-                    expandedGroups[hash] = expanded;
-                }
-                else
-                {
-                    expandedGroups.Add(hash, expanded);
-                }
+                expandedGroups[mg.GetHashCode()] = expanded;
             }
         }
 
