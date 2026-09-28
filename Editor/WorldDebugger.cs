@@ -3081,7 +3081,7 @@ namespace VRWorldToolkit.Editor
 
                 selectedBuildReport = (BuildReportType)EditorGUILayout.Popup((int)selectedBuildReport, BuildReportSelectionDropdown, EditorStyles.toolbarPopup);
 
-                if (selectedBuildReport != previousSelectedBuildReport)
+                if (Event.current.type == EventType.Layout && selectedBuildReport != previousSelectedBuildReport)
                 {
                     switch (selectedBuildReport)
                     {
