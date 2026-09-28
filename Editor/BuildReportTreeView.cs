@@ -249,6 +249,7 @@ namespace VRWorldToolkit.Editor
         {
             using (new EditorGUILayout.VerticalScope())
             {
+                EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
                 if (HasReport && HasMessages())
                 {
                     var steps = report.steps;
@@ -283,7 +284,7 @@ namespace VRWorldToolkit.Editor
                                 EditorGUILayout.HelpBox(message.content, messageType);
                             }
 
-                            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+                            if (i != steps.Length - 1) EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
                         }
                     }
 
@@ -291,8 +292,7 @@ namespace VRWorldToolkit.Editor
                 }
                 else
                 {
-                    EditorGUILayout.HelpBox("No messages to show.", MessageType.Info);
-                    EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+                    EditorGUILayout.HelpBox("No messages to show for the current Build Report.", MessageType.Info);
                 }
             }
         }
