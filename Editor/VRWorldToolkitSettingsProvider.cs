@@ -6,7 +6,7 @@ namespace VRWorldToolkit.Editor
 {
     public class VRWorldToolkitSettingsProvider : SettingsProvider
     {
-        [MenuItem("VRWorld Toolkit/Settings")]
+        [MenuItem("VRWorld Toolkit/Settings", false, 40)]
         public static void OpenSettings()
         {
             SettingsService.OpenProjectSettings("Project/VRWorld Toolkit");
