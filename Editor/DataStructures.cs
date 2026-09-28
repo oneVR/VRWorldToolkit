@@ -8,6 +8,7 @@ namespace VRWorldToolkit.Editor
         public static GUIStyle HelpBoxRichText { get; internal set; }
         public static GUIStyle HelpBoxRichTextIgnored { get; internal set; }
         public static GUIStyle HelpBoxPadded { get; internal set; }
+        public static GUIStyle HelpBoxPaddedIgnored { get; internal set; }
         public static GUIStyle LabelRichText { get; internal set; }
         public static GUIStyle LabelTitle { get; internal set; }
         public static GUIStyle SubTitle { get; internal set; }
@@ -54,6 +55,11 @@ namespace VRWorldToolkit.Editor
             };
 
             HelpBoxPadded = new GUIStyle(HelpBoxRichText)
+            {
+                margin = new RectOffset(18, 4, 4, 4)
+            };
+
+            HelpBoxPaddedIgnored = new GUIStyle(HelpBoxRichTextIgnored)
             {
                 margin = new RectOffset(18, 4, 4, 4)
             };

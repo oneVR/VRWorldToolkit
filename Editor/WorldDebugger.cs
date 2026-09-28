@@ -551,7 +551,7 @@ namespace VRWorldToolkit.Editor
 
                                     using (new EditorGUILayout.HorizontalScope())
                                     {
-                                        DrawPaddedMessage(finalSingleMessage);
+                                        DrawPaddedMessage(finalSingleMessage, contains);
                                         DrawButtons(message.selectObjects, null, message.assetPath, message.AutoFix, true);
                                     }
                                 }
@@ -564,10 +564,10 @@ namespace VRWorldToolkit.Editor
                     GUILayout.FlexibleSpace();
                 }
 
-                Rect DrawPaddedMessage(string messageText)
+                Rect DrawPaddedMessage(string messageText, bool ignored)
                 {
                     var box = new GUIContent(messageText);
-                    GUILayout.Box(box, Styles.HelpBoxPadded, GUILayout.ExpandHeight(true), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 116));
+                    GUILayout.Box(box, ignored ? Styles.HelpBoxPaddedIgnored : Styles.HelpBoxPadded, GUILayout.ExpandHeight(true), GUILayout.MinWidth(EditorGUIUtility.currentViewWidth - 116));
                     return GUILayoutUtility.GetLastRect();
                 }
 
