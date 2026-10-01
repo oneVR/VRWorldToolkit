@@ -24,7 +24,7 @@ namespace VRWorldToolkit.Editor
 
         // World Debugger
         public bool alwaysDisplaySizesInKB = false;
-        public List<int> ignoredWorldDebuggerMessages;
+        public List<int> ignoredWorldDebuggerMessages = new();
         
         private static VRWorldToolkitSettings CreateSettings(string path)
         {
@@ -54,7 +54,6 @@ namespace VRWorldToolkit.Editor
 
                 if (!AssetDatabase.IsValidFolder($"{pathing}/{directories[i]}"))
                 {
-                    Debug.Log($"{pathing}, {directories[i]}");
                     AssetDatabase.CreateFolder(pathing, directories[i]);
                 }
 
@@ -69,7 +68,7 @@ namespace VRWorldToolkit.Editor
         {
             VRWorldToolkitSettings currentSettingsAsset = null;
             
-            var foundAssetGUIDs = AssetDatabase.FindAssets("t:ScriptableObject VRWorldToolkitSettings");
+            var foundAssetGUIDs = AssetDatabase.FindAssets("t:VRWorldToolkitSettings");
             if (foundAssetGUIDs != null)
             {
                 foreach (var foundAssetGUID in foundAssetGUIDs)
