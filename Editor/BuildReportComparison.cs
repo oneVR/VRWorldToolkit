@@ -151,6 +151,8 @@ namespace VRWorldToolkit.Editor
                     }
                     
                     if (searchField == null) searchField = new SearchField();
+                    
+                    var currentSearch = comparisonOriginTreeView.searchString;
 
                     using (new EditorGUILayout.HorizontalScope(EditorStyles.toolbar))
                     {
@@ -169,8 +171,7 @@ namespace VRWorldToolkit.Editor
                         buildReportMessagesFoldout = GUILayout.Toggle(buildReportMessagesFoldout, "Messages", EditorStyles.toolbarButton);
 
                         GUILayout.Space(5);
-
-                        var currentSearch = comparisonOriginTreeView.searchString;
+                        
                         var newSearch = searchField.OnToolbarGUI(currentSearch, GUILayout.Width(250));
 
                         if (newSearch != currentSearch)
@@ -197,6 +198,18 @@ namespace VRWorldToolkit.Editor
                         using (new EditorGUILayout.VerticalScope(GUILayout.Width(width)))
                         {
                             DrawSide(comparisonTargetBuildReport, comparisonTargetTreeView);
+                        }
+
+                        if (comparisonOriginTreeView.searchString != comparisonTargetTreeView.searchString)
+                        {
+                            if (currentSearch != comparisonOriginTreeView.searchString)
+                            {
+                                comparisonTargetTreeView.searchString = comparisonOriginTreeView.searchString;
+                            }
+                            else
+                            {
+                                comparisonOriginTreeView.searchString = comparisonTargetTreeView.searchString;
+                            }
                         }
                     }
                     break;
