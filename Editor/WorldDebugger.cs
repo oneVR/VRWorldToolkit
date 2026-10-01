@@ -2923,8 +2923,6 @@ namespace VRWorldToolkit.Editor
 
             DrawBuildReportOverviews(current);
 
-            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
-
             tab = GUILayout.Toolbar(tab, MainToolbar);
 
             switch (tab)
