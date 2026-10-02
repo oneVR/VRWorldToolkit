@@ -131,15 +131,47 @@ namespace VRWorldToolkit.Editor
             switch (tab)
             {
                 case 0:
-                    using (new EditorGUILayout.HorizontalScope())
+                    if (archivedBuilds.Count == 0)
                     {
                         using (new EditorGUILayout.VerticalScope())
                         {
-                            DrawSelectionSide(ref selectedLeft, ref comparisonOriginBuildReport, ref scrollPosOrigin);
+                            GUILayout.FlexibleSpace();
+                            EditorGUILayout.LabelField($"No archived builds reports yet.", Styles.CenteredNoticeLabel);
+                            GUILayout.Space(10);
+                            using (new EditorGUILayout.HorizontalScope())
+                            {
+                                GUILayout.FlexibleSpace();
+                                EditorGUILayout.LabelField("You will need to let VRWorld Toolkit capture multiple builds before you can use this feature. By default VRWorld Toolkit will capture any new build reports and archive old ones. You can change how this works in the Settings.", Styles.CenteredNoticeLabel, GUILayout.MaxWidth(position.width - 150)); GUILayout.FlexibleSpace();
+                            }
+
+                            GUILayout.Space(10);
+                            using (new EditorGUILayout.HorizontalScope())
+                            {
+                                GUILayout.FlexibleSpace();
+                                if (GUILayout.Button("Settings", GUILayout.ExpandWidth(false)))
+                                {
+                                    SettingsService.OpenProjectSettings("Project/VRWorld Toolkit");
+                                }
+
+                                GUILayout.FlexibleSpace();
+                            }
+
+                            GUILayout.FlexibleSpace();
                         }
-                        using (new EditorGUILayout.VerticalScope())
+                    }
+                    else
+                    {
+                        using (new EditorGUILayout.HorizontalScope())
                         {
-                            DrawSelectionSide(ref selectedRight, ref comparisonTargetBuildReport, ref scrollPosTarget);
+                            using (new EditorGUILayout.VerticalScope())
+                            {
+                                DrawSelectionSide(ref selectedLeft, ref comparisonOriginBuildReport, ref scrollPosOrigin);
+                            }
+
+                            using (new EditorGUILayout.VerticalScope())
+                            {
+                                DrawSelectionSide(ref selectedRight, ref comparisonTargetBuildReport, ref scrollPosTarget);
+                            }
                         }
                     }
                     break;
@@ -233,7 +265,7 @@ namespace VRWorldToolkit.Editor
 
             void DrawBuilds(string selected, ref BuildReport report)
             {
-                if (selected == "Latest")
+                if (selected == "Latest" && archivedBuilds.Count != 0)
                 {
                     GUILayout.FlexibleSpace();
                     if (latestWindowsBuild != null) DrawBuildReportButton(latestWindowsBuild, ref report, current);
@@ -245,28 +277,20 @@ namespace VRWorldToolkit.Editor
                 {
                     GUILayout.FlexibleSpace();
                     
-                    if (archivedBuilds.Count > 0)
+                    if (archivedBuilds.TryGetValue(selected, out var buildReports))
                     {
-                        if (archivedBuilds.TryGetValue(selected, out var buildReports))
+                        if (buildReports.Count > 0)
                         {
-                            if (buildReports.Count > 0)
+                            foreach (var item in buildReports)
                             {
-                                foreach (var item in buildReports)
-                                {
-                                    DrawBuildReportButton(item, ref report, current);
-                                }
-                            }
-                            else
-                            {
-                                EditorGUILayout.LabelField($"No past archived builds stored for platform yet.", Styles.CenteredNoticeLabel, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true), GUILayout.Height(40));
-                                RefreshButton();
+                                DrawBuildReportButton(item, ref report, current);
                             }
                         }
-                    }
-                    else
-                    {
-                        EditorGUILayout.LabelField($"No past archived builds stored yet.", Styles.CenteredNoticeLabel, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true), GUILayout.Height(40));
-                        RefreshButton();
+                        else
+                        {
+                            EditorGUILayout.LabelField($"No past archived builds stored for platform yet.", Styles.CenteredNoticeLabel, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true), GUILayout.Height(40));
+                            RefreshButton();
+                        }
                     }
 
                     GUILayout.FlexibleSpace();

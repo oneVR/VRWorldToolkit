@@ -187,7 +187,7 @@ namespace VRWorldToolkit.Editor
                 alignment = TextAnchor.LowerCenter,
                 fontSize = 17,
                 fontStyle = FontStyle.BoldAndItalic,
-                normal = { textColor = new Color(0.33f, 0.33f, 0.33f) }
+                wordWrap = true,
             };
 
             CenteredNoticeTitle = new GUIStyle("Label")
