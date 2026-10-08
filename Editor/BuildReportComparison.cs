@@ -61,6 +61,8 @@ namespace VRWorldToolkit.Editor
         {
             if (!initDone)
             {
+                BuildReportManager.CheckForNewBuild();
+
                 if (File.Exists(WindowsBuildReportPath))
                 {
                     latestWindowsBuild = AssetDatabase.LoadAssetAtPath<BuildReport>(WindowsBuildReportPath);
