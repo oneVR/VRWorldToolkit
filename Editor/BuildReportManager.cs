@@ -54,11 +54,11 @@ namespace VRWorldToolkit.Editor
         private const string BuildReportDir = "Assets/_LastBuild";
         private const string LastBuildReportPath = "Assets/_LastBuild/LastBuild.buildreport";
 
-        private static readonly Dictionary<BuildTargetGroup, string> PlatformNames = new()
+        private static readonly Dictionary<BuildTarget, string> PlatformNames = new()
         {
-            { BuildTargetGroup.Standalone, "Windows"},
-            { BuildTargetGroup.Android, "Android"},
-            { BuildTargetGroup.iOS, "iOS"},
+            { BuildTarget.StandaloneWindows64, "Windows"},
+            { BuildTarget.Android, "Android"},
+            { BuildTarget.iOS, "iOS"},
         };
 
         private static string LatestPathFor(string platform) => $"{BuildReportDir}/Last{platform}Build.buildreport";
@@ -78,7 +78,7 @@ namespace VRWorldToolkit.Editor
             
             var report = (BuildReport)AssetDatabase.LoadAssetAtPath(LastBuildReportPath, typeof(BuildReport));
             if (report == null) return false;
-            if (!PlatformNames.TryGetValue(report.summary.platformGroup, out var platform)) return false;
+            if (!PlatformNames.TryGetValue(report.summary.platform, out var platform)) return false;
             
             var latest = LatestPathFor(platform);
 
