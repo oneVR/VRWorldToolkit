@@ -5,7 +5,11 @@ using UnityEditor;
 using UnityEditor.Build.Reporting;
 
 #if VRC_SDK_VRCSDK3
+#if UDON
 using VRC.SDK3.Editor;
+#else
+using VRC.SDK3A.Editor;
+#endif
 #endif
 
 namespace VRWorldToolkit.Editor
