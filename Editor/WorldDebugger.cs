@@ -2638,11 +2638,6 @@ namespace VRWorldToolkit.Editor
             recheck = true;
         }
 
-        private const string LastBuild = "Library/LastBuild.buildreport";
-
-        private const string BuildReportDir = "Assets/_LastBuild/";
-
-        private const string LastBuildReportPath = "Assets/_LastBuild/LastBuild.buildreport";
         private const string WindowsBuildReportPath = "Assets/_LastBuild/LastWindowsBuild.buildreport";
         private const string AndroidBuildReportPath = "Assets/_LastBuild/LastAndroidBuild.buildreport";
         private const string iOSBuildReportPath = "Assets/_LastBuild/LastiOSBuild.buildreport";
