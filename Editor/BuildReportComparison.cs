@@ -424,7 +424,7 @@ namespace VRWorldToolkit.Editor
                 var currentCulture = CultureInfo.CurrentCulture;
                 var dateTimeFormat = currentCulture.DateTimeFormat;
 
-                GUILayout.Label("<b>" + Helper.GetReadableBuildTargetName(summary.platformGroup) + " build</b>", Styles.LabelTitle);
+                GUILayout.Label("<b>" + Helper.GetReadableBuildTargetName(summary.platform) + " build</b>", Styles.LabelTitle);
 
                 GUILayout.Label("<b>Build time:</b> " + summary.buildEndedAt.ToLocalTime().ToString("g", dateTimeFormat), Styles.LabelRichText);
 
